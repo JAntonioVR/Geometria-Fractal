@@ -4,7 +4,7 @@
 function main() {
     const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
-    const gl = canvas.getContext("webgl");
+    const gl = canvas.getContext("webgl2");
   
     // Only continue if WebGL is available and working
     if (gl === null) {
