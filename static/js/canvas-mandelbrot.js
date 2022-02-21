@@ -34,6 +34,7 @@ function main() {
 
     buffers = initBuffers(gl)
     drawScene(gl, programInfo, buffers)
+    compruebaErrorGL(gl)
 }
 
 window.onload = main;
@@ -69,6 +70,10 @@ function initShaderProgram(gl, vsSource, fsSource) {
   return shaderProgram;
 }
 
+function glsl(strings){
+  return strings.raw[0]
+}
+
 //
 // creates a shader of the given type, uploads the source and
 // compiles it.
@@ -97,7 +102,7 @@ function loadShader(gl, type, source) {
 
 // Vertex shader program
 
-const vsSource = `
+const vsSource = glsl`
 precision highp float;
 attribute vec2 a_Position;
 void main() {
@@ -105,7 +110,7 @@ void main() {
 }
 `;
 
-const fsSource = `
+const fsSource = glsl`
 /* Fragment shader that renders Mandelbrot set */
 precision mediump float;
 
@@ -164,11 +169,17 @@ function initBuffers(gl) {
 
   // Now create an array of positions for the square.
 
+  let x0 = -0.9,
+      x1 =  0.9,
+      y0 = -0.9,
+      y1 =  0.9
   const positions = [
-    -1, 1,
-     3,-1,
-    -1, 3
+    x0, y0, x1, y0, x1, y1,
+    x0, y0, x1, y1, x0, y1
   ];
+
+  let positions_nfpv = 2,   // Number of floats per vertex in 'positions' array
+      positions_nv   = positions.length / positions_nfpv    // Number of vertexes in 'positions' array
 
   // Now pass the list of positions and colors into WebGL to build the
   // shape. We do this by creating a Float32Array from the
@@ -179,7 +190,9 @@ function initBuffers(gl) {
     gl.STATIC_DRAW);
 
   return {
-    position: positionBuffer
+    position: positionBuffer,
+    num_floats_pv: positions_nfpv,
+    num_vertexes: positions_nv
   };
 }
 
@@ -200,10 +213,6 @@ function drawScene(gl, programInfo, buffers) {
   // and we only want to see objects between 0.1 units
   // and 100 units away from the camera.
 
-  const fieldOfView = 45 * Math.PI / 180;   // in radians
-  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-  const zNear = 0.1;
-  const zFar = 100.0;
   const resolution = [960, 720];
   const zoomCenter = [0.0,0.0];
   const zoomSize = 4.0;
@@ -212,7 +221,7 @@ function drawScene(gl, programInfo, buffers) {
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute.
   {
-    const numComponents = 2;  // pull out 2 values per iteration
+    const numComponents = buffers.num_floats_pv;  // pull out 2 values per iteration
     const type = gl.FLOAT;    // the data in the buffer is 32bit floats
     const normalize = false;  // don't normalize
     const stride = 0;         // how many bytes to get from one set of values to the next
@@ -251,10 +260,20 @@ function drawScene(gl, programInfo, buffers) {
 
   {
     const offset = 0;
-    const vertexCount = 3;
+    const vertexCount = buffers.num_vertexes;
     gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
   }
 }
 
-
+function compruebaErrorGL(gl) {
+  const err = gl.getError();
+  if (err == gl.NO_ERROR) {
+    console.log("No hay ningun error de OpenGL");
+    return
+  }
+  else{
+    const msg = `Ha ocurrido un error de OpenGL: [${err}]`;
+    throw new Error(msg);
+  }
+}
 
