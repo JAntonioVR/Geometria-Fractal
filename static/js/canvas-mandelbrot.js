@@ -169,10 +169,10 @@ function initBuffers(gl) {
 
   // Now create an array of positions for the square.
 
-  let x0 = -0.9,
-      x1 =  0.9,
-      y0 = -0.9,
-      y1 =  0.9
+  let x0 = -1,
+      x1 =  1,
+      y0 = -1,
+      y1 =  1
   const positions = [
     x0, y0, x1, y0, x1, y1,
     x0, y0, x1, y1, x0, y1
@@ -213,9 +213,9 @@ function drawScene(gl, programInfo, buffers) {
   // and we only want to see objects between 0.1 units
   // and 100 units away from the camera.
 
-  const resolution = [960, 720];
-  const zoomCenter = [0.0,0.0];
-  const zoomSize = 4.0;
+  const resolution = [720, 720];
+  const zoomCenter = [-0.75,0.0];   // Parámetros a cambiar 
+  const zoomSize = 3;
   const max_iterations = 500;
 
   // Tell WebGL how to pull out the positions from the position
