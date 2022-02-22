@@ -33,8 +33,15 @@ function main() {
     };
 
     buffers = initBuffers(gl)
-    drawScene(gl, programInfo, buffers)
+    initialParameters = {
+      zoomCenter: [-0.75, 0.0],
+      zoomSize: 3,
+      maxIterations: 500
+    };
+    drawScene(gl, programInfo, buffers, initialParameters)
     compruebaErrorGL(gl)
+    document.addEventListener("keydown", (event)=>onKeyDown(event), true );
+    document.addEventListener("wheel", (event)=>onWheel(event), true );
 }
 
 window.onload = main;
@@ -209,7 +216,7 @@ function initBuffers(gl) {
   };
 }
 
-function drawScene(gl, programInfo, buffers) {
+function drawScene(gl, programInfo, buffers, parameters) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
   gl.clearDepth(1.0);                 // Clear everything
   gl.enable(gl.DEPTH_TEST);           // Enable depth testing
@@ -227,9 +234,9 @@ function drawScene(gl, programInfo, buffers) {
   // and 100 units away from the camera.
 
   const resolution = [720, 720];
-  const zoomCenter = [-0.75,0.0];   // Parámetros a cambiar 
-  const zoomSize = 3;
-  const max_iterations = 500;
+  const zoomCenter = parameters.zoomCenter   // Parámetros a cambiar 
+  const zoomSize = parameters.zoomSize;
+  const maxIterations = parameters.maxIterations;
 
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute.
@@ -269,7 +276,7 @@ function drawScene(gl, programInfo, buffers) {
       zoomSize);
   gl.uniform1i(
       programInfo.uniformLocations.maxIterations,
-      max_iterations);
+      maxIterations);
 
   {
     const offset = 0;
@@ -290,3 +297,46 @@ function compruebaErrorGL(gl) {
   }
 }
 
+function onKeyDown(event) {
+  let key = event.wich || event.keyCode;
+
+  switch (key) {
+    case 37:  // Left key
+      // TODO
+      break;
+
+    case 38:  // Up key
+      // TODO
+      break;
+
+    case 39:  // Right key
+      // TODO
+      break;
+
+    case 38:  // Down key
+      // TODO
+      break;
+    
+    case 187:  // + key
+      // TODO
+      break;
+
+    case 189:  // - key
+      // TODO
+      break;
+
+    default:
+      break;
+  }
+}
+
+function onWheel(event) {
+  let delta = event.deltaY;
+  if (delta > 0) {    // Down -> Increment zoomSize
+    // TODO
+  } 
+  else {              // Up -> Decrement zoomSize
+    // TODO
+  }
+  console.log(event.deltaY);
+}
