@@ -2,7 +2,24 @@
 // start here
 //
 function main() {
-    const canvas = document.querySelector("#glCanvas");
+    draw(parameters)
+    document.addEventListener("keydown", (event)=>onKeyDown(event), true );
+    document.addEventListener("wheel", (event)=>onWheel(event), true );
+
+    console.log(document.querySelector("#numIteraciones").value)
+    const deslizador = document.querySelector("#numIteraciones");
+
+    deslizador.addEventListener('change', (event) => {
+      document.querySelector("#numero").innerHTML = event.target.value;
+      parameters.maxIterations = event.target.value;
+      draw(parameters)
+    });
+    
+
+}
+
+function draw(parameters){
+  const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
     const gl = canvas.getContext("webgl2");
   
@@ -33,16 +50,16 @@ function main() {
     };
 
     buffers = initBuffers(gl)
-    initialParameters = {
-      zoomCenter: [-0.75, 0.0],
-      zoomSize: 3,
-      maxIterations: 500
-    };
-    drawScene(gl, programInfo, buffers, initialParameters)
+    drawScene(gl, programInfo, buffers, parameters)
     compruebaErrorGL(gl)
-    document.addEventListener("keydown", (event)=>onKeyDown(event), true );
-    document.addEventListener("wheel", (event)=>onWheel(event), true );
 }
+
+let parameters = {
+    zoomCenter: [-0.75, 0.0],
+    zoomSize: 3,
+    maxIterations: 500,
+    delta: 0.1
+  };
 
 window.onload = main;
 
@@ -166,11 +183,12 @@ void main() {
     }
   }
   gl_FragColor = escaped ? vec4(palette(
-    float(iterations)/ float(u_maxIterations), 
+    3.0*float(iterations)/ float(u_maxIterations),
     vec3(0.02, 0.02, 0.03), 
     vec3(0.1, 0.2, 0.3), 
     vec3(0.0, 0.3, 0.2), 
     vec3(0.0, 0.5, 0.8)
+    
     ), 
     1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
 }
@@ -299,44 +317,48 @@ function compruebaErrorGL(gl) {
 
 function onKeyDown(event) {
   let key = event.wich || event.keyCode;
-
   switch (key) {
     case 37:  // Left key
-      // TODO
+      parameters.zoomCenter[0] -= parameters.delta;
       break;
 
     case 38:  // Up key
-      // TODO
+      parameters.zoomCenter[1] += parameters.delta;
       break;
 
     case 39:  // Right key
-      // TODO
+      parameters.zoomCenter[0] += parameters.delta;
       break;
 
-    case 38:  // Down key
-      // TODO
+    case 40:  // Down key
+      parameters.zoomCenter[1] -= parameters.delta;
       break;
     
     case 187:  // + key
-      // TODO
+      parameters.zoomSize *= 0.9;
+      parameters.delta *= 0.9;
       break;
 
     case 189:  // - key
-      // TODO
+      parameters.zoomSize *= 1.1;
+      parameters.delta *= 1.1;
       break;
 
     default:
       break;
   }
+  draw(parameters);
 }
 
 function onWheel(event) {
   let delta = event.deltaY;
   if (delta > 0) {    // Down -> Increment zoomSize
-    // TODO
+    parameters.zoomSize *= 1.1;
+    parameters.delta *= 1.1;
   } 
   else {              // Up -> Decrement zoomSize
-    // TODO
+    parameters.zoomSize *= 0.9;
+    parameters.delta *= 0.9;
   }
-  console.log(event.deltaY);
+  draw(parameters);
 }
