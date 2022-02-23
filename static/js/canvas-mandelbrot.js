@@ -1,12 +1,16 @@
 //
 // start here
 //
+
+import {ShaderType, Shader, ShaderProgram} from './shader.js'
+import {Buffer} from './buffer.js'
+
+
 function main() {
     draw(parameters)
     document.addEventListener("keydown", (event)=>onKeyDown(event), true );
     document.addEventListener("wheel", (event)=>onWheel(event), true );
 
-    console.log(document.querySelector("#numIteraciones").value)
     const deslizador = document.querySelector("#numIteraciones");
 
     deslizador.addEventListener('change', (event) => {
@@ -49,7 +53,7 @@ function draw(parameters){
       },
     };
 
-    buffers = initBuffers(gl)
+    var buffers = initBuffers(gl)
     drawScene(gl, programInfo, buffers, parameters)
     compruebaErrorGL(gl)
 }
@@ -68,60 +72,16 @@ window.onload = main;
 //
 function initShaderProgram(gl, vsSource, fsSource) {
   
-  var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(vertexShader,vsSource);
-  gl.shaderSource(fragmentShader,fsSource);
-  gl.compileShader(vertexShader);
-  console.log(gl.getShaderInfoLog(vertexShader)); 
-  gl.compileShader(fragmentShader);
-  console.log(gl.getShaderInfoLog(fragmentShader));
-  
-  // Create the shader program
+  var vertexShader = new Shader(gl, vsSource, ShaderType.vertexShader),
+      fragmentShader = new Shader(gl, fsSource, ShaderType.fragmentShader);
 
-  const shaderProgram = gl.createProgram();
-  gl.attachShader(shaderProgram, vertexShader);
-  gl.attachShader(shaderProgram, fragmentShader);
-  gl.linkProgram(shaderProgram);
+  var shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
 
-  // If creating the shader program failed, alert
-
-  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
-    return null;
-  }
-
-  return shaderProgram;
+  return shaderProgram.getShaderProgram()
 }
 
 function glsl(strings){
   return strings.raw[0]
-}
-
-//
-// creates a shader of the given type, uploads the source and
-// compiles it.
-//
-function loadShader(gl, type, source) {
-  const shader = gl.createShader(type);
-
-  // Send the source to the shader object
-
-  gl.shaderSource(shader, source);
-
-  // Compile the shader program
-
-  gl.compileShader(shader);
-
-  // See if it compiled successfully
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    return null;
-  }
-
-  return shader;
 }
 
 // Vertex shader program
@@ -196,21 +156,10 @@ void main() {
 
 function initBuffers(gl) {
 
-  // Create a buffer for the square's positions.
-
-  const positionBuffer = gl.createBuffer();
-
-  // Select the positionBuffer as the one to apply buffer
-  // operations to from here out.
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-  // Now create an array of positions for the square.
-
-  let x0 = -1,
-      x1 =  1,
-      y0 = -1,
-      y1 =  1
+  let x0 = -1.0,
+      x1 =  1.0,
+      y0 = -1.0,
+      y1 =  1.0
   const positions = [
     x0, y0, x1, y0, x1, y1,
     x0, y0, x1, y1, x0, y1
@@ -219,16 +168,10 @@ function initBuffers(gl) {
   let positions_nfpv = 2,   // Number of floats per vertex in 'positions' array
       positions_nv   = positions.length / positions_nfpv    // Number of vertexes in 'positions' array
 
-  // Now pass the list of positions and colors into WebGL to build the
-  // shape. We do this by creating a Float32Array from the
-  // JavaScript array, then use it to fill the current buffer.
-
-  gl.bufferData(gl.ARRAY_BUFFER,
-    new Float32Array(positions),
-    gl.STATIC_DRAW);
+  let positionBuffer = new Buffer(gl, positions)
 
   return {
-    position: positionBuffer,
+    position: positionBuffer.getBuffer(),
     num_floats_pv: positions_nfpv,
     num_vertexes: positions_nv
   };
@@ -243,13 +186,6 @@ function drawScene(gl, programInfo, buffers, parameters) {
   // Clear the canvas before we start drawing on it.
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // Create a perspective matrix, a special matrix that is
-  // used to simulate the distortion of perspective in a camera.
-  // Our field of view is 45 degrees, with a width/height
-  // ratio that matches the display size of the canvas
-  // and we only want to see objects between 0.1 units
-  // and 100 units away from the camera.
 
   const resolution = [720, 720];
   const zoomCenter = parameters.zoomCenter   // Parámetros a cambiar 
