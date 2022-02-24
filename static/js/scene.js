@@ -14,25 +14,26 @@ class Scene {
     }
     this.context = gl;
     
-    this.shaderProgram = this.initShaderProgram(gl, vsSource, fsSource);
+    this.shaderProgram = this.initShaderProgram(vsSource, fsSource);
     this.bufferInfo = this.initBuffers(gl)
+    var that = this;
 
     this.programInfo = {
-      program: this.shaderProgram,
+      program: that.shaderProgram,
       attribLocations: {
-        vertexPosition: gl.getAttribLocation(this.shaderProgram, 'a_Position')
+        vertexPosition: gl.getAttribLocation(that.shaderProgram, 'a_Position')
       },
       uniformLocations: {
-        zoomCenter: gl.getUniformLocation(this.shaderProgram, 'u_zoomCenter'),
-        zoomSize: gl.getUniformLocation(this.shaderProgram, 'u_zoomSize'),
-        maxIterations: gl.getUniformLocation(this.shaderProgram, 'u_maxIterations'),
+        zoomCenter: gl.getUniformLocation(that.shaderProgram, 'u_zoomCenter'),
+        zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
+        maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
       }
     };
 
     this.parameters = {
-      zoomCenter: [-0.75, 0.0],
+      zoomCenter: [0.0, 0.0],
       zoomSize: 3,
-      maxIterations: 500,
+      maxIterations: 50,
       delta: 0.1
     };
   }
@@ -84,23 +85,24 @@ class Scene {
     let zoomCenter = this.parameters.zoomCenter,
         zoomSize = this.parameters.zoomSize,
         maxIterations = this.parameters.maxIterations;
+    var that = this;
     {
-      const numComponents = this.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
+      const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
       const type = gl.FLOAT;    // the data in the buffer is 32bit floats
       const normalize = false;  // don't normalize
       const stride = 0;         // how many bytes to get from one set of values to the next
                                 // 0 = use type and numComponents above
       const offset = 0;         // how many bytes inside the buffer to start from
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferInfo.positionBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, that.bufferInfo.positionBuffer);
       gl.vertexAttribPointer(
-          this.programInfo.attribLocations.vertexPosition,
+          that.programInfo.attribLocations.vertexPosition,
           numComponents,
           type,
           normalize,
           stride,
           offset);
       gl.enableVertexAttribArray(
-          this.programInfo.attribLocations.vertexPosition);
+          that.programInfo.attribLocations.vertexPosition);
     }
     gl.useProgram(this.programInfo.program);
 
@@ -116,18 +118,20 @@ class Scene {
 
     {
       const offset = 0;
-      const vertexCount = this.bufferInfo.num_vertexes;
+      const vertexCount = that.bufferInfo.num_vertexes;
       gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
     }
 
+    this.checkGLError();
+
   }
 
-  increaseZoom(){
+  zoomIn(){
     this.parameters.zoomSize *= 0.9;
     this.parameters.delta *= 0.9;
   }
 
-  decrementZoom(){
+  zoomOut(){
     this.parameters.zoomSize *= 1.1;
     this.parameters.delta *= 1.1
   }
@@ -148,4 +152,22 @@ class Scene {
     this.parameters.zoomCenter[1] -= this.parameters.delta;
   }
 
+  setMaxIterations(newValue){
+    this.parameters.maxIterations = newValue;
+  }
+
+  checkGLError(){
+    let gl = this.context;
+    const err = gl.getError();
+    if (err == gl.NO_ERROR) {
+      return
+    }
+    else{
+      const msg = `Ha ocurrido un error de OpenGL: [${err}]`;
+      throw new Error(msg);
+    }
+  }
+
 }
+
+export {Scene}

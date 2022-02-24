@@ -15,7 +15,10 @@ class Shader {
     this.source = source;
     gl.shaderSource(this.program, this.source);
     gl.compileShader(this.program);
-    console.log(gl.getShaderInfoLog(this.program));
+    var msg = gl.getShaderInfoLog(this.program);
+    if(msg){
+      console.log(msg);
+    }
   }
 
   getProgram() {
