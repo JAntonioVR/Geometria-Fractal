@@ -29,6 +29,9 @@ uniform float u_zoomSize;
 /* How many iterations to do before deciding that a point is in the set. */
 uniform int u_maxIterations;
 
+/* Fixed c value in Julia set Equation z^2 + c */
+uniform vec2 u_juliaSetConstant;
+
 vec2 f(vec2 x, vec2 c) {
 	return mat2(x,-x.y,x.x)*x + c;
 }
@@ -37,6 +40,16 @@ vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
   return a + b*cos( 6.28318*(c*t+d) );
 }
 
+void assignColor(bool escaped, int iterations) {
+    gl_FragColor = escaped ? vec4(palette(
+      3.0*float(iterations)/ float(u_maxIterations),
+      vec3(0.02, 0.02, 0.03), 
+      vec3(0.1, 0.2, 0.3), 
+      vec3(0.0, 0.3, 0.2), 
+      vec3(0.0, 0.5, 0.8)
+      ), 
+      1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
+}
 
 void Julia(vec2 c) {
     vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
@@ -54,15 +67,8 @@ void Julia(vec2 c) {
             break;
         }
     }
-    gl_FragColor = escaped ? vec4(palette(
-        3.0*float(iterations)/ float(u_maxIterations),
-        vec3(0.02, 0.02, 0.03), 
-        vec3(0.1, 0.2, 0.3), 
-        vec3(0.0, 0.3, 0.2), 
-        vec3(0.0, 0.5, 0.8)
-        
-        ), 
-        1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
+
+    assignColor(escaped, iterations);
 }
 
 void Mandelbrot(){
@@ -86,20 +92,14 @@ void Mandelbrot(){
       break;
     }
   }
-  gl_FragColor = escaped ? vec4(palette(
-    3.0*float(iterations)/ float(u_maxIterations),
-    vec3(0.02, 0.02, 0.03), 
-    vec3(0.1, 0.2, 0.3), 
-    vec3(0.0, 0.3, 0.2), 
-    vec3(0.0, 0.5, 0.8)
-    
-    ), 
-    1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
+
+  assignColor(escaped, iterations);
+  
 }
 
 void main() {
-  //Mandelbrot();
-  Julia(vec2(-0.125, 0.65));
+  // Mandelbrot();
+  Julia(u_juliaSetConstant);
 }
 `;
 
