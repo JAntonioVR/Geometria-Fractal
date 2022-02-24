@@ -114,6 +114,15 @@ function main(){
 
     deslizador.addEventListener('change', (event) => changeMaxIterations(event), true);
 
+    const deslizadorJuliaX = document.querySelector("#juliaX");
+    document.querySelector("#valorJuliaX").innerHTML = deslizadorJuliaX.value
+    deslizadorJuliaX.addEventListener('input', (event) => changeJuliaX(event), true);
+
+    const deslizadorJuliaY = document.querySelector("#juliaY");
+    document.querySelector("#valorJuliaY").innerHTML = deslizadorJuliaY.value
+    deslizadorJuliaY.addEventListener('input', (event) => changeJuliaY(event), true);
+
+    
     theScene.drawScene();
     
 }
@@ -168,4 +177,16 @@ function changeMaxIterations(event){
     document.querySelector("#numero").innerHTML = event.target.value;
     theScene.setMaxIterations(event.target.value);
     theScene.drawScene();
+}
+
+function changeJuliaX(event) {
+  document.querySelector("#valorJuliaX").innerHTML = event.target.value;
+  theScene.setJuliaConstantX(event.target.value);
+  theScene.drawScene();
+}
+
+function changeJuliaY(event) {
+  document.querySelector("#valorJuliaY").innerHTML = event.target.value;
+  theScene.setJuliaConstantY(event.target.value);
+  theScene.drawScene();
 }

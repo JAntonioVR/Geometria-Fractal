@@ -3,9 +3,6 @@
     <head>
         <title>WebGL-Canvas</title>
         <script type="module"  src="static/js/canvas-mandelbrot.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
-            integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
-            crossorigin="anonymous" defer></script>
         <link rel="stylesheet" href="static/css/style.css">
         <!-- TODO MORE -->
     </head>
@@ -17,6 +14,25 @@
         <div id="numIteraciones-wrapper">
         Número de iteraciones: <input id="numIteraciones" type="range" min="100" max="1000" step="25">
         <div id="numero"></div>
+        </div>
+        Constante del Conjunto de Julia c = x + i*y
+        <div class="deslizador" id="deslizadorJuliaX">
+            <div>
+            <b>x:</b>
+            </div>
+            <div>
+            <input id="juliaX" type="range" min="-2" max="2" step="0.01">
+            </div>
+            <div id="valorJuliaX"></div>
+        </div>
+        <div class="deslizador" id="deslizadorJuliaY">
+            <div>
+            <b>y:</b>
+            </div>
+            <div>
+            <input id="juliaY" type="range" min="-2" max="2" step="0.01">
+            </div>
+            <div id="valorJuliaY"></div>
         </div>
     </body>
 </html>
