@@ -163,12 +163,24 @@ class Scene {
     this.parameters.maxIterations = newValue;
   }
 
+  getMaxIterations(){
+    return this.parameters.maxIterations;
+  }
+
   setJuliaConstantX(newX) {
     this.parameters.juliaSetConstant[0] = newX;
   }
 
+  getJuliaConstantX(){
+    return this.parameters.juliaSetConstant[0];
+  }
+
   setJuliaConstantY(newY) {
     this.parameters.juliaSetConstant[1] = newY;
+  }
+
+  getJuliaConstantY(){
+    return this.parameters.juliaSetConstant[1];
   }
 
   checkGLError(){

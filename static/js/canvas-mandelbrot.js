@@ -36,19 +36,33 @@ vec2 f(vec2 x, vec2 c) {
 	return mat2(x,-x.y,x.x)*x + c;
 }
 
-vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+/*vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
   return a + b*cos( 6.28318*(c*t+d) );
+}*/
+
+vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
+  float x = 1.0 / 3.0;
+  if (t < x) return mix(c1, c2, t/x);
+  else if (t < 2.0 * x) return mix(c2, c3, (t - x)/x);
+  else if (t < 3.0 * x) return mix(c3, c4, (t - 2.0*x)/x);
+  return c4;
 }
 
 void assignColor(bool escaped, int iterations) {
     gl_FragColor = escaped ? vec4(palette(
       3.0*float(iterations)/ float(u_maxIterations),
-      vec3(0.02, 0.02, 0.03), 
+      /*vec3(0.02, 0.02, 0.03), 
       vec3(0.1, 0.2, 0.3), 
       vec3(0.0, 0.3, 0.2), 
-      vec3(0.0, 0.5, 0.8)
+      vec3(0.0, 0.5, 0.8)*/
+      vec3(28.0,28.0,165.0)/vec3(255.0,255.0,255.0), 
+      vec3(210.0, 105.0, 0.0)/vec3(255.0,255.0,255.0), 
+      vec3(196.0, 168.0, 0.0)/vec3(255.0,255.0,255.0), 
+      
+      vec3(160.0,224.0,11.0)/vec3(255.0,255.0,255.0)
+      
       ), 
-      1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
+      1.0) : vec4(vec3(0.0,0.0,0.0), 1.0); // Azul horrible
 }
 
 void Julia(vec2 c) {
@@ -110,16 +124,19 @@ function main(){
     document.addEventListener("keydown", (event) => onKeyDown(event), true );
     document.addEventListener("wheel", (event) => onWheel(event), true );
 
-    const deslizador = document.querySelector("#numIteraciones");
-
-    deslizador.addEventListener('change', (event) => changeMaxIterations(event), true);
+    const deslizadorNIter = document.querySelector("#nIteraciones");
+    deslizadorNIter.value = theScene.getMaxIterations();
+    document.querySelector("#valorNIteraciones").innerHTML = theScene.getMaxIterations();
+    deslizadorNIter.addEventListener('input', (event) => changeMaxIterations(event), true);
 
     const deslizadorJuliaX = document.querySelector("#juliaX");
-    document.querySelector("#valorJuliaX").innerHTML = deslizadorJuliaX.value
+    deslizadorJuliaX.value = theScene.getJuliaConstantX();
+    document.querySelector("#valorJuliaX").innerHTML = theScene.getJuliaConstantX();
     deslizadorJuliaX.addEventListener('input', (event) => changeJuliaX(event), true);
 
     const deslizadorJuliaY = document.querySelector("#juliaY");
-    document.querySelector("#valorJuliaY").innerHTML = deslizadorJuliaY.value
+    deslizadorJuliaY.value = theScene.getJuliaConstantY();
+    document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstantY();
     deslizadorJuliaY.addEventListener('input', (event) => changeJuliaY(event), true);
 
     
@@ -174,7 +191,7 @@ function onWheel(event) {
   }
 
 function changeMaxIterations(event){
-    document.querySelector("#numero").innerHTML = event.target.value;
+    document.querySelector("#valorNIteraciones").innerHTML = event.target.value;
     theScene.setMaxIterations(event.target.value);
     theScene.drawScene();
 }

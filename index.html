@@ -12,8 +12,14 @@
         <canvas id="glCanvas"  width="720" height="720"></canvas>
         </div>
         <div id="numIteraciones-wrapper">
-        Número de iteraciones: <input id="numIteraciones" type="range" min="100" max="1000" step="25">
-        <div id="numero"></div>
+        <div class="deslizador" id="numIteraciones">
+            <div>
+            <b>Número de iteraciones: </b>
+            </div>
+            <div>
+            <input id="nIteraciones" type="range" min="10" max="1000" step="5">
+            </div>
+            <div id="valorNIteraciones"></div>
         </div>
         Constante del Conjunto de Julia c = x + i*y
         <div class="deslizador" id="deslizadorJuliaX">
