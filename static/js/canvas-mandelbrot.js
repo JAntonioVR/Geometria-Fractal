@@ -51,18 +51,12 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 void assignColor(bool escaped, int iterations) {
     gl_FragColor = escaped ? vec4(palette(
       3.0*float(iterations)/ float(u_maxIterations),
-      /*vec3(0.02, 0.02, 0.03), 
-      vec3(0.1, 0.2, 0.3), 
-      vec3(0.0, 0.3, 0.2), 
-      vec3(0.0, 0.5, 0.8)*/
-      vec3(28.0,28.0,165.0)/vec3(255.0,255.0,255.0), 
-      vec3(210.0, 105.0, 0.0)/vec3(255.0,255.0,255.0), 
-      vec3(196.0, 168.0, 0.0)/vec3(255.0,255.0,255.0), 
-      
-      vec3(160.0,224.0,11.0)/vec3(255.0,255.0,255.0)
-      
+      vec3(0.109,0.109,0.647), 
+      vec3(0.823, 0.411, 0.0), 
+      vec3(0.769, 0.659, 0.0), 
+      vec3(0.627,0.878,0.043)
       ), 
-      1.0) : vec4(vec3(0.0,0.0,0.0), 1.0); // Azul horrible
+      1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
 void Julia(vec2 c) {
