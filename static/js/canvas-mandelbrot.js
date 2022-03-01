@@ -32,8 +32,18 @@ uniform int u_maxIterations;
 /* Fixed c value in Julia set Equation z^2 + c */
 uniform vec2 u_juliaSetConstant;
 
+vec2 pow(vec2 z, int n) {
+  vec2 current_pow = vec2(1,0);
+  for (int i = 1; i < 100; i++) {
+    vec2 z_ant = vec2(current_pow.x, current_pow.y);
+    current_pow = vec2(z_ant.x*z.x - z_ant.y*z.y, z_ant.x*z.y + z_ant.y*z.x);
+    if(i >= n) break;
+  }
+  return current_pow;
+}
+
 vec2 f(vec2 x, vec2 c) {
-	return mat2(x,-x.y,x.x)*x + c;
+	return pow(x,2) + c;
 }
 
 /*vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
@@ -106,8 +116,8 @@ void Mandelbrot(){
 }
 
 void main() {
-  // Mandelbrot();
-  Julia(u_juliaSetConstant);
+  Mandelbrot();
+  //Julia(u_juliaSetConstant);
 }
 `;
 
