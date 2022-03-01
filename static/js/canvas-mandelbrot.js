@@ -33,7 +33,7 @@ uniform int u_maxIterations;
 uniform vec2 u_juliaSetConstant;
 
 /* Fixed n value in Julia/Mandelbrot set Equation */
-uniform int order;
+uniform int u_order;
 
 vec2 pow(vec2 z, int n) {
   vec2 current_pow = vec2(1,0);
@@ -120,7 +120,7 @@ void Mandelbrot(int n) {
 
 void main() {
   // Mandelbrot(3);
-  Julia(u_juliaSetConstant, 2);
+  Julia(u_juliaSetConstant, u_order);
 }
 `;
 
@@ -146,6 +146,10 @@ function main(){
     document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstantY();
     deslizadorJuliaY.addEventListener('input', (event) => changeJuliaY(event), true);
 
+    const deslizadorExp = document.querySelector("#exponente");
+    deslizadorExp.value = theScene.getOrder();
+    document.querySelector("#valorExponente").innerHTML = theScene.getOrder();
+    deslizadorExp.addEventListener('input', (event) => changeExponente(event), true);
     
     theScene.drawScene();
     
@@ -212,5 +216,11 @@ function changeJuliaX(event) {
 function changeJuliaY(event) {
   document.querySelector("#valorJuliaY").innerHTML = event.target.value;
   theScene.setJuliaConstantY(event.target.value);
+  theScene.drawScene();
+}
+
+function changeExponente(event) {
+  document.querySelector("#valorExponente").innerHTML = event.target.value;
+  theScene.setOrder(event.target.value);
   theScene.drawScene();
 }
