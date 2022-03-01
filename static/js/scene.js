@@ -27,7 +27,8 @@ class Scene {
         zoomCenter: gl.getUniformLocation(that.shaderProgram, 'u_zoomCenter'),
         zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
         maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
-        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant')
+        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
+        order: gl.getUniformLocation(that.shaderProgram, 'u_order')
       }
     };
 
@@ -36,7 +37,8 @@ class Scene {
       zoomSize: 3,
       maxIterations: 50,
       delta: 0.1,
-      juliaSetConstant: [-0.12, 0.75]
+      juliaSetConstant: [-0.12, 0.75],
+      order: 2
     };
   }
 
@@ -87,7 +89,8 @@ class Scene {
     let zoomCenter = this.parameters.zoomCenter,
         zoomSize = this.parameters.zoomSize,
         maxIterations = this.parameters.maxIterations,
-        juliaSetConstant = this.parameters.juliaSetConstant;
+        juliaSetConstant = this.parameters.juliaSetConstant,
+        order = this.parameters.order;
     var that = this;
     {
       const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
@@ -121,6 +124,9 @@ class Scene {
     gl.uniform2f(
       this.programInfo.uniformLocations.juliaSetConstant,
       juliaSetConstant[0], juliaSetConstant[1]);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.order,
+      order);
 
 
     {
@@ -181,6 +187,14 @@ class Scene {
 
   getJuliaConstantY(){
     return this.parameters.juliaSetConstant[1];
+  }
+
+  setOrder(newOrder) {
+    this.parameters.order = newOrder;
+  }
+
+  getOrder() {
+    return this.parameters.order;
   }
 
   checkGLError(){

@@ -29,8 +29,11 @@ uniform float u_zoomSize;
 /* How many iterations to do before deciding that a point is in the set. */
 uniform int u_maxIterations;
 
-/* Fixed c value in Julia set Equation z^2 + c */
+/* Fixed c value in Julia set Equation z^n + c */
 uniform vec2 u_juliaSetConstant;
+
+/* Fixed n value in Julia/Mandelbrot set Equation */
+uniform int order;
 
 vec2 pow(vec2 z, int n) {
   vec2 current_pow = vec2(1,0);
@@ -42,8 +45,8 @@ vec2 pow(vec2 z, int n) {
   return current_pow;
 }
 
-vec2 f(vec2 x, vec2 c) {
-	return pow(x,2) + c;
+vec2 f(vec2 x, vec2 c, int n) {
+	return pow(x,n) + c;
 }
 
 /*vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
@@ -69,7 +72,7 @@ void assignColor(bool escaped, int iterations) {
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
-void Julia(vec2 c) {
+void Julia(vec2 c, int n) {
     vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
     vec2 z0 = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
 
@@ -79,7 +82,7 @@ void Julia(vec2 c) {
     for(int i = 0; i < 10000; i++) {
         if(i > u_maxIterations) break;
         iterations = i;
-        z = f(z, c);
+        z = f(z, c, n);
         if (length(z) > 2.0){
             escaped = true;
             break;
@@ -89,7 +92,7 @@ void Julia(vec2 c) {
     assignColor(escaped, iterations);
 }
 
-void Mandelbrot(){
+void Mandelbrot(int n) {
     vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
   
   /* Decide which point on the complex plane this fragment corresponds to.*/
@@ -104,7 +107,7 @@ void Mandelbrot(){
        conditions so we have to do this ugly thing instead. */
     if (i > u_maxIterations) break;
     iterations = i;
-    z = f(z, c);
+    z = f(z, c, n);
     if (length(z) > 2.0) {
       escaped = true;
       break;
@@ -116,8 +119,8 @@ void Mandelbrot(){
 }
 
 void main() {
-  Mandelbrot();
-  //Julia(u_juliaSetConstant);
+  // Mandelbrot(3);
+  Julia(u_juliaSetConstant, 2);
 }
 `;
 
