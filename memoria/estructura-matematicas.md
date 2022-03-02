@@ -17,15 +17,12 @@
   * El juego del caos para ir abriendo boca. ¿Quizá esto rente más en la parte de orden y caos de la dinámica de poblaciones? ¿O en el apartado de SFI?
   * Números complejos y método de Newton se dan por sabidos (buscar referencia).
   * Cuencas de atracción en los complejos y aquí incluimos algunas imágenes. Las que requieren demasiado tiempo que se ejecuten en el despacho si a Manuel no le importa.
-* **Capítulo 3: Conjuntos de Julia**
+* **Capítulo 3 + 4: Conjuntos de Julia y Mandelbrot**
   * Definición genérica. Familia $\{z^2+c\}_{c\in\mathbb C}$. Particularidades de las cuencas de atracción.
   *  Una vez definido y expresado en términos matemáticos, mostrar imágenes y código.
   * Pincelada no demasiado intensa de conjuntos de Julia generalizados, incluir imágenes y algo de código pero no entrar demasiado en detalle. Incluir aquí los conjuntos con polinomios de orden superior.
-  * Discernir entre conjuntos de Julia conexos o polvaredas, de enganche con el siguiente capítulo.
-  * Madre mía qué chapa voy a pegar.
-* **Capítulo 4: El conjunto de Mandelbrot**
-  * Definición a partir del tema de los conjuntos de Julia conexos y polvaredas.
-  * ¿Chapa sobre la anatomía de los bulbos? Un poco solo no?
+  * Discernir entre conjuntos de Julia conexos o polvaredas.
+  * Definición del conjunto de Mandelbrot a partir del tema de los conjuntos de Julia conexos y polvaredas.
   * Recordamos Julia generalizados para hablar de M generalizado, pero lo mismo, no insistir demasiado.
   * Fotos, aquí hacen falta fotos.
 * **Capítulo 5: Dinámica de poblaciones**
