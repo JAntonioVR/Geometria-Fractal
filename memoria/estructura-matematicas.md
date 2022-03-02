@@ -15,7 +15,7 @@
   * Partimos de lo que se dio en Modelos Matemáticos I de atractores, iteración y tal en la recta real. Añadimos iteración en el plano complejo. ¿Quizá la chapa se debería llevar a un anexo en vez de darse por sabida?
   * Meter alguna gráfica medio chula de estas de atractores, repulsores y ciclos.
   * El juego del caos para ir abriendo boca. ¿Quizá esto rente más en la parte de orden y caos de la dinámica de poblaciones? ¿O en el apartado de SFI?
-  * Números complejos y método de Newton a un anexo o se dan por sabidos.
+  * Números complejos y método de Newton se dan por sabidos (buscar referencia).
   * Cuencas de atracción en los complejos y aquí incluimos algunas imágenes. Las que requieren demasiado tiempo que se ejecuten en el despacho si a Manuel no le importa.
 * **Capítulo 3: Conjuntos de Julia**
   * Definición genérica. Familia $\{z^2+c\}_{c\in\mathbb C}$. Particularidades de las cuencas de atracción.
@@ -44,9 +44,7 @@
   * Definir L-Sistemas y poner ejemplos como la curva de Koch. Si soy capaz codificar el triángulo de Sierpinski.
   * Filotaxis me parece de lo más interesante pero la veo poco relacionada con el tema.
 * **Anexo**
-  * Series geométricas
   * Convergencia de las iteradas en la recta real
-  * Números complejos
   * Método de Newton-Raphson
   * Ecuación logística y convergencia.
 
