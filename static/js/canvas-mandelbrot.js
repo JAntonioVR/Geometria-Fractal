@@ -35,6 +35,9 @@ uniform vec2 u_juliaSetConstant;
 /* Fixed n value in Julia/Mandelbrot set Equation */
 uniform int u_order;
 
+/* Render Mandelbrot or Julia set */
+uniform int u_fractal;
+
 vec2 pow(vec2 z, int n) {
   vec2 current_pow = vec2(1,0);
   for (int i = 1; i < 100; i++) {
@@ -119,8 +122,15 @@ void Mandelbrot(int n) {
 }
 
 void main() {
-  // Mandelbrot(3);
-  Julia(u_juliaSetConstant, u_order);
+  switch (u_fractal) {
+    case 0:
+      Mandelbrot(u_order);
+      break;
+  
+    case 1:
+      Julia(u_juliaSetConstant, u_order);
+      break;
+  }
 }
 `;
 
