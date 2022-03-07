@@ -28,7 +28,8 @@ class Scene {
         zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
         maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
         juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
-        order: gl.getUniformLocation(that.shaderProgram, 'u_order')
+        order: gl.getUniformLocation(that.shaderProgram, 'u_order'),
+        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal')
       }
     };
 
@@ -38,7 +39,8 @@ class Scene {
       maxIterations: 50,
       delta: 0.1,
       juliaSetConstant: [-0.12, 0.75],
-      order: 2
+      order: 2,
+      fractal: 0
     };
   }
 
@@ -90,7 +92,8 @@ class Scene {
         zoomSize = this.parameters.zoomSize,
         maxIterations = this.parameters.maxIterations,
         juliaSetConstant = this.parameters.juliaSetConstant,
-        order = this.parameters.order;
+        order = this.parameters.order,
+        fractal = this.parameters.fractal;
     var that = this;
     {
       const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
@@ -127,6 +130,9 @@ class Scene {
     gl.uniform1i(
       this.programInfo.uniformLocations.order,
       order);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.fractal,
+      fractal);
 
 
     {

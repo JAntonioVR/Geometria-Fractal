@@ -122,14 +122,11 @@ void Mandelbrot(int n) {
 }
 
 void main() {
-  switch (u_fractal) {
-    case 0:
-      Mandelbrot(u_order);
-      break;
-  
-    case 1:
-      Julia(u_juliaSetConstant, u_order);
-      break;
+  if(u_fractal == 0){
+    Mandelbrot(u_order);
+  }
+  else{
+    Julia(u_juliaSetConstant, u_order);
   }
 }
 `;
