@@ -4,6 +4,10 @@
         <title>WebGL-Canvas</title>
         <script type="module"  src="static/js/canvas-mandelbrot.js"></script>
         <link rel="stylesheet" href="static/css/style.css">
+        <!-- MathJax para las expresiones matemáticas -->
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
         <!-- TODO MORE -->
     </head>
     <body>
@@ -28,7 +32,7 @@
                 <option value="1">Julia</option>
             </select>
         </div>
-        Constante del Conjunto de Julia c = x + i*y
+        Constante del Conjunto de Julia \(c = x + i\cdot y\)
         <div class="deslizador" id="deslizadorJuliaX">
             <div>
             <b>x:</b>
@@ -47,7 +51,7 @@
             </div>
             <div id="valorJuliaY"></div>
         </div>
-        Exponente n de la función f(z) = z^n + c
+        Exponente n de la función \(f(z) = z^n + c\)
         <div class="deslizador" id="deslizadorExponente">
             <div>
             <b>n:</b>
