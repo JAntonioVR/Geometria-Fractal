@@ -138,6 +138,10 @@ function main(){
     document.addEventListener("keydown", (event) => onKeyDown(event), true );
     document.addEventListener("wheel", (event) => onWheel(event), true );
 
+    const fractal = document.querySelector("#fractales");
+    fractal.selectedIndex = 0;
+    fractal.addEventListener('change', changeFractal, true);
+
     const deslizadorNIter = document.querySelector("#nIteraciones");
     deslizadorNIter.value = theScene.getMaxIterations();
     document.querySelector("#valorNIteraciones").innerHTML = theScene.getMaxIterations();
@@ -229,5 +233,12 @@ function changeJuliaY(event) {
 function changeExponente(event) {
   document.querySelector("#valorExponente").innerHTML = event.target.value;
   theScene.setOrder(event.target.value);
+  theScene.drawScene();
+}
+
+function changeFractal(){
+  const fractales = document.querySelector("#fractales")
+  var selected = parseInt(fractales.value);
+  theScene.setFractal(selected);
   theScene.drawScene();
 }

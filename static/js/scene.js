@@ -203,6 +203,18 @@ class Scene {
     return this.parameters.order;
   }
 
+  setFractal(newFractal) {
+    if (newFractal == 0) {
+      this.parameters.fractal = newFractal;
+    } else {
+      this.parameters.fractal = 1;
+    }
+  }
+
+  getFractal() {
+    return this.parameters.fractal;
+  }
+
   checkGLError(){
     let gl = this.context;
     const err = gl.getError();
