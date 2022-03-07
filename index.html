@@ -21,6 +21,16 @@
             </div>
             <div id="valorNIteraciones"></div>
         </div>
+        ¿Qué fractal quieres ver?
+        <form>
+            <label for="fractal">Elige un fractal:</label>
+            <input list="fractales" name="fractal" id="fractal">
+            <datalist id="fractales">
+                <option value="Mandelbrot">
+                <option value="Julia">
+            </datalist>
+            <input type="submit">
+        </form>
         Constante del Conjunto de Julia c = x + i*y
         <div class="deslizador" id="deslizadorJuliaX">
             <div>
