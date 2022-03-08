@@ -72,6 +72,7 @@ El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que
 \end{figure}
 
 \subsection{El copo de nieve de Koch}
+\label{subsection:copo-Koch}
 
 A partir de la curva de Koch podemos crear un objeto matemático muy particular: el copo de nieve de Koch. Para crearlo, basta aplicar el proceso iterativo descrito para generar la curva de Koch a cada uno de los segmentos que componen un triángulo equilátero, de forma que los triángulos que se generan apunten hacia el exterior.
 
@@ -86,6 +87,7 @@ A partir de la curva de Koch podemos crear un objeto matemático muy particular:
 Esta curva posee la particularidad de tener longitud infinita y a su vez encerrar un área finita. Realmente el copo de Koch no es exactamente un fractal, pues no es totalmente autosimilar, aunque se compone de tres partes idénticas las cuales sí son autosimilares.
 
 \subsection{El triángulo de Sierpinski}
+\label{subsection:triangulo-Sierpinski}
 
 Esta figura, original del polaco Waclaw Sierpinski, es creada de una manera que evoca al conjunto de Cantor, pero en dos dimensiones. Veamos detalladamente el proceso (ver imagen \ref{fig:triangulo-Sierpinski}):
 
@@ -106,7 +108,18 @@ La figura a la que converge este proceso infinito se conoce como triángulo \tex
  \label{fig:triangulo-Sierpinski}
 \end{figure}
 
+Si llamamos $A$ al área del triángulo inicial, sabemos que en la primera iteración eliminamos un área de $\frac 1 4 A$, en el segundo eliminamos $3 \left(\frac 1 4\right)^2 A$ y en el $n$-ésimo $3^{n-1}\left(\frac 1 4\right)^n A$, de forma que si sumamos todo el área que eliminamos en cada paso obtenemos:
+
+$$
+A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A
+$$
+
+Donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $\sum_{n=0}^\infty q^n = \frac{1}{1-q}$.
+
+Es decir, el área eliminada es igual al área total y aún así tenemos puntos (por ejemplo los vértices de los triángulos que se van generando). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
+
 \subsection{La alfombra de Sierpinski y la esponja de Menger}
+\label{subsection:alfombra-esponja}
 
 El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden generar otras formas. Por ejemplo, pensemos que en lugar de partir de un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
 
@@ -125,3 +138,12 @@ Este proceso también se puede modelar en 3D, obteniendo así la conocida como e
 \caption{Esponja de Menger}
  \label{fig:esponja-menger}
 \end{figure}
+
+\section{La dimensión}
+\label{section:dimension}
+
+Al iniciar este capítulo mencionamos que las distintas definiciones de fractal utilizaban los conceptos de autosimilaridad y dimensión. Con los distintos ejemplos hemos entendido el primero de ellos, por lo que es momento de abordar el concepto de dimensión. 
+
+Intuitivamente, sabemos que una recta o un segmento de recta es de dimensión 1, pues sólo nos podemos mover en una dirección: de derecha a izquierda (el movimiento se describe con un único parámetro). Según este razonamiento y de acuerdo con la intuición un conjunto de puntos aislados es un conjunto de dimensión 0, pues no existe movilidad. Un cuadrado es de dimensión 2, ya que nos podemos mover de izquierda a derecha o de arriba a abajo (el movimiento se describe con dos parámetros: largo y ancho). Un cubo es de dimensión 3 porque en él nos podemos mover de derecha a izquierda, de arriba a abajo o de más a menos profundidad (el movimiento se describe con tres parámetros: altura, anchura y profundidad). 
+
+Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería algo que está entre estos dos enteros.
