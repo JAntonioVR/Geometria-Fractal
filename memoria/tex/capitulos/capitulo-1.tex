@@ -194,3 +194,19 @@ Retomando ahora el triángulo de Sierpinski, sabemos que este está compuesto po
 En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a escala $\frac 1 3$ (sección \ref{subsection:Cantor}), por lo que su dimensión fractal autosimilar sería $D=\frac{\log 2}{\log 3} \approx 0.63093$, que es un valor situado entre 0 y 1.
 
 Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $D=\frac{\log 4}{\log 3} \approx 1.26186$.
+
+\subsection{Dimensión por cajas}
+
+El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos el concepto de dimensión por cajas.
+
+Dada una figura o conjunto $A\subset \R^2$, lo recubrimos con una cuadrícula en la que todos los cuadrados son iguales, de longitud $\delta$. A estos cuadrados los llamamos \textit{cajas}. Contamos los cuadrados necesarios para recubrir la figura, obteniendo el número $N_\delta(A)$, que es dependiente de la longitud de los cuadrados. Si disminuimos el valor $\delta$ obtendríamos un número posiblemente distinto y más óptimo de cuadrados necesarios para recubrir la figura. Notemos que este proceso de hecho se puede generalizar a tres dimensiones si usamos cubos de lado $\delta$ en lugar de cuadrados.
+
+\begin{definicion}[Dimensión por cajas]
+Se define la \textbf{dimensión por cajas} de un subconjunto $A\subset \R^2$, denotada por $D(A)$ como:
+
+\begin{equation}\label{eq:dim-cajas}
+D(A)=\lim_{\delta\rightarrow\infty}\frac{\log N_\delta(A)}{\log(1/\delta)}
+\end{equation}
+
+\end{definicion}
+
