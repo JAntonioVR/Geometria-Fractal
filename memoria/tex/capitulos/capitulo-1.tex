@@ -139,11 +139,58 @@ Este proceso también se puede modelar en 3D, obteniendo así la conocida como e
  \label{fig:esponja-menger}
 \end{figure}
 
-\section{La dimensión}
+\section{Conceptos de dimensión fractal}
 \label{section:dimension}
 
 Al iniciar este capítulo mencionamos que las distintas definiciones de fractal utilizaban los conceptos de autosimilaridad y dimensión. Con los distintos ejemplos hemos entendido el primero de ellos, por lo que es momento de abordar el concepto de dimensión. 
 
 Intuitivamente, sabemos que una recta o un segmento de recta es de dimensión 1, pues sólo nos podemos mover en una dirección: de derecha a izquierda (el movimiento se describe con un único parámetro). Según este razonamiento y de acuerdo con la intuición un conjunto de puntos aislados es un conjunto de dimensión 0, pues no existe movilidad. Un cuadrado es de dimensión 2, ya que nos podemos mover de izquierda a derecha o de arriba a abajo (el movimiento se describe con dos parámetros: largo y ancho). Un cubo es de dimensión 3 porque en él nos podemos mover de derecha a izquierda, de arriba a abajo o de más a menos profundidad (el movimiento se describe con tres parámetros: altura, anchura y profundidad). 
 
-Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería algo que está entre estos dos enteros.
+Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
+
+\subsection{Dimension fractal autosimilar}
+\label{subsection:dim-frac-autosimilar}
+
+Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Supongamos ahora que cada lado de cada objeto se divide en 4 como indica la imagen \ref{fig:divisiones}. Entonces en el segmentro aparecen $N(4):=4=4^1$ segmentos a razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno a razón $\frac 1 4$ del original y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos a razón $\frac 1 4$ del cubo original.
+
+\begin{figure}[h]
+\begin{tabular}{ccc}
+  \includegraphics[scale=0.15]{./img/linea-dividida.png} &   \includegraphics[scale=0.15]{./img/cuadrado-dividido.png} & \includegraphics[scale=0.2]{./img/cubo-dividido.png}\\
+(a) Segmento dividido en 4 & (b) Cuadrado dividido en 16 & (c) Cubo dividido en 64 \\[4pt]
+\end{tabular}
+\caption{Segmento, cuadrado y cubo divididos en 4}
+\label{fig:divisiones}
+\end{figure}
+
+Si en lugar de 4 tomamos cualquier número natural $k\geq 1$, la razón sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
+
+\begin{equation}\label{eq:relaciones-dimension}
+\frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
+\end{equation}
+
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar el factor de contracción $k$ para obtener la relación (\ref{eq:relaciones-dimension}). De manera análoga podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subfiguras o subconjuntos idénticos salvo traslaciones o rotaciones y que sean una copia a escala $r=\frac 1 k$ del objeto original.
+
+\begin{definicion}[Dimensión autosimilar]
+Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí e idénticos a $X$ por un factor de escala de $r=\frac 1 k$, definimos su \textbf{dimensión autosimilar} como el único valor $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
+$$
+d=\frac{\log N(k)}{\log(k)}
+$$
+\end{definicion}
+
+\begin{wrapfigure}{l}{0cm}
+\includegraphics[scale=0.14, trim={0cm 0.35cm 0cm 0.5cm}, clip]{./img/triangulo-dividido.png}
+\end{wrapfigure}
+
+Un ejemplo distinto pero clarificador podría ser el de un triángulo equilátero, el cual podemos dividir en 4 copias congruentes entre sí, cada una a escala $r=\frac 1 2$ del triángulo original, de forma que tendríamos $k=2$ y $N(2)=4$. 
+
+Con estos valores, tenemos que $N(k)=4=k^d=2^d$, por lo que necesariamente $d=2$ y por tanto un triángulo equilátero es un objeto 2-dimensional, lo cual tampoco nos sorprende.
+
+\begin{observacion}
+La dimensión $d$ ya no tiene por qué ser necesariamente un número entero. A esta posibilidad de tener dimensiones no enteras es a lo que llamamos \textbf{dimensión fractal autosimilar}, y lo denotamos con $D$.
+\end{observacion}
+
+Retomando ahora el triángulo de Sierpinski, sabemos que este está compuesto por 3 copias de sí mismo a escala $\frac 1 2$ (véase sección \ref{subsection:triangulo-Sierpinski}), por lo que entonces su dimensión fractal autosimilar es $D=\frac{\log 3}{\log 2} \approx 1.58496$. Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
+
+En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a escala $\frac 1 3$ (sección \ref{subsection:Cantor}), por lo que su dimensión fractal autosimilar sería $D=\frac{\log 2}{\log 3} \approx 0.63093$, que es un valor situado entre 0 y 1.
+
+Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $D=\frac{\log 4}{\log 3} \approx 1.26186$.
