@@ -196,6 +196,7 @@ En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a 
 Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $D=\frac{\log 4}{\log 3} \approx 1.26186$.
 
 \subsection{Dimensión por cajas}
+\label{subsection:dim-cajas}
 
 El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos el concepto de dimensión por cajas.
 
@@ -210,3 +211,58 @@ D(A)=\lim_{\delta\rightarrow\infty}\frac{\log N_\delta(A)}{\log(1/\delta)}
 
 \end{definicion}
 
+\subsection{Dimensión de Hausdorff}
+\label{subsection:dim-Hausdorff}
+
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Por ejemplo, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas Hausdorff publicó en 1918 un artículo que cambiaría la teoría de la medida tal y como la conocíamos. 
+
+Supongamos que queremos medir el área de un conjunto $A\subset\R^2$ complicado, como podría ser el triángulo de Sierpinski. Una manera de hacerlo es recubrir $A$ con una sucesión de discos $D_1,D_2,\dots$. Entonces el área de $A$ está acotada superiormente por la suma de las áreas de todos estos discos:
+\begin{equation}\label{eq:cota-A}
+\lambda_2(A)\leq \frac \pi 4 \sum_{n\in\N}\diam(D_n)^2
+\end{equation}
+
+donde $\lambda_2$ denota la medida 2-dimensional de Lebesgue.
+
+Sin embargo en esta aproximación la cota es demasiado grande, aunque podemos refinarla usando otros discos cada vez más pequeños, siempre que recubran a $A$. De esta forma, el área de $A$ será el valor más pequeño que podamos obtener con cualquier sucesión de discos al sumar sus áreas como en (\ref{eq:cota-A}).
+\begin{equation}
+\lambda_2(A)=\inf\left\lbrace \frac \pi 4 \sum_{n\in\N}\diam(D_n)^2 \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace
+\end{equation}
+
+Si como ejemplo aplicamos esta definición a un segmento de recta, el cual podemos recubrir con $n$ circunferencias de diámetro $\frac 1 n$, tendríamos aplicando (\ref{eq:cota-A}) que el área está acotada por $\frac \pi 4 \cdot n \cdot \left(\frac 1 n\right)^2=\frac c n$, donde $c$ es una constante positiva. Tomando círculos cada vez más pequeños, es decir, tomando límite en $n$, tenemos que $0 \leq \lambda_2(A) \leq \lim_{n\rightarrow\infty}\frac c n = 0$, obteniendo así que el área 2-dimensional de un segmento de recta es 0, tal y como cabía esperar.
+
+Para calcular la medida 1-dimensional (i.e. la longitud) de $A$ aplicamos el mismo proceso pero en lugar de calcular la suma de las áreas podemos calcular la suma de los diámetros de los discos, es decir:
+
+\begin{eqnarray}
+\lambda_1(A)\leq\sum_{n\in\N}\diam(D_n) & & \\
+\lambda_1(A)=\inf\left\lbrace \sum_{n\in\N}\diam(D_n) \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace & &
+\end{eqnarray}
+
+Por tanto, la medida $d$-dimensional de $A$ será \footnote{Recordemos que el símbolo $\propto$ denota proporcionalidad.}
+\begin{equation}\label{ec:medida-d-dimensional}
+\lambda_d(A)\propto \inf\left\lbrace \sum_{n\in\N}\diam(D_n)^d \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace
+\end{equation}
+
+Por comodidad y simplicidad, en la práctica se usan círculos de igual radio, digamos $\varepsilon\geq 0$, y se asume que $A$ es un subconjunto cerrado y acotado de $\R^2$. Llamamos $N_\varepsilon(A)$ al número de círculos de radio $\varepsilon$ necesarios para recubrir a $A$, de forma entonces que según (\ref{ec:medida-d-dimensional}) la medida $d$-dimensional de un conjunto $A\subset\R^2$ es proporcional a
+\begin{equation}
+h^d(A):= \lim_{\varepsilon\rightarrow 0} N_\varepsilon(A)\varepsilon^d
+\end{equation}
+
+Sin embargo, para poder calcular estas medidas necesitamos asegurarnos la existencia de este límite para algún valor de $d$.
+
+\begin{teorema}
+\label{th:Hausdorff}
+Sea $A\subset \R^n$ un conjunto cerrado y acotado. Entonces existe un único valor de $d$ para el cual $h^d(A)$ no es ni $0$ ni $\infty$. Este valor $d=D_H(A)$ satisface que:
+\begin{equation}
+h^d(A)= \left\{ \begin{array}{lcc}
+             \infty &   si  & d < D_H(A) \\
+             \\ 0 &  si & d > D_H(A) 
+             \end{array}
+   \right.
+\end{equation}
+\end{teorema} 
+
+\begin{definicion}[Dimensión de Hausdorff]
+Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_H(A)$ del teorema \ref{th:Hausdorff}.
+\end{definicion}
+
+De manera natural, para objetos autosimilares los conceptos de dimensión fractal autosimilar y dimensión de Hausdorff coinciden.
