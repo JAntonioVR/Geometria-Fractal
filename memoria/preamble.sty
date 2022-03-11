@@ -20,11 +20,16 @@
 %\usepackage{helvet}
 
 \usepackage{amsthm, amssymb}
-\newtheorem{definicion}{Definición}
-\newtheorem{observacion}{Observación}
+\usepackage{amsmath}
+\newtheorem{teorema}{Teorema}[section]
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}[section]
+\newtheorem{observacion}{Observación}[section]
+\newcommand{\diam}[0]{\mathrm{diam}}
 
 %MORE PACKAGES HERE
 \newcommand{\R}[0]{\mathbb{R}}
 \newcommand{\C}[0]{\mathbb{C}}
 \newcommand{\N}[0]{\mathbb{N}}
 \newcommand{\Z}[0]{\mathbb{Z}}
+\newcommand{\Q}[0]{\mathbb{Q}}
