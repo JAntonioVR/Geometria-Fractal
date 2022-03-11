@@ -266,3 +266,26 @@ Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_
 \end{definicion}
 
 De manera natural, para objetos autosimilares los conceptos de dimensión fractal autosimilar y dimensión de Hausdorff coinciden.
+
+
+\subsection{Dimensión topológica}
+
+Por último estudiaremos un concepto de dimensión aplicable a espacios topológicos. La \textbf{dimensión topológica} se define inductivamente de la siguiente forma:
+
+\begin{enumerate}
+\item La dimensión del conjunto vacío es $\partial(\emptyset):=-1$.
+\item Un espacio topológico $X$ tiene dimensión 0 ($\dim(X)=0$) si para cualquier $x\in V$ con $V$ abierto en $X$ existe un abierto $U$ cuya frontera $\partial(U)$ es vacía y se verifica que $x\in U\subseteq V$.
+
+\item Un espacio topológico $X$ tiene dimensión menor o igual que $n$ ($\dim(X)\leq n$) si para cualquier $x\in X$ y cualquier $V$ abierto que contiene a $x$ existe un abierto $U$ tal que $\dim(\partial(U))\leq n-1$ y se verifica que $x\in U\subseteq V$. 
+
+\item $X$ tiene dimensión $n$ ($\dim(X)=n$) si se verifica que $\dim(X)\leq n$ pero es falso que $\dim(X)\leq n-1$
+\end{enumerate}
+
+%%%TODO PONER UN EJEMPLO
+
+A partir de esta definición, la cual notamos que solo puede tomar valores enteros, podemos enunciar nuestra primera definición de fractal, que fue formulada por Benoit Mandelbrot.
+
+\begin{definicion}[Fractal]
+\label{def:fractal}
+Un \textbf{fractal} es un subconjunto del plano que es autosimilar y cuya dimensión fractal excede a su dimensión topológica.
+\end{definicion}
