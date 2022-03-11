@@ -281,7 +281,26 @@ Por último estudiaremos un concepto de dimensión aplicable a espacios topológ
 \item $X$ tiene dimensión $n$ ($\dim(X)=n$) si se verifica que $\dim(X)\leq n$ pero es falso que $\dim(X)\leq n-1$
 \end{enumerate}
 
-%%%TODO PONER UN EJEMPLO
+\begin{figure}[h]
+\begin{tabular}{cc}
+\includegraphics[scale=0.5]{./img/ejemplo-dimension-1.png} &   \includegraphics[scale=0.45]{./img/ejemplo-dimension-2.png} \\
+(a) Ejemplo con $X=\{p\}$ & (b) Ejemplo con $X=r$ \\[6pt]
+\end{tabular}
+\caption{Figuras representativas de los ejemplos}
+\label{fig:ejemplos}
+\end{figure}
+
+
+\begin{ejemplo}
+\label{ej:dimension-1}
+(Véase imagen \ref{fig:ejemplos} (a))
+En $\R^2$ dotado de la topología usual consideramos un punto $p$ cualquiera y el espacio topológico $X=\{p\}$. Por tanto la topología inducida por la topología usual $\tau$ en $X$ es $\tau_X=\{X,\emptyset\}$. Sea $V$ un abierto de $\R^2$ que contenga a $p$, por tanto $\tilde{V} = V \cap X = \{p\}$ es un abierto en $X$ que contiene a $p$. Podemos encontrar entonces un abierto $U=\{p\}$ de $X$ tal que su frontera $\partial(U)=\emptyset$ y además $p\in U \subseteq V$. Por tanto concluimos que $X$ tiene dimensión 0.
+\end{ejemplo}
+
+\begin{ejemplo}
+(Véase imagen \ref{fig:ejemplos} (b))
+En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llamémosla $r$, y el espacio topológico $X=\{r\}$. Sea $x\in X$ y $V$ un abierto de $\R^2$ que contenga a $x$, de forma que $\tilde{V} = r\cap V$ es un abierto de $X$. Podemos entonces tomar un abierto $U$ dentro de $\tilde{V}$ (un segmento abierto de recta), de forma que $x\in U\subseteq \tilde{V}$. Por otro lado, $\partial(U)=\{p,q\}$, y podemos comprobar fácilmente (con ayuda del ejemplo \ref{ej:dimension-1}) que $\dim(\partial(U))=0$. Por todo esto podemos concluir que $X=r$ es un espacio topológico de dimensión 1. 
+\end{ejemplo}
 
 A partir de esta definición, la cual notamos que solo puede tomar valores enteros, podemos enunciar nuestra primera definición de fractal, que fue formulada por Benoit Mandelbrot.
 
