@@ -19,8 +19,14 @@ Observemos que el romanescu, que es un tipo de coliflor, pareciera que está for
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
-\begin{definicion}[Autosimilaridad] Un objeto es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala.
+\begin{definicion}[Autosimilaridad] Una figura o subconjunto $A$ de $\R^n$ es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala. Es decir,
+$$
+A = \bigcup_{i=1}^n h_i(A),
+$$
+donde cada $h_i, i=1,\dots,n$ es una homotecia de razón menor que 1. 
 \end{definicion}
+
+En futuras ocasiones se utilizarán indistintamente los términos de <<reducción por un factor de escala>> e <<imagen vía una homotecia>>, queriendo en ambos casos referirnos a este concepto.
 
 Para afianzar y formalizar conceptos y con el objetivo de introducir un concepto de dimensión, estudiaremos algunos ejemplos clásicos de objetos fractales.
 
@@ -232,10 +238,12 @@ Si como ejemplo aplicamos esta definición a un segmento de recta, el cual podem
 
 Para calcular la medida 1-dimensional (i.e. la longitud) de $A$ aplicamos el mismo proceso pero en lugar de calcular la suma de las áreas podemos calcular la suma de los diámetros de los discos, es decir:
 
-\begin{eqnarray}
-\lambda_1(A)\leq\sum_{n\in\N}\diam(D_n) & & \\
-\lambda_1(A)=\inf\left\lbrace \sum_{n\in\N}\diam(D_n) \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace & &
-\end{eqnarray}
+$$
+\lambda_1(A)\leq\sum_{n\in\N}\diam(D_n) 
+$$
+$$
+\lambda_1(A)=\inf\left\lbrace \sum_{n\in\N}\diam(D_n) \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace 
+$$
 
 Por tanto, la medida $d$-dimensional de $A$ será \footnote{Recordemos que el símbolo $\propto$ denota proporcionalidad.}
 \begin{equation}\label{ec:medida-d-dimensional}
