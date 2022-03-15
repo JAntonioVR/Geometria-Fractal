@@ -82,7 +82,7 @@ El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que
 
 \begin{figure} [h]
 \centering
-\includegraphics[scale = 0.6]{img/curva-Koch.png}
+\includegraphics[scale = 0.5]{img/curva-Koch.png}
 \caption{Iteraciones del proceso de generación de la curva de Koch}
  \label{fig:curva-Koch}
 \end{figure}
@@ -141,7 +141,7 @@ En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de
 \subsection{La alfombra de Sierpinski y la esponja de Menger}
 \label{subsection:alfombra-esponja}
 
-El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden generar otras formas. Por ejemplo, pensemos que en lugar de partir de un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
+El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden obtener otras formas. Por ejemplo, pensemos que en lugar de comenzar con un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
 
 \begin{figure} [h]
 \centering
@@ -171,7 +171,7 @@ Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en
 \subsection{Dimension fractal autosimilar}
 \label{subsection:dim-frac-autosimilar}
 
-Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Supongamos ahora que cada lado de cada objeto se divide en 4 como indica la imagen \ref{fig:divisiones}. Entonces en el segmentro aparecen $N(4):=4=4^1$ segmentos a razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno a razón $\frac 1 4$ del original y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos a razón $\frac 1 4$ del cubo original.
+Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 4 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(4):=4=4^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 4$ del original y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 4$ del cubo original.
 
 \begin{figure}[h]
 \begin{tabular}{ccc}
@@ -182,16 +182,22 @@ Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 
 \label{fig:divisiones}
 \end{figure}
 
-Si en lugar de 4 tomamos cualquier número natural $k\geq 1$, la razón sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
+Si en lugar de 4 tomamos cualquier número natural $k\geq 1$, la razón de la homotecia sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
 
 \begin{equation}\label{eq:relaciones-dimension}
 \frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
 \end{equation}
 
-En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar el factor de contracción $k$ para obtener la relación (\ref{eq:relaciones-dimension}). De manera análoga podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subfiguras o subconjuntos idénticos salvo traslaciones o rotaciones y que sean una copia a escala $r=\frac 1 k$ del objeto original.
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definicion.
+
+\begin{definicion}[Congruencia]
+Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
+\end{definicion}
+
+De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$. 
 
 \begin{definicion}[Dimensión autosimilar]
-Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí e idénticos a $X$ por un factor de escala de $r=\frac 1 k$, definimos su \textbf{dimensión autosimilar} como el único valor $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
+Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$, definimos su \textbf{dimensión autosimilar} como el único valor $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
 $$
 d=\frac{\log N(k)}{\log(k)}
 $$
