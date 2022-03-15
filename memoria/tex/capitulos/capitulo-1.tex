@@ -39,7 +39,7 @@ Para afianzar y formalizar conceptos y con el objetivo de introducir un concepto
 Creado por el célebre matemático \textit{George Cantor}, este fractal se construye a partir de un segmento de línea recta aplicando el siguiente proceso iterativo:
 
 \begin{enumerate}
-\item Dado el segmento de recta compuesto por el intervalo cerrado $[0,1]$, dividimos dicho segmento en tres segmentos iguales y extraemos el intervalo central, manteniendo los extremos. Es decir, extraemos el intervalo abierto $\left(\frac 1 3, \frac 2 3\right)$ y mantenemos el segmento $\left[0,\frac 1 3\right]$ y el $\left[\frac 2 3, 1\right]$.. Nótese que obtenemos $2=2^1$ segmentos, cada uno a escala $\frac 1 3=\left(\frac 1 3\right)^1$ del original.
+\item Partimos del segmento de recta compuesto por el intervalo cerrado $[0,1]$, aunque realmente es indiferente qué intervalo se escoja, pues el resultado final será el mismo salvo homotecia. Dividimos dicho segmento en tres segmentos iguales y extraemos el intervalo central, manteniendo los extremos. Es decir, extraemos el intervalo abierto $\left(\frac 1 3, \frac 2 3\right)$ y mantenemos el segmento $\left[0,\frac 1 3\right]$ y el $\left[\frac 2 3, 1\right]$.. Nótese que obtenemos $2=2^1$ segmentos, cada uno a escala $\frac 1 3=\left(\frac 1 3\right)^1$ del original.
 
 \item Aplicamos el mismo proceso a los segmentos $\left[0,\frac 1 3\right]$ y $\left[\frac 2 3, 1\right]$. Esto es, se dividen ambos en tres partes iguales y se extrae el intervalo abierto central de cada uno de ellos, manteniendo los extremos. En este caso obtendríamos $4=2^2$ segmentos iguales, cada uno de ellos a escala $\frac 1 3$ de los dos obtenidos en el primer paso y a escala $\frac 1 9=\left(\frac 1 3\right)^2$ del original.
 
@@ -95,9 +95,9 @@ A partir de la curva de Koch podemos crear un objeto matemático muy particular:
 Esta curva posee la particularidad de tener longitud infinita y a su vez encerrar un área finita. Realmente el copo de Koch no es exactamente un fractal, pues no es totalmente autosimilar, aunque se compone de tres partes idénticas las cuales sí son autosimilares.
 
 \subsection{El triángulo de Sierpinski}
-\label{subsection:triangulo-Sierpinski}
+\label{subsection:triangulo-Sierpinski} 
 
-Esta figura, original del polaco Waclaw Sierpinski, es creada de una manera que evoca al conjunto de Cantor, pero en dos dimensiones. Veamos detalladamente el proceso (ver imagen \ref{fig:triangulo-Sierpinski}):
+Esta figura, original del polaco \textit{Waclaw Sierpinski}, es creada de una manera que evoca al conjunto de Cantor, pero en dos dimensiones. Veamos detalladamente el proceso (ver imagen \ref{fig:triangulo-Sierpinski}):
 
 \begin{enumerate}
 \item Se parte de un triángulo equilátero de lado 1 (de nuevo la longitud inicial es irrelevante). Uniendo los puntos medios de cada lado obtenemos una partición del triángulo inicial en 4 triángulos equiláteros, del cual extraemos el central. Tenemos por tanto $3=3^1$ triángulos a escala $\frac 1 2 = \left(\frac 1 2\right)^1$ del original.
@@ -222,7 +222,7 @@ D(A)=\lim_{\delta\rightarrow\infty}\frac{\log N_\delta(A)}{\log(1/\delta)}
 \subsection{Dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
-La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Por ejemplo, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas Hausdorff publicó en 1918 un artículo que cambiaría la teoría de la medida tal y como la conocíamos. 
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Por ejemplo, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1918 un artículo que cambiaría la teoría de la medida tal y como la conocíamos. 
 
 Supongamos que queremos medir el área de un conjunto $A\subset\R^2$ complicado, como podría ser el triángulo de Sierpinski. Una manera de hacerlo es recubrir $A$ con una sucesión de discos $D_1,D_2,\dots$. Entonces el área de $A$ está acotada superiormente por la suma de las áreas de todos estos discos:
 \begin{equation}\label{eq:cota-A}
@@ -312,7 +312,7 @@ En $\R^2$ dotado de la topología usual consideramos un punto $p$ cualquiera y e
 En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llamémosla $r$, y el espacio topológico $X=\{r\}$. Sea $x\in X$ y $V$ un abierto de $\R^2$ que contenga a $x$, de forma que $\tilde{V} = r\cap V$ es un abierto de $X$. Podemos entonces tomar un abierto $U$ dentro de $\tilde{V}$ (un segmento abierto de recta), de forma que $x\in U\subseteq \tilde{V}$. Por otro lado, $\partial(U)=\{p,q\}$, y podemos comprobar fácilmente (con ayuda del ejemplo \ref{ej:dimension-1}) que $\dim(\partial(U))=0$. Por todo esto podemos concluir que $X=r$ es un espacio topológico de dimensión 1. 
 \end{ejemplo}
 
-A partir de esta definición, la cual notamos que solo puede tomar valores enteros, podemos enunciar nuestra primera definición de fractal, que fue formulada por Benoit Mandelbrot.
+A partir de esta definición, la cual notamos que solo puede tomar valores enteros, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot}.
 
 \begin{definicion}[Fractal]
 \label{def:fractal}
