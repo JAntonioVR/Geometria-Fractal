@@ -203,6 +203,26 @@ d=\frac{\log N(k)}{\log(k)}
 $$
 \end{definicion}
 
+Sin embargo, antes de utilizar este concepto debemos comprobar que la definición es coherente con cualquier partición y cualquier factor de escala. Es decir, que independientemente de la división del objeto que se tome la dimensión va a ser la misma.
+
+\begin{lema}
+Sean $k_1 < k_2$ dos números naturales y un subconjunto $X$ de $\R^n$ autosimilar y que se puede dividir en $N(k_1)$ (resp. $N(k_2)$) subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac {1}{k_1}$ (resp. $\frac {1}{k_2}$). Entonces tanto $N(k_1)$ como $N(k_2)$ son potencias de un mismo número natural $N$ y tanto $\frac{1}{k_1}$ como $\frac{1}{k_2}$ son potencias de una misma razón $\frac 1 k$.
+\end{lema}
+\begin{proof}
+Si tenemos una partición con $N(k_1)$ copias reducidas del propio $X$, cada una de ellas se puede subdividir a su vez en $N(k_2)$ réplicas a escala $\frac 1{k_2}$, obteniendo así una nueva división en $N(k_1)\cdot N(k_2)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac{1}{k_1\cdot k_2}$. Como esta es una nueva partición de $X$ más fina que las anteriores, deben existir un $N,n$ tal que $N(k_1)\cdot N(k_2)=N^n$ y $k$ tal que $\frac{1}{k_1\cdot k_2}=\left(\frac{1}{k}\right)^n$. (Mejorar)
+\end{proof}
+
+\begin{proposicion}
+En un subconjunto $X$ de $\R^n$ autosimilar el valor de la dimension fractal autosimilar es el mismo independientemente de la partición que se le aplique.
+\end{proposicion}
+\begin{proof}
+Supongamos que podemos dividir $X$ en $N(k_1)$ (resp. $N(k_2)$) subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac {1}{k_1}$ (resp. $\frac {1}{k_2}$). Entonces sabemos que existen $n_1, n_2, N, k\in \N$ tales que $N(k_1)=N^{n_1}, N(k_2)=N^{n_2}, \frac 1 {k_1} = \left(\frac{1}{k}\right)^{n_1}, \frac{1}{k_2} = \left(\frac{1}{k}\right)^{n_2} $, de forma que 
+$$
+d = \frac{\log N(k_1)}{\log(k_1)} = \frac{\log N^{n_1}}{\log(k^{n_1})} = \frac{n_1}{n_1} \frac{\log N}{\log k} = \frac{\log N}{\log k},
+$$
+y análogamente con la partición inducida por $k_2$, pudiendo así comprobar que la división no afecta en el valor de $d$.
+\end{proof}
+
 \begin{wrapfigure}{l}{0cm}
 \includegraphics[scale=0.14, trim={0cm 0.35cm 0cm 0.5cm}, clip]{./img/triangulo-dividido.png}
 \end{wrapfigure}
@@ -240,7 +260,7 @@ siempre que exista dicho límite.
 \subsection{Dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
-La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1918 un artículo que cambiaría la teoría de la medida tal y como la conocíamos. 
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
 Supongamos que queremos medir el área de un conjunto $A\subset\R^2$ complicado, como podría ser el triángulo de Sierpinski. Una manera de hacerlo es recubrir $A$ con una sucesión de discos $D_1,D_2,\dots$. Entonces el área de $A$ está acotada superiormente por la suma de las áreas de todos estos discos:
 \begin{equation}\label{eq:cota-A}
