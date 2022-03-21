@@ -257,58 +257,76 @@ D(A)=\lim_{\delta\rightarrow\infty}\frac{\log N_\delta(A)}{\log(1/\delta)},
 siempre que exista dicho límite.
 \end{definicion}
 
-\subsection{Dimensión de Hausdorff}
+\subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
 La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
-Supongamos que queremos medir el área de un conjunto $A\subset\R^2$ complicado, como podría ser el triángulo de Sierpinski. Una manera de hacerlo es recubrir $A$ con una sucesión de discos $D_1,D_2,\dots$. Entonces el área de $A$ está acotada superiormente por la suma de las áreas de todos estos discos:
-\begin{equation}\label{eq:cota-A}
-\lambda_2(A)\leq \frac \pi 4 \sum_{n\in\N}\diam(D_n)^2,
-\end{equation}
-donde $\lambda_2$ denota la medida 2-dimensional de Lebesgue.
+Dado un subconjunto $U$ de $\R^n$, definimos su diámetro como:
 
-Sin embargo en esta aproximación la cota es demasiado grande, aunque podemos refinarla usando otros discos cada vez más pequeños, siempre que recubran a $A$. De esta forma, el área de $A$ será el valor más pequeño que podamos obtener con cualquier sucesión de discos al sumar sus áreas como en (\ref{eq:cota-A}).
-\begin{equation}
-\lambda_2(A)=\inf\left\lbrace \frac \pi 4 \sum_{n\in\N}\diam(D_n)^2 \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace.
-\end{equation}
-
-Si como ejemplo aplicamos esta definición a un segmento de recta, el cual podemos recubrir con $n$ circunferencias de diámetro $\frac 1 n$, tendríamos aplicando (\ref{eq:cota-A}) que el área está acotada por $\frac \pi 4 \cdot n \cdot \left(\frac 1 n\right)^2=\frac c n$, donde $c$ es una constante positiva. Tomando círculos cada vez más pequeños, es decir, tomando límite en $n$, tenemos que $0 \leq \lambda_2(A) \leq \lim_{n\rightarrow\infty}\frac c n = 0$, obteniendo así que el área 2-dimensional de un segmento de recta es 0, tal y como cabía esperar.
-
-Para calcular la medida 1-dimensional (\textit{i.e.} la longitud) de $A$ aplicamos el mismo proceso pero en lugar de calcular la suma de las áreas podemos calcular la suma de los diámetros de los discos, es decir:
 $$
-\lambda_1(A)\leq\sum_{n\in\N}\diam(D_n),
-$$
-$$
-\lambda_1(A)=\inf\left\lbrace \sum_{n\in\N}\diam(D_n) \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace.
+\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace 
 $$
 
-Por tanto, la medida $d$-dimensional de $A$ será \footnote{Recordemos que el símbolo $\propto$ denota proporcionalidad.}
-\begin{equation}\label{ec:medida-d-dimensional}
-\lambda_d(A)\propto \inf\left\lbrace \sum_{n\in\N}\diam(D_n)^d \ | \  D_1,D_2,\dots \text{ recubren a A }\right\rbrace.
-\end{equation}
+Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una familia numerable de conjuntos $\left\lbrace U_i\right\rbrace_{i\in\N}$  tales que 
+$$
+A\subseteq\bigcup_{i\in\N} U_i, \ \ \ \ \ 0\leq\diam(U_i)\leq\varepsilon \ \ \forall i\in \N
+$$
 
-Por comodidad y simplicidad, en la práctica se usan círculos de igual radio, digamos $\varepsilon\geq 0$, y se asume que $A$ es un subconjunto compacto de $\R^2$. Llamamos $N_\varepsilon(A)$ al número de círculos de radio $\varepsilon$ necesarios para recubrir a $A$, de forma entonces que según (\ref{ec:medida-d-dimensional}) la medida $d$-dimensional de un conjunto $A\subset\R^2$ es proporcional a
-\begin{equation}
-h^d(A):= \lim_{\varepsilon\rightarrow 0} N_\varepsilon(A)\varepsilon^d
-\end{equation}
+se dice que la familia $\left\lbrace U_i\right\rbrace_{i\in\N}$ es un $\varepsilon$-recubrimiento de $A$. Si ahora tomamos un valor $s>0$, definimos
 
-Sin embargo, para poder calcular estas medidas necesitamos asegurarnos la existencia de este límite para algún valor de $d$.
+$$
+\mathcal{H}_\varepsilon^s(A):=\inf\left\lbrace\sum_{n\in\N} \diam(U_i)^s: \left\lbrace U_i\right\rbrace_{i\in\N} \text{ es un }\varepsilon\text{-recubrimiento de }A\right\rbrace
+$$
+
+Si reducimos el valor de $\epsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando posiblemente el infinito como posible valor del límite. Definimos así 
+$$
+\mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A)
+$$
+
+En \cite[Secciones 5.2 y 5.4]{alma991007022459704990} se comprueba que $\mathcal{H}^s(A)$ es una medida definida en la $\sigma$-álgebra de Borel que llamamos \textit{medida $s$-dimensional de Hausdorff} del conjunto $A$.
+
+Veamos el comportamiento de $\mathcal{H}^s(A)$ como función de $s$. Es claro que siempre que $\varepsilon < 1$, $\mathcal{H}_\varepsilon^s(A)$ decrece conforme $s$ aumenta, por tanto $\mathcal{H}^s(A)$ también es decreciente. Podemos de hecho probar el siguiente resultado.
+
+\begin{proposicion}
+  \label{prop:desigualdad}
+  Sean $A\subset \R^n$, $t>s$, $0<\varepsilon<1$ y $\{U_i\}$ un $\varepsilon$-recubrimiento de $A$. Entonces 
+  $$\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$$. 
+\end{proposicion}
+\begin{proof}
+  Sabemos que $\diam(U_i)^{t-s}\leq\varepsilon^{t-s} \ \forall i\in \N$ y del hecho de que $\sum_{i\in\N}\diam(U_i)^t=\sum_{i\in\N}\diam(U_i)^{t-s}\diam(U_i)^s$ deducimos que 
+  $$
+  \sum_{i\in\N}\diam(U_i)^t\leq\varepsilon^{t-s}\sum_{i\in\N}\diam(U_i)^{s}.
+  $$
+  Tomando el ínfimo en la anterior desigualdad tenemos que
+  $$
+  \mathcal{H}_\varepsilon^t(A)\leq\sum_{i\in\N}\diam(U_i)^t\leq\varepsilon^{t-s}\sum_{i\in\N}\diam(U_i)^{s},
+  $$
+  por lo que
+  $$\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$$
+
+\end{proof}
+
+Esta desigualdad nos será muy útil para probar el siguiente teorema que nos da la definición definitiva de lo que llamaremos dimensión de Hausdorff.
 
 \begin{teorema}
 \label{th:Hausdorff}
-Sea $A\subset \R^n$ un conjunto cerrado y acotado. Entonces existe un único valor de $d$ para el cual $h^d(A)$ no es ni $0$ ni $\infty$. Este valor $d=D_H(A)$ satisface que:
+Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathcal{H}^s(A)$ no es ni $0$ ni $\infty$. Este valor $s=D_H(A)$ satisface que:
 \begin{equation}
-h^d(A)= \left\{ \begin{array}{lcc}
-             \infty &   si  & d < D_H(A) \\
-             \\ 0 &  si & d > D_H(A) 
+\mathcal H^s(A)= \left\{ \begin{array}{lcc}
+             \infty &   si  & s < D_H(A) \\
+             \\ 0 &  si & s > D_H(A) 
              \end{array}
    \right.
 \end{equation}
 \end{teorema} 
+\begin{proof}
+  Si tomamos $0<\varepsilon<1$ y $t>s$ dos valores reales, por la proposicion \ref{prop:desigualdad} tenemos que $\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$. Por tanto, al hacer a $\varepsilon$ tender a $0$, siempre que $\mathcal{H}^s(A)$ sea finito necesariamente $\mathcal{H}^t(A)=0$. Si aplicamos el contrarrecíproco ocurre que si $\mathcal{H}^t(A)>0$ entonces $\mathcal{H}^s(A)=\infty$.
 
+  Por lo que necesariamente debe de existir un valor $s_0\in[0,\infty]$ tal que $\mathcal{H}^s(A)=0 \ \forall s<s_0$ y $\mathcal{H}^s(A)=\infty \ \forall s>s_0$.
+\end{proof}
 \begin{definicion}[Dimensión de Hausdorff]
-Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_H(A)$ del teorema \ref{th:Hausdorff}.
+Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_H(A)$ que satisface las condiciones del teorema \ref{th:Hausdorff}.
 \end{definicion}
 
 De manera natural, para objetos autosimilares los conceptos de dimensión fractal autosimilar y dimensión de Hausdorff coinciden.
