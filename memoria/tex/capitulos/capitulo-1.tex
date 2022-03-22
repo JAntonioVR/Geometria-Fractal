@@ -287,7 +287,7 @@ donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de di
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
-La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $F=\Q\cap[0,1]\subset\R$ es un conjunto en el que cada punto por separado tiene obviamente dimensión por cajas igual a 0, pero al ser $\Q$ un conjunto denso en $\R$ la dimensión por cajas de $F$ es $1$. Por tanto, no se cumple en general que para una familia $\{F_i\}$ de conjuntos $\dim_B\cup_{i=1}^\infty = \sup_i\dim_B F_i$. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
 
 Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una familia numerable de conjuntos $\left\lbrace U_i\right\rbrace_{i\in\N}$  tales que 
@@ -385,12 +385,34 @@ En $\R^2$ dotado de la topología usual consideramos un punto $p$ cualquiera y e
 En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llamémosla $r$, y el espacio topológico $X=\{r\}$. Sea $x\in X$ y $V$ un abierto de $\R^2$ que contenga a $x$, de forma que $\tilde{V} = r\cap V$ es un abierto de $X$. Podemos entonces tomar un abierto $U$ dentro de $\tilde{V}$ (un segmento abierto de recta), de forma que $x\in U\subseteq \tilde{V}$. Por otro lado, $\partial(U)=\{p,q\}$, y podemos comprobar fácilmente (con ayuda del ejemplo \ref{ej:dimension-1}) que $\dim(\partial(U))=0$. Por todo esto podemos concluir que $X=r$ es un espacio topológico de dimensión 1. 
 \end{ejemplo}
 
-A partir de esta definición, la cual notamos que solo puede tomar valores enteros, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot}.
+\subsection{Relación entre los distintos tipos de dimensión fractal}
+
+La dimensión por cajas, aunque útil en la práctica, al comienzo de la sección \ref{subsection:dim-Hausdorff} hemos comprobado que tiene algunos problemas. No obstante, para muchos fractales, y en particular para los que cumplen la \textit{condición de conjunto abierto}\footnote{Wagon, S. (2010). Mathematica in Action. Springer Publishing. p. 124}, resulta más sencillo computacionalmente calcular su dimensión por cajas frente a su dimensión de Hausdorff.
+
+En general, y como se puede comprobar en \cite[Sección 3.1]{alma991007022459704990}, ocurre que la dimensión por cajas acota superiormente a la dimensión de Hausdorff, esto es, dado $A\subset\R^n$:
+$$
+\dim_H(A)\leq\dim_{\inf} (A) \leq \dim_{\sup} (A),
+$$
+donde, insistimos, es posible que se dé la igualdad.
+
+Sobre la dimensión topológica, se tiene que si $X$ es un espacio topológico separable\footnote{Recordamos que un espacio topológico es \textit{separable} si contiene un conjunto denso numerable}, entonces
+$$
+\dim_T(X)\leq\dim_H(X).
+$$
+
+Este resultado fue originalmente probado por \textit{Edward Szpilrajn}, véase \cite[Capítulo VII]{Hurewicz-Wallman}.
+
+Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran \cite{Moran}. Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden siempre que el conjunto sea autosimilar.
+
+En conclusión, para un conjunto genérico cualquiera $A\subseteq\R^n$, se tiene que:
+
+$$
+\dim_T(A)\leq\dim_H(A)\leq\dim_{\inf}(A)\leq\dim_{\sup}(A)\leq n
+$$
+
+A partir de esta cadena de desigualdades, en la que notamos que la dimensión fractal, entendiendo por esta la dimensión de Hausdorff que es la más general, y que siempre excede o iguala a la dimensión topológica, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot} en \cite{alma991007242979704990}.
 
 \begin{definicion}[Fractal]
 \label{def:fractal}
-Un \textbf{fractal} es un subconjunto del plano que es autosimilar y cuya dimensión fractal excede a su dimensión topológica.
+Un \textbf{fractal} es un subconjunto de $\R^n$ que es autosimilar y cuya dimensión fractal excede a su dimensión topológica.
 \end{definicion}
-
-\subsection{Relación entre los distintos tipos de dimensión fractal} 
-
