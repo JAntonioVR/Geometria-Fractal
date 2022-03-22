@@ -171,7 +171,7 @@ Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en
 \subsection{Dimension fractal autosimilar}
 \label{subsection:dim-frac-autosimilar}
 
-Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 4 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(4):=4=4^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 4$ del original y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 4$ del cubo original.
+Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 4 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(4):=4=4^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 4$ del cuadrado inicial y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 4$ del cubo original.
 
 \begin{figure}[h]
 \begin{tabular}{ccc}
@@ -194,33 +194,22 @@ En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente}
 Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
 \end{definicion}
 
-De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$. 
+De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$. Esto es, en lenguaje formal, un conjunto autosimilar.
 
 \begin{definicion}[Dimensión autosimilar]
-Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$, definimos su \textbf{dimensión autosimilar} como el único valor $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
+Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$, definimos su \textbf{dimensión autosimilar} como el único valor de $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
 $$
-\dim_A(A)=\frac{\log N(k)}{\log(k)}
+d=\frac{\log N(k)}{\log(k)}
 $$
 \end{definicion}
 
 También se puede ver definida como \textit{dimensión de homotecia}. Sin embargo, antes de utilizar este concepto debemos comprobar que la definición es coherente con cualquier partición y cualquier factor de escala. Es decir, que independientemente de la división del objeto que se tome la dimensión va a ser la misma.
 
-\begin{lema}
-Sean $k_1 < k_2$ dos números naturales y un subconjunto $X$ de $\R^n$ autosimilar y que se puede dividir en $N(k_1)$ (resp. $N(k_2)$) subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac {1}{k_1}$ (resp. $\frac {1}{k_2}$). Entonces tanto $N(k_1)$ como $N(k_2)$ son potencias de un mismo número natural $N$ y tanto $\frac{1}{k_1}$ como $\frac{1}{k_2}$ son potencias de una misma razón $\frac 1 k$.
-\end{lema}
-\begin{proof}
-Si tenemos una partición con $N(k_1)$ copias reducidas del propio $X$, cada una de ellas se puede subdividir a su vez en $N(k_2)$ réplicas a escala $\frac 1{k_2}$, obteniendo así una nueva división en $N(k_1)\cdot N(k_2)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac{1}{k_1\cdot k_2}$. Como esta es una nueva partición de $X$ más fina que las anteriores, deben existir un $N,n$ tal que $N(k_1)\cdot N(k_2)=N^n$ y $k$ tal que $\frac{1}{k_1\cdot k_2}=\left(\frac{1}{k}\right)^n$. (Mejorar)
-\end{proof}
-
 \begin{proposicion}
 En un subconjunto $X$ de $\R^n$ autosimilar el valor de la dimension fractal autosimilar es el mismo independientemente de la partición que se le aplique.
 \end{proposicion}
 \begin{proof}
-Supongamos que podemos dividir $X$ en $N(k_1)$ (resp. $N(k_2)$) subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $\frac {1}{k_1}$ (resp. $\frac {1}{k_2}$). Entonces sabemos que existen $n_1, n_2, N, k\in \N$ tales que $N(k_1)=N^{n_1}, N(k_2)=N^{n_2}, \frac 1 {k_1} = \left(\frac{1}{k}\right)^{n_1}, \frac{1}{k_2} = \left(\frac{1}{k}\right)^{n_2} $, de forma que 
-$$
-d = \frac{\log N(k_1)}{\log(k_1)} = \frac{\log N^{n_1}}{\log(k^{n_1})} = \frac{n_1}{n_1} \frac{\log N}{\log k} = \frac{\log N}{\log k},
-$$
-y análogamente con la partición inducida por $k_2$, pudiendo así comprobar que la división no afecta en el valor de $d$.
+TODO
 \end{proof}
 
 \begin{wrapfigure}{l}{0cm}
@@ -232,14 +221,14 @@ Un ejemplo distinto pero clarificador podría ser el de un triángulo equiláter
 Con estos valores, tenemos que $N(k)=4=k^d=2^d$, por lo que necesariamente $d=2$ y por tanto un triángulo equilátero es un objeto 2-dimensional, lo cual tampoco nos sorprende.
 
 \begin{observacion}
-La dimensión $d$ ya no tiene por qué ser necesariamente un número entero. A esta posibilidad de tener dimensiones no enteras es a lo que llamamos \textbf{dimensión fractal autosimilar}, y lo denotamos con $D$.
+La dimensión $d$ ya no tiene por qué ser necesariamente un número entero. A esta posibilidad de tener dimensiones no enteras es a lo que llamamos \textbf{dimensión fractal autosimilar}, y lo denotamos con $\dim_A$.
 \end{observacion}
 
-Retomando ahora el triángulo de Sierpinski, sabemos que este está compuesto por 3 copias de sí mismo a escala $\frac 1 2$ (véase sección \ref{subsection:triangulo-Sierpinski}), por lo que entonces su dimensión fractal autosimilar es $D=\frac{\log 3}{\log 2} \approx 1.58496$. Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
+Retomando ahora el triángulo de Sierpinski, sabemos que este está compuesto por 3 copias de sí mismo a escala $\frac 1 2$ (véase sección \ref{subsection:triangulo-Sierpinski}), por lo que entonces su dimensión fractal autosimilar es $\dim_A(\mathbf{S})=\frac{\log 3}{\log 2} \approx 1.58496$. Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
 
-En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a escala $\frac 1 3$ (sección \ref{subsection:Cantor}), por lo que su dimensión fractal autosimilar sería $D=\frac{\log 2}{\log 3} \approx 0.63093$, que es un valor situado entre 0 y 1.
+En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a escala $\frac 1 3$ (sección \ref{subsection:Cantor}), por lo que su dimensión fractal autosimilar sería $\dim_A(\mathbf{C})=\frac{\log 2}{\log 3} \approx 0.63093$, que es un valor situado entre 0 y 1.
 
-Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $D=\frac{\log 4}{\log 3} \approx 1.26186$.
+Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $\dim_A(\mathbf{K})=\frac{\log 4}{\log 3} \approx 1.26186$.
 
 \subsection{Dimensión por cajas}
 \label{subsection:dim-cajas}
@@ -253,7 +242,7 @@ $$
 $$
 \end{definicion}
 
-Dada un conjunto $A\subset \R^n$ no vacío y acotado, sea $N_\delta(A)$ el mínimo número de conjuntos de diámetro a lo sumo $\delta$ necesario para recubrir $A$. La \textit{dimensión por cajas superior} y la \textit{dimensión por cajas inferior} se definen, respectivamente como
+Dado un conjunto $A\subset \R^n$ no vacío y acotado, sea $N_\delta(A)$ el mínimo número de conjuntos de diámetro a lo sumo $\delta$ necesario para recubrir $A$. La \textit{dimensión por cajas superior} y la \textit{dimensión por cajas inferior} se definen, respectivamente como
 
 $$
 \dim_{\inf}(A) := \liminf_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)},
@@ -295,13 +284,13 @@ $$
 A\subseteq\bigcup_{i\in\N} U_i, \ \ \ \ \ 0\leq\diam(U_i)\leq\varepsilon \ \ \forall i\in \N
 $$
 
-se dice que la familia $\left\lbrace U_i\right\rbrace_{i\in\N}$ es un $\varepsilon$-recubrimiento de $A$. Si ahora tomamos un valor $s>0$, definimos
+se dice que la familia $\left\lbrace U_i\right\rbrace_{i\in\N}$ es un $\varepsilon$-recubrimiento de $A$. Si ahora consideramos un valor $s>0$, definimos
 
 $$
 \mathcal{H}_\varepsilon^s(A):=\inf\left\lbrace\sum_{n\in\N} \diam(U_i)^s: \left\lbrace U_i\right\rbrace_{i\in\N} \text{ es un }\varepsilon\text{-recubrimiento de }A\right\rbrace
 $$
 
-Si reducimos el valor de $\epsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando posiblemente el infinito como posible valor del límite. Definimos así 
+Si reducimos el valor de $\varepsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando posiblemente el infinito como posible valor del límite. Definimos así 
 $$
 \mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A)
 $$
@@ -333,7 +322,7 @@ Esta desigualdad nos será muy útil para probar el siguiente teorema que nos da
 
 \begin{teorema}
 \label{th:Hausdorff}
-Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathcal{H}^s(A)$ no es ni $0$ ni $\infty$. Este valor $s=D_H(A)$ satisface que:
+Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathcal{H}^s(A)$ no es ni $0$ ni $\infty$. Este valor $s=\dim_H(A)$ satisface que:
 \begin{equation}
 \mathcal H^s(A)= \left\{ \begin{array}{lcc}
              \infty &   si  & s < D_H(A) \\
@@ -348,7 +337,7 @@ Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathc
   Por lo que necesariamente debe de existir un valor $s_0\in[0,\infty]$ tal que $\mathcal{H}^s(A)=0 \ \forall s<s_0$ y $\mathcal{H}^s(A)=\infty \ \forall s>s_0$.
 \end{proof}
 \begin{definicion}[Dimensión de Hausdorff]
-Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_H(A)$ que satisface las condiciones del teorema \ref{th:Hausdorff}.
+Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $\dim_H(A)$ que satisface las condiciones del teorema \ref{th:Hausdorff}.
 \end{definicion}
 
 \subsection{Dimensión topológica}
@@ -356,12 +345,12 @@ Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_
 Por último estudiaremos un concepto de dimensión aplicable a espacios topológicos. La \textbf{dimensión topológica} se define inductivamente de la siguiente forma:
 
 \begin{enumerate}
-\item La dimensión del conjunto vacío es $\dim(\emptyset):=-1$.
-\item Un espacio topológico $X$ tiene dimensión 0 ($\dim(X)=0$) si para cualquier $x\in V$ con $V$ abierto en $X$ existe un abierto $U$ cuya frontera $\partial(U)$ es vacía y se verifica que $x\in U\subseteq V$.
+\item La dimensión del conjunto vacío es $\dim_T(\emptyset):=-1$.
+\item Un espacio topológico $X$ tiene dimensión 0 ($\dim_T(X)=0$) si para cualquier $x\in V$ con $V$ abierto en $X$ existe un abierto $U$ cuya frontera $\partial(U)$ es vacía y se verifica que $x\in U\subseteq V$.
 
-\item Un espacio topológico $X$ tiene dimensión menor o igual que $n$ ($\dim(X)\leq n$) si para cualquier $x\in X$ y cualquier $V$ abierto que contiene a $x$ existe un abierto $U$ tal que $\dim(\partial(U))\leq n-1$ y se verifica que $x\in U\subseteq V$. 
+\item Un espacio topológico $X$ tiene dimensión menor o igual que $n$ ($\dim_T(X)\leq n$) si para cualquier $x\in X$ y cualquier $V$ abierto que contiene a $x$ existe un abierto $U$ tal que $\dim_T(\partial(U))\leq n-1$ y se verifica que $x\in U\subseteq V$. 
 
-\item $X$ tiene dimensión $n$ ($\dim(X)=n$) si se verifica que $\dim(X)\leq n$ pero es falso que $\dim(X)\leq n-1$
+\item $X$ tiene dimensión $n$ ($\dim_T(X)=n$) si se verifica que $\dim_T(X)\leq n$ pero es falso que $\dim_T(X)\leq n-1$
 \end{enumerate}
 
 \begin{figure}[h]
@@ -382,7 +371,7 @@ En $\R^2$ dotado de la topología usual consideramos un punto $p$ cualquiera y e
 
 \begin{ejemplo}
 (Véase imagen \ref{fig:ejemplos} (b))
-En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llamémosla $r$, y el espacio topológico $X=\{r\}$. Sea $x\in X$ y $V$ un abierto de $\R^2$ que contenga a $x$, de forma que $\tilde{V} = r\cap V$ es un abierto de $X$. Podemos entonces tomar un abierto $U$ dentro de $\tilde{V}$ (un segmento abierto de recta), de forma que $x\in U\subseteq \tilde{V}$. Por otro lado, $\partial(U)=\{p,q\}$, y podemos comprobar fácilmente (con ayuda del ejemplo \ref{ej:dimension-1}) que $\dim(\partial(U))=0$. Por todo esto podemos concluir que $X=r$ es un espacio topológico de dimensión 1. 
+En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llamémosla $r$, y el espacio topológico $X=\{r\}$. Sea $x\in X$ y $V$ un abierto de $\R^2$ que contenga a $x$, de forma que $\tilde{V} = r\cap V$ es un abierto de $X$. Podemos entonces tomar un abierto $U$ dentro de $\tilde{V}$ (un segmento abierto de recta), de forma que $x\in U\subseteq \tilde{V}$. Por otro lado, $\partial(U)=\{p,q\}$, y podemos comprobar fácilmente (con ayuda del ejemplo \ref{ej:dimension-1}) que $\dim_T(\partial(U))=0$. Por todo esto podemos concluir que $X=r$ es un espacio topológico de dimensión 1. 
 \end{ejemplo}
 
 \subsection{Relación entre los distintos tipos de dimensión fractal}
@@ -404,10 +393,10 @@ Este resultado fue originalmente probado por \textit{Edward Szpilrajn}, véase \
 
 Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran \cite{Moran}. Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden siempre que el conjunto sea autosimilar.
 
-En conclusión, para un conjunto genérico cualquiera $A\subseteq\R^n$, se tiene que:
+En conclusión, para un conjunto no vacío y acotado $A\subseteq\R^n$, se tiene que:
 
 $$
-\dim_T(A)\leq\dim_H(A)\leq\dim_{\inf}(A)\leq\dim_{\sup}(A)\leq n
+\dim_T(A)\leq\dim_H(A)\leq\dim_B(A)\leq n
 $$
 
 A partir de esta cadena de desigualdades, en la que notamos que la dimensión fractal, entendiendo por esta la dimensión de Hausdorff que es la más general, y que siempre excede o iguala a la dimensión topológica, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot} en \cite{alma991007242979704990}.
