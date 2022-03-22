@@ -244,29 +244,51 @@ Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a e
 \subsection{Dimensión por cajas}
 \label{subsection:dim-cajas}
 
-El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos el concepto de dimensión por cajas.
+El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos un nuevo concepto de dimensión. Previamente definimos un término necesario en las futuras definiciones.
 
-Dada una figura o conjunto $A\subset \R^2$, lo recubrimos con una cuadrícula en la que todos los cuadrados son iguales, de longitud $\delta$. A estos cuadrados los llamamos \textit{cajas}. Contamos los cuadrados necesarios para recubrir la figura, obteniendo el número $N_\delta(A)$, que es dependiente de la longitud de los cuadrados. Si disminuimos el valor $\delta$ obtendríamos un número posiblemente distinto y más óptimo de cuadrados necesarios para recubrir la figura. Notemos que este proceso de hecho se puede generalizar a tres dimensiones si usamos cubos de lado $\delta$ en lugar de cuadrados.
-
-\begin{definicion}[Dimensión por cajas]
-Se define la \textbf{dimensión por cajas} de un subconjunto $A\subset \R^2$, denotada por $D(A)$ como:
-
-\begin{equation}\label{eq:dim-cajas}
-D(A)=\lim_{\delta\rightarrow\infty}\frac{\log N_\delta(A)}{\log(1/\delta)},
-\end{equation}
-siempre que exista dicho límite.
+\begin{definicion}
+Dado un subconjunto $U$ de $\R^n$, definimos su \textit{diámetro} como:
+$$
+\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace 
+$$
 \end{definicion}
+
+Dada un conjunto $A\subset \R^n$ no vacío y acotado, sea $N_\delta(A)$ el mínimo número de conjuntos de diámetro a lo sumo $\delta$ necesario para recubrir $A$. La \textit{dimensión por cajas superior} y la \textit{dimensión por cajas inferior} se definen, respectivamente como
+
+$$
+\dim_{\inf}(A) := \liminf_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)},
+$$
+$$
+\dim_{\sup}(A) := \limsup_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)}.
+$$
+
+En caso de coincidir, se denomina \textit{dimensión por cajas} de $A$ al valor 
+\begin{equation}
+  \label{eq:dim-cajas}
+  \dim_{B}(A) := \lim_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)}.
+\end{equation}
+
+También es conocida en literatura como \textit{dimensión por conteo de cajas} o \textit{dimensión de Minkowski-Bouligand}.
+
+Hay varias definiciones equivalentes, generalmente más sencillas de utilizar. Por ejemplo, si tomamos en $\R^n$ una cuadrícula de lado $\delta$, \textit{i.e.}, de la forma
+$$
+[m_1 \delta, (m_1+1)\delta]\times\cdots\times[m_n \delta, (m_n+1)\delta]
+$$
+donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
+
+\begin{figure}[h]
+\begin{tabular}{cc}
+\includegraphics[scale=0.17]{./img/cajas-grandes.png} &   \includegraphics[scale=0.17]{./img/cajas-peques.png} \\
+\end{tabular}
+\caption{Una forma de calcular la dimensión por cajas de la curva de Koch}
+\label{fig:dim-cajas}
+\end{figure}
 
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
 La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $\Q\times\Q\subset\R^2$ es un conjunto denso pero numerable, su dimensión debería ser 0. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
-Dado un subconjunto $U$ de $\R^n$, definimos su diámetro como:
-
-$$
-\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace 
-$$
 
 Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una familia numerable de conjuntos $\left\lbrace U_i\right\rbrace_{i\in\N}$  tales que 
 $$
@@ -329,9 +351,6 @@ Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathc
 Llamamos \textbf{dimensión de Hausdorff} de un conjunto $A$ al único valor $D_H(A)$ que satisface las condiciones del teorema \ref{th:Hausdorff}.
 \end{definicion}
 
-De manera natural, para objetos autosimilares los conceptos de dimensión fractal autosimilar y dimensión de Hausdorff coinciden.
-
-
 \subsection{Dimensión topológica}
 
 Por último estudiaremos un concepto de dimensión aplicable a espacios topológicos. La \textbf{dimensión topológica} se define inductivamente de la siguiente forma:
@@ -372,3 +391,6 @@ A partir de esta definición, la cual notamos que solo puede tomar valores enter
 \label{def:fractal}
 Un \textbf{fractal} es un subconjunto del plano que es autosimilar y cuya dimensión fractal excede a su dimensión topológica.
 \end{definicion}
+
+\subsection{Relación entre los distintos tipos de dimensión fractal} 
+
