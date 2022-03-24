@@ -245,11 +245,12 @@ $$
 Dado un conjunto $A\subset \R^n$ no vacío y acotado, sea $N_\delta(A)$ el mínimo número de conjuntos de diámetro a lo sumo $\delta$ necesario para recubrir $A$. La \textit{dimensión por cajas superior} y la \textit{dimensión por cajas inferior} se definen, respectivamente como
 
 $$
-\dim_{\inf}(A) := \liminf_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)},
+\diminf(A) := \liminf_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)},
 $$
 $$
-\dim_{\sup}(A) := \limsup_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)}.
+\dimsup(A) := \limsup_{\delta\rightarrow 0}\frac{\log(N_\delta(A))}{\log(1/\delta)}.\footnote{Nótese la analogía con la notación de los límites superior e inferior como $\varliminf$ y $\varlimsup$. }
 $$
+
 
 En caso de coincidir, se denomina \textit{dimensión por cajas} de $A$ al valor 
 \begin{equation}
@@ -380,7 +381,7 @@ La dimensión por cajas, aunque útil en la práctica, al comienzo de la secció
 
 En general, y como se puede comprobar en \cite[Sección 3.1]{alma991007022459704990}, ocurre que la dimensión por cajas acota superiormente a la dimensión de Hausdorff, esto es, dado $A\subset\R^n$:
 $$
-\dim_H(A)\leq\dim_{\inf} (A) \leq \dim_{\sup} (A),
+\dim_H(A)\leq\diminf (A) \leq \dimsup (A),
 $$
 donde, insistimos, es posible que se dé la igualdad.
 
