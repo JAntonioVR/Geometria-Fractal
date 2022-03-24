@@ -1,0 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Capítulo 2: Iteración
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. La evolución de este procedimiento es a lo que llamamos un \textbf{sistema dinámico}, y aplicar esta metodología sobre ciertos lugares del plano y sobre ciertas funciones comlejas $f:\C\longrightarrow\C$ es lo que nos proporcionará bellas imágenes fractales.
+
+\section{Iteración en }
+\begin{definicion}
+    Consideramos una función $f:\R\longrightarrow\R$ y un punto $x\in\R$. La aplicación sucesiva de $f$ a $x$ - \textit{i.e.} $x,f(x),f(f(x)), f(f(f(x))),\dots$ produce las \textit{iteradas} de la función $f$ en el punto $x$. Al conjunto de dichas iteradas se le denomina \textit{órbita} $O_f(x)$ de $f$ en $x$.
+    $$
+    O_f(x):=\left\lbrace x, f(x), f^2(x), \dots, f^n(x), \dots\right\rbrace.
+    $$
+    donde $f^n$ denota a $f\circ f^{n-1}$
+\end{definicion}
+
+Naturalmente este concepto se puede extender a funciones complejas $f:\C\longrightarrow\C$ y puntos $z\in\C$.
