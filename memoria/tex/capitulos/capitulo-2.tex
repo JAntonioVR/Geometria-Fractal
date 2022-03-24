@@ -120,8 +120,9 @@ comenzando por un punto $z_0$ cercano a la raíz. Es decir, calcula la sucesión
 Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayor que 1, existen varias soluciones distintas, pero el método de Newton converge sólo a una de ellas. Nuestro objetivo ahora se sitúa en discernir, para cada punto $z_0$ del plano, a qué solución de la ecuación $f(z)=0$ converge la sucesión $\{z_n\}$ dada por el método de Newton utilizando a $z_0$ como semilla. En las siguientes secciones veremos algunos ejemplos de esta distinción y su utilidad, llegando a las primeras imágenes fractales generadas por iteración.
 
 \subsection{Caso $z^2-1$}
+\label{subsection:cuencas-1}
 
-Consideramos la función compleja $f:\C\longrightarrow\C$ dada por $f(z)=z^2-1$, la cual tiene dos raíces: $1$ y $-1$, las dos raíces cuadradas de 1. Una forma sencilla de comprobar a qué raíz converge cada sucesión utilizando como semilla cada $z_0\in\C$ es asociando un color a cada punto del plano dependiendo de la raíz a la que converja y pidiendo a \textit{Mathematica} que coloree el plano complejo siguiendo este criterio:
+Consideramos la función compleja $f:\C\longrightarrow\C$ dada por $f(z)=z^2-1$, la cual tiene dos raíces: $1$ y $-1$, las dos raíces cuadradas de 1. Una forma sencilla de comprobar a qué raíz converge cada sucesión utilizando como semilla cada $z_0\in\C$ es asociando un color a cada punto del plano dependiendo de la raíz a la que converja y pidiendo a \textit{Mathematica} que coloree el plano complejo siguiendo este criterio.
 
 \begin{verbatim}
 In[]:= iteracionN = #2 - #1[#2]/Derivative[1][#1][#2] &;
@@ -140,7 +141,7 @@ In[]:= DensityPlot[newtonArgumento[x + I*y], {x, -2, 2}, {y, -2, 2},
     \label{fig:cuencas-1}
 \end{figure}
 
-Produciendo como resultado la imagen \ref{fig:cuencas-1}. Como podemos ver, y teniendo en cuenta que la imagen solo grafica el intervalo $[-2,2]\times[-2,2]$ y un número finito de puntos\footnote{El número de puntos que se grafica se puede parametrizar con el argumento opcional PlotPoints| de las funciones |Plot|. A mayor valor mayor calidad de imagen y resolución, pero mayor tiempo de ejecución.} la sucesión cuya semilla es un punto perteneciente al semiplano abierto de la derecha converge a la raíz $1$. Por otro lado, si la sucesión comienza con un complejo del semiplano abierto de la izquierda, entonces esta converge a la raíz $-1$. Apoyándonos en este ejemplo, definimos el siguiente concepto.
+Produciendo como resultado la imagen \ref{fig:cuencas-1}. La forma de deducir a qué raíz converge cada sucesión consiste en evaluar los argumentos de los valores a los que se acerca la sucesión. Como podemos ver, y teniendo en cuenta que la imagen solo grafica el intervalo $[-2,2]\times[-2,2]$ y un número finito de puntos\footnote{El número de puntos que se grafica se puede parametrizar con el argumento opcional ``PlotPoints'' de las funciones ``Plot''. A mayor valor mayor calidad de imagen y resolución, pero mayor tiempo de ejecución.} la sucesión cuya semilla es un punto perteneciente al semiplano abierto de la derecha converge a la raíz $1$. Por otro lado, si la sucesión comienza con un complejo del semiplano abierto de la izquierda, entonces esta converge a la raíz $-1$. Apoyándonos en este ejemplo, definimos el siguiente concepto.
 
 \begin{definicion}[Cuenca de atracción]
     Definimos como \textit{cuenca de atracción} de una raíz $a\in\C$ de una función compleja $f:\C\longrightarrow\C$ (\textit{i.e.} $f(a)=0$), y denotamos como $A(a)$ al conjunto de puntos $z_0\in\C$ tales que la sucesión $\{z_n\}$ dada por $z_{n+1}=N_f(z_n)$ converge a $a$ utilizando a $z_0$ como primer valor de la sucesión. 
@@ -153,6 +154,21 @@ $$
 $$
 A(1)=\{z\in\C:\operatorname{Re} z>0\}
 $$
-y sin embargo los puntos del eje $Y$ no convergen a ninguna de las raíces, siendo esta por tanto la frontera entre las dos cuencas de atracción. 
+y sin embargo los puntos del eje $Y$ no convergen a ninguna de las raíces, siendo esta por tanto la frontera entre las dos cuencas de atracción y el conjunto invariante para $N_f$.
+
+\subsection{Caso $z^3-1$}
+
+Consideremos ahora la función compleja $f:\C\longrightarrow\C$ definida como $f(z)=z^3-1$, cuyas raíces son las raíces cúbicas de 1, es decir: $1, -\frac{1}{2}+\frac{\sqrt{3}}{2}i$ y $-\frac{1}{2}-\frac{\sqrt{3}}{2}i$. De nuevo seguimos la estrategia que hemos tomado en la sección \ref{subsection:cuencas-1}, dividir en píxeles una región del plano complejo y colorear dichos píxeles según distintos colores dependiendo de cuál sea su cuenca de atracción. De esta forma, cada cuenca de atracción será caracterizada por un único color. \textit{Mathematica} permite personalizar la función de color que se utiliza en estos gráficos, de forma que no solo es posible asociar un color, sino una tonalidad de gris mediante el uso del argumento \verb|ColorFunction|, asociandole el valor ``Rainbow", ``Graylevel", o personalizando nosotros mismos la función de coloreado, como veremos más adelante.
+
+\begin{figure}[h]
+    \begin{tabular}{cc}
+      \includegraphics[scale=0.5]{./img/cuencas-2.png} &   \includegraphics[scale=0.5]{./img/cuencas-3.png} \\
+    (a) De colores & (b) En escala de grises \\[6pt]
+    \end{tabular}
+    \caption{Cuencas de atracción de $f(z)=z^3-1$}
+    \label{fig:cuencas-2}
+\end{figure}
+
+El resultado de este cálculo es el que se representa en la imagen \ref{fig:cuencas-2}, que es realmente el mismo con coloreado distinto. En estas imágenes podemos ahora sí ver el primer ejemplo de estructura fractal producido por la iteración.
 
 
