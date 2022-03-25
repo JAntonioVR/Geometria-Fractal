@@ -169,6 +169,37 @@ Consideremos ahora la función compleja $f:\C\longrightarrow\C$ definida como $f
     \label{fig:cuencas-2}
 \end{figure}
 
-El resultado de este cálculo es el que se representa en la imagen \ref{fig:cuencas-2}, que es realmente el mismo con coloreado distinto. En estas imágenes podemos ahora sí ver el primer ejemplo de estructura fractal producido por la iteración.
+El resultado de este cálculo es el que se representa en la imagen \ref{fig:cuencas-2}, que es realmente el mismo con coloreado distinto. En estas imágenes podemos ahora sí ver el primer ejemplo de estructura fractal producido por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes.
 
+Otra posibilidad para representar estas imágenes es, en lugar de asociar un color a cada número complejo según la cuenca de atracción a la que perteneciente, evaluar la velocidad de convergencia, es decir, las iteraciones necesarias hasta alcanzar la raíz en cuestión. A partir de esa velocidad de convergencia asignamos un color más o menos intenso. El código necesario se muestra a continuación y el resultado en la imagen \ref{fig:cuencas-velocidad}.
 
+\begin{verbatim}
+newtonVelocidad = 
+  Compile[{{z, _Complex}}, 
+    Length[FixedPointList[iteracionN[f, #] &, z, 50]]];
+
+DensityPlot[newtonVelocidad[x + I*y], {x, -2, 2}, {y, -2, 2}, 
+  PlotPoints -> 200, Mesh -> False, ColorFunction -> GrayLevel]
+\end{verbatim}
+
+\begin{figure} [h]
+\centering
+\includegraphics[scale = 0.5]{img/cuencas-velocidad.png}
+\caption{Evaluación de la velocidad de convergencia a las raíces.}
+    \label{fig:cuencas-velocidad}
+\end{figure}
+
+Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, es decir, representamos una región más pequeña, encontramos estructuras que son iguales independientemente del zoom que se aplique. En la figura \ref{fig:detalles} podemos ver distintos detalles de la figura \ref{fig:cuencas-velocidad}, cada una es una ampliación de la anterior, y podemos ver como esa estructura se repite en todas las escalas.
+
+\newpage
+
+\begin{figure}[h]
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.33]{./img/detalle-1.png} &   \includegraphics[scale=0.33]{./img/detalle-2.png} &   \includegraphics[scale=0.33]{./img/detalle-3.png} \\
+    (a) $[-1,0]\times[-0.5,0.5]$ & (b) $[-0.6,-0.4]\times[0.1,0.3]$ & (c) $[-0.5,-0.47]\times[0.215,0.245]$ \\[6pt]
+    \end{tabular}
+    \caption{Diferentes regiones ampliadas de la figura \ref{fig:cuencas-velocidad}}
+    \label{fig:detalles}
+\end{figure}
+
+De manera natural, podemos aplicar esta misma teoría a cualquier otro tipo de funciones, como por ejemplo $z^n-1 (n\in\N\backslash\{0,1\})$, o incluso no polinómicas como $z^3-3^z$ o $z^2-2^z-1$.
