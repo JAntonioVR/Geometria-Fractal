@@ -2,7 +2,7 @@
 %% Capítulo 2: Iteración
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. La evolución de este procedimiento es a lo que llamamos un \textbf{sistema dinámico}, y aplicar esta metodología sobre ciertos lugares del plano y sobre ciertas funciones comlejas $f:\C\longrightarrow\C$ es lo que nos proporcionará bellas imágenes fractales.
+Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. La evolución de este procedimiento es a lo que llamamos un \textbf{sistema dinámico}, y aplicar esta metodología sobre ciertos lugares del plano y sobre ciertas funciones complejas $f:\C\longrightarrow\C$ es lo que nos proporcionará bellas imágenes fractales.
 
 \section{Iteración en $\R$}
 \begin{definicion}
@@ -40,7 +40,7 @@ Como se puede observar, en cada iteración se acerca cada vez más a $1$, lo cua
 
 Para ilustrar de forma sencilla las distintas posibilidades nos ayudaremos de la función $f:\R\longrightarrow\R^+$ definida como $f(x)=x^2$. Es claro que si $|x|>1$ entonces $O_f(x)\rightarrow\infty$, es decir, diverge. Si $|x|<1$ se tiene que $O_f(x)\rightarrow 0$, por lo tanto converge a $0$. Por último, en caso de que $x=-1$ ó $x=1$ tenemos $O_f(x)=\{1\}$ en ambos casos, por lo que lógicamente convergen a $1$.
 
-En este caso, y debido a la simplicidad de la función, hemos podido clasificar la órbita de todos los puntos de $\R$, pudiendo decir que todas las órbitas son \textit{predecibles}. Pensemos ahora en la función $g:\R\longrightarrow\R$ definida como $g(x)=-x^3$. De nuevo, si $|x|<1$ la órbita converge a 0 y si $|x|>1$ la órbita diverge, aunque este caso lo hagan cambiando ocasionalmente el signo. Sin embargo, en $x=-1$ y en $x=1$ ocurre un suceso distinto.
+En este caso, y debido a la simplicidad de la función, hemos podido clasificar la órbita de todos los puntos de $\R$, pudiendo decir que todas las órbitas son \textit{predecibles}. Pensemos ahora en la función $g:\R\longrightarrow\R$ definida como $g(x)=-x^3$. De nuevo, si $|x|<1$ la órbita converge a 0 y si $|x|>1$ la órbita diverge, aunque este caso lo hagan intercalando el signo. Sin embargo, en $x=-1$ y en $x=1$ ocurre un suceso distinto.
 $$
 O_g(1) = \{-1,1,-1,1,\dots\}
 $$
@@ -63,7 +63,7 @@ Esta vez la órbita no sigue ningún patrón predecible, y además se puede comp
 
 \subsection{Velocidad de convergencia}
 
-En estos casos, han sido suficientes 20 iteraciones para conocer el comportamiento de la órbita a largo plazo, pero interesa saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. En general, este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
+En estos casos, han sido suficientes 20 iteraciones para conocer el comportamiento de la órbita a largo plazo, pero interesa saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
     \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/FixedPointList.html}}.
@@ -108,7 +108,7 @@ De hecho, para la función $f(z)=z^2$ se tiene que la órbita de todo $z$ con m�
 
 \section{El método de Newton y cuencas de atracción}
 
-La iteración es la base de muchos métodos numéricos, entre los que en este caso destacamos el `método de Newton', el cual fue inicialmente descrito por \textit{Isaac Newton} en su libro \textit{De analysi per aequationes numero terminorum infinitas}. Este es un procedimiento muy útil y utilizado en la resolución de ecuaciones, tomando una ecuación como el punto en el que se anula una función $f:\R\longrightarrow\R$, aunque gracias al trabajo de \textit{Arthur Cayley} sabemos que es posible generalizarlo a los números complejos.
+La iteración es la base de muchos métodos numéricos, entre los que en este caso destacamos el `método de Newton', el cual fue inicialmente descrito por \textit{Isaac Newton} en su libro \textit{De analysi per aequationes numero terminorum infinitas}. Este es un procedimiento muy útil y utilizado en la resolución numérica de ecuaciones, tratando buscar con cierta precisión el punto en el que se anula una función $f:\R\longrightarrow\R$, aunque gracias al trabajo de \textit{Arthur Cayley} sabemos que es posible generalizarlo a los números complejos.
 
 Recordemos que dada una ecuación $f(z)=0$ para cierta función compleja y derivable $f:\C\longrightarrow\C$, el método de Newton itera la función
 \begin{equation}
@@ -117,7 +117,7 @@ Recordemos que dada una ecuación $f(z)=0$ para cierta función compleja y deriv
 \end{equation} 
 comenzando por un punto $z_0$ cercano a la raíz. Es decir, calcula la sucesión $\{z_n\}$ definida como $z_{n+1}=N_f(z_n) \ \forall n\in\N$, la cual converge a un punto $a\in\C$ que verifica $f(a)=0$.
 
-Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayor que 1, existen varias soluciones distintas, pero el método de Newton converge sólo a una de ellas. Nuestro objetivo ahora se sitúa en discernir, para cada punto $z_0$ del plano, a qué solución de la ecuación $f(z)=0$ converge la sucesión $\{z_n\}$ dada por el método de Newton utilizando a $z_0$ como semilla. En las siguientes secciones veremos algunos ejemplos de esta distinción y su utilidad, llegando a las primeras imágenes fractales generadas por iteración.
+Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayor que 1, existen varias soluciones distintas, pero el método de Newton converge sólo a una de ellas, dependiendo de qué $z_0$ fijemos. Nuestro objetivo ahora se sitúa en discernir, para cada punto $z_0$ del plano, a qué solución de la ecuación $f(z)=0$ converge la sucesión $\{z_n\}$ dada por el método de Newton utilizando a $z_0$ como semilla. En las siguientes secciones veremos algunos ejemplos de esta distinción y su utilidad, llegando a las primeras imágenes fractales generadas por iteración.
 
 \subsection{Caso $z^2-1$}
 \label{subsection:cuencas-1}
@@ -169,7 +169,7 @@ Consideremos ahora la función compleja $f:\C\longrightarrow\C$ definida como $f
     \label{fig:cuencas-2}
 \end{figure}
 
-El resultado de este cálculo es el que se representa en la imagen \ref{fig:cuencas-2}, que es realmente el mismo con coloreado distinto. En estas imágenes podemos ahora sí ver el primer ejemplo de estructura fractal producido por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes.
+El resultado de este cálculo es el que se representa en las imagenes \ref{fig:cuencas-2}, que son realmente la misma con coloreado distinto. En estas imágenes podemos ahora sí ver el primer ejemplo de estructura fractal producido por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes.
 
 Otra posibilidad para representar estas imágenes es, en lugar de asociar un color a cada número complejo según la cuenca de atracción a la que perteneciente, evaluar la velocidad de convergencia, es decir, las iteraciones necesarias hasta alcanzar la raíz en cuestión. A partir de esa velocidad de convergencia asignamos un color más o menos intenso. El código necesario se muestra a continuación y el resultado en la imagen \ref{fig:cuencas-velocidad}.
 
@@ -211,16 +211,11 @@ De manera natural, podemos aplicar esta misma teoría a cualquier otro tipo de f
     \begin{tabular}{cc}
     \includegraphics[scale=0.5]{./img/cuencas-4.png} &   \includegraphics[scale=0.375]{./img/cuencas-5.png} \\
     (a) Función $z^6-1$ & (b) Función $z^3-3^z$ \\[6pt]
-    \includegraphics[scale=0.45]{./img/cuencas-6.png} &   \includegraphics[scale=0.36]{./img/cuencas-7.png} \\
-    (a) Función $z^6-1$ & (b) Función $z^3-3^z$ \\
-    %\multicolumn{2}{c}{\includegraphics[scale=0.45]{./img/cuencas-6.png}} \\
-    %\multicolumn{2}{c}{(c) Función $z^2-2^z-1$} \\
-    %\multicolumn{2}{c}{\includegraphics[scale=0.40]{./img/cuencas-7.png}} \\
-    %\multicolumn{2}{c}{(d) Función $z^5 - z^3 + z^2 - 4$} \\ 
+    \multicolumn{2}{c}{\includegraphics[scale=0.45]{./img/cuencas-6.png}} \\
+    \multicolumn{2}{c}{(c) Función $z^2-2^z-1$} \\
+    \multicolumn{2}{c}{\includegraphics[scale=0.40]{./img/cuencas-7.png}} \\
+    \multicolumn{2}{c}{(d) Función $z^5 - z^3 + z^2 - 4$} \\ 
     \end{tabular}
     \caption{Representaciones de cuencas de atracción de distintas funciones.}
     \label{fig:imagenes-finales}
 \end{figure}
-
-
-
