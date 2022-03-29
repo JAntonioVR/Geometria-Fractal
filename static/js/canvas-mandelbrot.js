@@ -32,6 +32,9 @@ function main(){
     deslizadorExp.value = theScene.getOrder();
     document.querySelector("#valorExponente").innerHTML = theScene.getOrder();
     deslizadorExp.addEventListener('input', (event) => changeExponente(event), true);
+
+    const botonReset = document.querySelector("#botonReset");
+    botonReset.onclick = resetParameters;
     
     theScene.drawScene();
     
@@ -100,5 +103,24 @@ function changeFractal(){
   const fractales = document.querySelector("#fractales")
   var selected = parseInt(fractales.value);
   theScene.setFractal(selected);
+  theScene.drawScene();
+}
+
+function resetParameters(){
+  theScene.setInitialParameters();
+
+  document.querySelector("#nIteraciones").value = theScene.getMaxIterations();
+  document.querySelector("#valorNIteraciones").innerHTML = theScene.getMaxIterations()
+  
+  document.querySelector("#juliaX").value = theScene.getJuliaConstantX();
+  document.querySelector("#valorJuliaX").innerHTML = theScene.getJuliaConstantX()
+
+  document.querySelector("#juliaY").value = theScene.getJuliaConstantY();
+  document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstantY()
+  
+  document.querySelector("#exponente").value = theScene.getOrder();
+  document.querySelector("#valorExponente").innerHTML = theScene.getOrder()
+  
+  document.querySelector("#fractales").value = theScene.getFractal();
   theScene.drawScene();
 }

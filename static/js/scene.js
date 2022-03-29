@@ -42,6 +42,18 @@ class Scene {
       order: 2,
       fractal: 0
     };
+
+    const initialParameters = JSON.parse(JSON.stringify(this.parameters));
+
+    /*const initialParameters = Object.assign({}, this.parameters);
+
+    initialParameters.zoomCenter[0] = this.parameters.zoomCenter[0];
+    initialParameters.zoomCenter[1] = this.parameters.zoomCenter[1];
+    initialParameters.juliaSetConstant[0] = -0.12;
+    initialParameters.juliaSetConstant[1] = 0.75;*/
+    this.initialParameters = initialParameters;
+
+    /*console.log(initialParameters)*/
   }
 
   initShaderProgram(vsSource, fsSource) {
@@ -213,6 +225,10 @@ class Scene {
 
   getFractal() {
     return this.parameters.fractal;
+  }
+
+  setInitialParameters() {
+    this.parameters = JSON.parse(JSON.stringify(this.initialParameters));
   }
 
   checkGLError(){
