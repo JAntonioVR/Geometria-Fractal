@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <title>WebGL-Canvas</title>
+        <meta charset="UTF-8">
         <script type="module"  src="static/js/canvas-mandelbrot.js"></script>
         <link rel="stylesheet" href="static/css/style.css">
         <!-- MathJax para las expresiones matemáticas -->
@@ -11,55 +12,68 @@
         <!-- TODO MORE -->
     </head>
     <body>
-        <!--<canvas id="glCanvas" width="640" height="480"></canvas>-->
-        <div id="glCanvas-wrapper">
-        <canvas id="glCanvas"  width="720" height="720"></canvas>
-        </div>
-        <div id="numIteraciones-wrapper">
-        <div class="deslizador" id="numIteraciones">
-            <div>
-            <b>Número de iteraciones: </b>
+        <header>
+                <h1>Visualización de fractales en 2D</h1>
+        </header>
+        <main>
+            <canvas id="glCanvas"  width="720" height="720"></canvas>
+        </main>
+        <aside>
+            <h3>Controles:</h3>
+            <ul>
+                <li>Teclas +/-: Ampliar o reducir el zoom</li>
+                <li>Flechas: Desplazarse por el plano</li>
+                <li>Rueda del ratón: Ampliar o reducir el zoom</li>
+            </ul>
+            <div class="deslizador" id="numIteraciones">
+                <div>
+                <b>Número de iteraciones:</b>
+                </div>
+                <div>
+                <input id="nIteraciones" type="range" min="10" max="1000" step="5">
+                </div>
+                <div id="valorNIteraciones"></div>
+            </div><br>
+            <div class="fractal">
+            <b>¿Qué fractal quieres ver?</b>
+                <select id="fractales">
+                    <option value="0">Mandelbrot</option>
+                    <option value="1">Julia</option>
+                </select>
+            </div><br>
+            <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
+            <div class="deslizador" id="deslizadorJuliaX">
+                <div>
+                <b>x:</b>
+                </div>
+                <div>
+                <input id="juliaX" type="range" min="-2" max="2" step="0.01">
+                </div>
+                <div id="valorJuliaX"></div>
             </div>
-            <div>
-            <input id="nIteraciones" type="range" min="10" max="1000" step="5">
+            <div class="deslizador" id="deslizadorJuliaY">
+                <div>
+                <b>y:</b>
+                </div>
+                <div>
+                <input id="juliaY" type="range" min="-2" max="2" step="0.01">
+                </div>
+                <div id="valorJuliaY"></div>
+            </div><br>
+            <b>Exponente n de la función</b> \(f(z) = z^n + c\)
+            <div class="deslizador" id="deslizadorExponente">
+                <div>
+                <b>n:</b>
+                </div>
+                <div>
+                <input id="exponente" type="range" min="1" max="10" step="1">
+                </div>
+                <div id="valorExponente"></div>
             </div>
-            <div id="valorNIteraciones"></div>
-        </div>
-        <div class="fractal">
-        ¿Qué fractal quieres ver?
-            <select id="fractales">
-                <option value="0">Mandelbrot</option>
-                <option value="1">Julia</option>
-            </select>
-        </div>
-        Constante del Conjunto de Julia \(c = x + i\cdot y\)
-        <div class="deslizador" id="deslizadorJuliaX">
-            <div>
-            <b>x:</b>
-            </div>
-            <div>
-            <input id="juliaX" type="range" min="-2" max="2" step="0.01">
-            </div>
-            <div id="valorJuliaX"></div>
-        </div>
-        <div class="deslizador" id="deslizadorJuliaY">
-            <div>
-            <b>y:</b>
-            </div>
-            <div>
-            <input id="juliaY" type="range" min="-2" max="2" step="0.01">
-            </div>
-            <div id="valorJuliaY"></div>
-        </div>
-        Exponente n de la función \(f(z) = z^n + c\)
-        <div class="deslizador" id="deslizadorExponente">
-            <div>
-            <b>n:</b>
-            </div>
-            <div>
-            <input id="exponente" type="range" min="1" max="10" step="1">
-            </div>
-            <div id="valorExponente"></div>
-        </div>
+
+        </aside>
+        <footer>
+            &copy Juan Antonio Villegas Recio
+        </footer>
     </body>
 </html>
