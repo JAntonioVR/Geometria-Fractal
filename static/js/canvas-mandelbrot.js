@@ -8,7 +8,6 @@ var theScene = new Scene(vsSource, fsSource);
 function main(){
 
     document.addEventListener("keydown", (event) => onKeyDown(event), true );
-    document.addEventListener("wheel", (event) => onWheel(event), true );
 
     const fractal = document.querySelector("#fractales");
     fractal.selectedIndex = 0;
@@ -72,17 +71,6 @@ function onKeyDown(event) {
     }
     theScene.drawScene();
 }
-
-function onWheel(event) {
-    let delta = event.deltaY;
-    if (delta > 0) {    // Down -> Zoom Out
-      theScene.zoomOut();
-    } 
-    else {              // Up -> Zoom In
-      theScene.zoomIn();
-    }
-    theScene.drawScene();
-  }
 
 function changeMaxIterations(event){
     document.querySelector("#valorNIteraciones").innerHTML = event.target.value;
