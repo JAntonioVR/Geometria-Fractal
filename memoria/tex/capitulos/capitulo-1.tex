@@ -19,19 +19,21 @@ Observemos que el romanescu, que es un tipo de coliflor, pareciera que está for
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
-\begin{definicion}[Autosimilaridad] Una figura o subconjunto $A$ de $\R^n$ es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala. Es decir,
+\begin{definicion}[Autosimilaridad] Una figura o subconjunto $A$ de $\R^n$ es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala y desplazadas por un movimiento rígido. Es decir,
 $$
-A = \bigcup_{i=1}^n h_i(A),
+A = \bigcup_{i=1}^n f_i\circ h_i(A),
 $$
-donde cada $h_i, i=1,\dots,n$ es una homotecia de razón menor que 1. 
+donde cada $h_i, i=1,\dots,n$ es una homotecia de razón menor que 1 y $f_i, i=1,\dots,n$ es un movimiento rígido. 
 \end{definicion}
 
-En futuras ocasiones se utilizarán indistintamente los términos de <<reducción por un factor de escala>> e <<imagen vía una homotecia>>, queriendo en ambos casos referirnos a este concepto.
+En futuras ocasiones se utilizarán indistintamente los términos de <<reducción por un factor de escala>> e <<imagen vía una homotecia>>, evidenciando el movimiento rígido y queriendo en ambos casos referirnos a este concepto.
 
-Para afianzar y formalizar conceptos y con el objetivo de introducir un concepto de dimensión, estudiaremos algunos ejemplos clásicos de objetos fractales.
+Para afianzar y formalizar conceptos y con el objetivo de introducir una definición de la dimensión, estudiaremos algunos ejemplos clásicos de objetos fractales.
 
 \section{Ejemplos clásicos}
 \label{section:ejemplos}
+
+En adelante, y salvo que se indique lo contrario, cuando hablemos en términos topológicos de $\R^n$ o subconjuntos suyos nos estaremos refiriendo al espacio topológico $\R^n$ dotado de la topología usual o la topología inducida por la usual en el caso de subconjuntos de $\R^n$.
 
 \subsection{El conjunto de Cantor}
 \label{subsection:Cantor}
