@@ -67,10 +67,60 @@ donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $\su
 
 Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
 
+\subsection{El triángulo de Sierpinski}
+\label{subsection:triangulo-Sierpinski} 
+
+Esta figura, original del polaco \textit{Waclaw Sierpinski}, es creada de una manera que evoca al conjunto de Cantor, pero en dos dimensiones. Veamos detalladamente el proceso (ver imagen \ref{fig:triangulo-Sierpinski}):
+
+\begin{enumerate}
+\item Se parte de un triángulo equilátero de lado 1 (de nuevo la longitud inicial es irrelevante). Uniendo los puntos medios de cada lado obtenemos una partición del triángulo inicial en 4 triángulos equiláteros, del cual extraemos el interior del triángulo central. Tenemos por tanto $3=3^1$ triángulos a escala $\frac 1 2 = \left(\frac 1 2\right)^1$ del original.
+
+\item En cada uno de estos tres triángulos equiláteros se repite la operación anterior, obteniendo por tanto $9=3^2$ triángulos, cada uno a escala $\frac 1 4 = \left(\frac 1 2\right)^2$ del original.
+
+\item Repetimos este proceso indefinidamente, de forma que en el paso $n$-ésimo se tienen $3^n$ triángulos, cada uno de ellos a escala $\left(\frac 1 2\right)^n$ del original.
+\end{enumerate}
+
+La figura a la que converge este proceso infinito se conoce como triángulo \textbf{S} de Sierpinski.
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.6]{img/Sierpinski-triangle.png}
+\caption{Generación del triángulo de Sierpinski}
+ \label{fig:triangulo-Sierpinski}
+\end{figure}
+
+Si llamamos $A$ al área del triángulo inicial, sabemos que en la primera iteración eliminamos un área de $\frac 1 4 A$, en el segundo eliminamos $3 \left(\frac 1 4\right)^2 A$ y en el $n$-ésimo $3^{n-1}\left(\frac 1 4\right)^n A$, de forma que si sumamos todo el área que eliminamos en cada paso obtenemos:
+$$
+A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A,
+$$
+
+En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área es 0 y aún así tenemos puntos (por ejemplo los vértices de los triángulos que se van generando). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
+
+\subsection{La alfombra de Sierpinski y la esponja de Menger}
+\label{subsection:alfombra-esponja}
+
+El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden obtener otras formas. Por ejemplo, pensemos que en lugar de comenzar con un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.6]{img/Sierpinski-carpet.png}
+\caption{Generación de la alfombra de Sierpinski}
+ \label{fig:alfombra-Sierpinski}
+\end{figure}
+
+Este proceso también se puede modelar en 3D, obteniendo así la conocida como esponja de Menger o cubo de Magritte, que es una generalización en tres dimensiones de la alfombra de Sierpinski, la cual podemos ver en la imagen \ref{fig:esponja-menger}.
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.6]{img/esponja_menger.png}
+\caption{Esponja de Menger}
+ \label{fig:esponja-menger}
+\end{figure}
+
 \subsection{La curva de Koch}
 \label{subsection:curva-Koch}
 
-Esta figura, creada por el sueco \textit{N. F. Helge von Koch} sigue un proceso de construcción iterativo al igual que el conjunto de Cantor, pero en lugar de eliminar segmentos, se añaden de la siguiente manera (ver imagen \ref{fig:curva-Koch})
+Esta figura fractal, creada por el sueco \textit{N. F. Helge von Koch} sigue un proceso de construcción iterativo al igual que el conjunto de Cantor, pero en lugar de eliminar segmentos, se añaden de la siguiente manera (ver imagen \ref{fig:curva-Koch}):
 
 \begin{enumerate}
 \item Partiendo de un segmento de recta de longitud $1$ (al igual que en el conjunto de Cantor, la longitud del segmento inicial es irrelevante, pues la figura final es la misma salvo homotecia), se divide en tres partes iguales de longitud $\frac 1 3$ y la parte central se sustituye por un triángulo equilátero al que se le elimina la base. Esto da lugar a $4=4^1$ segmentos de recta de longitud $\frac 1 3=\left(\frac 1 3\right)^1$.
@@ -111,55 +161,6 @@ Esta curva posee la particularidad de tener longitud infinita y a su vez encerra
 \label{fig:copo-Koch-colores}
 \end{figure}
 
-\subsection{El triángulo de Sierpinski}
-\label{subsection:triangulo-Sierpinski} 
-
-Esta figura, original del polaco \textit{Waclaw Sierpinski}, es creada de una manera que evoca al conjunto de Cantor, pero en dos dimensiones. Veamos detalladamente el proceso (ver imagen \ref{fig:triangulo-Sierpinski}):
-
-\begin{enumerate}
-\item Se parte de un triángulo equilátero de lado 1 (de nuevo la longitud inicial es irrelevante). Uniendo los puntos medios de cada lado obtenemos una partición del triángulo inicial en 4 triángulos equiláteros, del cual extraemos el interior del triángulo central. Tenemos por tanto $3=3^1$ triángulos a escala $\frac 1 2 = \left(\frac 1 2\right)^1$ del original.
-
-\item En cada uno de estos tres triángulos equiláteros se repite la operación anterior, obteniendo por tanto $9=3^2$ triángulos, cada uno a escala $\frac 1 4 = \left(\frac 1 2\right)^2$ del original.
-
-\item Repetimos este proceso indefinidamente, de forma que en el paso $n$-ésimo se tienen $3^n$ triángulos, cada uno de ellos a escala $\left(\frac 1 2\right)^n$ del original.
-\end{enumerate}
-
-La figura a la que converge este proceso infinito se conoce como triángulo \textbf{S} de Sierpinski.
-
-\begin{figure} [ht]
-\centering
-\includegraphics[scale = 0.6]{img/Sierpinski-triangle.png}
-\caption{Generación del triángulo de Sierpinski}
- \label{fig:triangulo-Sierpinski}
-\end{figure}
-
-Si llamamos $A$ al área del triángulo inicial, sabemos que en la primera iteración eliminamos un área de $\frac 1 4 A$, en el segundo eliminamos $3 \left(\frac 1 4\right)^2 A$ y en el $n$-ésimo $3^{n-1}\left(\frac 1 4\right)^n A$, de forma que si sumamos todo el área que eliminamos en cada paso obtenemos:
-$$
-A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A,
-$$
-
-En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total y aún así tenemos puntos (por ejemplo los vértices de los triángulos que se van generando). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
-
-\subsection{La alfombra de Sierpinski y la esponja de Menger}
-\label{subsection:alfombra-esponja}
-
-El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden obtener otras formas. Por ejemplo, pensemos que en lugar de comenzar con un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
-
-\begin{figure} [ht]
-\centering
-\includegraphics[scale = 0.6]{img/Sierpinski-carpet.png}
-\caption{Generación de la alfombra de Sierpinski}
- \label{fig:alfombra-Sierpinski}
-\end{figure}
-
-Este proceso también se puede modelar en 3D, obteniendo así la conocida como esponja de Menger o cubo de Magritte, que es una generalización en tres dimensiones de la alfombra de Sierpinski, la cual podemos ver en la imagen \ref{fig:esponja-menger}.
-
-\begin{figure} [ht]
-\centering
-\includegraphics[scale = 0.6]{img/esponja_menger.png}
-\caption{Esponja de Menger}
- \label{fig:esponja-menger}
-\end{figure}
 
 \section{Conceptos de dimensión fractal}
 \label{section:dimension}
