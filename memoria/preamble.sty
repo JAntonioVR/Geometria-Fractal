@@ -1,0 +1,45 @@
+\ProvidesPackage{preamble}
+
+\usepackage[a4paper, tmargin=2.54cm, bmargin=2.54cm, lmargin=3.17cm, rmargin=3.17cm]{geometry}
+\newcommand{\head}[1]{\textnormal{\textbf{#1}}}
+
+\usepackage{titlesec}    % Remove the text 'Chapter' from each chapter.
+\titleformat{\chapter}{\normalfont\huge\bf}{\thechapter}{20pt}{\huge\bf}
+
+\title{Master's thesis Health Informatics \the\year}
+\author{authors}
+\setcounter{tocdepth}{3}
+
+% PARA EVITAR LA DIVISIÓN SILÁBICA
+\pretolerance=10000
+\tolerance=10000
+
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[spanish, es-tabla]{babel}
+
+%\usepackage{helvet}
+
+\usepackage{amsthm, amssymb}
+\usepackage{amsmath}
+\newtheorem{teorema}{Teorema}[section]
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}[section]
+\newtheorem{observacion}{Observación}[section]
+\newtheorem{ejemplo}{Ejemplo}[section]
+\newtheorem{proposicion}{Proposición}[section]
+\newtheorem{lema}{Lema}[section]
+
+\newcommand{\diam}[0]{\mathrm{diam}}
+\newcommand{\diminf}[0]{\underline{\dim}_B}
+\newcommand{\dimsup}[0]{\overline{\dim}_B}
+
+%MORE PACKAGES HERE
+\newcommand{\R}[0]{\mathbb{R}}
+\newcommand{\C}[0]{\mathbb{C}}
+\newcommand{\N}[0]{\mathbb{N}}
+\newcommand{\Z}[0]{\mathbb{Z}}
+\newcommand{\Q}[0]{\mathbb{Q}}
