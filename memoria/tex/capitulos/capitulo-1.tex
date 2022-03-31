@@ -6,16 +6,16 @@
 
 Las primeras preguntas que se pueden plantear son ¿qué es un fractal? ¿Qué tienen de especial estas figuras? ¿Qué las diferencia de un objeto no fractal? ¿Por qué es necesaria una geometría fractal? Trataremos de responder a cada una de estas preguntas a lo largo de este capítulo, comenzando por la primera de ellas. En realidad, hay distintas definiciones de \textit{fractal}, pero todas utilizan dos conceptos como base: la \textbf{autosimilaridad} y la \textbf{dimensión}. La primera de ellas es más cercana para nosotros de lo que en un principio podemos pensar, fijémonos en los ejemplos de la imagen \ref{fig:objetos}. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
-  \includegraphics[scale=0.24]{./img/romanescu.jpg} &   \includegraphics[scale=0.28]{./img/helecho.jpg} \\
-(a) Romanescu & (b) Hoja de un helecho \\[6pt]
+  \includegraphics[scale=0.225]{./img/romanescu.jpg} &   \includegraphics[scale=0.2]{./img/rayo.jpg} \\
+(a) Romanescu & (b) Rayo \\[6pt]
 \end{tabular}
-\caption{Objetos cotidianos con estructura fractal}
+\caption{Objetos de la naturaleza con estructura fractal}
 \label{fig:objetos}
 \end{figure}
 
-Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos que recuerdan al original, y así sucesivamente. Por su parte, la hoja de un helecho también pareciera estar formada por muchas hojas más pequeñas similares a la original, y estas pequeñas hojas a su vez también están formadas por otras hojas aún más pequeñas.
+Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos que recuerdan al original, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras ramificaciones, formando pequeños rayos similares al original.
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
@@ -48,7 +48,7 @@ Creado por el célebre matemático \textit{George Cantor}, este fractal se const
 
 Los puntos del intervalo inicial $[0,1]$ que restan tras las infinitas iteraciones son los que conforman el \textit{conjunto de Cantor}, que denotamos con $\mathbf{C}$, de forma que $\mathbf{C}=\bigcap_{n\in\N}C_n$.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.4]{img/cantor.png}
 \caption{Iteraciones del proceso de generación del conjunto de Cantor}
@@ -80,7 +80,7 @@ Esta figura, creada por el sueco \textit{N. F. Helge von Koch} sigue un proceso 
 
 El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que denotamos como \textbf{K}.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.5]{img/curva-Koch.png}
 \caption{Iteraciones del proceso de generación de la curva de Koch}
@@ -93,7 +93,7 @@ El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que
 A partir de la curva de Koch podemos generar un objeto matemático muy particular: el copo de nieve de Koch. Para crearlo, basta aplicar el proceso iterativo descrito para generar la curva de Koch a cada uno de los segmentos que componen un triángulo equilátero, de forma que los triángulos que se generan apunten hacia el exterior.
 
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/copo-Koch.png}
 \caption{Generación del copo de nieve de Koch}
@@ -102,7 +102,7 @@ A partir de la curva de Koch podemos generar un objeto matemático muy particula
 
 Esta curva posee la particularidad de tener longitud infinita y a su vez encerrar un área finita. Realmente el copo de Koch no es exactamente un fractal, pues no es totalmente autosimilar, aunque se compone de tres partes idénticas las cuales sí son autosimilares, como podemos ver en la imagen \ref{fig:copo-Koch-colores}.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.2]{img/copo-Koch-colores.png}
 \caption{Curvas de Koch que componen el copo de Koch}
@@ -124,7 +124,7 @@ Esta figura, original del polaco \textit{Waclaw Sierpinski}, es creada de una ma
 
 La figura a la que converge este proceso infinito se conoce como triángulo \textbf{S} de Sierpinski.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/Sierpinski-triangle.png}
 \caption{Generación del triángulo de Sierpinski}
@@ -143,7 +143,7 @@ En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de
 
 El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden obtener otras formas. Por ejemplo, pensemos que en lugar de comenzar con un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/Sierpinski-carpet.png}
 \caption{Generación de la alfombra de Sierpinski}
@@ -152,7 +152,7 @@ El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para gener
 
 Este proceso también se puede modelar en 3D, obteniendo así la conocida como esponja de Menger o cubo de Magritte, que es una generalización en tres dimensiones de la alfombra de Sierpinski, la cual podemos ver en la imagen \ref{fig:esponja-menger}.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/esponja_menger.png}
 \caption{Esponja de Menger}
@@ -173,7 +173,7 @@ Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en
 
 Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 4 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(4):=4=4^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 4$ del cuadrado inicial y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 4$ del cubo original.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{ccc}
   \includegraphics[scale=0.15]{./img/linea-dividida.png} &   \includegraphics[scale=0.15]{./img/cuadrado-dividido.png} & \includegraphics[scale=0.2]{./img/cubo-dividido.png}\\
 (a) Segmento dividido en 4 & (b) Cuadrado dividido en 16 & (c) Cubo dividido en 64 \\[4pt]
@@ -266,7 +266,7 @@ $$
 $$
 donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
 \includegraphics[scale=0.17]{./img/cajas-grandes.png} &   \includegraphics[scale=0.17]{./img/cajas-peques.png} \\
 \end{tabular}
@@ -354,7 +354,7 @@ Por último estudiaremos un concepto de dimensión aplicable a espacios topológ
 \item $X$ tiene dimensión $n$ ($\dim_T(X)=n$) si se verifica que $\dim_T(X)\leq n$ pero es falso que $\dim_T(X)\leq n-1$
 \end{enumerate}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
 \includegraphics[scale=0.5]{./img/ejemplo-dimension-1.png} &   \includegraphics[scale=0.45]{./img/ejemplo-dimension-2.png} \\
 (a) Ejemplo con $X=\{p\}$ & (b) Ejemplo con $X=r$ \\[6pt]
