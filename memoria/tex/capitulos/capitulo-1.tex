@@ -167,9 +167,21 @@ Esta curva posee la particularidad de tener longitud infinita y a su vez encerra
 
 Al iniciar este capítulo mencionamos que las distintas definiciones de fractal utilizaban los conceptos de autosimilaridad y dimensión. Con los distintos ejemplos hemos entendido el primero de ellos, por lo que es momento de abordar el concepto de dimensión. 
 
-Intuitivamente, sabemos que una recta o un segmento de recta es de dimensión 1, pues sólo nos podemos mover en una dirección: de derecha a izquierda (el movimiento se describe con un único parámetro). Según este razonamiento y de acuerdo con la intuición un conjunto de puntos aislados es un conjunto de dimensión 0, pues no existe movilidad. Un cuadrado es de dimensión 2, ya que nos podemos mover de izquierda a derecha o de arriba a abajo (el movimiento se describe con dos parámetros: largo y ancho). Un cubo es de dimensión 3 porque en él nos podemos mover de derecha a izquierda, de arriba a abajo o de más a menos profundidad (el movimiento se describe con tres parámetros: altura, anchura y profundidad). 
+El concepto de dimensión más clara que tenemos es el de dimensión algebraica, esto es, la dimensión de un espacio vectorial. Sabemos que un espacio vectorial $V$ se dice que tiene $\dim(V)=n$, con $n\in\N$ si, y solo si existe una base de $V$ constituida por $n$ vectores, de forma que cualquier elemento de $V$ puede ser expresado como una combinación lineal de los $n$ vectores de la base. Otra manera de ver esto es que para construir los vectores de $V$ tenemos hasta $n$ parámetros de libertad, esto es, $v=a_1 v_1 +\cdots a_n v_n \ \ \forall v\in V$, donde $\{v_1,\dots,v_n\}$ es una base de $V$ y $a_1,\dots,a_n\in K$ siendo $K$ el cuerpo sobre el que está construido el espacio vectorial.
 
-Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
+En el caso de subconjuntos de $R^n$ como puede ser una curva parametrizada, si seguimos la analogía del número de parámetros que define un punto en este caso de una curva, podemos decir que su dimensión es $1$, ya que un punto de una curva parametrizada puede expresarse en función de un único parámetro. La variación de este parámetro nos daría otro punto de la curva, por lo que podemos decir que un punto puede moverse por la curva con un grado de libertad (ver imagen \ref{fig:curva-superficie} (a)). Por su lado, una superficie regular de $\R^3$ puede localmente ser expresada como la imagen de una parametrización que depende de dos variables y la variación de estas mediante dicha parametrización resulta en otro punto de la superficie, pudiendo expresar esto como que un punto de una superficie regular tiene dos grados de libertad, lo que intuitivamente permite afirmar que una superficie regular tiene dimensión $2$ (ver imagen \ref{fig:curva-superficie} (b)).
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{cc}
+  \includegraphics[scale=0.3]{./img/circunferencia.png} &   \includegraphics[scale=0.5]{./img/esfera.png} \\
+(a) En una curva de $\R^2$ & (b) En una superficie de $\R^3$ \\[4pt]
+\end{tabular}
+\caption{Posible movimiento de un punto en posibles objetos de $\R^n$}
+\label{fig:curva-superficie}
+\end{figure}
+
+Un posible enfoque para definir la dimensión puede ser el recién presentado, el cual nos sugiere pensar en el número de parámetros que definen la libertad de movimiento de un punto. Sin embargo, pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
 
 \subsection{Dimension fractal autosimilar}
 \label{subsection:dim-frac-autosimilar}
