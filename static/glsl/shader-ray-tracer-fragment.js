@@ -1,7 +1,6 @@
 import { glsl } from './glsl.js';
 
 const fsSource = glsl`
-
 //
 // ─── FRAGMENT SHADER DEL RAY TRACER ─────────────────────────────────────────────
 //    
@@ -94,26 +93,70 @@ Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_
     bool hit_anything = false;
     float closest_t = t_max;
     for(int i = 0; i < ARRAY_TAM; i++){
+        if(i == size) break;
         tmp = hit_sphere(spheres[i], R, t_min, closest_t);
         if(tmp.hit){
             hit_anything = true;
             closest_t = tmp.t;
             result = tmp;
         }
-        if(i == size-1) break;
     }
     return result;
 }
 
-vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size) {
+// A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the normal vector
+// that defines the plane.
+
+struct Plane{
+    vec3 normal;    // Normal vector to the plane
+    float D;        // Independent term
+};
+
+Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
+    Hit_record result;
+    float oc = dot(P.normal, R.dir);
+    if(oc == 0.0){
+        result.hit = false;
+        return result;
+    }
+    float t = (P.D - dot(P.normal, R.orig))/oc;
+    if (t < t_min || t > t_max)
+        result.hit = false;
+    else{
+        result.hit = true;
+        result.t = t;
+        result.p = ray_at(R, result.t);
+        result.normal = P.normal;
+    }
+    return result;
+}
+
+vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
     Sphere S;
     S.center = vec3(0.0,0.0,-1.0);
     S.radius = 0.5;
-    Hit_record hr = hit_spheres_list(world, size, r, 0.0, 100.0);
+    float t_closest = 100000.0;
+    vec3 tmp_color;
+    Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
+        t_closest = hr.t;
         vec3 N = hr.normal;
-        return 0.5*vec3(N.x+1.0, N.y+1.0, N.z+1.0);
+        tmp_color = 0.5*vec3(N.x+1.0, N.y+1.0, N.z+1.0);
     }
+    hr = hit_plane(P, r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        vec3 p = hr.p;
+        int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+        int modulus = sum - (2*int(sum/2));
+        if(modulus == 0)
+            tmp_color = vec3(1.0, 1.0, 1.0);
+        else
+            tmp_color = vec3(0.0,0.0,0.0);
+    }
+
+    if(t_closest < 10000.0) return tmp_color;
+
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return (1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0);
@@ -126,12 +169,16 @@ void main() {
     int image_height = int(float(image_width) / aspect_ratio);
 
     // World
-    int size = 2;
+    int size = 1;
     Sphere world[ARRAY_TAM];
     Sphere S1, S2;
     S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5;
     S2.center = vec3(0.0, -100.5, -1.0); S2.radius = 100.0;
     world[0] = S1; world[1] = S2;
+
+    Plane P;
+    P.normal = vec3(0.0, 1.0, 0.0);
+    P.D = -1.0;
 
     // Camera
 
@@ -153,7 +200,7 @@ void main() {
     r.orig = origin;
     r.dir = lower_left_corner + u*horizontal + v*vertical - origin;
 
-    gl_FragColor = vec4(ray_color(r, world, size),1.0);
+    gl_FragColor = vec4(ray_color(r, world, size, P), 1.0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
