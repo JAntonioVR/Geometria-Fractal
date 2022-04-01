@@ -28,7 +28,7 @@ Out[10]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
 
 Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. Nuestro objetivo ahora es poder conocer el comportamiento de la órbita de una función y un punto dados. 
 
-\subsection{Tipos de convergencia}
+\subsection{Convergencia a un punto fijo}
 
 Fijémonos que en el ejemplo anterior si en lugar de tomar $z_0=0.9$ hubiésemos tomado cualquier valor con $|z_0|<1$ la convergencia habría sido igualmente a $0$, pues elevamos al cuadrado cada vez números más pequeños. Justo al contrario ocurre si $|z_0|>1$, en cuyo caso la sucesión diverge. Por último, en caso de que $|z_0|=1$, esto es, $z_0\in S^1$, la sucesión $\{f^n(z_0)\}$ nunca saldrá de $S^1$, siendo este el conjunto que delimita la frontera entre el conjunto de puntos cuya sucesión converge o diverge. En particular, $f^n(-1)=f^n(1)=1\ \ \forall n\in\N$, por lo que $z=1$ es un punto fijo de $f$, es decir, $f(z)=z$. 
 
@@ -59,14 +59,11 @@ Nos interesa particularmente saber qué sucesiones de iteradas convergen y a qu�
     Para probar la unicidad, suponemos que $y\in X$ es otro punto fijo de $f$, por lo que $d(x,y) = d(f(x),f(y))\leq K d(x,y)$. Tomando el primero y el tercer miembro de la desigualdad deducimos que $(1-K)d(x,y)\leq 0$, luego $d(x,y)=0$.
 \end{proof}
 
-Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos cerrados, es completo, nos permite asegurar convergencia de las sucesiones $f^n(x_0)$ a un punto fijo para cualquier $x_0$.
-
-
-
+Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos cerrados, es completo, nos permite asegurar convergencia de las sucesiones $f^n(x_0)$ a un punto fijo para cualquier $x_0$ siempre que dicha función sea contractiva.
 
 \subsection{Velocidad de convergencia}
 
-En estos casos, han sido suficientes 20 iteraciones para conocer el comportamiento de la órbita a largo plazo, pero interesa saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
+En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
     \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/FixedPointList.html}}.
