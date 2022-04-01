@@ -2,64 +2,67 @@
 %% Capítulo 2: Iteración
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. La evolución de este procedimiento es a lo que llamamos un \textbf{sistema dinámico}, y aplicar esta metodología sobre ciertos lugares del plano y sobre ciertas funciones complejas $f:\C\longrightarrow\C$ es lo que nos proporcionará bellas imágenes fractales.
+Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. Este procedimiento es muy útil en muchas disciplinas matemáticas. Por ejemplo, existen métodos numéricos basados en la iteración como el método de \textit{Jacobi} y \textit{Gauss-Seidel} para resolución de sistemas de ecuaciones lineales, el método de \textit{Newton-Raphson} para encontrar soluciones de ecuaciones, el método de \textit{Runge-Kutta} para resolución numérica de ecuaciones diferenciales, etc. Incluso en otras disciplinas como el aprendizaje automático los algoritmos de \textit{K-Means} para ``clustering'' o los métodos de generación de árboles de decisión en problemas de clasificación hacen uso de procesos iterativos. Esta metodología aplicada sobre el plano complejo y sobre ciertas funciones complejas será la que nos proporcionará nuestros primeros ejemplos de imágenes fractales.
 
-\section{Iteración en $\R$}
+\section{Iteración de funciones}
 \begin{definicion}
-    Consideramos una función $f:\R\longrightarrow\R$ y un punto $x\in\R$. La aplicación sucesiva de $f$ a $x$ -- \textit{i.e.} $x,f(x),f(f(x)), f(f(f(x))),\dots$ -- produce las \textit{iteradas} de la función $f$ en el punto $x$. Al conjunto de dichas iteradas se le denomina \textit{órbita} $O_f(x)$ de $f$ en $x$.
+    Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.} $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textit{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textit{órbita} $O_f(z)$ de $f$ en $z$.
     $$
-    O_f(x):=\left\lbrace x, f(x), f^2(x), \dots, f^n(x), \dots\right\rbrace.
+    O_f(z):=\left\lbrace z, f(z), f^2(z), \dots, f^n(z), \dots\right\rbrace.
     $$
     donde $f^n$ denota a $f\circ f^{n-1}$.
 \end{definicion}
 
-Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(x)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1). El comando \verb|NestList[f,x,n]| itera una función \verb|f|, comenzando en el punto \verb|x| \verb|n| veces y devuelve una lista con los \verb|n| valores. 
+Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1)\footnote{Los códigos completos que generan cada una de las imágenes que se observan en este documento se pueden encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Iteracion-y-Fractales}}. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
+
+Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 
 \begin{verbatim}
-In[]:= NestList[f, a, 5]
-
-Out[]= {a, f[a], f[f[a]], f[f[f[a]]], f[f[f[f[a]]]], 
-        f[f[f[f[f[a]]]]]}
-\end{verbatim}
-
-Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(x):=\sqrt{x}$ comenzando por $x_0=0.175$.
-
-\begin{verbatim}
-In[]:= f[x_] = Sqrt[x];
-    NestList[f, 0.175, 20]
+In[]:= f[z_] = z^2;
+    NestList[f, 0.9, 10]
     
-Out[]= {0.175, 0.41833, 0.646784, 0.804229, 0.896788, 0.946989, 
-    0.973134, 0.986475, 0.993215, 0.996602, 0.998299, 0.999149, 
-    0.999575, 0.999787, 0.999894, 0.999947, 0.999973, 0.999987, 
-    0.999993, 0.999997, 0.999998}
+Out[10]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
+    0.00117902, 1.39008*10^-6, 1.93233*10^-12, 3.73392*10^-24, 
+    1.39421*10^-47}
 \end{verbatim}
 
-Como se puede observar, en cada iteración se acerca cada vez más a $1$, lo cual denotamos con $O_f(0.175)\rightarrow 1$. Nuestro objetivo ahora es poder conocer el comportamiento de la órbita de una función y un punto dados. 
+Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. Nuestro objetivo ahora es poder conocer el comportamiento de la órbita de una función y un punto dados. 
 
 \subsection{Tipos de convergencia}
 
-Para ilustrar de forma sencilla las distintas posibilidades nos ayudaremos de la función $f:\R\longrightarrow\R^+$ definida como $f(x)=x^2$. Es claro que si $|x|>1$ entonces $O_f(x)\rightarrow\infty$, es decir, diverge. Si $|x|<1$ se tiene que $O_f(x)\rightarrow 0$, por lo tanto converge a $0$. Por último, en caso de que $x=-1$ ó $x=1$ tenemos $O_f(x)=\{1\}$ en ambos casos, por lo que lógicamente convergen a $1$.
+Fijémonos que en el ejemplo anterior si en lugar de tomar $z_0=0.9$ hubiésemos tomado cualquier valor con $|z_0|<1$ la convergencia habría sido igualmente a $0$, pues elevamos al cuadrado cada vez números más pequeños. Justo al contrario ocurre si $|z_0|>1$, en cuyo caso la sucesión diverge. Por último, en caso de que $|z_0|=1$, esto es, $z_0\in S^1$, la sucesión $\{f^n(z_0)\}$ nunca saldrá de $S^1$, siendo este el conjunto que delimita la frontera entre el conjunto de puntos cuya sucesión converge o diverge. En particular, $f^n(-1)=f^n(1)=1\ \ \forall n\in\N$, por lo que $z=1$ es un punto fijo de $f$, es decir, $f(z)=z$. 
 
-En este caso, y debido a la simplicidad de la función, hemos podido clasificar la órbita de todos los puntos de $\R$, pudiendo decir que todas las órbitas son \textit{predecibles}. Pensemos ahora en la función $g:\R\longrightarrow\R$ definida como $g(x)=-x^3$. De nuevo, si $|x|<1$ la órbita converge a 0 y si $|x|>1$ la órbita diverge, aunque este caso lo hagan intercalando el signo. Sin embargo, en $x=-1$ y en $x=1$ ocurre un suceso distinto.
-$$
-O_g(1) = \{-1,1,-1,1,\dots\}
-$$
-$$
-O_g(-1) = \{1,-1,1,-1,\dots\}
-$$
-Los valores $1$ y $-1$ se van alternando. Esto es, la órbita no es convergente, ni divergente, sino cíclica, concretamente de período 2. A este caso se le denomina \textbf{órbita periódica}. Aunque este caso sea distinto, aún es predecible, podemos saber cómo se comportará la órbita en el infinito. Pero veamos ahora un último ejemplo distinto, con la función $h:\R\longrightarrow\R$ definida como $h(x)=4x(1-x)$ en el punto $x=0.3$:
+Nos interesa particularmente saber qué sucesiones de iteradas convergen y a qué elemento convergen. En este sentido \textit{Stephan Banach} demostró uno de los resultados más útiles y vigentes del análisis funcional:
 
-\begin{verbatim}
-In[]:= h[x_] = 4 x (1 - x);
-    NestList[h, 0.3, 20]
+\begin{teorema}[Punto fijo de Banach]
+    Sea $X$ un espacio métrico completo y $f:X\longrightarrow X$ una aplicación contractiva. Entonces $f$ tiene un único punto fijo. Además, la sucesión de iteradas $\{f^n(x_0)\}$ converge a dicho punto fijo para cualquier $x_0\in X$. 
+\end{teorema}
+\begin{proof}
+    Probaremos primero la existencia:
 
-Out[]= {0.3, 0.84, 0.5376, 0.994345, 0.0224922, 0.0879454, 
-    0.320844, 0.871612, 0.447617, 0.989024, 0.0434219, 
-    0.166146, 0.554165, 0.988265, 0.0463905, 0.176954, 
-    0.582565, 0.972732, 0.106097, 0.379361, 0.941785}
-\end{verbatim}
+    Sea $x_0\in X$ y sea la sucesión de iteradas $\{x_n\}=\{f^n(x_0)\}$. Por ser $f$ contractiva, llamamos $K<1$ a su constante de Lipschitz. Probaremos por inducción que $d(x_n,x_{n+1})\leq K^n d(x_0,x_1) \ \ \forall n\in\N$.
+    El caso base es cierto pues $d(x_1,x_2)=d(f(x_0),f(x_1))\leq K d(x_0,x_1)$. Si suponemos que la hipótesis es cierta para cierto $n$, tenemos que
+    $$
+    d(x_{n+1},x_{n+2})=d(f(x_n),f(x_{n+1}))\leq K d(x_n,x_{n+1})\leq K^{n+1}d(x_0,x_1).
+    $$
+    Ahora, para $n,r\in\N$:
+    \begin{eqnarray*}
+        d(x_n,x_{n+r}) & \leq & \sum_{j=0}^{r-1}d(x_{n+j},x_{n+j+1}) \leq d(x_1,x_0)\sum_{j=0}^{r-1}K^{n+j} \leq K^n d(x_0,x_1)\sum_{j=0}^{\infty} K^j \\
+        & = & \frac{d(x_0,x_1)K^n}{1-K}.
+    \end{eqnarray*}
+    Dado $\varepsilon>0$, como $\{K^n\}\rightarrow 0$, existe un $m\in\N$ tal que para $n>m$ se tiene que $d(x_0,x_1)K^n<\varepsilon(1-K)$. Si ahora tomamos dos naturales $p,q\geq m$ con $p<q$, aplicando la desigualdad anterior tomando $n=p$ y $r=q-p$ obtenemos que:
+    $$
+    d(x_p,x_q) = d(x_n, x_{n+r}) \leq \frac{d(x_0,x_1)K^n}{1-K} < \varepsilon
+    $$
+    de donde deducimos que $\{x_n\}$ es una sucesión de Cauchy, y como $X$ es completo, tenemos que $\{x_{n+1}\}=\{f(x_n)\}=\{f^n(x_0)\}\rightarrow x\in X$. Pero $f$ es continua, por lo que si $\{x_n\}\rightarrow x$, necesariamente $\{f(x_n)\}\rightarrow f(x)$, por lo que $f(x)=x$.
 
-Esta vez la órbita no sigue ningún patrón predecible, y además se puede comprobar que es muy sensible a las condiciones iniciales. A esto le llamamos un comportamiento \textbf{caótico}.
+    Para probar la unicidad, suponemos que $y\in X$ es otro punto fijo de $f$, por lo que $d(x,y) = d(f(x),f(y))\leq K d(x,y)$. Tomando el primero y el tercer miembro de la desigualdad deducimos que $(1-K)d(x,y)\leq 0$, luego $d(x,y)=0$.
+\end{proof}
+
+Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos cerrados, es completo, nos permite asegurar convergencia de las sucesiones $f^n(x_0)$ a un punto fijo para cualquier $x_0$.
+
+
+
 
 \subsection{Velocidad de convergencia}
 
