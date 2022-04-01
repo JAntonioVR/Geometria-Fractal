@@ -15,7 +15,7 @@ Las primeras preguntas que se pueden plantear son ¿qué es un fractal? ¿Qué t
 \label{fig:objetos}
 \end{figure}
 
-Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos que recuerdan al original, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras ramificaciones, formando pequeños rayos similares al original.
+Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos similares al objeto inicial, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras divisiones, formando pequeños rayos semejantes al rayo primitivo.
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
@@ -65,7 +65,7 @@ $$
 $$
 donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $\sum_{n=0}^\infty q^n = \frac{1}{1-q}$.
 
-Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
+Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original, es decir, la longitud de $\mathbf C$ es nula y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
 
 \subsection{El triángulo de Sierpinski}
 \label{subsection:triangulo-Sierpinski} 
@@ -94,7 +94,7 @@ $$
 A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A,
 $$
 
-En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área es 0 y aún así tenemos puntos (por ejemplo los vértices de los triángulos que se van generando). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
+En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área es 0 y seguimos tenemos puntos (por ejemplo los vértices de los triángulos originados en cada iteración). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
 
 \subsection{La alfombra de Sierpinski y la esponja de Menger}
 \label{subsection:alfombra-esponja}
@@ -169,7 +169,7 @@ Al iniciar este capítulo mencionamos que las distintas definiciones de fractal 
 
 El concepto de dimensión más clara que tenemos es el de dimensión algebraica, esto es, la dimensión de un espacio vectorial. Sabemos que un espacio vectorial $V$ se dice que tiene $\dim(V)=n$, con $n\in\N$ si, y solo si existe una base de $V$ constituida por $n$ vectores, de forma que cualquier elemento de $V$ puede ser expresado como una combinación lineal de los $n$ vectores de la base. Otra manera de ver esto es que para construir los vectores de $V$ tenemos hasta $n$ parámetros de libertad, esto es, $v=a_1 v_1 +\cdots a_n v_n \ \ \forall v\in V$, donde $\{v_1,\dots,v_n\}$ es una base de $V$ y $a_1,\dots,a_n\in K$ siendo $K$ el cuerpo sobre el que está construido el espacio vectorial.
 
-En el caso de subconjuntos de $R^n$ como puede ser una curva parametrizada, si seguimos la analogía del número de parámetros que define un punto en este caso de una curva, podemos decir que su dimensión es $1$, ya que un punto de una curva parametrizada puede expresarse en función de un único parámetro. La variación de este parámetro nos daría otro punto de la curva, por lo que podemos decir que un punto puede moverse por la curva con un grado de libertad (ver imagen \ref{fig:curva-superficie} (a)). Por su lado, una superficie regular de $\R^3$ puede localmente ser expresada como la imagen de una parametrización que depende de dos variables y la variación de estas mediante dicha parametrización resulta en otro punto de la superficie, pudiendo expresar esto como que un punto de una superficie regular tiene dos grados de libertad, lo que intuitivamente permite afirmar que una superficie regular tiene dimensión $2$ (ver imagen \ref{fig:curva-superficie} (b)).
+En el caso de subconjuntos de $\R^n$ como puede ser una curva parametrizada, si seguimos la analogía del número de parámetros que define un punto en este caso de una curva, podemos decir que su dimensión es $1$, ya que un punto de una curva parametrizada puede expresarse en función de un único parámetro. La variación de este parámetro nos daría otro punto de la curva, por lo que podemos decir que un punto puede moverse por la curva con un grado de libertad (ver imagen \ref{fig:curva-superficie} (a)). Por su lado, una superficie regular de $\R^3$ puede localmente ser expresada como la imagen de una parametrización que depende de dos variables y la variación de estas mediante dicha parametrización resulta en otro punto de la superficie, pudiendo expresar esto como que un punto de una superficie regular tiene dos grados de libertad, lo que intuitivamente permite afirmar que una superficie regular tiene dimensión $2$ (ver imagen \ref{fig:curva-superficie} (b)).
 
 \begin{figure}[ht]
 \centering
@@ -186,7 +186,7 @@ Un posible enfoque para definir la dimensión puede ser el recién presentado, e
 \subsection{Dimension fractal autosimilar}
 \label{subsection:dim-frac-autosimilar}
 
-Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 3 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(2):=2=2^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 2$ del original, en el cuadrado se obtienen $N(2):=4=2^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 2$ del cuadrado inicial y en el cubo $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 2$ del cubo original.
+Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 2 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(2):=2=2^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 2$ del original, en el cuadrado se obtienen $N(2):=4=2^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 2$ del cuadrado inicial y en el cubo $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 2$ del cubo original.
 
 \begin{figure}[ht]
 \begin{tabular}{ccc}
@@ -203,7 +203,7 @@ Si en lugar de 2 tomamos cualquier número natural $k\geq 1$, la razón de la ho
 \frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
 \end{equation}
 
-En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definicion.
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definición.
 
 \begin{definicion}[Congruencia]
 Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
@@ -253,7 +253,7 @@ El concepto de dimensión fractal autosimilar tiene el defecto de que está limi
 \begin{definicion}
 Dado un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
 $$
-\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace 
+\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace .
 $$
 \end{definicion}
 
@@ -292,7 +292,7 @@ donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de di
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
-La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $F=\Q\cap[0,1]\subset\R$ es un conjunto en el que cada punto por separado tiene obviamente dimensión por cajas igual a 0, pero al ser $\Q$ un conjunto denso en $\R$ la dimensión por cajas de $F$ es $1$. Por tanto, no se cumple en general que para una familia $\{F_i\}$ de conjuntos $\dim_B\cup_{i=1}^\infty = \sup_i\dim_B F_i$. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $F=\Q\cap[0,1]\subset\R$ es un conjunto en el que cada punto por separado tiene obviamente dimensión por cajas igual a 0, pero al ser $\Q$ un conjunto denso en $\R$ la dimensión por cajas de $F$ es $1$. Por tanto, no se cumple en general que para una familia $\{F_i\}$ de conjuntos $\dim_B\cup_{i=1}^\infty F_i = \sup_i\dim_B F_i$. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
 
 Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una familia numerable de conjuntos $\left\lbrace U_i\right\rbrace_{i\in\N}$  tales que 
