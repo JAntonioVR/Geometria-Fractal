@@ -31,6 +31,8 @@ precision mediump float;
 /* Render Mandelbrot or Julia set */
 //uniform int u_fractal; 
 
+#define ARRAY_TAM 100
+
 struct Ray {
     vec3 orig;
     vec3 dir;
@@ -40,11 +42,12 @@ vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
 
-
-
-/*float dot(vec3 u, vec3 v) {
-    return u.x*v.x + u.y*v.y + u.z*v.z;
-}*/
+struct Hit_record {
+    vec3 p;         // Intersection point
+    vec3 normal;    // Surface's normal at p point
+    float t;        // t value where the ray hits the surface
+    bool hit;       // True if surface is hit, false otherwise
+};
 
 bool hit_plane(vec4 plane, Ray r){
     vec3 orth = plane.xyz;
@@ -54,19 +57,62 @@ bool hit_plane(vec4 plane, Ray r){
         return true;
 }
 
-bool hit_sphere(vec3 center, float radius, Ray r){
-    vec3 oc = r.orig - center;
-    float a = dot(r.dir, r.dir);
-    float b = 2.0 * dot(oc, r.dir);
-    float c = dot(oc, oc) - radius*radius;
-    float discriminant = b*b - 4.0*a*c;
-    return (discriminant > 0.0);
+struct Sphere{
+    vec3 center;
+    float radius;
+};
+
+Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
+    Hit_record result;
+    vec3 oc = R.orig - S.center;
+    float a = dot(R.dir, R.dir);
+    float half_b = dot(oc, R.dir);
+    float c = dot(oc, oc) - S.radius*S.radius;
+    float discriminant = half_b*half_b - a*c;
+    if (discriminant < 0.0){
+        result.hit = false;
+        return result;
+    }
+    float sqrtd = sqrt(discriminant);
+    float root = (-half_b - sqrt(discriminant))/a; // First root
+    if (root < t_min || t_max < root){ // The first root is out of range
+        root = (-half_b + sqrt(discriminant))/a;     // The other root
+        if(root < t_min || t_max < root){    // Both roots are out of range
+            result.hit = false;
+            return result;
+        }
+    } 
+    result.hit = true;
+    result.t = root;
+    result.p = ray_at(R, result.t);
+    result.normal = (result.p - S.center) / S.radius;
+    return result;
 }
 
+Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
+    Hit_record result, tmp;
+    bool hit_anything = false;
+    float closest_t = t_max;
+    for(int i = 0; i < ARRAY_TAM; i++){
+        tmp = hit_sphere(spheres[i], R, t_min, closest_t);
+        if(tmp.hit){
+            hit_anything = true;
+            closest_t = tmp.t;
+            result = tmp;
+        }
+        if(i == size-1) break;
+    }
+    return result;
+}
 
-vec3 ray_color(Ray r) {
-    if(hit_sphere(vec3(0.0,0.0,-1.0), 0.5, r)){
-        return vec3(1.0,0.0,0.0);
+vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size) {
+    Sphere S;
+    S.center = vec3(0.0,0.0,-1.0);
+    S.radius = 0.5;
+    Hit_record hr = hit_spheres_list(world, size, r, 0.0, 100.0);
+    if(hr.hit){
+        vec3 N = hr.normal;
+        return 0.5*vec3(N.x+1.0, N.y+1.0, N.z+1.0);
     }
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
@@ -78,6 +124,14 @@ void main() {
     float aspect_ratio = float(16.0) / float(9.0);
     int image_width = 1280;
     int image_height = int(float(image_width) / aspect_ratio);
+
+    // World
+    int size = 2;
+    Sphere world[ARRAY_TAM];
+    Sphere S1, S2;
+    S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5;
+    S2.center = vec3(0.0, -100.5, -1.0); S2.radius = 100.0;
+    world[0] = S1; world[1] = S2;
 
     // Camera
 
@@ -99,8 +153,7 @@ void main() {
     r.orig = origin;
     r.dir = lower_left_corner + u*horizontal + v*vertical - origin;
 
-    // Inicialmente renderizar todo azul
-    gl_FragColor = vec4(ray_color(r),1.0);
+    gl_FragColor = vec4(ray_color(r, world, size),1.0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
