@@ -21,12 +21,24 @@ Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, 
 In[]:= f[z_] = z^2;
     NestList[f, 0.9, 10]
     
-Out[10]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
+Out[]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
     0.00117902, 1.39008*10^-6, 1.93233*10^-12, 3.73392*10^-24, 
     1.39421*10^-47}
 \end{verbatim}
 
-Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. Nuestro objetivo ahora es poder conocer el comportamiento de la órbita de una función y un punto dados. 
+Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. En este caso todos los valores eran reales, pero aprovechando la correspondencia de $\C$ con $\R^2$, de forma que un número complejo $z=x+y\cdot i\in\C$ se corresponde con el par $(x,y)\in\R^2$ podemos representar en el plano y de forma visual la tendencia de dichas sucesiones. Observemos los ejemplos de las imágenes \ref{fig:orbitas-C}.
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{cc}
+      \includegraphics[scale=0.45]{./img/orbita-1.png} &   \includegraphics[scale=0.4]{./img/orbita-2.png} \\
+    (a)$f(z)=z^2$ en $z=0.9+0.3i$ & (b) $f(z)=z^2+0.33+0.35$ en $z=0.2+0.2i$ \\[6pt]
+    \end{tabular}
+    \caption{Representación de dos órbitas en $\C$}
+    \label{fig:orbitas-C}
+\end{figure}
+
+Los ejemplos expuestos hasta ahora son todos convergentes, pero esto no es siempre así. Nuestro objetivo ahora es poder conocer el comportamiento a largo plazo de la órbita de una función y un punto dados. 
 
 \subsection{Convergencia a un punto fijo}
 
@@ -73,38 +85,17 @@ En los casos que tengamos asegurada la convergencia, es interesante saber cuánt
 El siguiente código muestra un ejemplo de uso:
 
 \begin{verbatim}
-In[]:= f[x_] = x/2 + 1/x;
-    FixedPointList[f, 1.0, SameTest -> (Abs[#1 - #2] < 10^-4 &)]
-    FixedPoint[f, 1.0]
-
-Out[]= {1., 1.5, 1.41667, 1.41422, 1.41421}
-Out[]= 1.41421
+In[]:= f[z_] = z/2 + 1/z;
+    FixedPointList[f, 0.75 + 0.1 I, SameTest -> (Abs[#1 - #2] < 10^-4 &)]
+    FixedPoint[f, 0.75 + 0.1 I]
+    
+Out[]= {0.75 + 0.1 I, 1.68504 - 0.124672 I, 1.43275 - 0.0186668 I, 
+     1.41421 - 0.000241452 I, 1.41421 - 2.45537*10^-10 I, 
+     1.41421 + 3.57849*10^-18 I}
+Out[]= 1.41421 + 0. I
 \end{verbatim}
 
 Y a partir de la longitud de la lista que nos devuelve \verb|FixedPointList|, es decir, con el sencillo comando \verb|Length[FixedPoint[f,x]]| podemos medir la velocidad de convergencia de cada punto.
-
-\section{Iteración en $\C$}
-
-De manera natural, todos los conceptos explicados anteriormente sobre iteración en $\R$ se pueden extender al plano complejo. Esto es, dada una función compleja $f:\C\longrightarrow\C$ y un número complejo $z\in\C$, podemos preguntarnos por el comportamiento a largo plazo de la órbita $O_f(z)$. En este caso, y utilizando la correspondencia entre un punto $(x,y)\in\R^2$ y un número complejo $z=x+i\cdot y$, podemos representar cada punto de una órbita como un punto del plano, pudiendo así fácilmente graficar las órbitas y observar su comportamiento. Observamos en la imagen \ref{fig:orbitas-C} dos ejemplos de esto, ambos han sido generados por el código siguiente, cambiando necesariamente los parámetros para generar la figura (b), de aspecto más armónico.
-
-\begin{verbatim}
-In[]:= f[z_] := z^2;
-    x0 = 0.9 + 0.3 I;
-    ComplexListPlot[N[FixedPointList[f, x0, 10]]];
-    ComplexListPlot[N[FixedPointList[f, x0, 10]], Joined -> True];
-    Show[%, %%]
-\end{verbatim}
-
-\begin{figure}[h]
-    \begin{tabular}{cc}
-      \includegraphics[scale=0.45]{./img/orbita-1.png} &   \includegraphics[scale=0.4]{./img/orbita-2.png} \\
-    (a)$f(z)=z^2$ en $z=0.9+0.3i$ & (b) $f(z)=z^2+0.33+0.35$ en $z=0.2+0.2i$ \\[6pt]
-    \end{tabular}
-    \caption{Representación de dos órbitas en $\C$}
-    \label{fig:orbitas-C}
-\end{figure}
-
-De hecho, para la función $f(z)=z^2$ se tiene que la órbita de todo $z$ con módulo $|z|<1$ tiende a $0$, mientras que si $|z|>1$ diverge y si $|z|=1$ su órbita permanece siempre en la esfera unidad $S^1$. Por tanto, $S^1$ se convierte en la frontera entre los puntos \textit{de escape} -- cuyas órbitas escapan -- y los puntos \textit{prisioneros} -- cuyas órbiras convergen. Por tanto los puntos del plano complejo presentan una dicotomía para la función $f$: escapar o no. $S^1$, al ser la frontera entre estos dos conjuntos, es conocido como el \textit{conjunto de Julia} de la función $f(z)=z^2$. Esta idea será tratada detenidamente en el capítulo \ref{chap:Julia-Mandelbrot}.
 
 \section{El método de Newton y cuencas de atracción}
 
