@@ -208,20 +208,23 @@ void main() {
     int image_height = int(float(image_width) / aspect_ratio);
 
     // World
-    int size = 1;
+    int size = 4;
     Sphere world[ARRAY_TAM];
-    Sphere S1, S2;
-    S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5;
-    S2.center = vec3(0.0, -100.5, -1.0); S2.radius = 100.0;
-    world[0] = S1; world[1] = S2;
+    Sphere S1, S2, S3, S4;
+    S1.center = vec3(0.0, 0.5, 0.0); S1.radius = 0.5;
+    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5;
+    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5;
+    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5;
+
+    world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
     Plane P;
     P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = -1.0;
+    P.D = 0.0;
 
     // Camera
-    vec3 lookfrom = vec3(-1.0, 1.0, 1.0);
-    vec3 lookat = vec3(0.0, 0.0, -1.0);
+    vec3 lookfrom = vec3(-3.0, 3.0, 3.0);
+    vec3 lookat = vec3(0.0, 0.0, 0.0);
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
 
