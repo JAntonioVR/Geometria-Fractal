@@ -1,5 +1,6 @@
 import {ShaderType, Shader, ShaderProgram} from './shader.js'
 import {Buffer} from './buffer.js'
+import { sphericToCartesian, cartesianToSpheric } from "./utils.js";
 
 class Scene3D {
   constructor(vsSource, fsSource) {
@@ -29,9 +30,13 @@ class Scene3D {
       }
     };
 
+    var initialLookfrom = [5.0, 5.0, 5.0];
+
     this.parameters = {
-      lookfrom: [5.0, 5.0, 5.0],
-      lookat: [0.0, 0.0, 0.0]
+      lookfrom: initialLookfrom,
+      lookat: [0.0, 0.0, 0.0],
+      lookfrom_spheric: cartesianToSpheric(initialLookfrom),
+      delta: 0.1
     };
 
     const initialParameters = JSON.parse(JSON.stringify(this.parameters));
@@ -123,27 +128,49 @@ class Scene3D {
   }
 
   zoomIn(){
-    // TODO
+    this.parameters.lookfrom_spheric[0] *= 0.9;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    //this.parameters.delta *= 0.9;
   }
 
   zoomOut(){
-    // TODO
+    this.parameters.lookfrom_spheric[0] *= 1.1;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    //this.parameters.delta *= 1.1;
   }
 
   moveLeft(){
-    // TODO
+    this.parameters.lookfrom_spheric[2] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   moveRight(){
-    // TODO
+    this.parameters.lookfrom_spheric[2] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   moveUp(){
-    // TODO
+    this.parameters.lookfrom_spheric[1] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.rescaleAngles()
   }
 
   moveDown(){
-    // TODO
+    this.parameters.lookfrom_spheric[1] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.rescaleAngles()
+  }
+
+  rescaleAngles(){
+    var theta = this.parameters.lookfrom_spheric[1],
+        phi   = this.parameters.lookfrom_spheric[2];
+    if(theta < 0.0 ) theta += 2.0 * Math.PI;
+    if(theta > 2.0 * Math.PI) theta -= 2.0 * Math.PI;
+    if(phi < 0.0 ) phi += 2.0 * Math.PI;
+    if(phi > 2.0 * Math.PI) phi -= 2.0 * Math.PI;
+
+    this.parameters.lookfrom_spheric[1] = theta
+    this.parameters.lookfrom_spheric[2] = phi
   }
 
   setMaxIterations(newValue){
