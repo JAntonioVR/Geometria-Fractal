@@ -2,34 +2,55 @@ import { glsl } from './glsl.js';
 
 const fsSource = glsl`
 //
-// ─── FRAGMENT SHADER DEL RAY TRACER ─────────────────────────────────────────────
-//    
+// ────────────────────────────────────────────────────────────────────────────────
+//   :::::: F R A G M E N T   S H A D E R : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────
+//
 
-/* Fragment shader that renders Mandelbrot set */
+// ─── PRECISION ──────────────────────────────────────────────────────────────────
+    
 precision mediump float;
 
-/* TODO Poner aqui las variables uniform que se vayan a usar */
-/* Point on the complex plane that will be mapped to the center of the screen */
+// ─── UNIFORM VARIABLES ──────────────────────────────────────────────────────────
+
 uniform vec3 u_lookfrom;
 uniform vec3 u_lookat;
 
+// ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
 #define PI 3.14159265359
+
+// ─── UTILS ──────────────────────────────────────────────────────────────────────
+
+// ─── DEGREES TO RADIANS ─────────────────────────────────────────────────────────
+// Transform an angle measure from degrees to radians
 
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
 }
 
+//
+// ─── RAY ────────────────────────────────────────────────────────────────────────
+// Struct that represents a Ray, defined by a point 'origin' and a vector 
+// 'direction'
 
 struct Ray {
-    vec3 orig;
-    vec3 dir;
+    vec3 orig;      // Ray's origin
+    vec3 dir;       // Ray's direction
 };
 
+// ─── AT ─────────────────────────────────────────────────────────────────────────
+// Given a Ray, it returns the point given by origin + t * direction.    
 vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
+
+// ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ─── HIT RECORD ─────────────────────────────────────────────────────────────────
+// Stores information about an intersection between a ray and a surface.
 
 struct Hit_record {
     vec3 p;         // Intersection point
@@ -38,18 +59,21 @@ struct Hit_record {
     bool hit;       // True if surface is hit, false otherwise
 };
 
-bool hit_plane(vec4 plane, Ray r){
-    vec3 orth = plane.xyz;
-    if(dot(r.dir, orth) == 0.0)
-        return false;
-    else
-        return true;
-}
+
+
+//
+// ─── SPHERE ─────────────────────────────────────────────────────────────────────
+// Represents a sphere, defined by the center and the radius
 
 struct Sphere{
     vec3 center;
     float radius;
 };
+
+//
+// ─── HIT SPHERE ─────────────────────────────────────────────────────────────────
+// Calculates the intersection between a Ray and a Sphere and stores the hit
+// information in a Hit_record struct.
 
 Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     Hit_record result;
@@ -78,6 +102,12 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     return result;
 }
 
+//
+// ─── HIT SPHERES LIST ───────────────────────────────────────────────────────────
+// Given a list of spheres, calculates the possible intersection between a Ray and
+// and the spheres list. If any sphere is hit, stores the hit information in a
+// hit_record struct.
+
 Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
     Hit_record result, tmp;
     bool hit_anything = false;
@@ -94,14 +124,24 @@ Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_
     return result;
 }
 
-// A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the normal vector
-// that defines the plane.
+// ────────────────────────────────────────────────────────────────────────────────
+
+
+//
+// ─── PLANE ──────────────────────────────────────────────────────────────────────
+// A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the 
+// normal vector that defines the plane.
 
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
 };
 
+//
+// ─── HIT PLANE ──────────────────────────────────────────────────────────────────
+// Calculates the possible intersection between a ray and a plane and stores the
+// information in a Hit_record struct.
+    
 Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     Hit_record result;
     float oc = dot(P.normal, R.dir);
@@ -121,19 +161,22 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     return result;
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ─── CAMERA ─────────────────────────────────────────────────────────────────────
+// Stores information about the camera and the rendered frame. 
+
 struct Camera{
-    vec3 origin;
-    vec3 horizontal;
-    vec3 vertical;
-    vec3 lower_left_corner;
+    vec3 origin;                // Where the observer is located
+    vec3 horizontal;            // Viewport width in WC
+    vec3 vertical;              // Viewport height in WC
+    vec3 lower_left_corner;     // Point in WC that is in the corner of the screen
 };
 
-Ray get_ray(Camera cam, float s, float t){
-    Ray R;
-    R.orig = cam.origin;
-    R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
-    return R;
-}
+//
+// ─── INIT CAMERA ────────────────────────────────────────────────────────────────
+// Initializes and returns a Camera given its parameters
 
 Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
     Camera cam;
@@ -154,10 +197,27 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     return cam;
 }
 
+//
+// ─── GET RAY ────────────────────────────────────────────────────────────────────
+// Creates and returns a Ray where the origin is the observer's position and
+// the direction is a point of the rendered frame.
+    
+Ray get_ray(Camera cam, float s, float t){
+    Ray R;
+    R.orig = cam.origin;
+    R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
+    return R;
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ─── RAY COLOR ──────────────────────────────────────────────────────────────────
+// Given a ray and the full scene, calculates pixel's color.
+
 vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
-    Sphere S;
-    S.center = vec3(0.0,0.0,-1.0);
-    S.radius = 0.5;
+
+    // r hits any sphere?
     float t_closest = 100000.0;
     vec3 tmp_color;
     Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
@@ -166,6 +226,8 @@ vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
         vec3 N = hr.normal;
         tmp_color = 0.5*vec3(N.x+1.0, N.y+1.0, N.z+1.0);
     }
+
+    // r hits the plane?
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
@@ -178,20 +240,29 @@ vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
             tmp_color = vec3(0.0,0.0,0.0);
     }
 
+    // If r hits any surface
     if(t_closest < 10000.0) return tmp_color;
 
+    // r does not hit any surface
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return (1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0);
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ─── MAIN ───────────────────────────────────────────────────────────────────────
+//
+
 void main() {
-    // Image
+    // IMAGE
     float aspect_ratio = float(16.0) / float(9.0);
     int image_width = 1280;
     int image_height = int(float(image_width) / aspect_ratio);
 
-    // World
+    // WORLD
+    // Spheres
     int size = 4;
     Sphere world[ARRAY_TAM];
     Sphere S1, S2, S3, S4;
@@ -202,20 +273,17 @@ void main() {
 
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
+    // Plane
     Plane P;
     P.normal = vec3(0.0, 1.0, 0.0);
     P.D = 0.0;
 
-    // Camera
-
+    // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
-
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
-
-
     
-    // Render
+    // COLOR
     vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
     float u = uv.x;
     float v = uv.y;
