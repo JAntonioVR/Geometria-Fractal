@@ -31,6 +31,12 @@ precision mediump float;
 //uniform int u_fractal; 
 
 #define ARRAY_TAM 100
+#define PI 3.14159265359
+
+float degrees_to_radians(float degrees){
+    return PI*degrees/float(180.0);
+}
+
 
 struct Ray {
     vec3 orig;
@@ -131,6 +137,39 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     return result;
 }
 
+struct Camera{
+    vec3 origin;
+    vec3 horizontal;
+    vec3 vertical;
+    vec3 lower_left_corner;
+};
+
+Ray get_ray(Camera cam, float s, float t){
+    Ray R;
+    R.orig = cam.origin;
+    R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
+    return R;
+}
+
+Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
+    Camera cam;
+    float theta = degrees_to_radians(vfov);
+    float h = tan(theta/2.0);
+    float viewport_height = 2.0*h;
+    float viewport_width = aspect_ratio * viewport_height;
+    float focal_length = 1.0;
+
+    vec3 w = normalize(lookfrom - lookat);
+    vec3 u = normalize(cross(vup,w));
+    vec3 v = cross(w,u);
+
+    cam.origin = lookfrom;
+    cam.horizontal = viewport_width * u;
+    cam.vertical = viewport_height * v;
+    cam.lower_left_corner = cam.origin - cam.horizontal/float(2.0) - cam.vertical/float(2.0) - w;
+    return cam;
+}
+
 vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
     Sphere S;
     S.center = vec3(0.0,0.0,-1.0);
@@ -181,24 +220,21 @@ void main() {
     P.D = -1.0;
 
     // Camera
+    vec3 lookfrom = vec3(-1.0, 1.0, 1.0);
+    vec3 lookat = vec3(0.0, 0.0, -1.0);
+    vec3 vup = vec3(0.0, 1.0, 0.0);
+    float vfov = 90.0; // Vertical field of view in degrees
 
-    float viewport_height = 2.0;
-    float viewport_width = aspect_ratio * viewport_height;
-    float focal_length = 1.0;
+    Camera cam = init_camera(lookfrom, lookat, vup, vfov, aspect_ratio);
 
-    vec3 origin = vec3(0.0, 0.0, 0.0);
-    vec3 horizontal = vec3(viewport_width, 0.0, 0.0);
-    vec3 vertical = vec3(0, viewport_height, 0.0);
-    vec3 lower_left_corner = origin - horizontal/float(2.0) - vertical/float(2.0) -vec3(0.0, 0.0, focal_length);
 
+    
     // Render
     vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
     float u = uv.x;
     float v = uv.y;
 
-    Ray r;
-    r.orig = origin;
-    r.dir = lower_left_corner + u*horizontal + v*vertical - origin;
+    Ray r = get_ray(cam, u, v);
 
     gl_FragColor = vec4(ray_color(r, world, size, P), 1.0);
 }
