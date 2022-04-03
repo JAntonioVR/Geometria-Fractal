@@ -1,7 +1,7 @@
 import {ShaderType, Shader, ShaderProgram} from './shader.js'
 import {Buffer} from './buffer.js'
 
-class Scene {
+class Scene2D {
   constructor(vsSource, fsSource) {
     const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
@@ -245,4 +245,4 @@ class Scene {
 
 }
 
-export {Scene}
+export {Scene2D}

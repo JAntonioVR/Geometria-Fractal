@@ -9,6 +9,10 @@ var theScene = new Scene3D(vsSource, fsSource);
 function main(){
 
     document.addEventListener("keydown", (event) => onKeyDown(event), true );
+
+    const botonReset = document.querySelector("#botonReset");
+    botonReset.onclick = resetParameters;
+    actualizaValorPosicion(theScene.getPosition());
     
     theScene.drawScene();
     
@@ -44,7 +48,19 @@ function onKeyDown(event) {
       default:
         break;
     }
+    actualizaValorPosicion(theScene.getPosition());
     theScene.drawScene();
+}
+
+function resetParameters() {
+    theScene.setInitialParameters();
+    theScene.drawScene()
+}
+
+function actualizaValorPosicion(posicion) {
+    document.querySelector("#marcador-posicion").innerHTML = 
+    "(" + posicion[0].toFixed(2) + ", " + posicion[1].toFixed(2) + ", " + posicion[2].toFixed(2) + ")"
+
 }
 
 

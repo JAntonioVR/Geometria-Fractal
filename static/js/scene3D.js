@@ -130,13 +130,11 @@ class Scene3D {
   zoomIn(){
     this.parameters.lookfrom_spheric[0] *= 0.9;
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
-    //this.parameters.delta *= 0.9;
   }
 
   zoomOut(){
     this.parameters.lookfrom_spheric[0] *= 1.1;
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
-    //this.parameters.delta *= 1.1;
   }
 
   moveLeft(){
@@ -161,6 +159,10 @@ class Scene3D {
     this.rescaleAngles()
   }
 
+  getPosition() {
+    return this.parameters.lookfrom; 
+  }
+
   rescaleAngles(){
     var theta = this.parameters.lookfrom_spheric[1],
         phi   = this.parameters.lookfrom_spheric[2];
@@ -171,10 +173,6 @@ class Scene3D {
 
     this.parameters.lookfrom_spheric[1] = theta
     this.parameters.lookfrom_spheric[2] = phi
-  }
-
-  setMaxIterations(newValue){
-    // TODO
   }
 
   setInitialParameters() {
