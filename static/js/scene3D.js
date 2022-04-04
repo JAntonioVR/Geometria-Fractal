@@ -1,7 +1,8 @@
 import {ShaderType, Shader, ShaderProgram} from './shader.js'
 import {Buffer} from './buffer.js'
+import { sphericToCartesian, cartesianToSpheric } from "./utils.js";
 
-class Scene {
+class Scene3D {
   constructor(vsSource, fsSource) {
     const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
@@ -13,7 +14,7 @@ class Scene {
     return;
     }
     this.context = gl;
-    
+
     this.shaderProgram = this.initShaderProgram(vsSource, fsSource);
     this.bufferInfo = this.initBuffers(gl)
     var that = this;
@@ -24,45 +25,31 @@ class Scene {
         vertexPosition: gl.getAttribLocation(that.shaderProgram, 'a_Position')
       },
       uniformLocations: {
-        zoomCenter: gl.getUniformLocation(that.shaderProgram, 'u_zoomCenter'),
-        zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
-        maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
-        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
-        order: gl.getUniformLocation(that.shaderProgram, 'u_order'),
-        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal')
+        lookfrom: gl.getUniformLocation(that.shaderProgram, 'u_lookfrom'),
+        lookat: gl.getUniformLocation(that.shaderProgram, 'u_lookat')
       }
     };
 
+    var initialLookfrom = [5.0, 5.0, 5.0];
+
     this.parameters = {
-      zoomCenter: [0.0, 0.0],
-      zoomSize: 3,
-      maxIterations: 50,
-      delta: 0.1,
-      juliaSetConstant: [-0.12, 0.75],
-      order: 2,
-      fractal: 0
+      lookfrom: initialLookfrom,
+      lookat: [0.0, 0.0, 0.0],
+      lookfrom_spheric: cartesianToSpheric(initialLookfrom),
+      delta: 0.1
     };
 
     const initialParameters = JSON.parse(JSON.stringify(this.parameters));
-
-    /*const initialParameters = Object.assign({}, this.parameters);
-
-    initialParameters.zoomCenter[0] = this.parameters.zoomCenter[0];
-    initialParameters.zoomCenter[1] = this.parameters.zoomCenter[1];
-    initialParameters.juliaSetConstant[0] = -0.12;
-    initialParameters.juliaSetConstant[1] = 0.75;*/
     this.initialParameters = initialParameters;
-
-    /*console.log(initialParameters)*/
   }
 
   initShaderProgram(vsSource, fsSource) {
     let gl = this.context;
     var vertexShader = new Shader(gl, vsSource, ShaderType.vertexShader),
         fragmentShader = new Shader(gl, fsSource, ShaderType.fragmentShader);
-  
+
     var shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
-  
+
     return shaderProgram.getShaderProgram()
   }
 
@@ -77,12 +64,12 @@ class Scene {
       x0, y0, x1, y0, x1, y1,
       x0, y0, x1, y1, x0, y1
     ];
-  
+
     let positions_nfpv = 2,   // Number of floats per vertex in 'positions' array
         positions_nv   = positions.length / positions_nfpv    // Number of vertexes in 'positions' array
-  
+
     let positionBuffer = new Buffer(gl, positions)
-  
+
     return {
       positionBuffer: positionBuffer.getBuffer(),
       num_floats_pv: positions_nfpv,
@@ -100,12 +87,8 @@ class Scene {
     // Clear the canvas before we start drawing on it.
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    let zoomCenter = this.parameters.zoomCenter,
-        zoomSize = this.parameters.zoomSize,
-        maxIterations = this.parameters.maxIterations,
-        juliaSetConstant = this.parameters.juliaSetConstant,
-        order = this.parameters.order,
-        fractal = this.parameters.fractal;
+    let lookfrom = this.parameters.lookfrom,
+        lookat = this.parameters.lookat;
     var that = this;
     {
       const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
@@ -127,25 +110,12 @@ class Scene {
     }
     gl.useProgram(this.programInfo.program);
 
-    gl.uniform2f(
-      this.programInfo.uniformLocations.zoomCenter,
-      zoomCenter[0], zoomCenter[1]);
-    gl.uniform1f(
-      this.programInfo.uniformLocations.zoomSize,
-      zoomSize);
-    gl.uniform1i(
-      this.programInfo.uniformLocations.maxIterations,
-      maxIterations);
-    gl.uniform2f(
-      this.programInfo.uniformLocations.juliaSetConstant,
-      juliaSetConstant[0], juliaSetConstant[1]);
-    gl.uniform1i(
-      this.programInfo.uniformLocations.order,
-      order);
-    gl.uniform1i(
-      this.programInfo.uniformLocations.fractal,
-      fractal);
-
+    gl.uniform3f(
+      this.programInfo.uniformLocations.lookfrom,
+      lookfrom[0], lookfrom[1], lookfrom[2]);
+    gl.uniform3f(
+        this.programInfo.uniformLocations.lookat,
+        lookat[0], lookat[1], lookat[2]);
 
     {
       const offset = 0;
@@ -158,73 +128,51 @@ class Scene {
   }
 
   zoomIn(){
-    this.parameters.zoomSize *= 0.9;
-    this.parameters.delta *= 0.9;
+    this.parameters.lookfrom_spheric[0] *= 0.9;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   zoomOut(){
-    this.parameters.zoomSize *= 1.1;
-    this.parameters.delta *= 1.1
+    this.parameters.lookfrom_spheric[0] *= 1.1;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   moveLeft(){
-    this.parameters.zoomCenter[0] -= this.parameters.delta;
+    this.parameters.lookfrom_spheric[2] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   moveRight(){
-    this.parameters.zoomCenter[0] += this.parameters.delta;
+    this.parameters.lookfrom_spheric[2] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
   moveUp(){
-    this.parameters.zoomCenter[1] += this.parameters.delta;
+    this.parameters.lookfrom_spheric[1] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.rescaleAngles()
   }
 
   moveDown(){
-    this.parameters.zoomCenter[1] -= this.parameters.delta;
+    this.parameters.lookfrom_spheric[1] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.rescaleAngles()
   }
 
-  setMaxIterations(newValue){
-    this.parameters.maxIterations = newValue;
+  getPosition() {
+    return this.parameters.lookfrom; 
   }
 
-  getMaxIterations(){
-    return this.parameters.maxIterations;
-  }
+  rescaleAngles(){
+    var theta = this.parameters.lookfrom_spheric[1],
+        phi   = this.parameters.lookfrom_spheric[2];
+    if(theta < 0.0 ) theta += 2.0 * Math.PI;
+    if(theta > 2.0 * Math.PI) theta -= 2.0 * Math.PI;
+    if(phi < 0.0 ) phi += 2.0 * Math.PI;
+    if(phi > 2.0 * Math.PI) phi -= 2.0 * Math.PI;
 
-  setJuliaConstantX(newX) {
-    this.parameters.juliaSetConstant[0] = newX;
-  }
-
-  getJuliaConstantX(){
-    return this.parameters.juliaSetConstant[0];
-  }
-
-  setJuliaConstantY(newY) {
-    this.parameters.juliaSetConstant[1] = newY;
-  }
-
-  getJuliaConstantY(){
-    return this.parameters.juliaSetConstant[1];
-  }
-
-  setOrder(newOrder) {
-    this.parameters.order = newOrder;
-  }
-
-  getOrder() {
-    return this.parameters.order;
-  }
-
-  setFractal(newFractal) {
-    if (newFractal == 0) {
-      this.parameters.fractal = newFractal;
-    } else {
-      this.parameters.fractal = 1;
-    }
-  }
-
-  getFractal() {
-    return this.parameters.fractal;
+    this.parameters.lookfrom_spheric[1] = theta
+    this.parameters.lookfrom_spheric[2] = phi
   }
 
   setInitialParameters() {
@@ -245,4 +193,4 @@ class Scene {
 
 }
 
-export {Scene}
+export {Scene3D} 

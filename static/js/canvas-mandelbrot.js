@@ -1,9 +1,9 @@
 
-import { Scene } from "./scene.js";
-import { vsSource } from "../../glsl/shader-wgl-vertex.js";
-import { fsSource } from "../../glsl/shader-wgl-fragment.js";
+import { Scene2D } from "./scene2D.js";
+import { vsSource } from "../glsl/shader-wgl-vertex.js";
+import { fsSource } from "../glsl/shader-wgl-fragment.js";
 
-var theScene = new Scene(vsSource, fsSource);
+var theScene = new Scene2D(vsSource, fsSource);
 
 function main(){
 
