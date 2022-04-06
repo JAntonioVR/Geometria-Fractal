@@ -28,7 +28,7 @@ Out[]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
 
 Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. En este caso todos los valores eran reales, pero aprovechando la correspondencia de $\C$ con $\R^2$, de forma que un número complejo $z=x+y\cdot i\in\C$ se corresponde con el par $(x,y)\in\R^2$ podemos representar en el plano y de forma visual la tendencia de dichas sucesiones. Observemos los ejemplos de las imágenes \ref{fig:orbitas-C}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
       \includegraphics[scale=0.45]{./img/orbita-1.png} &   \includegraphics[scale=0.4]{./img/orbita-2.png} \\
@@ -41,6 +41,7 @@ Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cua
 Los ejemplos expuestos hasta ahora son todos convergentes, pero esto no es siempre así. Nuestro objetivo ahora es poder conocer el comportamiento a largo plazo de la órbita de una función y un punto dados. 
 
 \subsection{Convergencia a un punto fijo}
+\label{subsection:convergencia-punto-fijo}
 
 Fijémonos que en el ejemplo anterior si en lugar de tomar $z_0=0.9$ hubiésemos tomado cualquier valor con $|z_0|<1$ la convergencia habría sido igualmente a $0$, pues elevamos al cuadrado cada vez números más pequeños. Justo al contrario ocurre si $|z_0|>1$, en cuyo caso la sucesión diverge. Por último, en caso de que $|z_0|=1$, esto es, $z_0\in S^1$, la sucesión $\{f^n(z_0)\}$ nunca saldrá de $S^1$, siendo este el conjunto que delimita la frontera entre el conjunto de puntos cuya sucesión converge o diverge. En particular, $f^n(-1)=f^n(1)=1\ \ \forall n\in\N$, por lo que $z=1$ es un punto fijo de $f$, es decir, $f(z)=z$. 
 
@@ -125,7 +126,7 @@ In[]:= DensityPlot[newtonArgumento[x + I*y], {x, -2, 2}, {y, -2, 2},
      PlotPoints -> 100, Mesh -> False, ColorFunction -> "Rainbow"] 
 \end{verbatim}
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.4]{img/cuencas-1.png}
 \caption{Cuencas de atracción de $f(z)=z^2-1$.}
@@ -142,7 +143,7 @@ Produciendo como resultado la imagen \ref{fig:cuencas-1}. La forma de deducir a 
 
 En muchas de las funciones que trataremos ocurre que existen distintas cuencas de atracción y la distinción sobre a cuál de ellas pertenece cada punto del plano complejo es la que nos permitirá graficar imágenes fractales. Si aplicamos el mismo procedimiento antes descrito en el ejemplo \ref{ejemplo:cuencas-1} con otras funciones encontramos las imágenes \ref{fig:cuencas-raiz}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
       \includegraphics[scale=0.33]{img/cuencas-color-1.png} &   \includegraphics[scale=0.31]{img/cuencas-color-2.png} &   \includegraphics[scale=0.33]{img/cuencas-color-3.png} \\
@@ -165,7 +166,7 @@ En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fr
 
 donde se puede cambiar el valor de \verb|f|, la región del plano \verb|{x, -2, 2}, {y, -2, 2}| o el valor del argumento \verb|ColorFunction| para obtener distintas imágenes.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
       \includegraphics[scale=0.33]{img/cuencas-velocidad-1.png} &   \includegraphics[scale=0.31]{img/cuencas-velocidad-2.png} &   \includegraphics[scale=0.33]{img/cuencas-velocidad-3.png} \\
@@ -182,7 +183,7 @@ Podemos jugar con estos parámetros como son la función a representar \verb|f|,
 
 Consideramos ahora la representación de las cuencas de atracción de la función compleja $f(z)=z^3-1$, que podemos ver en la imagen \ref{fig:cuencas-autosimilaridad}
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.5]{img/cuencas-autosimilaridad.png}
 \caption{Cuencas de atracción de $f(z)=z^3-1$}
@@ -193,7 +194,7 @@ Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, 
 
 %\newpage
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \begin{tabular}{ccc}
       \includegraphics[scale=0.33]{./img/detalle-1.png} &   \includegraphics[scale=0.33]{./img/detalle-2.png} &   \includegraphics[scale=0.33]{./img/detalle-3.png} \\
     (a) $[-1,0]\times[-0.5,0.5]$ & (b) $[-0.6,-0.4]\times[0.1,0.3]$ & (c) $[-0.5,-0.47]\times[0.215,0.245]$ \\[6pt]
