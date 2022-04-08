@@ -156,7 +156,7 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
         result.hit = true;
         result.t = t;
         result.p = ray_at(R, result.t);
-        result.normal = P.normal;
+        result.normal = normalize(P.normal);
     }
     return result;
 }
@@ -210,6 +210,57 @@ Ray get_ray(Camera cam, float s, float t){
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
+// 
+
+//
+// ─── MATERIAL ───────────────────────────────────────────────────────────────────
+// Struct that defines a material RGB components.
+
+struct Material {
+    vec4 ke;    // Emissive component
+    vec4 ka;    // Ambient component
+    vec4 kd;    // Ambient component
+    vec4 ks;    // Specular component
+    float sh;   // Shiness
+};
+
+//
+// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
+// Struct that defines a directional light source.
+
+struct Directional_light{
+    vec3 dir;   // Light direction
+    vec4 color; // Light RGB color
+};
+
+vec4 evaluateLightingModel( Directional_light light, Hit_record hr, Material mat ){
+    vec3 light_dir = normalize(light.dir);
+    vec3 view_dir = normalize(u_lookfrom - hr.p);
+    vec3 normal = normalize(hr.normal);
+
+    float cos_theta = max(0.0, dot(normal, light_dir));
+
+    vec4 emissive = mat.ke * light.color;
+    vec4 ambient = mat.ka * light.color;
+    vec4 diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    // Only if light is visible from surface point
+    if(cos_theta > 0.0) {
+        // Reflection direction
+        vec3 reflection_dir = reflect(-light_dir, normal);
+
+        diffuse = mat.kd * light.color * cos_theta;
+        specular = mat.ks * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
+    }
+    
+    return emissive + ambient + diffuse + specular;
+    
+}
+
 
 //
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
