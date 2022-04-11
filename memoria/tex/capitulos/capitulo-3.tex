@@ -77,11 +77,13 @@ Sin dejar de tener en cuenta la familia de funciones $\{P_c(z)\}_{c\in\C}$ intro
 
 A partir de estas dos definiciones, que insisten en clasificar los puntos del plano complejo entre de escape o prisioneros según su órbita, podemos introducir la definición que esperábamos.
 
-\textit{Y aquí profesor tengo una duda porque las órbitas con comportamiento caótico, ¿se considera que divergen o no? Porque teóricamente es impredicible, pero por otro lado, en el libro pone que en la frontera entre estos dos conjuntos, es decir, en el conjunto de Julia, es donde este comportamiento es caótico, estando los detalles en cierto libro que puedo buscar, ¿lo busco o lo dejo así superficial?}
+\textit{He buscado información acerca de la duda que le planteé y ya tendría material para completar formalmente este apartado. Sin embargo, creo que es un poco técnica y realmente no termino de entenderla bien. La realidad es que se define el conjunto de Julia como el conjunto de puntos en los que la dinámica es caótica y por una serie de resultados acaba siendo equivalente a estas definiciones más sencillas. Pero para llegar a eso hay que meter artillería un poco pesada y quizá un poco fuera de contexto. Podemos verlo juntos y en función decidir.}
 
 \begin{definicion}[Conjunto de Julia]
-Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota como $\mathsf{J}_c$ a la frontera de $\mathsf{E}_c$.  
+Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota como $\mathsf{J}_c$ a la frontera de $\mathsf{E}_c$. Es en este conjunto donde las iteradas tienen un comportamiento caótico. Se denomina \textbf{conjunto de Fatou} al complemento del conjunto de Julia.
 \end{definicion}
+
+
 
 \begin{ejemplo}
   En el caso $c=0$, es decir, $P_0(z)=z^2$, sabemos ya que $E_c=S^1$, pues precisamente es $S^1$ la frontera entre los puntos cuyas iteradas divergen o convergen a $0$.
@@ -93,4 +95,62 @@ Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota c
 
 \subsection{Representación gráfica de los conjuntos de Julia}
 
-Tenemos entonces una definición de los conjuntos de Julia, pero aparentemente está muy alejada de las imágenes \ref{fig:julia-intro} que presentamos en la introducción. La forma de llegar a ellas es similar a la que utilizamos para graficar las imágenes que utilizaban la velocidad de convergencia en el capítulo \ref{chap:iteracion}. Sin embargo, y al contrario que al utilizar el método de Newton, ahora no tenemos ningún tipo de convergencia asegurada, por lo que el método de aplicar iteradas hasta encontrar un patrón no es el más correcto.
+Tenemos entonces una definición de los conjuntos de Julia, pero aparentemente está muy alejada de las imágenes \ref{fig:julia-intro} que presentamos en la introducción. La forma de llegar a ellas es similar a la que utilizamos para graficar las imágenes que utilizaban la velocidad de convergencia en el capítulo \ref{chap:iteracion}. Sin embargo, y al contrario que al utilizar el método de Newton, ahora no tenemos ningún tipo de convergencia asegurada, por lo que el método de aplicar iteradas hasta encontrar un patrón no es el más correcto. Debemos por tanto encontrar una manera eficiente de clasificar cada punto del plano como prisionero o de escape. 
+
+Para ello podemos fijarnos en que la operación de elevar $z_n$ al cuadrado prima sobre la de sumar una constante $c$ siempre que el módulo $|z_n|$ sea 'suficientemente grande'. Procedemos entonces a enunciar el siguiente resultado:
+
+\begin{teorema}
+  Dado un $c\in\C$, consideramos la función $P_c(z)=z^2+c$. Si un número $z_0\in\C$ verifica que $|z_0|>\max\{|c|,2\}$, entonces $z_0$ es un punto de escape. Al número $e_c=\max\{|c|,2\}$ se le denomina \textit{número de escape}.
+\end{teorema}
+\begin{proof}
+  Supongamos que $|z_0|>e_c=\max\{|c|,2\}$, por tanto necesariamente debe existir un número $\varepsilon>0$ tal que $|z_0| = 2 + \varepsilon$. Aplicamos entonces la cadena de desigualdades siguiente:
+  \begin{eqnarray*}
+    |P_c(z_0)| = |z_0^2 + c| & \geq & |z_0^2| - |c|\text{  (Propiedades del módulo)} \\
+    & = & |z_0|^2 - c \\
+    & \geq & |z_0|^2 - |z_0|\text{  (Porque } |z_0|>|c| \text{)} \\
+    & = & (|z_0|-1)|z_0| \\
+    & = & (1 + \varepsilon)|z_0|
+  \end{eqnarray*}
+
+  Por tanto tenemos que $|P_c(z_0)|\geq(1 + \varepsilon)|z_0|$, por lo que en cada iteración el módulo aumenta $1+\varepsilon$ unidades, que es mayor que uno, es decir, $|P_c^k(z_0)|\geq(1+\varepsilon)^k|z_0|$, por lo que la sucesión diverge y $z_0$ es un punto de escape. 
+\end{proof}
+
+Podemos aplicar este teorema para programar un algoritmo que grafique conjuntos de Julia. Para ello, fijamos un número $M\in\N$ que será el máximo de iteraciones que se aplicarán en cada punto antes de decidir si el punto es prisionero o de escape. Si pasadas esas $M$ iteraciones el módulo de $z_0$ no ha alcanzado el número de escape $e_c$ entonces consideramos que $z_0$ es un punto prisionero. En caso contrario, en el momento que se alcance el número de escape cesarán las iteraciones y se etiquetará el punto como prisionero. El valor de $M$ puede ser alto si queremos aumentar la precisión a cambio de mayor tiempo de cómputo, y viceversa. Es posible que algunos de los puntos sean de escape pero alcancen $e_c$ después de las $M$ iteraciones, pero tomando un valor suficientemente alto el resultado es prácticamente el mismo.
+
+Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos prisioneros y a los puntos de escape asignarle otro en función de las iteraciones necesarias antes de alcanzar el número de escape. Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathsf{J}_{-0.12+0.75i}$ utilizaríamos el siguiente código:
+
+\begin{verbatim}
+M = 50;
+Julia[z_, c_] := Length[FixedPointList[#^2 + c &, z, M, 
+    SameTest -> (Abs[#] > Max[2.0, Abs[c]] &)]];
+    
+DensityPlot[
+      Julia[x + I y, -0.12 + 0.75 I], {x, -1.5, 1.5}, 
+      {y, -1.25, 1.25}, PlotPoints->200, AspectRatio->Automatic, 
+      ColorFunction -> (If[# >= 1, RGBColor[0, 0, 0], Hue[#]] &) ]
+\end{verbatim}
+
+Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar cuando dejar de iterar, especificando que se haga cuando se alcance $e_c$. Hemos utilizado también $M=50$ como máximo número de iteraciones. Podemos variar el segundo argumento de la llamada a la función \verb|Julia|, el rango de valores, el argumento \verb|PlotPoints| o el número máximo de iteraciones $M$ para graficar distintos conjuntos y detalles de dichos conjuntos. Algunos ejemplos de resultados de estos códigos se encuentran en la imagen \refname{fig:julia-explicados}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[scale=0.5]{./img/C3/julia-explicado-1.png} &   \includegraphics[scale=0.5]{./img/C3/julia-explicado-2.png} \\
+  (a) $J_{-0.12+0.75i}$ & (b) $J_{-0.23+0.65i}$  \\[6pt]
+  \end{tabular}
+  \caption{Conjuntos de Julia graficados con Mathematica}
+  \label{fig:julia-explicados}
+\end{figure}
+
+Por sí solo Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathsf{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta, véanse las imágenes \ref{fig:julia-set-plot}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[scale=0.4]{./img/C3/juliaSetPlot-1.png} &   \includegraphics[scale=0.3]{./img/C3/juliaSetPlot-2.png} \\
+  (a) $J_{-0.23+0.69i}$ & (b) $J_{0.16-0.59i}$  \\[6pt]
+  \end{tabular}
+  \caption{Resultados de la orden `JuliaSetPlot'}
+  \label{fig:julia-set-plot}
+\end{figure}
+
