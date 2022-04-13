@@ -100,6 +100,7 @@ Tenemos entonces una definición de los conjuntos de Julia, pero aparentemente e
 Para ello podemos fijarnos en que la operación de elevar $z_n$ al cuadrado prima sobre la de sumar una constante $c$ siempre que el módulo $|z_n|$ sea 'suficientemente grande'. Procedemos entonces a enunciar el siguiente resultado:
 
 \begin{teorema}
+\label{th:escape}
   Dado un $c\in\C$, consideramos la función $P_c(z)=z^2+c$. Si un número $z_0\in\C$ verifica que $|z_0|>\max\{|c|,2\}$, entonces $z_0$ es un punto de escape. Al número $e_c=\max\{|c|,2\}$ se le denomina \textit{número de escape}.
 \end{teorema}
 \begin{proof}
@@ -130,7 +131,7 @@ DensityPlot[
       ColorFunction -> (If[# >= 1, RGBColor[0, 0, 0], Hue[#]] &) ]
 \end{verbatim}
 
-Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar cuando dejar de iterar, especificando que se haga cuando se alcance $e_c$. Hemos utilizado también $M=50$ como máximo número de iteraciones. Podemos variar el segundo argumento de la llamada a la función \verb|Julia|, el rango de valores, el argumento \verb|PlotPoints| o el número máximo de iteraciones $M$ para graficar distintos conjuntos y detalles de dichos conjuntos. Algunos ejemplos de resultados de estos códigos se encuentran en la imagen \refname{fig:julia-explicados}.
+Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar cuando dejar de iterar, especificando que se haga cuando se alcance $e_c$. Hemos utilizado también $M=50$ como máximo número de iteraciones. Podemos variar el segundo argumento de la llamada a la función \verb|Julia|, el rango de valores, el argumento \verb|PlotPoints| o el número máximo de iteraciones $M$ para graficar distintos conjuntos y detalles de dichos conjuntos. Algunos ejemplos de resultados de estos códigos se encuentran en la imagen \ref{fig:julia-explicados}.
 
 \begin{figure}[ht]
   \centering
@@ -142,7 +143,7 @@ Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar 
   \label{fig:julia-explicados}
 \end{figure}
 
-Por sí solo Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathsf{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta, véanse las imágenes \ref{fig:julia-set-plot}.
+Por sí solo Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathsf{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta\footnote{Más información en la documentación oficial: \url{https://reference.wolfram.com/language/ref/JuliaSetPlot.html?q=JuliaSetPlot}}, véanse las imágenes \ref{fig:julia-set-plot}.
 
 \begin{figure}[ht]
   \centering
@@ -154,3 +155,47 @@ Por sí solo Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra
   \label{fig:julia-set-plot}
 \end{figure}
 
+\section{Distinción entre conjuntos de Julia conexos y polvaredas}
+\label{section:conexos-polvaredas}
+
+Ya en la introducción de este capítulo y tras presentar las imágenes \ref{fig:julia-intro} prestamos atención a un detalle que, ahora que tenemos más ejemplos e imágenes de distintos conjuntos de Julia, se vuelve más evidente. Mientras algunos conjuntos de Julia se presentan conexos, como los de las imágenes \ref{fig:julia-explicados}, otros parecen no ser conexos y estar formados por trozos más pequeños, como los de las imágenes \ref{fig:julia-set-plot}. Cabe recordar que en realidad los conjuntos de Julia son la frontera entre los puntos que se representan en negro y los que se representan de colores.
+
+Para saber qué conjuntos de Julia son conexos y cuales no \textit{Gaston Julia} y \textit{Pierre Fatou} demostraron en 1918 el siguiente teorema, cuya prueba se puede encontrar en \cite[Theorem 9.5]{John-Milnor}.
+
+\begin{teorema}[Teorema de Fatou-Julia]
+  \label{th:fatou-julia}
+  Si $\mathsf{P}_c$ contiene todos los puntos críticos de $P_c(z)$, entonces $\mathsf{J}_c=\partial \mathsf{P}_c$ es conexo. Si al menos un punto crítico de $P_c(z)$ pertenece a $\mathsf{E}_c$, entonces $\mathsf{J}_c$ es homeomorfo al conjunto de Cantor, es decir, tiene un conjunto no numerable de componentes conexas. En este último caso se conoce como <<polvo de Fatou>>.
+\end{teorema}
+
+En realidad el teorema en su versión original está enunciado para polinomios de grado mayor o igual que $2$, entendiendo las extensiones naturales del conjunto de puntos de escape y prisioneros. Si nos restringimos entonces a la familia $\{P_c(z)\}_{c\in\C}$, es muy sencillo caracterizar qué conjuntos de Julia son conexos y cuales son polvaredas.
+
+\begin{corolario}
+  \label{th:conexo-polvareda}
+  Dado $c\in\C$, el conjunto de Julia $\mathsf{J}_c$ es conexo (resp. polvareda) si, y solo si, la sucesión de iteradas $\{P_c^n(0)\}$ no diverge (resp. diverge), es decir, si $0\in\mathsf{P}_c$ (resp. $0\in\mathsf{E}_c$).
+\end{corolario}
+\begin{proof}
+  Es claro que $P'_c(z)=(z^2+c)'=2z$, por lo que los puntos críticos de $P_c(z)$ se alcanzan cuando $z=0$, por lo que aplicando el teorema \ref{th:fatou-julia} tenemos el resultado.
+\end{proof}
+
+Sobre la dicotomía entre qué conjuntos de Julia son conexos y cuales son polvareda surge el conocido \textbf{conjunto de Mandelbrot}, el cual adelantamos que está formado por los números complejos $c$ tales que su conjunto de Julia $\mathsf{J_c}$ es conexo. 
+
+\section{El conjunto de Mandelbrot}
+
+Como ya veníamos anunciando al final de la sección \ref{section:conexos-polvaredas}, el conjunto de Mandelbrot está formado por los $c\in\C$ tales que $\textbf{J}_c$ es conexo. La idea inicial de \textit{Benoit Mandelbrot} para graficar el conjunto que denotaremos a partir de ahora como $\mathcal{M}$ fue pintar de negro los puntos del plano cuyo conjunto de Julia fuese conexo y de blanco el resto. De entrada parece una tarea titánica graficar, para cada punto del plano (aunque realmente sería solo un subconjunto suficientemente representativo), su conjunto de Julia y decidir si éste es o no conexo, pues en algunos casos la decisión se torna muy complicada.
+
+Afortunadamente, gracias al teorema \ref{th:fatou-julia} y al corolario \ref{th:conexo-polvareda} esta tarea se vuelve mucho más sencilla, tan solo habría que tomar las iteradas en el origen, es decir $\{P_c^n(0)\}=\{c, c^2+c, (c^2+c)^2+c, \dots\}$ y decidir si la sucesión diverge o no mediante algún método similar al utilizado para graficar conjuntos de Julia.
+
+Por resumir, de momento sabemos que:
+\begin{eqnarray*}
+  \mathcal{M} & = & \{c\in\C : \mathsf{J}_c \text{ es conexo }\} \\
+              & = & \{c\in\C : 0\in\mathsf{P}_c \} \\
+              & = & \{c\in\C : \{P_c^n(0)\}\not\rightarrow\infty\}
+\end{eqnarray*}
+
+\subsection{Representación gráfica del conjunto de Mandelbrot}
+
+Buscamos ahora obtener alguna figura similar a la imagen \ref{fig:mandelbrot-intro} a partir del conocimiento que tenemos de $mathcal M$. Como ya viene siendo costumbre, la idea es dividir el plano en una cantidad finita de píxeles, asignando a cada uno un número complejo $c$ y evaluar en cada uno si la órbita en $z=0$ converge o diverge. Para tomar esta decisión nos podemos apoyar en el teorema \ref{th:escape} para probar este resultado.
+
+\begin{proposicion}
+  Dado un número complejo $c\in\C$, si $|c|>2$ entonces la sucesión de iteradas $\{P_c^n(0)\}$ es divergente.
+\end{proposicion}
