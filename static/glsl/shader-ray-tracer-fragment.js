@@ -16,6 +16,14 @@ precision mediump float;
 uniform vec3 u_lookfrom;
 uniform vec3 u_lookat;
 
+uniform vec4 u_ke;
+uniform vec4 u_ka;
+uniform vec4 u_kd;
+uniform vec4 u_ks;
+uniform float u_sh;
+
+uniform vec4 u_light_color;
+
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
@@ -59,7 +67,7 @@ vec3 ray_at(Ray r, float t){
 struct Material {
     vec4 ke;    // Emissive component
     vec4 ka;    // Ambient component
-    vec4 kd;    // Ambient component
+    vec4 kd;    // Diffuse component
     vec4 ks;    // Specular component
     float sh;   // Shiness
 };
@@ -318,11 +326,11 @@ void main() {
     // WORLD
     // Material
     Material mat;
-    mat.ke = vec4(0.0, 0.0, 0.0, 1.0);
-    mat.ka = vec4(0.0, 0.0, 1.0, 1.0);
-    mat.kd = vec4(0.0, 0.0, 0.0, 1.0);
-    mat.ks = vec4(1.0, 0.0, 0.0, 1.0);
-    mat.sh = 10.0;
+    mat.ke = u_ke;
+    mat.ka = u_ka;
+    mat.kd = u_kd;
+    mat.ks = u_ks;
+    mat.sh = u_sh;
 
     // Spheres
     int size = 4;
@@ -348,7 +356,7 @@ void main() {
 
     // LIGHTING
     Directional_light light;
-    light.color = vec4(0.0, 0.0, 1.0, 1.0);
+    light.color = u_light_color;
     light.dir = vec3(1.0, 1.0, 1.0);
 
     
