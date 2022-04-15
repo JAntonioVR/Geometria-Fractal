@@ -46,4 +46,18 @@ function hexToRgb(hex) {
      ] : null;
 }
 
-export {cartesianToSpheric, sphericToCartesian, hexToRgb}
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+  
+function rgbToHex(rgba) {
+    let r = rgba[0],
+        g = rgba[1],
+        b = rgba[2]
+    return "#" + componentToHex(r*255) + 
+                 componentToHex(g*255) + 
+                 componentToHex(b*255);
+}
+
+export {cartesianToSpheric, sphericToCartesian, hexToRgb, rgbToHex}

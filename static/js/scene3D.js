@@ -207,43 +207,59 @@ class Scene3D {
     this.parameters.ke[0] = new_ke[0];
     this.parameters.ke[1] = new_ke[1];
     this.parameters.ke[2] = new_ke[2];
-    this.parameters.ke[3] = new_ke[3];
+  }
+
+  get_ke() {
+    return this.parameters.ke;
   }
 
   set_ka(new_ka) {
     this.parameters.ka[0] = new_ka[0];
     this.parameters.ka[1] = new_ka[1];
     this.parameters.ka[2] = new_ka[2];
-    this.parameters.ka[3] = new_ka[3];
+  }
+
+  get_ka(){
+    return this.parameters.ka;
   }
 
   set_kd(new_kd) {
     this.parameters.kd[0] = new_kd[0];
     this.parameters.kd[1] = new_kd[1];
     this.parameters.kd[2] = new_kd[2];
-    this.parameters.kd[3] = new_kd[3];
+    this.parameters.kd[3] = 1.0
+  }
+
+  get_kd(){
+    return this.parameters.kd;
   }
 
   set_ks(new_ks) {
     this.parameters.ks[0] = new_ks[0];
     this.parameters.ks[1] = new_ks[1];
     this.parameters.ks[2] = new_ks[2];
-    this.parameters.ks[3] = new_ks[3];
+  }
+
+  get_ks(){
+    return this.parameters.ks;
   }
 
   set_sh(new_sh){
     this.parameters.sh = new_sh;
   }
 
+  get_sh(){
+    return this.parameters.sh;
+  }
+
   set_light_color(new_light_color) {
     this.parameters.light_color[0] = new_light_color[0];
     this.parameters.light_color[1] = new_light_color[1];
     this.parameters.light_color[2] = new_light_color[2];
-    this.parameters.light_color[3] = new_light_color[3];
   }
 
-  get_sh(){
-    return this.parameters.sh;
+  get_light_color(){
+    return this.parameters.light_color;
   }
   
   rescaleAngles(){
