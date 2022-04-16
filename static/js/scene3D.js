@@ -187,6 +187,11 @@ class Scene3D {
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
   }
 
+  moveX(desp) {
+    this.parameters.lookfrom_spheric[2] += desp;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+  }
+
   moveUp(){
     this.parameters.lookfrom_spheric[1] -= this.parameters.delta;
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
@@ -198,6 +203,13 @@ class Scene3D {
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
     this.rescaleAngles()
   }
+
+
+  moveY(desp) {
+    this.parameters.lookfrom_spheric[1] += desp;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+  }
+
 
   getPosition() {
     return this.parameters.lookfrom; 

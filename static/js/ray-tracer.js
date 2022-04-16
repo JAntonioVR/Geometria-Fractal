@@ -17,8 +17,8 @@ function main(){
     document.addEventListener("keydown", (event) => onKeyDown(event), true );
 
     const glCanvas = document.querySelector("#glCanvas");
-    glCanvas.addEventListener('mousemove', (event) => setCurrentPosition(event), true);
-    glCanvas.addEventListener('mousedown', (event) => moveCamera(event), true);
+    glCanvas.addEventListener('mousemove', (event) => moveCamera(event), true);
+    glCanvas.addEventListener('mousedown', (event) => mouseDown(event), true);
     glCanvas.addEventListener('mouseup', mouseUp, true);
 
     const botonReset = document.querySelector("#botonReset");
@@ -59,7 +59,7 @@ var mousePosition = [0,0];
 var mouseDownPosition = [0,0];
 var mouseState = MouseState.MOUSE_UP; 
 
-function setCurrentPosition(event){
+function moveCamera(event){
   var x = event.clientX;
   var y = event.clientY;
   mousePosition = [x, y];
@@ -70,17 +70,20 @@ function setCurrentPosition(event){
 
   if(mouseState == MouseState.MOUSE_DOWN){
     var disp = [
-      (mousePosition[0] - mouseDownPosition[0])/width,
-      (mousePosition[1] - mouseDownPosition[1])/height
+      0.01*2.0*Math.PI*(mousePosition[0] - mouseDownPosition[0])/width-Math.PI,
+      0.01*Math.PI*(mousePosition[1] - mouseDownPosition[1])/height-Math.PI/2.0
     ]
     document.querySelector("#marcador-raton").innerHTML = "(" + disp[0] +", " + disp[1] +")"
 
+    theScene.moveX(disp[0]);
+    theScene.moveY(disp[1]);
+    theScene.drawScene();
     
   }
 
 }
 
-function moveCamera(event){
+function mouseDown(event){
   mouseState = MouseState.MOUSE_DOWN;
   mouseDownPosition = [event.clientX, event.clientY];
 }
