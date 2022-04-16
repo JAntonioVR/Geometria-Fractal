@@ -37,4 +37,27 @@ function sphericToCartesian(point) {
     return [x, y, z]
 }
 
-export {cartesianToSpheric, sphericToCartesian}
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+      parseInt(result[1], 16)/256.0,
+      parseInt(result[2], 16)/256.0,
+      parseInt(result[3], 16)/256.0
+     ] : null;
+}
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+  
+function rgbToHex(rgba) {
+    let r = rgba[0],
+        g = rgba[1],
+        b = rgba[2]
+    return "#" + componentToHex(r*255) + 
+                 componentToHex(g*255) + 
+                 componentToHex(b*255);
+}
+
+export {cartesianToSpheric, sphericToCartesian, hexToRgb, rgbToHex}

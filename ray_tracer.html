@@ -24,11 +24,28 @@
                 <li>Teclas +/-: Ampliar o reducir el zoom</li>
                 <li>Flechas: Desplazarse por el espacio</li>
             </ul>
+            <b>Modelo de iluminación</b><br>
+            <input id="ke" type="color"> Componente emisiva<br>
+            <input id="ka" type="color"> Componente ambiental<br>
+            <input id="kd" type="color"> Componente difusa<br>
+            <input id="ks" type="color"> Componente especular<br>
+            <div class="deslizador" id="shiness">
+                <div>
+                <b>Brillo:</b>
+                </div>
+                <div>
+                <input id="sh" type="range" min="10.0" max="1000" step="5">
+                </div>
+                <div id="valor_sh"></div>
+            </div>
+            <input id="light_color" type="color"> Color de la luz<br>
             <b>Volver a los parámetros por defecto</b><br>
             <button id="botonReset">Reset</button>
             <div  id="posicion-actual">
                 <b>Posición actual: </b><div id="marcador-posicion"></div>
-
+            </div>
+            <div  id="posicion-raton">
+                <b>Posición ratón: </b><div id="marcador-raton"></div>
             </div>
 
 

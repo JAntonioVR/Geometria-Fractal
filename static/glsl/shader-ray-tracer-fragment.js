@@ -16,6 +16,14 @@ precision mediump float;
 uniform vec3 u_lookfrom;
 uniform vec3 u_lookat;
 
+uniform vec4 u_ke;
+uniform vec4 u_ka;
+uniform vec4 u_kd;
+uniform vec4 u_ks;
+uniform float u_sh;
+
+uniform vec4 u_light_color;
+
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
@@ -49,6 +57,22 @@ vec3 ray_at(Ray r, float t){
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
+// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
+// 
+
+//
+// ─── MATERIAL ───────────────────────────────────────────────────────────────────
+// Struct that defines a material RGB components.
+
+struct Material {
+    vec4 ke;    // Emissive component
+    vec4 ka;    // Ambient component
+    vec4 kd;    // Diffuse component
+    vec4 ks;    // Specular component
+    float sh;   // Shiness
+};
+
+//
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
 // Stores information about an intersection between a ray and a surface.
 
@@ -57,9 +81,58 @@ struct Hit_record {
     vec3 normal;    // Surface's normal at p point
     float t;        // t value where the ray hits the surface
     bool hit;       // True if surface is hit, false otherwise
+    Material mat;   // Material of the hit surface
 };
 
+//
+// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
+// Struct that defines a directional light source.
 
+struct Directional_light{
+    vec3 dir;   // Light direction
+    vec4 color; // Light RGB color
+};
+
+vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
+
+    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
+    Material mat = hr.mat;
+    Directional_light light;
+    vec3 light_dir;
+    vec3 view_dir = normalize(u_lookfrom - hr.p);
+    vec3 normal = normalize(hr.normal);
+    vec4 emissive, ambient, diffuse, specular;
+    emissive = vec4(0.0, 0.0, 0.0, 1.0);
+    ambient = vec4(0.0, 0.0, 0.0, 1.0);
+    diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+    specular = vec4(0.0, 0.0, 0.0, 1.0);
+    if(num_lights > 0){
+        for(int i = 0; i < ARRAY_TAM; i++){
+            if(i == num_lights) break;
+            light = lights[i];
+            color_average += light.color;
+            light_dir = normalize(light.dir);
+            float cos_theta = max(0.0, dot(normal, light_dir));
+            
+            // Only if light is visible from surface point
+            if(cos_theta > 0.0) {
+                // Reflection direction
+                vec3 reflection_dir = reflect(-light_dir, normal);
+
+                diffuse += mat.kd * light.color * cos_theta;
+                specular += mat.ks * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
+            }
+        }
+        color_average /= float(num_lights);
+        emissive = mat.ke * color_average;
+        ambient = mat.ka * color_average;
+    }
+
+    return emissive + ambient + diffuse + specular;
+    
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 
 //
 // ─── SPHERE ─────────────────────────────────────────────────────────────────────
@@ -68,6 +141,7 @@ struct Hit_record {
 struct Sphere{
     vec3 center;
     float radius;
+    Material mat;
 };
 
 //
@@ -99,6 +173,7 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     result.t = root;
     result.p = ray_at(R, result.t);
     result.normal = (result.p - S.center) / S.radius;
+    result.mat = S.mat;
     return result;
 }
 
@@ -156,7 +231,7 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
         result.hit = true;
         result.t = t;
         result.p = ray_at(R, result.t);
-        result.normal = P.normal;
+        result.normal = normalize(P.normal);
     }
     return result;
 }
@@ -215,19 +290,19 @@ Ray get_ray(Camera cam, float s, float t){
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
 
-vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
 
     // r hits any sphere?
     float t_closest = 100000.0;
-    vec3 tmp_color;
+    vec4 tmp_color;
     Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
         vec3 N = hr.normal;
-        tmp_color = 0.5*vec3(N.x+1.0, N.y+1.0, N.z+1.0);
+        tmp_color = evaluateLightingModel(lights, num_lights, hr);
     }
 
-    // r hits the plane?
+    // r hits the plane? 
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
@@ -235,9 +310,9 @@ vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
         int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
         int modulus = sum - (2*int(sum/2));
         if(modulus == 0)
-            tmp_color = vec3(1.0, 1.0, 1.0);
+            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
         else
-            tmp_color = vec3(0.0,0.0,0.0);
+            tmp_color = vec4(0.0,0.0,0.0, 1.0);
     }
 
     // If r hits any surface
@@ -246,7 +321,7 @@ vec3 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P) {
     // r does not hit any surface
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
-    return (1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0);
+    return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -262,26 +337,44 @@ void main() {
     int image_height = int(float(image_width) / aspect_ratio);
 
     // WORLD
+    // Material
+    Material mat;
+    mat.ke = u_ke;
+    mat.ka = u_ka;
+    mat.kd = u_kd;
+    mat.ks = u_ks;
+    mat.sh = u_sh;
+
     // Spheres
-    int size = 4;
+    int num_spheres = 1;
     Sphere world[ARRAY_TAM];
     Sphere S1, S2, S3, S4;
-    S1.center = vec3(0.0, 0.5, 0.0); S1.radius = 0.5;
-    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5;
-    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5;
-    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5;
+    S1.center = vec3(0.0, 0.0, 0.0); S1.radius = 0.5; S1.mat = mat;
+    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5; S2.mat = mat;
+    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5; S3.mat = mat;
+    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5; S4.mat = mat;
+
 
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
     // Plane
     Plane P;
     P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = 0.0;
+    P.D = -0.5;
 
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
+
+    // LIGHTING
+    Directional_light lights[ARRAY_TAM];
+    int num_lights = 2;
+    Directional_light l1, l2;
+    l1.color = u_light_color; l2.color = vec4(0.0, 0.0, 1.0, 1.0);
+    l1.dir = vec3(1.0, 1.0, 1.0);
+    l2.dir = vec3(-1.0, -1.0, 0.0);
+    lights[0] = l1; lights[1] = l2;
     
     // COLOR
     vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
@@ -290,7 +383,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = vec4(ray_color(r, world, size, P), 1.0);
+    gl_FragColor = ray_color(r, world, num_spheres, P, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
