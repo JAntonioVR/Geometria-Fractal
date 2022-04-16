@@ -67,11 +67,12 @@ function moveCamera(event){
   var width = canvas.offsetWidth,
       height = canvas.offsetHeight;
   
+  // FIXME Corregir movimiento de la camara a partir del ratón
 
   if(mouseState == MouseState.MOUSE_DOWN){
     var disp = [
-      0.01*2.0*Math.PI*(mousePosition[0] - mouseDownPosition[0])/width-Math.PI,
-      0.01*Math.PI*(mousePosition[1] - mouseDownPosition[1])/height-Math.PI/2.0
+      2.0*Math.PI*(mousePosition[0] - mouseDownPosition[0])/width-Math.PI,
+      Math.PI*(mousePosition[1] - mouseDownPosition[1])/height-Math.PI/2.0
     ]
     document.querySelector("#marcador-raton").innerHTML = "(" + disp[0] +", " + disp[1] +")"
 
