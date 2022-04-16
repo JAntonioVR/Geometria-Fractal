@@ -3,8 +3,10 @@
 \usepackage[a4paper, tmargin=2.54cm, bmargin=2.54cm, lmargin=3.17cm, rmargin=3.17cm]{geometry}
 \newcommand{\head}[1]{\textnormal{\textbf{#1}}}
 
-\usepackage{titlesec}    % Remove the text 'Chapter' from each chapter.
-\titleformat{\chapter}{\normalfont\huge\bf}{\thechapter}{20pt}{\huge\bf}
+%Options: Sonny, Lenny, Glenn, Conny, Rejne, Bjarne, Bjornstrup
+\usepackage[Glenn]{fncychap}
+%\usepackage{titlesec}    % Remove the text 'Chapter' from each chapter.
+%\titleformat{\chapter}{\normalfont\huge\bf}{\thechapter}{20pt}{\huge\bf}
 
 \title{Master's thesis Health Informatics \the\year}
 \author{authors}
@@ -18,6 +20,7 @@
 \usepackage{wrapfig}
 \usepackage{booktabs}
 \usepackage{xcolor}
+\usepackage{listings}
 \usepackage{hyperref}
 \usepackage[spanish, es-tabla]{babel}
 
@@ -43,3 +46,31 @@
 \newcommand{\N}[0]{\mathbb{N}}
 \newcommand{\Z}[0]{\mathbb{Z}}
 \newcommand{\Q}[0]{\mathbb{Q}}
+
+%% Custom Verbatim
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}

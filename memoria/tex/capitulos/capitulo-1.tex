@@ -6,32 +6,36 @@
 
 Las primeras preguntas que se pueden plantear son ¿qué es un fractal? ¿Qué tienen de especial estas figuras? ¿Qué las diferencia de un objeto no fractal? ¿Por qué es necesaria una geometría fractal? Trataremos de responder a cada una de estas preguntas a lo largo de este capítulo, comenzando por la primera de ellas. En realidad, hay distintas definiciones de \textit{fractal}, pero todas utilizan dos conceptos como base: la \textbf{autosimilaridad} y la \textbf{dimensión}. La primera de ellas es más cercana para nosotros de lo que en un principio podemos pensar, fijémonos en los ejemplos de la imagen \ref{fig:objetos}. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
-  \includegraphics[scale=0.24]{./img/romanescu.jpg} &   \includegraphics[scale=0.28]{./img/helecho.jpg} \\
-(a) Romanescu & (b) Hoja de un helecho \\[6pt]
+  \includegraphics[scale=0.225]{./img/romanescu.jpg} &   \includegraphics[scale=0.2]{./img/rayo.jpg} \\
+(a) Romanescu & (b) Rayo \\[6pt]
 \end{tabular}
-\caption{Objetos cotidianos con estructura fractal}
+\caption{Objetos de la naturaleza con estructura fractal}
 \label{fig:objetos}
 \end{figure}
 
-Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos que recuerdan al original, y así sucesivamente. Por su parte, la hoja de un helecho también pareciera estar formada por muchas hojas más pequeñas similares a la original, y estas pequeñas hojas a su vez también están formadas por otras hojas aún más pequeñas.
+Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos similares al objeto inicial, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras divisiones, formando pequeños rayos semejantes al rayo primitivo.
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
-\begin{definicion}[Autosimilaridad] Una figura o subconjunto $A$ de $\R^n$ es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala. Es decir,
+\begin{definicion}[Autosimilaridad] 
+\label{def:autosimilaridad}  
+Una figura o subconjunto $A$ de $\R^n$ es \textbf{autosimilar} si está compuesto por copias de sí mismo reducidas mediante un factor de escala y desplazadas por un movimiento rígido. Es decir,
 $$
-A = \bigcup_{i=1}^n h_i(A),
+A = \bigcup_{i=1}^n f_i\circ h_i(A),
 $$
-donde cada $h_i, i=1,\dots,n$ es una homotecia de razón menor que 1. 
+donde cada $h_i, i=1,\dots,n$ es una homotecia de razón menor que 1 y $f_i, i=1,\dots,n$ es un movimiento rígido. 
 \end{definicion}
 
-En futuras ocasiones se utilizarán indistintamente los términos de <<reducción por un factor de escala>> e <<imagen vía una homotecia>>, queriendo en ambos casos referirnos a este concepto.
+En futuras ocasiones se utilizarán indistintamente los términos de <<reducción por un factor de escala>> e <<imagen vía una homotecia>>, evidenciando el movimiento rígido y queriendo en ambos casos referirnos a este concepto.
 
-Para afianzar y formalizar conceptos y con el objetivo de introducir un concepto de dimensión, estudiaremos algunos ejemplos clásicos de objetos fractales.
+Para afianzar y formalizar conceptos y con el objetivo de introducir una definición de la dimensión, estudiaremos algunos ejemplos clásicos de objetos fractales.
 
 \section{Ejemplos clásicos}
 \label{section:ejemplos}
+
+En adelante, y salvo que se indique lo contrario, cuando hablemos en términos topológicos de $\R^n$ o subconjuntos suyos nos estaremos refiriendo al espacio topológico $\R^n$ dotado de la topología usual o la topología inducida por la usual en el caso de subconjuntos de $\R^n$.
 
 \subsection{El conjunto de Cantor}
 \label{subsection:Cantor}
@@ -48,66 +52,22 @@ Creado por el célebre matemático \textit{George Cantor}, este fractal se const
 
 Los puntos del intervalo inicial $[0,1]$ que restan tras las infinitas iteraciones son los que conforman el \textit{conjunto de Cantor}, que denotamos con $\mathbf{C}$, de forma que $\mathbf{C}=\bigcap_{n\in\N}C_n$.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.4]{img/cantor.png}
 \caption{Iteraciones del proceso de generación del conjunto de Cantor}
  \label{fig:Cantor}
 \end{figure}
 
-El conjunto de Cantor es además un conjunto compacto, pues cada $C_n$ es una unión finita de intervalos cerrados y acotados, y por tanto compactos. Sabiendo que la intersección numerable de conjuntos compactos es compacta, tenemos pues que $\mathbf{C}$ es un conjunto compacto.
+El conjunto de Cantor es además un conjunto compacto, pues cada $C_n$ es una unión finita de intervalos cerrados y acotados de $\R$, y por tanto compactos, como sabemos gracias al \textit{teorema de Heine-Borel}. Sabiendo que la intersección arbitraria de conjuntos cerrados es cerrada, y que cada $C_n$ está acotado, tenemos pues que $\mathbf{C}$ es un conjunto compacto.
 
-Observemos ahora que en la primera iteración eliminamos $1$ segmento de longitud $\frac 1 3$, en la segunda iteración se eliminan $2$ segmentos de longitud $\left(\frac{1}{3}\right)^2$ y en la $n$-ésima iteración extraemos $2^{n-1}$ segmentos de longitud $\left(\frac{1}{3}\right)^n$. Si sumamos todas las longitudes de todos los segmentos que son eliminados en cada paso se obtiene:
+Observemos ahora que en la primera iteración eliminamos $1$ segmento de longitud $\frac 1 3$, en la segunda iteración se eliminan $2$ segmentos de longitud $\left(\frac{1}{3}\right)^2$ y en la $n$-ésima iteración extraemos $2^{n-1}$ segmentos de longitud $\left(\frac{1}{3}\right)^n$. Si sumamos las longitudes de todos los segmentos que son eliminados en cada paso se obtiene:
 $$
 \sum_{n=1}^\infty 2^{n-1}\left(\frac 1 3\right)^n  = \frac 1 3  \sum_{n=0}^\infty 2^n\left(\frac 1 3\right)^n =  \frac 1 3  \sum_{n=0}^\infty \left(\frac 2 3\right)^n = \frac{1}{3} \left(\frac{1}{1-\frac{2}{3}}\right) = 1,
 $$
 donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $\sum_{n=0}^\infty q^n = \frac{1}{1-q}$.
 
-Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
-
-\subsection{La curva de Koch}
-\label{subsection:curva-Koch}
-
-Esta figura, creada por el sueco \textit{N. F. Helge von Koch} sigue un proceso de construcción iterativo al igual que el conjunto de Cantor, pero en lugar de eliminar segmentos, se añaden de la siguiente manera (ver imagen \ref{fig:curva-Koch})
-
-\begin{enumerate}
-\item Partiendo de un segmento de recta de longitud $1$ (al igual que en el conjunto de Cantor, la longitud del segmento inicial es irrelevante, pues la figura final es la misma salvo homotecia), se divide en tres partes iguales de longitud $\frac 1 3$ y la parte central se sustituye por un triángulo equilátero al que se le elimina la base. Esto da lugar a $4=4^1$ segmentos de recta de longitud $\frac 1 3=\left(\frac 1 3\right)^1$.
-
-\item Repetimos este proceso en cada uno de los segmentos de recta obtenidos, colocando el triángulo siempre por encima de la recta, obteniendo así $16=4^2$ segmentos de recta de longitud $\frac 1 9=\left(\frac 1 3\right)^2$.
-
-\item Aplicamos este proceso indefinidamente, obteniendo en el paso $n$-ésimo $4^n$ segmentos de longitud $\left(\frac 1 3\right)^n$. 
-\end{enumerate}
-
-El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que denotamos como \textbf{K}.
-
-\begin{figure} [h]
-\centering
-\includegraphics[scale = 0.5]{img/curva-Koch.png}
-\caption{Iteraciones del proceso de generación de la curva de Koch}
- \label{fig:curva-Koch}
-\end{figure}
-
-\subsection{El copo de nieve de Koch}
-\label{subsection:copo-Koch}
-
-A partir de la curva de Koch podemos generar un objeto matemático muy particular: el copo de nieve de Koch. Para crearlo, basta aplicar el proceso iterativo descrito para generar la curva de Koch a cada uno de los segmentos que componen un triángulo equilátero, de forma que los triángulos que se generan apunten hacia el exterior.
-
-
-\begin{figure} [h]
-\centering
-\includegraphics[scale = 0.6]{img/copo-Koch.png}
-\caption{Generación del copo de nieve de Koch}
-\label{fig:copo-Koch}
-\end{figure}
-
-Esta curva posee la particularidad de tener longitud infinita y a su vez encerrar un área finita. Realmente el copo de Koch no es exactamente un fractal, pues no es totalmente autosimilar, aunque se compone de tres partes idénticas las cuales sí son autosimilares, como podemos ver en la imagen \ref{fig:copo-Koch-colores}.
-
-\begin{figure} [h]
-\centering
-\includegraphics[scale = 0.2]{img/copo-Koch-colores.png}
-\caption{Curvas de Koch que componen el copo de Koch}
-\label{fig:copo-Koch-colores}
-\end{figure}
+Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original, es decir, la longitud de $\mathbf C$ es nula y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
 
 \subsection{El triángulo de Sierpinski}
 \label{subsection:triangulo-Sierpinski} 
@@ -124,7 +84,7 @@ Esta figura, original del polaco \textit{Waclaw Sierpinski}, es creada de una ma
 
 La figura a la que converge este proceso infinito se conoce como triángulo \textbf{S} de Sierpinski.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/Sierpinski-triangle.png}
 \caption{Generación del triángulo de Sierpinski}
@@ -136,14 +96,14 @@ $$
 A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A,
 $$
 
-En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total y aún así tenemos puntos (por ejemplo los vértices de los triángulos que se van generando). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
+En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área es 0 y seguimos tenemos puntos (por ejemplo los vértices de los triángulos originados en cada iteración). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
 
 \subsection{La alfombra de Sierpinski y la esponja de Menger}
 \label{subsection:alfombra-esponja}
 
 El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para generar \textbf{S} se pueden obtener otras formas. Por ejemplo, pensemos que en lugar de comenzar con un triángulo equilátero partimos de un cuadrado, lo subdividimos en 9 cuadrados de lado $\frac 1 3$ y extraemos el cuadrado central. Repitiendo este proceso indefinidamente con cada uno de los cuadrados que se generan finalmente se obtiene la llamada alfombra de Sierpinski (ver imagen \ref{fig:alfombra-Sierpinski}).
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/Sierpinski-carpet.png}
 \caption{Generación de la alfombra de Sierpinski}
@@ -152,43 +112,100 @@ El propio Sierpinski se dio cuenta que con el mismo patrón utilizado para gener
 
 Este proceso también se puede modelar en 3D, obteniendo así la conocida como esponja de Menger o cubo de Magritte, que es una generalización en tres dimensiones de la alfombra de Sierpinski, la cual podemos ver en la imagen \ref{fig:esponja-menger}.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \centering
 \includegraphics[scale = 0.6]{img/esponja_menger.png}
 \caption{Esponja de Menger}
  \label{fig:esponja-menger}
 \end{figure}
 
+\subsection{La curva de Koch}
+\label{subsection:curva-Koch}
+
+Esta figura fractal, creada por el sueco \textit{N. F. Helge von Koch} sigue un proceso de construcción iterativo al igual que el conjunto de Cantor, pero en lugar de eliminar segmentos, se añaden de la siguiente manera (ver imagen \ref{fig:curva-Koch}):
+
+\begin{enumerate}
+\item Partiendo de un segmento de recta de longitud $1$ (al igual que en el conjunto de Cantor, la longitud del segmento inicial es irrelevante, pues la figura final es la misma salvo homotecia), se divide en tres partes iguales de longitud $\frac 1 3$ y la parte central se sustituye por un triángulo equilátero al que se le elimina la base. Esto da lugar a $4=4^1$ segmentos de recta de longitud $\frac 1 3=\left(\frac 1 3\right)^1$.
+
+\item Repetimos este proceso en cada uno de los segmentos de recta obtenidos, colocando el triángulo siempre por encima de la recta, obteniendo así $16=4^2$ segmentos de recta de longitud $\frac 1 9=\left(\frac 1 3\right)^2$.
+
+\item Aplicamos este proceso indefinidamente, obteniendo en el paso $n$-ésimo $4^n$ segmentos de longitud $\left(\frac 1 3\right)^n$. 
+\end{enumerate}
+
+El resultado final del proceso es lo que llamamos la \textit{curva de Koch}, que denotamos como \textbf{K}.
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.5]{img/curva-Koch.png}
+\caption{Iteraciones del proceso de generación de la curva de Koch}
+ \label{fig:curva-Koch}
+\end{figure}
+
+\subsection{El copo de nieve de Koch}
+\label{subsection:copo-Koch}
+
+A partir de la curva de Koch podemos generar un objeto matemático muy particular: el copo de nieve de Koch. Para crearlo, basta aplicar el proceso iterativo descrito para generar la curva de Koch a cada uno de los segmentos que componen un triángulo equilátero, de forma que los triángulos que se generan apunten hacia el exterior.
+
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.6]{img/copo-Koch.png}
+\caption{Generación del copo de nieve de Koch}
+\label{fig:copo-Koch}
+\end{figure}
+
+Esta curva posee la particularidad de tener longitud infinita y a su vez encerrar un área finita. Realmente el copo de Koch no es exactamente un fractal, pues no es totalmente autosimilar, aunque se compone de tres partes idénticas las cuales sí son autosimilares, como podemos ver en la imagen \ref{fig:copo-Koch-colores}.
+
+\begin{figure} [ht]
+\centering
+\includegraphics[scale = 0.2]{img/copo-Koch-colores.png}
+\caption{Curvas de Koch que componen el copo de Koch}
+\label{fig:copo-Koch-colores}
+\end{figure}
+
+
 \section{Conceptos de dimensión fractal}
 \label{section:dimension}
 
 Al iniciar este capítulo mencionamos que las distintas definiciones de fractal utilizaban los conceptos de autosimilaridad y dimensión. Con los distintos ejemplos hemos entendido el primero de ellos, por lo que es momento de abordar el concepto de dimensión. 
 
-Intuitivamente, sabemos que una recta o un segmento de recta es de dimensión 1, pues sólo nos podemos mover en una dirección: de derecha a izquierda (el movimiento se describe con un único parámetro). Según este razonamiento y de acuerdo con la intuición un conjunto de puntos aislados es un conjunto de dimensión 0, pues no existe movilidad. Un cuadrado es de dimensión 2, ya que nos podemos mover de izquierda a derecha o de arriba a abajo (el movimiento se describe con dos parámetros: largo y ancho). Un cubo es de dimensión 3 porque en él nos podemos mover de derecha a izquierda, de arriba a abajo o de más a menos profundidad (el movimiento se describe con tres parámetros: altura, anchura y profundidad). 
+El concepto de dimensión más clara que tenemos es el de dimensión algebraica, esto es, la dimensión de un espacio vectorial. Sabemos que un espacio vectorial $V$ se dice que tiene $\dim(V)=n$, con $n\in\N$ si, y solo si existe una base de $V$ constituida por $n$ vectores, de forma que cualquier elemento de $V$ puede ser expresado como una combinación lineal de los $n$ vectores de la base. Otra manera de ver esto es que para construir los vectores de $V$ tenemos hasta $n$ parámetros de libertad, esto es, $v=a_1 v_1 +\cdots a_n v_n \ \ \forall v\in V$, donde $\{v_1,\dots,v_n\}$ es una base de $V$ y $a_1,\dots,a_n\in K$ siendo $K$ el cuerpo sobre el que está construido el espacio vectorial.
 
-Pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
+En el caso de subconjuntos de $\R^n$ como puede ser una curva parametrizada, si seguimos la analogía del número de parámetros que define un punto en este caso de una curva, podemos decir que su dimensión es $1$, ya que un punto de una curva parametrizada puede expresarse en función de un único parámetro. La variación de este parámetro nos daría otro punto de la curva, por lo que podemos decir que un punto puede moverse por la curva con un grado de libertad (ver imagen \ref{fig:curva-superficie} (a)). Por su lado, una superficie regular de $\R^3$ puede localmente ser expresada como la imagen de una parametrización que depende de dos variables y la variación de estas mediante dicha parametrización resulta en otro punto de la superficie, pudiendo expresar esto como que un punto de una superficie regular tiene dos grados de libertad, lo que intuitivamente permite afirmar que una superficie regular tiene dimensión $2$ (ver imagen \ref{fig:curva-superficie} (b)).
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{cc}
+  \includegraphics[scale=0.3]{./img/circunferencia.png} &   \includegraphics[scale=0.5]{./img/esfera.png} \\
+(a) En una curva de $\R^2$ & (b) En una superficie de $\R^3$ \\[4pt]
+\end{tabular}
+\caption{Posible movimiento de un punto en posibles objetos de $\R^n$}
+\label{fig:curva-superficie}
+\end{figure}
+
+Un posible enfoque para definir la dimensión puede ser el recién presentado, el cual nos sugiere pensar en el número de parámetros que definen la libertad de movimiento de un punto. Sin embargo, pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
 
 \subsection{Dimension fractal autosimilar}
 \label{subsection:dim-frac-autosimilar}
 
-Volvamos a pensar en un segmento de recta, un cuadrado y un cubo, objetos de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 4 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(4):=4=4^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 4$ del original, en el cuadrado se obtienen $N(4):=16=4^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 4$ del cuadrado inicial y en el cubo $N(4):=64=4^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 4$ del cubo original.
+Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 2 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(2):=2=2^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 2$ del original, en el cuadrado se obtienen $N(2):=4=2^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 2$ del cuadrado inicial y en el cubo $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 2$ del cubo original.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{ccc}
   \includegraphics[scale=0.15]{./img/linea-dividida.png} &   \includegraphics[scale=0.15]{./img/cuadrado-dividido.png} & \includegraphics[scale=0.2]{./img/cubo-dividido.png}\\
-(a) Segmento dividido en 4 & (b) Cuadrado dividido en 16 & (c) Cubo dividido en 64 \\[4pt]
+(a) Segmento dividido en 2 & (b) Cuadrado dividido en 4 & (c) Cubo dividido en 8 \\[4pt]
 \end{tabular}
-\caption{Segmento, cuadrado y cubo divididos en 4}
+\caption{Segmento, cuadrado y cubo divididos en objetos a razón $\frac 1 2$}
 \label{fig:divisiones}
 \end{figure}
 
-Si en lugar de 4 tomamos cualquier número natural $k\geq 1$, la razón de la homotecia sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
+Si en lugar de 2 tomamos cualquier número natural $k\geq 1$, la razón de la homotecia sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
 
 \begin{equation}\label{eq:relaciones-dimension}
 \frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
 \end{equation}
 
-En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definicion.
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definición.
 
 \begin{definicion}[Congruencia]
 Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
@@ -238,7 +255,7 @@ El concepto de dimensión fractal autosimilar tiene el defecto de que está limi
 \begin{definicion}
 Dado un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
 $$
-\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace 
+\diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace .
 $$
 \end{definicion}
 
@@ -266,7 +283,7 @@ $$
 $$
 donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
 \includegraphics[scale=0.17]{./img/cajas-grandes.png} &   \includegraphics[scale=0.17]{./img/cajas-peques.png} \\
 \end{tabular}
@@ -277,7 +294,7 @@ donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de di
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
 
-La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $F=\Q\cap[0,1]\subset\R$ es un conjunto en el que cada punto por separado tiene obviamente dimensión por cajas igual a 0, pero al ser $\Q$ un conjunto denso en $\R$ la dimensión por cajas de $F$ es $1$. Por tanto, no se cumple en general que para una familia $\{F_i\}$ de conjuntos $\dim_B\cup_{i=1}^\infty = \sup_i\dim_B F_i$. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
+La dimensión por cajas tiene el inconveniente de que no tenemos garantizada la existencia de límite en la ecuación (\ref{eq:dim-cajas}) o hipotéticos problemas con conjuntos más generales, por ejemplo conjuntos densos. Así, $F=\Q\cap[0,1]\subset\R$ es un conjunto en el que cada punto por separado tiene obviamente dimensión por cajas igual a 0, pero al ser $\Q$ un conjunto denso en $\R$ la dimensión por cajas de $F$ es $1$. Por tanto, no se cumple en general que para una familia $\{F_i\}$ de conjuntos $\dim_B\cup_{i=1}^\infty F_i = \sup_i\dim_B F_i$. Para solucionar estos problemas \textit{Felix Hausdorff} publicó en 1919 un artículo que cambiaría la teoría de la medida tal y como la conocíamos \cite{Hausdorff1919}. 
 
 
 Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una familia numerable de conjuntos $\left\lbrace U_i\right\rbrace_{i\in\N}$  tales que 
@@ -354,7 +371,7 @@ Por último estudiaremos un concepto de dimensión aplicable a espacios topológ
 \item $X$ tiene dimensión $n$ ($\dim_T(X)=n$) si se verifica que $\dim_T(X)\leq n$ pero es falso que $\dim_T(X)\leq n-1$
 \end{enumerate}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{tabular}{cc}
 \includegraphics[scale=0.5]{./img/ejemplo-dimension-1.png} &   \includegraphics[scale=0.45]{./img/ejemplo-dimension-2.png} \\
 (a) Ejemplo con $X=\{p\}$ & (b) Ejemplo con $X=r$ \\[6pt]
@@ -392,7 +409,7 @@ $$
 
 Este resultado fue originalmente probado por \textit{Edward Szpilrajn}, véase \cite[Capítulo VII]{Hurewicz-Wallman}.
 
-Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran \cite{Moran}. Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden siempre que el conjunto sea autosimilar.
+Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran \cite{Moran}. Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden.
 
 En conclusión, para un conjunto no vacío y acotado $A\subseteq\R^n$, se tiene que:
 
