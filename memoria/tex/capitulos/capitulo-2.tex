@@ -77,6 +77,14 @@ Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos ce
 
 \subsection{Velocidad de convergencia}
 
+Si recordamos el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}), que nos decía que las funciones contractivas en un espacio métrico completo admiten un único punto fijo, el cual se puede hallar iterando la función. Recordemos que dada una función $f:\C\longrightarrow\C$ contractiva, esta cumple que $|f(z_1)-f(z_2)|\leq K|z_1-z_2|\ \ \forall z_1,z_2\in\C$, siendo $0<K<1$ la constante de Lipschitz de $f$, nombrada en este caso la constante de contractividad. Fijémonos que, si iteramos $n$ veces la función $f$
+\begin{eqnarray*}
+    |f^n(z_0)-f^{n-1}(z_0)| & \leq & K|f^{n-1}(z_0)-f^{n-2}(z_0)| \\
+    & \leq & K^2 |f^{n-2}(z_0)-f^{n-3}(z_0)| \\
+    & \leq\cdots\leq&K^{n-1}|f(z_0)-z_0|
+\end{eqnarray*}
+por lo que en realidad la constante $K$ define de forma genérica la velocidad de convergencia en términos de la función. Cuanto más cercana a $0$, más rápida será la convergencia al punto fijo. Sin embargo, vemos que realmente también depende de la condición inicial fijada, y es este el aspecto que explotaremos para obtener imágenes fractales. 
+
 En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
@@ -190,9 +198,10 @@ Consideramos ahora la representación de las cuencas de atracción de la funció
     \label{fig:cuencas-autosimilaridad}
 \end{figure}
 
+\newpage
+
 Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, es decir, representamos una región más pequeña, encontramos estructuras que son iguales independientemente del zoom que se aplique. En la figura \ref{fig:detalles} podemos ver distintos detalles de la figura \ref{fig:cuencas-autosimilaridad}, cada una es una ampliación de la anterior, y podemos ver como esa estructura se repite en todas las escalas.
 
-%\newpage
 
 \begin{figure}[ht]
     \begin{tabular}{ccc}
