@@ -34,22 +34,23 @@ Recordamos que en el capítulo \ref{chap:iteracion}, a partir de una función an
 
 Un último caso de posible comportamiento de una órbita son las órbitas caóticas, en las cuales no se percibe ningún patrón y además es muy sensible a las condiciones iniciales, fijémonos en lo que ocurre en el caso de la función $h(z)=z^2-1.9$ si miramos sus órbitas en $z_0=0,0.1$:
 
-\begin{lstlisting}
-In[]:= h[z_] := z^2 - 1.9;
-    NestList[h, 0.1, 20]
-    NestList[h, 0.0, 20]
-
-
-Out[]= {0.1, -1.89, 1.6721, 0.895918, -1.09733, -0.695866,
-    -1.41577, 0.104404, -1.8891, 1.6687, 0.884552, -1.11757, 
-    -0.651043, -1.47614, 0.279, -1.82216, 1.42026, 0.117148, 
-    -1.88628, 1.65804, 0.849092}
-
-Out[]= {0., -1.9, 1.71, 1.0241, -0.851219, -1.17543, -0.518374, 
-  -1.63129, 0.761102, -1.32072, -0.155688, -1.87576, 1.61848, 
-  0.719477, -1.38235, 0.0109007, -1.89988, 1.70955, 1.02256, 
-  -0.854379, -1.17004}
-\end{lstlisting}
+\begin{mmaCell}{Code}
+  h[z_] := z^2 - 1.9;
+  NestList[h, 0.1, 20]
+  NestList[h, 0.0, 20]
+\end{mmaCell}
+\begin{mmaCell}{Output}
+  \{0.1, -1.89, 1.6721, 0.895918, -1.09733, -0.695866,  \
+  -1.41577, 0.104404, -1.8891, 1.6687, 0.884552, -1.11757, \
+  -0.651043, -1.47614, 0.279, -1.82216, 1.42026, 0.117148, \
+  -1.88628, 1.65804, 0.849092\}
+\end{mmaCell}
+\begin{mmaCell}{Output}
+  \{0., -1.9, 1.71, 1.0241, -0.851219, -1.17543, -0.518374, \
+  -1.63129, 0.761102, -1.32072, -0.155688, -1.87576, 1.61848, \
+  0.719477, -1.38235, 0.0109007, -1.89988, 1.70955, 1.02256, \
+  -0.854379, -1.17004\}
+  \end{mmaCell}
 
 No se observa ningún patrón de convergencia y además, a pesar de ser semillas muy cercanas, las órbitas son muy diferentes.
 
@@ -121,16 +122,16 @@ Podemos aplicar este teorema para programar un algoritmo que grafique conjuntos 
 
 Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos prisioneros y a los puntos de escape asignarle otro en función de las iteraciones necesarias antes de alcanzar el número de escape. Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathcal{J}_{-0.12+0.75i}$ utilizaríamos el siguiente código:
 
-\begin{lstlisting}
-M = 50;
-Julia[z_, c_] := Length[FixedPointList[#^2 + c &, z, M, 
+\begin{mmaCell}{Code}
+  M = 50;
+  Julia[z_, c_] := Length[FixedPointList[#^2 + c &, z, M, 
     SameTest -> (Abs[#] > Max[2.0, Abs[c]] &)]];
     
-DensityPlot[
-      Julia[x + I y, -0.12 + 0.75 I], {x, -1.5, 1.5}, 
-      {y, -1.25, 1.25}, PlotPoints->200, AspectRatio->Automatic, 
-      ColorFunction -> (If[# >= 1, RGBColor[0, 0, 0], Hue[#]] &) ]
-\end{lstlisting}
+  DensityPlot[
+    Julia[x + I y, -0.12 + 0.75 I], {x, -1.5, 1.5}, 
+    {y, -1.25, 1.25}, PlotPoints->200, AspectRatio->Automatic, 
+    ColorFunction -> (If[# >= 1, RGBColor[0, 0, 0], Hue[#]] &) ]
+\end{mmaCell}
 
 Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar cuando dejar de iterar, especificando que se haga cuando se alcance $e_c$. Hemos utilizado también $M=50$ como máximo número de iteraciones. Podemos variar el segundo argumento de la llamada a la función \verb|Julia|, el rango de valores, el argumento \verb|PlotPoints| o el número máximo de iteraciones $M$ para graficar distintos conjuntos y detalles de los mismos. Algunos ejemplos de resultados de estos códigos se encuentran en la imagen \ref{fig:julia-explicados}.
 
@@ -230,17 +231,17 @@ Además, en el momento que una iterada se sitúe fuera de $\bar D(0,2)$, podemos
 
 El código en \textit{Mathematica} utilizado es por tanto el siguiente, muy similar al utilizado para graficar conjuntos de Julia:
 
-\begin{lstlisting}[label=code:Mandelbrot, caption=Código que grafica el conjunto de Mandelbrot]
+\begin{mmaCell}{Code}
   M = 100; 
   Mandelbrot = Compile[{{c, _Complex}}, 
-  Length[FixedPointList[#^2 + c &, 0, M, SameTest -> (Abs[#] > 2.0 &)]]];
+    Length[FixedPointList[#^2 + c &, 0, M, 
+    SameTest -> (Abs[#] > 2.0 &)]]];
 
   DensityPlot[Mandelbrot[x + I y], {x, -2.1, .7}, {y, -1.2, 1.2}, 
     Mesh -> False, Frame -> False, PlotPoints -> 200, 
     AspectRatio -> Automatic, 
     ColorFunction -> (If[# >= 1, Hue[0, 0, 0], Hue[#]] &)]
-
-\end{lstlisting}
+\end{mmaCell}
 
 Al igual que en el caso de los conjuntos de Julia, \textit{Mathematica} tiene una función preprogramada que grafica el conjunto de Mandelbrot, llamada \verb|MandelbrotSetPlot|, la cual admite varios argumentos opcionales, como la región a graficar, el máximo de iteraciones, resolución, etc.\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/MandelbrotSetPlot.html}}. 
 
@@ -248,7 +249,7 @@ Al igual que en el caso de los conjuntos de Julia, \textit{Mathematica} tiene un
   \centering
   \begin{tabular}{cc}
     \includegraphics[scale=0.54]{./img/C3/Mandelbrot-Mathematica.png} &   \includegraphics[scale=0.46]{./img/C3/MandelbrotSetPlot.png} \\
-  (a) Salida del código \ref{code:Mandelbrot}  & (b) Salida de la orden `MandelbrotSetPlot' \\[6pt]
+  (a) Salida del código \textit{Mathematica}  & (b) Salida de la orden `MandelbrotSetPlot' \\[6pt]
   \end{tabular}
   \caption{Representación de $\mathcal{M}$ y detalle en $[-0.65, -0.4]\times[0.47, 0.72]$}
   \label{fig:Mandelbrot-explicado}
