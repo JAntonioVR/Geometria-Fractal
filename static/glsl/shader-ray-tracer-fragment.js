@@ -145,6 +145,103 @@ struct Sphere{
 };
 
 //
+// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+//
+
+vec2 hit_sphere_limits( Sphere S, Ray R ){
+    vec3 oc = R.orig - S.center;
+	float b = dot(oc,R.dir);
+	float c = dot(oc,oc) - S.radius*S.radius;
+    float h = b*b - c;
+    if( h<0.0 ) return vec2(-1.0);
+    h = sqrt( h );
+    return -b + vec2(-h,h);
+}
+
+
+float mandelbub_map(vec3 p, float dw){
+    vec3 w = p;
+    float m = dot(w,w);
+    // extract polar coordinates
+    float wr = sqrt(m);
+    float wo = acos(w.y/wr);
+    float wi = atan(w.x,w.z);
+
+    // scale and rotate the point
+    wr = pow( wr, 8.0 );
+    wo = wo * 8.0;
+    wi = wi * 8.0;
+
+    // convert back to cartesian coordinates
+    w.x = wr * sin(wo)*sin(wi);
+    w.y = wr * cos(wo);
+    w.z = wr * sin(wo)*cos(wi);
+
+    dw = 8.0*pow(dot(w,w), 3.5)*dw +1.0;
+
+    return 0.25*log(m)*wr/dw;
+
+}
+
+vec3 calculate_normal( vec3 pos, float t, in float px )
+{
+    vec4 tmp;
+    vec2 e = vec2(1.0,-1.0)*0.5773*0.25*px;
+    return normalize( e.xyy*mandelbub_map( pos + e.xyy,tmp.x ) + 
+					  e.yyx*mandelbub_map( pos + e.yyx,tmp.y ) + 
+					  e.yxy*mandelbub_map( pos + e.yxy,tmp.z ) + 
+					  e.xxx*mandelbub_map( pos + e.xxx,tmp.w ) );
+}
+
+Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
+    Hit_record tmp_hr;
+    tmp_hr.hit = false;
+    Sphere bounding_sphere;
+    float dw = 1.0;
+    float px = 2.0/(9.0*1.5); // Magic number by iquilez
+    bounding_sphere.center = vec3(0.0, 0.0, 0.0); bounding_sphere.radius = 1.25;
+    vec2 hits = hit_sphere_limits(bounding_sphere, R);
+    if(hits.x < 0.0 && hits.y < 0.0){ // R does not hit bounding Sphere   
+        return tmp_hr;  
+    }
+    else{
+        tmp_hr.hit = true;
+        tmp_hr.t = hits.x;
+        tmp_hr.p = ray_at(R, tmp_hr.t);
+        tmp_hr.normal = tmp_hr.p-bounding_sphere.center;
+        Material mat;
+        mat.ke = vec4(0.0, 1.0, 0.0, 1.0);
+        mat.ks = vec4(0.1, 0.1, 0.1, 1.0);
+        mat.sh = 100.0;
+        tmp_hr.mat = mat;
+        return tmp_hr;
+    }
+    // R hits bounding Sphere
+    if(hits.x > t_min) t_min = hits.x;
+    if(hits.y < t_max) t_max = hits.y;
+    float t = t_min;
+    for(int i=0; i<128; i++) {
+        vec3 p = ray_at(R, t);
+        float h = mandelbub_map(p, dw);
+        if(t>t_max || abs(h)<0.01) break;
+        t += h;
+    }
+    if(t < t_max){      // R hits Mandelbub
+        tmp_hr.hit = true;
+        tmp_hr.t = t;
+        tmp_hr.p = ray_at(R, t);
+        tmp_hr.normal = calculate_normal(tmp_hr.p, t, px);
+        Material mat;
+        mat.ke = vec4(0.0, 1.0, 0.0, 1.0);
+        mat.ks = vec4(0.1, 0.1, 0.1, 1.0);
+        mat.sh = 100.0;
+        tmp_hr.mat = mat;
+    }
+    return tmp_hr;
+    
+}
+
+//
 // ─── HIT SPHERE ─────────────────────────────────────────────────────────────────
 // Calculates the intersection between a Ray and a Sphere and stores the hit
 // information in a Hit_record struct.
@@ -291,11 +388,11 @@ Ray get_ray(Camera cam, float s, float t){
 // Given a ray and the full scene, calculates pixel's color.
 
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
-
+    
     // r hits any sphere?
     float t_closest = 100000.0;
     vec4 tmp_color;
-    Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
+    /*Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
         vec3 N = hr.normal;
@@ -313,6 +410,14 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
             tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
         else
             tmp_color = vec4(0.0,0.0,0.0, 1.0);
+    }*/
+
+    // r hits mandelbub?
+    Hit_record hr = hit_mandelbub(r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        vec3 N = hr.normal;
+        tmp_color = evaluateLightingModel(lights, num_lights, hr);
     }
 
     // If r hits any surface
