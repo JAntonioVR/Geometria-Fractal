@@ -18,7 +18,7 @@ Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$.
 Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 
 \begin{mmaCell}{Code}
-  f[z_] = z^2;
+  f[z_] := z^2;
   NestList[f, 0.9, 10]
 \end{mmaCell}
 \begin{mmaCell}{Output}
