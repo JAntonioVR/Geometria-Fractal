@@ -23,12 +23,15 @@
 \usepackage{listings}
 \usepackage{hyperref}
 \usepackage[spanish, es-tabla]{babel}
+\decimalpoint
 
+\lstset{basicstyle=\small\ttfamily}
 %\usepackage{helvet}
 
 \usepackage{amsthm, amssymb}
 \usepackage{amsmath}
 \newtheorem{teorema}{Teorema}[section]
+\newtheorem{corolario}{Corolario}[section]
 \theoremstyle{definition}
 \newtheorem{definicion}{Definición}[section]
 \newtheorem{observacion}{Observación}[section]
@@ -49,28 +52,21 @@
 
 %% Custom Verbatim
 
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\usepackage{mmacells}
 
-\lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2
+
+\mmaDefineMathReplacement[≤]{<=}{\leq}
+\mmaDefineMathReplacement[≥]{>=}{\geq}
+\mmaDefineMathReplacement[≠]{!=}{\neq}
+\mmaDefineMathReplacement[→]{->}{\to}[2]
+\mmaDefineMathReplacement[⧴]{:>}{:\hspace{-.2em}\to}[2]
+\mmaDefineMathReplacement{∉}{\notin}
+\mmaDefineMathReplacement{∞}{\infty}
+\mmaDefineMathReplacement{𝕕}{\mathbbm{d}}
+
+
+\mmaSet{
+  morefv={gobble=2},
+  linklocaluri=mma/symbol/definition:#1,
+  morecellgraphics={yoffset=1.9ex}
 }
-
-\lstset{style=mystyle}

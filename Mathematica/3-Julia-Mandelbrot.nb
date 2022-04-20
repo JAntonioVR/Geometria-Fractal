@@ -1,0 +1,1264 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     48294,       1256]
+NotebookOptionsPosition[     41609,       1157]
+NotebookOutlinePosition[     42002,       1173]
+CellTagsIndexPosition[     41959,       1170]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Cap\[IAcute]tulo 3: Conjuntos de Julia y Mandelbrot", "Chapter",
+ CellChangeTimes->{{3.859372791061632*^9, 
+  3.8593728028417597`*^9}},ExpressionUUID->"f1fdb4cf-d387-42a4-83d0-\
+54b37664bf69"],
+
+Cell[CellGroupData[{
+
+Cell["3.1. Iteraci\[OAcute]n convergente y no convergente", "Section",
+ CellChangeTimes->{{3.8593728229077578`*^9, 
+  3.8593728352275143`*^9}},ExpressionUUID->"78169948-0c4d-4d4c-8e67-\
+b2ec9cbc9ab8"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"f", "[", "z_", "]"}], ":=", 
+   RowBox[{"z", "^", "2"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"g", "[", "z_", "]"}], ":=", 
+   RowBox[{"z", " ", "I"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"h", "[", "z_", "]"}], ":=", 
+   RowBox[{
+    RowBox[{"z", "^", "2"}], "-", "1.9"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.859372845413082*^9, 3.859372887025243*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"801df518-0d53-44e6-816e-9a9c684b918d"],
+
+Cell["\<\
+Las \[OAcute]rbitas pueden ser convergentes, divergentes, c\[IAcute]clicas o \
+incluso ca\[OAcute]ticas:\
+\>", "Text",
+ CellChangeTimes->{{3.8593728935971518`*^9, 
+  3.859372965926609*^9}},ExpressionUUID->"f191468d-e31d-411e-ae0a-\
+4315c050a6c0"],
+
+Cell[BoxData[{
+ RowBox[{"NestList", "[", 
+  RowBox[{"f", ",", " ", 
+   RowBox[{"0.9", "I"}], ",", " ", "10"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"NestList", "[", 
+  RowBox[{"f", ",", " ", 
+   RowBox[{"1.1", "+", 
+    RowBox[{"1.1", "I"}]}], ",", " ", "10"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.85937297154466*^9, 3.859373053509223*^9}},
+ CellLabel->"In[10]:=",ExpressionUUID->"4f87155e-5aba-4213-a6f7-3bc038a311cf"],
+
+Cell[BoxData[
+ RowBox[{"NestList", "[", 
+  RowBox[{"g", ",", "1", ",", "10"}], "]"}]], "Input",
+ CellChangeTimes->{{3.859373064374037*^9, 3.859373072574861*^9}},
+ CellLabel->"In[12]:=",ExpressionUUID->"03c948b1-fcd4-4c6e-8080-8318e718d95d"],
+
+Cell[BoxData[{
+ RowBox[{"NestList", "[", 
+  RowBox[{"h", ",", "0.1", ",", "20"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"NestList", "[", 
+  RowBox[{"h", ",", "0.0", ",", " ", "20"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.859373077192872*^9, 3.859373099037019*^9}},
+ CellLabel->"In[13]:=",ExpressionUUID->"f4a3c085-fe46-4bf4-9a50-c93bcf4bad4d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.2. Conjuntos de Julia", "Section",
+ CellChangeTimes->{{3.859373162693413*^9, 
+  3.859373170598833*^9}},ExpressionUUID->"17c6eb84-f480-4e42-95a3-\
+eab3471de9e6"],
+
+Cell[CellGroupData[{
+
+Cell["3.2.1. Representaci\[OAcute]n gr\[AAcute]fica de los conjuntos de \
+Julia", "Subsection",
+ CellChangeTimes->{{3.8593731892771797`*^9, 
+  3.859373208813895*^9}},ExpressionUUID->"90f75435-808b-4414-ba1c-\
+e9d2c79a3f57"],
+
+Cell["\<\
+Podemos visualizar conjuntos de Julia con las siguientes \[OAcute]rdenes:\
+\>", "Text",
+ CellChangeTimes->{{3.859373518194807*^9, 
+  3.859373550889078*^9}},ExpressionUUID->"b872dbf3-4744-4eae-b0d6-\
+7f862bb266fc"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"M", "=", "50"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Julia", "[", 
+    RowBox[{"z_", ",", "c_"}], "]"}], " ", ":=", " ", 
+   RowBox[{"Length", "[", 
+    RowBox[{"FixedPointList", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"#", "^", "2"}], "+", "c"}], " ", "&"}], ",", " ", "z", ",", 
+      " ", "M", ",", " ", 
+      RowBox[{"SameTest", "\[Rule]", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Abs", "[", "#", "]"}], ">", 
+          RowBox[{"Max", "[", 
+           RowBox[{"2.0", ",", " ", 
+            RowBox[{"Abs", "[", "c", "]"}]}], "]"}]}], " ", "&"}], ")"}]}]}], 
+     "]"}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.85339743072507*^9, 3.8533975464598837`*^9}, {
+   3.853398004283853*^9, 3.8533980263150463`*^9}, {3.8533982904701843`*^9, 
+   3.85339831666475*^9}, 3.853398593696253*^9, 3.854024529973559*^9, {
+   3.854169222368445*^9, 3.854169239255515*^9}, {3.8541946153983297`*^9, 
+   3.854194630326495*^9}, {3.858663598529715*^9, 3.858663650123893*^9}, {
+   3.8586643033335323`*^9, 3.858664314915451*^9}},
+ CellLabel->"In[15]:=",ExpressionUUID->"a16cc371-17e2-4c95-a4d6-cf4817621335"],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{"DensityPlot", "[", 
+   RowBox[{
+    RowBox[{"Julia", "[", 
+     RowBox[{
+      RowBox[{"x", "+", 
+       RowBox[{"I", " ", "y"}]}], ",", " ", 
+      RowBox[{
+       RowBox[{"-", "0.12"}], "+", 
+       RowBox[{"0.75", " ", "I"}]}]}], "]"}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{"x", ",", 
+      RowBox[{"-", "1.5"}], ",", "1.5"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"y", ",", 
+      RowBox[{"-", "1.25"}], ",", "1.25"}], "}"}], ",", " ", 
+    RowBox[{"Mesh", "\[Rule]", "False"}], ",", 
+    RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+    RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+    RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+    RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+    RowBox[{"ColorFunction", "\[Rule]", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"#", " ", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+         RowBox[{"RGBColor", "[", 
+          RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+         RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], " ", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.85339755077059*^9, 3.853397678646793*^9}, {
+  3.853397831590014*^9, 3.853397831674518*^9}, {3.853397865402741*^9, 
+  3.8533978657649803`*^9}, {3.8533981091560917`*^9, 3.853398126721671*^9}, {
+  3.853398508444191*^9, 3.853398514279296*^9}, {3.853398571427105*^9, 
+  3.853398586763957*^9}, {3.8533987028206263`*^9, 3.853398705403758*^9}, {
+  3.854024495239064*^9, 3.854024496216772*^9}, {3.854024547519224*^9, 
+  3.8540245854402237`*^9}, {3.854194672008978*^9, 3.8541947363354883`*^9}, {
+  3.8582331740740547`*^9, 3.858233188569982*^9}, {3.858233254262155*^9, 
+  3.858233263995558*^9}, {3.858233326805848*^9, 3.858233347207625*^9}, {
+  3.858233394149373*^9, 3.858233523038072*^9}},
+ CellLabel->"In[17]:=",ExpressionUUID->"0f2ecd8a-bf68-4c19-ad62-bfe4cf62acb8"],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{"DensityPlot", "[", 
+   RowBox[{
+    RowBox[{"Julia", "[", 
+     RowBox[{
+      RowBox[{"x", "+", 
+       RowBox[{"I", " ", "y"}]}], ",", " ", 
+      RowBox[{
+       RowBox[{"-", "0.23"}], "+", 
+       RowBox[{"0.65", " ", "I"}]}]}], "]"}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{"x", ",", 
+      RowBox[{"-", "1.5"}], ",", "1.5"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"y", ",", 
+      RowBox[{"-", "1.25"}], ",", "1.25"}], "}"}], ",", " ", 
+    RowBox[{"Mesh", "\[Rule]", "False"}], ",", 
+    RowBox[{"Frame", " ", "\[Rule]", " ", "False"}], ",", " ", 
+    RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+    RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+    RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+    RowBox[{"ColorFunction", "\[Rule]", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"#", " ", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+         RowBox[{"RGBColor", "[", 
+          RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+         RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], " ", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.858233753507094*^9, 3.8582337538462257`*^9}, {
+  3.858233793190134*^9, 3.8582339081321793`*^9}, {3.858662932188048*^9, 
+  3.8586629525840597`*^9}, {3.8586657437466097`*^9, 3.858665746868239*^9}, {
+  3.8593733396566772`*^9, 
+  3.8593733554940434`*^9}},ExpressionUUID->"e6bd33e7-7074-4f60-b34f-\
+4fa3b574c3fc"],
+
+Cell["\<\
+La funci\[OAcute]n JuliaSetPlot hace lo mismo pero es m\[AAcute]s sencilla de \
+usar\
+\>", "Text",
+ CellChangeTimes->{{3.854024724210094*^9, 3.854024737167303*^9}, {
+  3.8541947704706306`*^9, 
+  3.8541947805115833`*^9}},ExpressionUUID->"1cfc6b3d-046e-40c3-99a4-\
+e9dd4ddc87e8"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"JuliaSetPlot", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "0.23"}], "+", 
+     RowBox[{"0.69", "I"}]}], ",", " ", 
+    RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}], 
+  "\[IndentingNewLine]"}]], "Input",
+ CellChangeTimes->{{3.853399178562439*^9, 3.8533992505694017`*^9}, {
+  3.858666712273532*^9, 3.858666725847961*^9}, {3.858666816508213*^9, 
+  3.858666846432238*^9}},
+ CellLabel->"In[19]:=",ExpressionUUID->"5f61f4bc-a6b1-443f-bc27-fe20ac1a10e5"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{"0.16", "-", 
+    RowBox[{"0.59", "I"}]}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8533993575515213`*^9, 3.853399357554556*^9}, {
+  3.853399798940468*^9, 3.853399857705285*^9}, {3.858666759294242*^9, 
+  3.858666767358718*^9}, {3.858666849629575*^9, 3.858666853298643*^9}},
+ CellLabel->"In[20]:=",ExpressionUUID->"c2a0b91f-8de6-49bf-baa9-6e83e21b87b4"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.4. El conjunto de Mandelbrot", "Section",
+ CellChangeTimes->{{3.859373589125186*^9, 
+  3.859373599542235*^9}},ExpressionUUID->"1566aaed-7796-42d5-a6f5-\
+9f653c564bef"],
+
+Cell["\<\
+Podemos graficar el conjunto de Mandelbrot con las siguientes \[OAcute]rdenes:\
+\>", "Text",
+ CellChangeTimes->{{3.8593737037795153`*^9, 
+  3.8593737237426043`*^9}},ExpressionUUID->"8c79e7c2-982d-4c2d-91b5-\
+1232c94fb36b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"M", " ", "=", " ", "100"}], ";", " ", 
+  RowBox[{"Mandelbrot", " ", "=", " ", 
+   RowBox[{"Compile", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"{", 
+       RowBox[{"c", ",", " ", "_Complex"}], "}"}], "}"}], ",", " ", 
+     RowBox[{"Length", "[", 
+      RowBox[{"FixedPointList", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{
+          RowBox[{"#", "^", "2"}], "+", "c"}], " ", "&"}], ",", "0", ",", "M",
+         ",", " ", 
+        RowBox[{"SameTest", "\[Rule]", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Abs", "[", "#", "]"}], ">", "2.0"}], "&"}], ")"}]}]}], 
+       "]"}], "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.8534906950730886`*^9, 3.8534907841507883`*^9}, {
+  3.8593736430492697`*^9, 3.859373645099061*^9}},
+ CellLabel->"In[53]:=",ExpressionUUID->"b6c6503d-6274-4c6e-a101-79f7b8852158"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"Mandelbrot", "[", 
+    RowBox[{"x", "+", 
+     RowBox[{"I", " ", "y"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "2.1"}], ",", ".7"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "1.2"}], ",", "1.2"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", "1"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853490786909751*^9, 3.853490905019247*^9}, {
+   3.853492469150757*^9, 3.853492469333414*^9}, {3.858234146494506*^9, 
+   3.858234157619795*^9}, 3.859373660305962*^9},
+ CellLabel->"In[22]:=",ExpressionUUID->"9ada824b-068d-49fd-b1ec-67a673ba9cb2"],
+
+Cell["\<\
+De manera an\[AAcute]loga a los conjuntos de Julia, hay una orden que lo hace \
+de manera m\[AAcute]s sencilla\
+\>", "Text",
+ CellChangeTimes->{{3.859373731586442*^9, 3.8593737515125027`*^9}, {
+  3.859373808155088*^9, 
+  3.859373808959363*^9}},ExpressionUUID->"475baf23-053e-4311-951d-\
+7b5426b59d61"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{"{", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"MandelbrotSetPlot", "[", "]"}], ",", " ", 
+     RowBox[{"MandelbrotSetPlot", "[", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"-", "0.65"}], "+", 
+         RowBox[{"0.47", "I"}]}], ",", 
+        RowBox[{
+         RowBox[{"-", "0.4"}], "+", 
+         RowBox[{"0.72", "I"}]}]}], "}"}], "]"}]}], "}"}], "}"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.8593738117374353`*^9, 3.859373886907645*^9}, {
+  3.859373957851685*^9, 3.85937398018896*^9}},
+ CellLabel->"In[24]:=",ExpressionUUID->"a5644bee-1542-407e-8137-dfe45bd87b7c"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.5. Autosimilaridad de los conjuntos de Julia y Mandelbrot", "Section",
+ CellChangeTimes->{{3.8593740798116713`*^9, 
+  3.8593740966167107`*^9}},ExpressionUUID->"5ff52406-26a2-40fa-9b08-\
+a73db21bc3a9"],
+
+Cell[CellGroupData[{
+
+Cell["3.5.1. Autosimilaridad en los conjuntos de Julia", "Subsection",
+ CellChangeTimes->{{3.8593741104394407`*^9, 
+  3.859374122896378*^9}},ExpressionUUID->"ed94c5ed-773b-461b-a50a-\
+7fd9753d5dbc"],
+
+Cell["\<\
+Podemos ver c\[OAcute]mo el conjunto de Julia para c=-0.23+0.65i tiene \
+regiones autosimilares:\
+\>", "Text",
+ CellChangeTimes->{{3.85937413044466*^9, 
+  3.8593741726750937`*^9}},ExpressionUUID->"a31a1921-9a27-4023-acfd-\
+cc8821131ce1"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"Julia", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"I", " ", "y"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"-", "0.23"}], "+", 
+      RowBox[{"0.65", " ", "I"}]}]}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", ".2"}], ",", "1.5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "1.2"}], ",", ".5"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", " ", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], " ", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.858665789888967*^9, 3.858665846526675*^9}},
+ CellLabel->"In[27]:=",ExpressionUUID->"ad3bfa1e-88ec-4c4a-985c-af4ad7b500f7"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"Julia", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"I", " ", "y"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"-", "0.23"}], "+", 
+      RowBox[{"0.65", " ", "I"}]}]}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", ".6", ",", "1.4"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "0.9"}], ",", 
+     RowBox[{"-", ".1"}]}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", " ", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], " ", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.858665906795586*^9, 3.858665933115679*^9}, {
+  3.858666027937971*^9, 3.858666029358611*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"a80d7c35-08d1-44c7-ab91-fd83422fe6b1"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"Julia", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"I", " ", "y"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"-", "0.23"}], "+", 
+      RowBox[{"0.65", " ", "I"}]}]}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "1.05", ",", "1.35"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "0.63"}], ",", 
+     RowBox[{"-", ".35"}]}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", " ", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], " ", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.858666091884334*^9, 3.858666158530374*^9}, {
+  3.858666191748912*^9, 3.8586662099943247`*^9}},
+ CellLabel->"In[28]:=",ExpressionUUID->"d02622a7-5efe-44c5-b30f-b1b804759d47"],
+
+Cell["Y otras regiones autosimilares en otros conjuntos de Julia:", "Text",
+ CellChangeTimes->{{3.859374525347505*^9, 
+  3.859374542761591*^9}},ExpressionUUID->"5e8f3167-73bf-4f78-9e6a-\
+d2b71cb46e6e"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{"0.33", "-", 
+    RowBox[{"0.41", "I"}]}], ",", " ", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", 
+        RowBox[{"-", "0.3"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1.1"}], ",", 
+        RowBox[{"-", "0.4"}]}], "}"}]}], "}"}]}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859374603023794*^9, 3.8593746393538733`*^9}},
+ CellLabel->"In[29]:=",ExpressionUUID->"03dab62a-28c8-4013-bc81-3b9539931200"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{"0.45", "-", 
+    RowBox[{"0.62", "I"}]}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "0.8"}], ",", "0.2"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "0.8"}], ",", "0.2"}], "}"}]}], "}"}]}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8593746727334433`*^9, 3.859374700536037*^9}, {
+  3.859374733101219*^9, 3.859374814712908*^9}},
+ CellLabel->"In[36]:=",ExpressionUUID->"bdb1a4b5-aa24-4955-87b9-57478d775a30"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{"0.23", "+", 
+    RowBox[{"0.51", "I"}]}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1.1"}], ",", 
+        RowBox[{"-", "0.4"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0.4", ",", "1.1"}], "}"}]}], "}"}]}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8593746727334433`*^9, 3.859374700536037*^9}, {
+  3.859374733101219*^9, 3.8593748712505493`*^9}},
+ CellLabel->"In[37]:=",ExpressionUUID->"318867f1-1daf-4d73-b64a-48f50875fc0b"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"-", "0.52"}], "+", 
+    RowBox[{"0.51", "I"}]}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1.5"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "0.5"}], "}"}]}], "}"}]}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8593746727334433`*^9, 3.859374700536037*^9}, {
+  3.859374733101219*^9, 3.859374814712908*^9}, {3.859374883290553*^9, 
+  3.859374909718526*^9}},
+ CellLabel->"In[38]:=",ExpressionUUID->"6aba3590-688a-4c34-afc8-e67ab34c63a5"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.5.2. Autosimilaridad en el conjunto de Mandelbrot", "Subsection",
+ CellChangeTimes->{{3.8593749309212303`*^9, 
+  3.859374942820072*^9}},ExpressionUUID->"d288c69b-4b08-4607-82b8-\
+79ddd61c0bf1"],
+
+Cell[BoxData[
+ RowBox[{"MandelbrotSetPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"-", "1"}], ",", 
+     RowBox[{
+      RowBox[{"-", "0.5"}], "+", 
+      RowBox[{"0.5", "I"}]}]}], "}"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859374988489398*^9, 3.859375023210372*^9}},
+ CellLabel->"In[40]:=",ExpressionUUID->"a3fb8b29-fee8-423e-80d8-f9dd00cd0e31"],
+
+Cell[BoxData[
+ RowBox[{"MandelbrotSetPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", "1.5"}], "-", 
+      RowBox[{"0.15", " ", "I"}]}], ",", 
+     RowBox[{
+      RowBox[{"-", "1.2"}], "+", 
+      RowBox[{"0.15", "I"}]}]}], "}"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375035180316*^9, 3.859375053322356*^9}},
+ CellLabel->"In[41]:=",ExpressionUUID->"a7e89e40-de4e-4f45-a5c8-eab836d70090"],
+
+Cell[BoxData[
+ RowBox[{"MandelbrotSetPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", "0.2"}], "-", 
+      RowBox[{"1.1", "I"}]}], ",", 
+     RowBox[{
+      RowBox[{"-", "0.9"}], "I"}]}], "}"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375064903757*^9, 3.859375080371336*^9}},
+ CellLabel->"In[42]:=",ExpressionUUID->"99edda34-4deb-4c70-b341-be0cab98199f"],
+
+Cell[BoxData[
+ RowBox[{"MandelbrotSetPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", "0.9"}], "-", "I"}], ",", 
+     RowBox[{"0.3", "+", 
+      RowBox[{"0.2", " ", "I"}]}]}], "}"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375088291285*^9, 3.85937511238396*^9}},
+ CellLabel->"In[43]:=",ExpressionUUID->"32e7cd7c-092d-4216-9e38-2b4fba32efcc"],
+
+Cell["Fij\[EAcute]monos en sucesivas ampliaciones del bulbo principal", "Text",
+ CellChangeTimes->{{3.859375147206105*^9, 
+  3.859375161566739*^9}},ExpressionUUID->"82840d81-5cce-4973-b4bb-\
+85ab9b05801d"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{"{", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"MandelbrotSetPlot", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", "1.42"}], "-", 
+          RowBox[{"0.03", "I"}]}], ",", " ", 
+         RowBox[{
+          RowBox[{"-", "1.36"}], "+", 
+          RowBox[{"0.03", " ", "I"}]}]}], "}"}], ",", " ", 
+       RowBox[{"MaxIterations", "\[Rule]", "2000"}]}], "]"}], ",", " ", 
+     RowBox[{"MandelbrotSetPlot", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", "1.405"}], "-", 
+          RowBox[{"0.0075", "I"}]}], ",", 
+         RowBox[{
+          RowBox[{"-", "1.39"}], "+", 
+          RowBox[{"0.0075", "I"}]}]}], "}"}], ",", " ", 
+       RowBox[{"MaxIterations", "\[Rule]", "3000"}]}], "]"}]}], "}"}], "}"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.859375164771296*^9, 3.859375264212829*^9}, {
+  3.859375337261396*^9, 3.859375365331421*^9}},
+ CellLabel->"In[47]:=",ExpressionUUID->"e9784b3c-5f06-43db-85e5-47a1d268139f"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.6 Conjuntos de Julia y Mandelbrot generalizados", "Section",
+ CellChangeTimes->{{3.859375443640024*^9, 
+  3.859375456579135*^9}},ExpressionUUID->"54c22849-b398-4b8a-94db-\
+5818204fb318"],
+
+Cell[CellGroupData[{
+
+Cell["3.6.1. Familia z^N+c", "Subsection",
+ CellChangeTimes->{{3.85937548395693*^9, 
+  3.859375495079649*^9}},ExpressionUUID->"75a4164c-94f1-48b2-bad9-\
+a0c9a96b5ffa"],
+
+Cell["\<\
+Variando el exponente de la funci\[OAcute]n podemos encontrar otros ejemplos \
+de conjuntos de Julia, en las siguientes \[OAcute]rdenes fijamos c = \
+-0.55+0.48 y variamos los exponentes:\
+\>", "Text",
+ CellChangeTimes->{{3.859375513567292*^9, 3.859375535283312*^9}, {
+  3.8593755717103453`*^9, 
+  3.8593755978541393`*^9}},ExpressionUUID->"c1ee39a6-da0d-4616-be9c-\
+1073a6295766"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "^", "2"}], "-", "0.55", "+", 
+    RowBox[{"0.48", "I"}]}], ",", "z", ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375505910138*^9, 3.859375506570198*^9}, {
+  3.859375538946292*^9, 3.8593755633151083`*^9}},
+ CellLabel->"In[49]:=",ExpressionUUID->"84419d52-06e4-4cbe-835e-0693f98ca255"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "^", "3"}], "-", "0.55", "+", 
+    RowBox[{"0.48", "I"}]}], ",", "z", ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375605750062*^9, 3.859375606094933*^9}},
+ CellLabel->"In[50]:=",ExpressionUUID->"874f5b26-13e2-49e7-bef9-5bae6dd993f4"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "^", "4"}], "-", "0.55", "+", 
+    RowBox[{"0.48", "I"}]}], ",", "z", ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8593756139513683`*^9, 3.859375614178286*^9}},
+ CellLabel->"In[51]:=",ExpressionUUID->"aba1f213-6f8c-4722-8ee6-979964bc0a69"],
+
+Cell[BoxData[
+ RowBox[{"JuliaSetPlot", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "^", "5"}], "-", "0.55", "+", 
+    RowBox[{"0.48", "I"}]}], ",", "z", ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.859375620211978*^9, 3.859375620632573*^9}},
+ CellLabel->"In[52]:=",ExpressionUUID->"3104c570-2c25-4739-8c87-81c2a8da35c0"],
+
+Cell["\<\
+A su vez la conexi\[OAcute]n o polvareda de estos conjuntos nos permite \
+definir el conjunto de Mandelbrot generalizado, el cual obtenemos con las \
+siguiente orden:\
+\>", "Text",
+ CellChangeTimes->{{3.859375642192727*^9, 
+  3.8593756868061457`*^9}},ExpressionUUID->"476688ef-c7a8-4378-a9c6-\
+fe181c1665db"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"M", " ", "=", " ", "100"}], ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"MandelbrotGeneralizado", "[", 
+    RowBox[{"n_", ",", "c_"}], "]"}], ":=", 
+   RowBox[{"Length", "[", 
+    RowBox[{"FixedPointList", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"#", "^", "n"}], "+", "c"}], " ", "&"}], ",", " ", "0", ",", 
+      " ", "100", ",", " ", 
+      RowBox[{"SameTest", "\[Rule]", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Abs", "[", "#", "]"}], ">", "2"}], " ", "&"}], ")"}]}]}], 
+     "]"}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.8534906950730886`*^9, 3.8534907841507883`*^9}, {
+  3.8593736430492697`*^9, 3.859373645099061*^9}, {3.859375829184709*^9, 
+  3.8593758393144693`*^9}},
+ CellLabel->"In[57]:=",ExpressionUUID->"77ebba24-5034-4a90-b5f7-dbe82d8ce300"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"graficaMandelbrot", "[", "n_", "]"}], ":=", 
+   RowBox[{"DensityPlot", "[", 
+    RowBox[{
+     RowBox[{"MandelbrotGeneralizado", "[", 
+      RowBox[{"n", ",", " ", 
+       RowBox[{"x", "+", 
+        RowBox[{"I", " ", "y"}]}]}], "]"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", 
+       RowBox[{"-", "1.5"}], ",", "1.5"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", 
+       RowBox[{"-", "1.4"}], ",", "1.4"}], "}"}], ",", " ", 
+     RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+     RowBox[{"PlotPoints", "\[Rule]", "200"}], ",", " ", 
+     RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+     RowBox[{"ColorFunction", "\[Rule]", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"#", "\[GreaterEqual]", "1"}], ",", " ", 
+          RowBox[{"Hue", "[", 
+           RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+          RowBox[{"Hue", "[", "#", "]"}]}], "]"}], "&"}], ")"}]}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.853824384747119*^9, 3.8538246286564827`*^9}, {
+   3.853824810279464*^9, 3.8538248148368464`*^9}, {3.854195624188747*^9, 
+   3.8541956711004353`*^9}, 3.8593757443696423`*^9, {3.859375787738586*^9, 
+   3.859375788806024*^9}, {3.859375842397252*^9, 3.8593758470353413`*^9}},
+ CellLabel->"In[59]:=",ExpressionUUID->"c8e25661-2e72-47d3-a6ef-740f73c5ee8e"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"graficaMandelbrot", "[", "3", "]"}], ",", " ", 
+      RowBox[{"graficaMandelbrot", "[", "4", "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"graficaMandelbrot", "[", "5", "]"}], ",", 
+      RowBox[{"graficaMandelbrot", "[", "6", "]"}]}], "}"}]}], "}"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.8593757968282433`*^9, 3.859375799902648*^9}, {
+  3.8593758754559727`*^9, 3.859375922842947*^9}},
+ CellLabel->"In[61]:=",ExpressionUUID->"c3ea54fe-0637-44fd-bf75-884499725c52"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3.6.2. Conjuntos de Julia con funciones no polin\[OAcute]micas", \
+"Subsection",
+ CellChangeTimes->{{3.85937618550809*^9, 
+  3.8593761980482473`*^9}},ExpressionUUID->"687e2a14-6880-4fed-a6ae-\
+46be3d2d7d3f"],
+
+Cell["Con f(z)=c Sen(z):", "Text",
+ CellChangeTimes->{{3.859376263820911*^9, 
+  3.859376276638569*^9}},ExpressionUUID->"64c6b82d-beeb-4782-84ba-\
+9a3e72cd58f7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"JuliaS", " ", "=", " ", 
+   RowBox[{"Compile", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"z", ",", " ", "_Complex"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"c", ",", "_Complex"}], "}"}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"Max", ",", " ", "_Integer"}], "}"}]}], "}"}], ",", " ", 
+     RowBox[{"Length", "[", 
+      RowBox[{"FixedPointList", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"c", "*", 
+          RowBox[{"Sin", "[", "#", "]"}]}], " ", "&"}], ",", " ", "z", ",", 
+        "Max", ",", 
+        RowBox[{"SameTest", "\[Rule]", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Re", "[", "#2", "]"}], ">", "50."}], " ", "&"}], 
+          ")"}]}]}], "]"}], "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.853484208776539*^9, 3.853484217741014*^9}, {
+  3.859376229246245*^9, 
+  3.85937623320998*^9}},ExpressionUUID->"2495a006-bf16-4973-a5bd-\
+3d1a60b090a4"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaS", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", 
+     RowBox[{"1", "+", 
+      RowBox[{"0.3", "I"}]}], ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853484260555056*^9, 3.853484278983075*^9}, {
+  3.853484329404118*^9, 3.8534843321184683`*^9}, {3.853484374857141*^9, 
+  3.8534843848084307`*^9}, {3.853484464007559*^9, 3.853484498731498*^9}, {
+  3.853484536300941*^9, 3.853484539342684*^9}, {3.853484663738736*^9, 
+  3.853484665833297*^9}, {3.859376091077297*^9, 3.859376091195238*^9}, {
+  3.859376238327798*^9, 
+  3.859376253055689*^9}},ExpressionUUID->"be22a42e-c200-4455-a5fc-\
+28495fcda4d6"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaS", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", 
+     RowBox[{"-", "4"}], ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"0", ",", "0", ",", "0"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", "#", "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.8534847840416393`*^9, 3.853484792181368*^9}, {
+  3.853484856941119*^9, 3.8534848600544786`*^9}, {3.859376093993134*^9, 
+  3.859376094060438*^9}, {3.859376136261512*^9, 3.8593761373108788`*^9}, {
+  3.859376245061699*^9, 
+  3.859376257449492*^9}},ExpressionUUID->"4a5bb343-1ad7-4bc0-8092-\
+4d8dab87428c"],
+
+Cell["Con f(z)=c Cos(z):", "Text",
+ CellChangeTimes->{{3.85937628153996*^9, 3.859376290448039*^9}, 
+   3.859384710619215*^9},ExpressionUUID->"ccd3844c-8b18-402f-a555-\
+f9aedcbd1731"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"JuliaC", " ", "=", " ", 
+   RowBox[{"Compile", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"z", ",", " ", "_Complex"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"c", ",", "_Complex"}], "}"}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"Max", ",", " ", "_Integer"}], "}"}]}], "}"}], ",", " ", 
+     RowBox[{"Length", "[", 
+      RowBox[{"FixedPointList", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"c", "*", 
+          RowBox[{"Cos", "[", "#", "]"}]}], " ", "&"}], ",", " ", "z", ",", 
+        "Max", ",", 
+        RowBox[{"SameTest", "\[Rule]", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Re", "[", "#2", "]"}], ">", "50."}], " ", "&"}], 
+          ")"}]}]}], "]"}], "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.853483720476056*^9, 3.853483741207448*^9}, {
+  3.859376317953495*^9, 3.859376323215096*^9}},
+ CellLabel->"In[68]:=",ExpressionUUID->"f85aa1c2-d244-41da-a426-01099562b563"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaC", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", "4", ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"1", ",", "1", ",", "1"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"1", "-", 
+          RowBox[{"2", "#"}]}], "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853483759850309*^9, 3.853483815170339*^9}, {
+  3.8534839088062696`*^9, 3.8534839207073507`*^9}, {3.8593763259966908`*^9, 
+  3.859376329331086*^9}, {3.8593847855016947`*^9, 
+  3.8593847883358593`*^9}},ExpressionUUID->"cca489bb-9647-4da9-a049-\
+7afd7ddbde43"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaC", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", "4", ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"1", ",", "1", ",", "1"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"1", "-", 
+          RowBox[{"2", "#"}]}], "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853483982714003*^9, 3.853483988189639*^9}, {
+  3.859376332220879*^9, 3.8593763356444807`*^9}, {3.8593847907609253`*^9, 
+  3.859384791640046*^9}},ExpressionUUID->"ff99737b-c1d6-40ff-944b-\
+0fc200e78369"],
+
+Cell["Con f(z)=c e^z:", "Text",
+ CellChangeTimes->{{3.859384695294847*^9, 
+  3.859384708538978*^9}},ExpressionUUID->"8cab35e9-623e-4520-a927-\
+dfb3d8959365"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"JuliaE", " ", "=", " ", 
+   RowBox[{"Compile", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"z", ",", " ", "_Complex"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"c", ",", "_Complex"}], "}"}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"Max", ",", " ", "_Integer"}], "}"}]}], "}"}], ",", " ", 
+     RowBox[{"Length", "[", 
+      RowBox[{"FixedPointList", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"c", "*", 
+          RowBox[{"E", "^", "#"}]}], " ", "&"}], ",", " ", "z", ",", "Max", 
+        ",", 
+        RowBox[{"SameTest", "\[Rule]", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Re", "[", "#2", "]"}], ">", "50."}], " ", "&"}], 
+          ")"}]}]}], "]"}], "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.853481851007341*^9, 3.853481866403311*^9}, {
+  3.853481951706594*^9, 3.853482025773931*^9}, {3.853482101006549*^9, 
+  3.853482101558325*^9}, {3.853482141314385*^9, 3.8534821592057667`*^9}, {
+  3.853483659213584*^9, 3.853483660885561*^9}, {3.85938471811268*^9, 
+  3.859384721716346*^9}},
+ CellLabel->"In[71]:=",ExpressionUUID->"7fe33b45-fcd8-4b2e-bc81-c3a4e81c3051"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaE", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", 
+     RowBox[{"1", "+", 
+      RowBox[{"2", "I"}]}], ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "2"}], ",", "4"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", "2", ",", "7"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"Axes", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"1", ",", "1", ",", "1"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"1", "-", 
+          RowBox[{"2", "#"}]}], "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853481895363152*^9, 3.853481923672611*^9}, {
+  3.853482065732779*^9, 3.853482091629199*^9}, {3.8534821836137342`*^9, 
+  3.853482199116493*^9}, {3.8534823207302856`*^9, 3.853482359139668*^9}, {
+  3.8534836657564497`*^9, 3.853483666438151*^9}, {3.859384726180915*^9, 
+  3.8593847301076937`*^9}, {3.859384797403289*^9, 
+  3.8593847990777073`*^9}},ExpressionUUID->"b417cce2-d623-4554-94b3-\
+b44c99896316"],
+
+Cell[BoxData[
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"JuliaE", "[", 
+    RowBox[{
+     RowBox[{"x", "+", 
+      RowBox[{"y", " ", "I"}]}], ",", 
+     RowBox[{"3", "I"}], ",", "50"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", 
+     RowBox[{"-", "6"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"Mesh", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", " ", 
+   RowBox[{"PlotPoints", "\[Rule]", "250"}], ",", " ", 
+   RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", " ", 
+   RowBox[{"ColorFunction", "\[Rule]", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"#", "\[GreaterEqual]", " ", "1"}], ",", " ", 
+        RowBox[{"RGBColor", "[", 
+         RowBox[{"1", ",", "1", ",", "1"}], "]"}], ",", " ", 
+        RowBox[{"Hue", "[", 
+         RowBox[{"1", "-", 
+          RowBox[{"2", "#"}]}], "]"}]}], "]"}], " ", "&"}], ")"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.853482587986919*^9, 3.8534826080077868`*^9}, {
+  3.853482928753201*^9, 3.853483023220786*^9}, {3.8534836741782207`*^9, 
+  3.8534836747821836`*^9}, {3.8593847332132463`*^9, 3.859384736645699*^9}, {
+  3.859384807597727*^9, 
+  3.8593848091046143`*^9}},ExpressionUUID->"b5eccdf9-bb61-4ad3-992b-\
+455f7fda3e66"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{976.5, 528.},
+WindowMargins->{{Automatic, 0}, {0, Automatic}},
+FrontEndVersion->"12.1 para Linux x86 (64-bit) (March 18, 2020)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"59e73657-5805-4428-b5f3-4f85039260cf"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 198, 3, 69, "Chapter",ExpressionUUID->"f1fdb4cf-d387-42a4-83d0-54b37664bf69"],
+Cell[CellGroupData[{
+Cell[803, 29, 200, 3, 68, "Section",ExpressionUUID->"78169948-0c4d-4d4c-8e67-b2ec9cbc9ab8"],
+Cell[1006, 34, 541, 15, 89, "Input",ExpressionUUID->"801df518-0d53-44e6-816e-9a9c684b918d"],
+Cell[1550, 51, 256, 6, 35, "Text",ExpressionUUID->"f191468d-e31d-411e-ae0a-4315c050a6c0"],
+Cell[1809, 59, 426, 9, 84, "Input",ExpressionUUID->"4f87155e-5aba-4213-a6f7-3bc038a311cf"],
+Cell[2238, 70, 240, 4, 46, "Input",ExpressionUUID->"03c948b1-fcd4-4c6e-8080-8318e718d95d"],
+Cell[2481, 76, 347, 6, 84, "Input",ExpressionUUID->"f4a3c085-fe46-4bf4-9a50-c93bcf4bad4d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2865, 87, 168, 3, 68, "Section",ExpressionUUID->"17c6eb84-f480-4e42-95a3-eab3471de9e6"],
+Cell[CellGroupData[{
+Cell[3058, 94, 223, 4, 54, "Subsection",ExpressionUUID->"90f75435-808b-4414-ba1c-e9d2c79a3f57"],
+Cell[3284, 100, 223, 5, 35, "Text",ExpressionUUID->"b872dbf3-4744-4eae-b0d6-7f862bb266fc"],
+Cell[3510, 107, 1219, 29, 66, "Input",ExpressionUUID->"a16cc371-17e2-4c95-a4d6-cf4817621335"],
+Cell[4732, 138, 1953, 42, 142, "Input",ExpressionUUID->"0f2ecd8a-bf68-4c19-ad62-bfe4cf62acb8"],
+Cell[6688, 182, 1513, 37, 142, "Input",ExpressionUUID->"e6bd33e7-7074-4f60-b34f-4fa3b574c3fc"],
+Cell[8204, 221, 287, 7, 35, "Text",ExpressionUUID->"1cfc6b3d-046e-40c3-99a4-e9dd4ddc87e8"],
+Cell[8494, 230, 490, 12, 68, "Input",ExpressionUUID->"5f61f4bc-a6b1-443f-bc27-fe20ac1a10e5"],
+Cell[8987, 244, 472, 9, 46, "Input",ExpressionUUID->"c2a0b91f-8de6-49bf-baa9-6e83e21b87b4"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9508, 259, 175, 3, 68, "Section",ExpressionUUID->"1566aaed-7796-42d5-a6f5-9f653c564bef"],
+Cell[9686, 264, 232, 5, 35, "Text",ExpressionUUID->"8c79e7c2-982d-4c2d-91b5-1232c94fb36b"],
+Cell[9921, 271, 907, 24, 66, "Input",ExpressionUUID->"b6c6503d-6274-4c6e-a101-79f7b8852158"],
+Cell[10831, 297, 1186, 29, 84, "Input",ExpressionUUID->"9ada824b-068d-49fd-b1ec-67a673ba9cb2"],
+Cell[12020, 328, 311, 7, 35, "Text",ExpressionUUID->"475baf23-053e-4311-951d-7b5426b59d61"],
+Cell[12334, 337, 658, 18, 46, "Input",ExpressionUUID->"a5644bee-1542-407e-8137-dfe45bd87b7c"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13029, 360, 208, 3, 68, "Section",ExpressionUUID->"5ff52406-26a2-40fa-9b08-a73db21bc3a9"],
+Cell[CellGroupData[{
+Cell[13262, 367, 198, 3, 54, "Subsection",ExpressionUUID->"ed94c5ed-773b-461b-a50a-7fd9753d5dbc"],
+Cell[13463, 372, 247, 6, 35, "Text",ExpressionUUID->"a31a1921-9a27-4023-acfd-cc8821131ce1"],
+Cell[13713, 380, 1200, 31, 84, "Input",ExpressionUUID->"ad3bfa1e-88ec-4c4a-985c-af4ad7b500f7"],
+Cell[14916, 413, 1249, 32, 84, "Input",ExpressionUUID->"a80d7c35-08d1-44c7-ab91-fd83422fe6b1"],
+Cell[16168, 447, 1256, 32, 122, "Input",ExpressionUUID->"d02622a7-5efe-44c5-b30f-b1b804759d47"],
+Cell[17427, 481, 201, 3, 35, "Text",ExpressionUUID->"5e8f3167-73bf-4f78-9e6a-d2b71cb46e6e"],
+Cell[17631, 486, 644, 18, 46, "Input",ExpressionUUID->"03dab62a-28c8-4013-bc81-3b9539931200"],
+Cell[18278, 506, 642, 17, 46, "Input",ExpressionUUID->"bdb1a4b5-aa24-4955-87b9-57478d775a30"],
+Cell[18923, 525, 644, 17, 46, "Input",ExpressionUUID->"318867f1-1daf-4d73-b64a-48f50875fc0b"],
+Cell[19570, 544, 683, 18, 46, "Input",ExpressionUUID->"6aba3590-688a-4c34-afc8-e67ab34c63a5"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20290, 567, 201, 3, 54, "Subsection",ExpressionUUID->"d288c69b-4b08-4607-82b8-79ddd61c0bf1"],
+Cell[20494, 572, 425, 11, 46, "Input",ExpressionUUID->"a3fb8b29-fee8-423e-80d8-f9dd00cd0e31"],
+Cell[20922, 585, 485, 13, 46, "Input",ExpressionUUID->"a7e89e40-de4e-4f45-a5c8-eab836d70090"],
+Cell[21410, 600, 449, 12, 46, "Input",ExpressionUUID->"99edda34-4deb-4c70-b341-be0cab98199f"],
+Cell[21862, 614, 436, 11, 46, "Input",ExpressionUUID->"32e7cd7c-092d-4216-9e38-2b4fba32efcc"],
+Cell[22301, 627, 205, 3, 35, "Text",ExpressionUUID->"82840d81-5cce-4973-b4bb-85ab9b05801d"],
+Cell[22509, 632, 1076, 30, 122, "Input",ExpressionUUID->"e9784b3c-5f06-43db-85e5-47a1d268139f"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[23634, 668, 194, 3, 68, "Section",ExpressionUUID->"54c22849-b398-4b8a-94db-5818204fb318"],
+Cell[CellGroupData[{
+Cell[23853, 675, 167, 3, 54, "Subsection",ExpressionUUID->"75a4164c-94f1-48b2-bad9-a0c9a96b5ffa"],
+Cell[24023, 680, 390, 8, 58, "Text",ExpressionUUID->"c1ee39a6-da0d-4616-be9c-1073a6295766"],
+Cell[24416, 690, 422, 9, 46, "Input",ExpressionUUID->"84419d52-06e4-4cbe-835e-0693f98ca255"],
+Cell[24841, 701, 371, 8, 46, "Input",ExpressionUUID->"874f5b26-13e2-49e7-bef9-5bae6dd993f4"],
+Cell[25215, 711, 373, 8, 46, "Input",ExpressionUUID->"aba1f213-6f8c-4722-8ee6-979964bc0a69"],
+Cell[25591, 721, 371, 8, 46, "Input",ExpressionUUID->"3104c570-2c25-4739-8c87-81c2a8da35c0"],
+Cell[25965, 731, 318, 7, 58, "Text",ExpressionUUID->"476688ef-c7a8-4378-a9c6-fe181c1665db"],
+Cell[26286, 740, 899, 24, 66, "Input",ExpressionUUID->"77ebba24-5034-4a90-b5f7-dbe82d8ce300"],
+Cell[27188, 766, 1424, 33, 84, "Input",ExpressionUUID->"c8e25661-2e72-47d3-a6ef-740f73c5ee8e"],
+Cell[28615, 801, 612, 15, 46, "Input",ExpressionUUID->"c3ea54fe-0637-44fd-bf75-884499725c52"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[29264, 821, 213, 4, 54, "Subsection",ExpressionUUID->"687e2a14-6880-4fed-a6ae-46be3d2d7d3f"],
+Cell[29480, 827, 160, 3, 35, "Text",ExpressionUUID->"64c6b82d-beeb-4782-84ba-9a3e72cd58f7"],
+Cell[29643, 832, 1023, 29, 84, "Input",ExpressionUUID->"2495a006-bf16-4973-a5bd-3d1a60b090a4"],
+Cell[30669, 863, 1483, 36, 84, "Input",ExpressionUUID->"be22a42e-c200-4455-a5fc-28495fcda4d6"],
+Cell[32155, 901, 1312, 33, 84, "Input",ExpressionUUID->"4a5bb343-1ad7-4bc0-8092-4d8dab87428c"],
+Cell[33470, 936, 182, 3, 35, "Text",ExpressionUUID->"ccd3844c-8b18-402f-a555-f9aedcbd1731"],
+Cell[33655, 941, 1043, 28, 84, "Input",ExpressionUUID->"f85aa1c2-d244-41da-a426-01099562b563"],
+Cell[34701, 971, 1307, 33, 84, "Input",ExpressionUUID->"cca489bb-9647-4da9-a049-7afd7ddbde43"],
+Cell[36011, 1006, 1252, 32, 84, "Input",ExpressionUUID->"ff99737b-c1d6-40ff-944b-0fc200e78369"],
+Cell[37266, 1040, 157, 3, 35, "Text",ExpressionUUID->"8cab35e9-623e-4520-a927-dfb3d8959365"],
+Cell[37426, 1045, 1230, 31, 84, "Input",ExpressionUUID->"7fe33b45-fcd8-4b2e-bc81-c3a4e81c3051"],
+Cell[38659, 1078, 1530, 37, 122, "Input",ExpressionUUID->"b417cce2-d623-4554-94b3-b44c99896316"],
+Cell[40192, 1117, 1377, 35, 84, "Input",ExpressionUUID->"b5eccdf9-bb61-4ad3-992b-455f7fda3e66"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

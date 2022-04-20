@@ -17,14 +17,15 @@ Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$.
 
 Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 
-\begin{verbatim}
-In[]:= f[z_] = z^2;
-    NestList[f, 0.9, 10]
-    
-Out[]= {0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368,
-    0.00117902, 1.39008*10^-6, 1.93233*10^-12, 3.73392*10^-24, 
-    1.39421*10^-47}
-\end{verbatim}
+\begin{mmaCell}{Code}
+  f[z_] := z^2;
+  NestList[f, 0.9, 10]
+\end{mmaCell}
+\begin{mmaCell}{Output}
+  \{0.9, 0.81, 0.6561, 0.430467, 0.185302, 0.0343368, \
+  0.00117902, 1.39008*10^-6, 1.93233*10^-12, 3.73392*10^-24, \
+  1.39421*10^-47\}
+\end{mmaCell}
 
 Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. En este caso todos los valores eran reales, pero aprovechando la correspondencia de $\C$ con $\R^2$, de forma que un número complejo $z=x+y\cdot i\in\C$ se corresponde con el par $(x,y)\in\R^2$ podemos representar en el plano y de forma visual la tendencia de dichas sucesiones. Observemos los ejemplos de las imágenes \ref{fig:orbitas-C}.
 
@@ -77,6 +78,14 @@ Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos ce
 
 \subsection{Velocidad de convergencia}
 
+Si recordamos el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}), que nos decía que las funciones contractivas en un espacio métrico completo admiten un único punto fijo, el cual se puede hallar iterando la función. Recordemos que dada una función $f:\C\longrightarrow\C$ contractiva, esta cumple que $|f(z_1)-f(z_2)|\leq K|z_1-z_2|\ \ \forall z_1,z_2\in\C$, siendo $0<K<1$ la constante de Lipschitz de $f$, nombrada en este caso la constante de contractividad. Fijémonos que, si iteramos $n$ veces la función $f$
+\begin{eqnarray*}
+    |f^n(z_0)-f^{n-1}(z_0)| & \leq & K|f^{n-1}(z_0)-f^{n-2}(z_0)| \\
+    & \leq & K^2 |f^{n-2}(z_0)-f^{n-3}(z_0)| \\
+    & \leq\cdots\leq&K^{n-1}|f(z_0)-z_0|
+\end{eqnarray*}
+por lo que en realidad la constante $K$ define de forma genérica la velocidad de convergencia en términos de la función. Cuanto más cercana a $0$, más rápida será la convergencia al punto fijo. Sin embargo, vemos que realmente también depende de la condición inicial fijada, y es este el aspecto que explotaremos para obtener imágenes fractales. 
+
 En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
@@ -86,16 +95,19 @@ En los casos que tengamos asegurada la convergencia, es interesante saber cuánt
 
 El siguiente código muestra un ejemplo de uso:
 
-\begin{verbatim}
-In[]:= f[z_] = z/2 + 1/z;
-    FixedPointList[f, 0.75 + 0.1 I, SameTest -> (Abs[#1 - #2] < 10^-4 &)]
-    FixedPoint[f, 0.75 + 0.1 I]
-    
-Out[]= {0.75 + 0.1 I, 1.68504 - 0.124672 I, 1.43275 - 0.0186668 I, 
-     1.41421 - 0.000241452 I, 1.41421 - 2.45537*10^-10 I, 
-     1.41421 + 3.57849*10^-18 I}
-Out[]= 1.41421 + 0. I
-\end{verbatim}
+\begin{mmaCell}{Code}
+  f[z_] = z/2 + 1/z;
+  FixedPointList[f, 0.75 + 0.1 I, SameTest -> (Abs[#1 - #2] < 10^-4 &)]
+  FixedPoint[f, 0.75 + 0.1 I]
+\end{mmaCell}
+\begin{mmaCell}{Output}
+  \{0.75 + 0.1 I, 1.68504 - 0.124672 I, 1.43275 - 0.0186668 I, \
+  1.41421 - 0.000241452 I, 1.41421 - 2.45537*10^-10 I, \
+  1.41421 + 3.57849*10^-18 I\}
+\end{mmaCell}
+\begin{mmaCell}{Output}
+  1.41421 + 0. I
+\end{mmaCell}
 
 Y a partir de la longitud de la lista que nos devuelve \verb|FixedPointList|, es decir, con el sencillo comando \verb|Length[FixedPoint[f,x]]| podemos medir la velocidad de convergencia de cada punto.
 
@@ -116,15 +128,15 @@ Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayo
 \label{ejemplo:cuencas-1}
 Consideramos la función compleja $f:\C\longrightarrow\C$ dada por $f(z)=z^2-1$, la cual tiene dos raíces: $1$ y $-1$, las dos raíces cuadradas de 1. Una forma sencilla de comprobar a qué raíz converge cada sucesión utilizando como semilla cada $z_0\in\C$ es asociando un color a cada punto del plano dependiendo de la raíz a la que converja y pidiendo a \textit{Mathematica} que coloree el plano complejo siguiendo este criterio.
 
-\begin{verbatim}
-In[]:= iteracionN = #2 - #1[#2]/Derivative[1][#1][#2] &;
+\begin{mmaCell}{Code}
+  iteracionN = #2 - #1[#2]/Derivative[1][#1][#2] &;
     newtonArgumento = 
-      Compile[{{z, _Complex}}, 
-       Arg[FixedPoint[iteracionNR[f, #] &, z, 50]]];
+    Compile[{{z, _Complex}}, 
+    Arg[FixedPoint[iteracionNR[f, #] &, z, 50]]];
     
-In[]:= DensityPlot[newtonArgumento[x + I*y], {x, -2, 2}, {y, -2, 2}, 
-     PlotPoints -> 100, Mesh -> False, ColorFunction -> "Rainbow"] 
-\end{verbatim}
+  DensityPlot[newtonArgumento[x + I*y], {x, -2, 2}, {y, -2, 2}, 
+    PlotPoints -> 100, Mesh -> False, ColorFunction -> "Rainbow"] 
+\end{mmaCell}
 
 \begin{figure} [ht]
 \centering
@@ -155,14 +167,13 @@ En muchas de las funciones que trataremos ocurre que existen distintas cuencas d
 
 En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fractales producidos por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes. Además, en lugar de colorear el plano según la raíz a la que converja la sucesión también podemos fijarnos en la velocidad de convergencia. Esto es, asociar a cada punto del plano un color dependiendo del número de iteraciones necesarias para converger a la raíz. En este sentido, podemos revisitar las imágenes \ref{fig:cuencas-raiz} y en función de la velocidad de convergencia de las sucesiones utilizar un color distinto. El código necesario es el siguiente y los resultados se pueden observar en las imágenes \ref{fig:cuencas-velocidad}:
 
-\begin{verbatim}
-    newtonVelocidad = 
-      Compile[{{z, _Complex}}, 
-        Length[FixedPointList[iteracionN[f, #] &, z, 50]]];
+\begin{mmaCell}{Code}
+  newtonVelocidad = Compile[{{z, _Complex}}, 
+    Length[FixedPointList[iteracionN[f, #] &, z, 50]]];
     
-    DensityPlot[newtonVelocidad[x + I*y], {x, -2, 2}, {y, -2, 2}, 
-      PlotPoints -> 200, Mesh -> False, ColorFunction -> GrayLevel]
-\end{verbatim}
+  DensityPlot[newtonVelocidad[x + I*y], {x, -2, 2}, {y, -2, 2}, 
+    PlotPoints -> 200, Mesh -> False, ColorFunction -> GrayLevel]
+\end{mmaCell}
 
 donde se puede cambiar el valor de \verb|f|, la región del plano \verb|{x, -2, 2}, {y, -2, 2}| o el valor del argumento \verb|ColorFunction| para obtener distintas imágenes.
 
@@ -190,9 +201,10 @@ Consideramos ahora la representación de las cuencas de atracción de la funció
     \label{fig:cuencas-autosimilaridad}
 \end{figure}
 
+\newpage
+
 Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, es decir, representamos una región más pequeña, encontramos estructuras que son iguales independientemente del zoom que se aplique. En la figura \ref{fig:detalles} podemos ver distintos detalles de la figura \ref{fig:cuencas-autosimilaridad}, cada una es una ampliación de la anterior, y podemos ver como esa estructura se repite en todas las escalas.
 
-%\newpage
 
 \begin{figure}[ht]
     \begin{tabular}{ccc}
