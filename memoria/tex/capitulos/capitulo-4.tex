@@ -6,5 +6,44 @@ Como venimos viendo ya en los dos últimos capítulos, la iteración es una pode
 
 La matemática que explica los SFI se puede encontrar en el clásico libro \textit{Fractals Everywhere}\cite{Barnsley} de \textit{Michael Barnsley}. Por su parte, la geometría fractal nació en 1977 con la publicación de \textit{The fractal geometry of nature}\cite{alma991007242979704990} por parte de \textit{Benoit Mandelbrot}. En general, gracias a la geometría fractal y ayudándonos de los SFI podemos recrear resultados de imágenes y objetos con un nivel de detalle que la geometría euclídea no puede conseguir. Sin embargo, el problema inverso también es interesante: ¿es posible, a partir de un objeto, describirlo matemáticamente mediante SFI? Este es un área de la matemática aún abierta y en la que a día de hoy se continua trabajando. Uno de los resultados más conocidos en este ámbito es el \textit{teorema del collage}, del cual hablaremos más adelante. %TODO referenciar teorema y sección
 
+\section{Transformaciones afines en el plano euclídeo}
+
+Si nos restringimos al plano euclídeo $\R^2$ visto como espacio afín, previo a la definición formal de SFI necesitamos unas nociones sobre transformaciones afines y maneras de representarlas, ya que estas serán las que compongan fundalmente los SFI.
+
+\begin{definicion}[Transformación afín]
+    Una transformación $w:\R^2\longrightarrow\R^2$ de la forma
+    \begin{equation}
+        w(x_1,x_2)=(ax_1+bx_2+e,cx_1+dx_2+f) \ \ \forall (x_1,x_2)\in\R^2
+    \end{equation}
+    donde las constantes $a,b,c,d,e,f$ son números reales es denominada una \textbf{transformación afín} del plano euclídeo.
+\end{definicion}
+
+Una forma equivalente de denotar $w$ matricialmente es tomando la matriz $A=\begin{pmatrix}
+    a & b \\
+    c & d
+\end{pmatrix}\in\mathcal{M}_2(\R)$ y el vector $b=\begin{pmatrix}
+    e \\
+    f
+\end{pmatrix}$ y expresar $w$ como:
+
+\begin{equation}
+    w(x) =
+    w\begin{pmatrix}
+        x_1 \\
+        x_2
+    \end{pmatrix} = Ax + b = \begin{pmatrix}
+        a & b \\
+        c & d
+    \end{pmatrix}\begin{pmatrix}
+        x_1 \\
+        x_2
+    \end{pmatrix}+\begin{pmatrix}
+        e \\
+        f
+    \end{pmatrix} \ \ \forall \ x = \begin{pmatrix}
+        x_1 \\
+        x_2
+    \end{pmatrix}\in\R^2.
+\end{equation}
 
 
