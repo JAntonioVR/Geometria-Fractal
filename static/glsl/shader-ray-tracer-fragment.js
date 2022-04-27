@@ -27,6 +27,9 @@ uniform vec4 u_light_color;
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
+#define MAX_STEPS 100
+#define MAX_DIST 10000.0
+#define DIST_SURFACE 0.01
 #define PI 3.14159265359
 
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
@@ -147,7 +150,7 @@ struct Sphere{
 //
 // ─── MANDELBUB ──────────────────────────────────────────────────────────────────
 //
-
+/*
 vec2 hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
 	float b = dot(oc,R.dir);
@@ -240,75 +243,48 @@ Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
     return tmp_hr;
     
 }
+*/
 
-//
-// ─── HIT SPHERE ─────────────────────────────────────────────────────────────────
-// Calculates the intersection between a Ray and a Sphere and stores the hit
-// information in a Hit_record struct.
-
-Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
-    Hit_record result;
-    vec3 oc = R.orig - S.center;
-    float a = dot(R.dir, R.dir);
-    float half_b = dot(oc, R.dir);
-    float c = dot(oc, oc) - S.radius*S.radius;
-    float discriminant = half_b*half_b - a*c;
-    if (discriminant < 0.0){
-        result.hit = false;
-        return result;
-    }
-    float sqrtd = sqrt(discriminant);
-    float root = (-half_b - sqrt(discriminant))/a; // First root
-    if (root < t_min || t_max < root){ // The first root is out of range
-        root = (-half_b + sqrt(discriminant))/a;     // The other root
-        if(root < t_min || t_max < root){    // Both roots are out of range
-            result.hit = false;
-            return result;
-        }
-    } 
-    result.hit = true;
-    result.t = root;
-    result.p = ray_at(R, result.t);
-    result.normal = (result.p - S.center) / S.radius;
-    result.mat = S.mat;
-    return result;
+float get_dist_sphere(vec3 p, Sphere S){
+    return length(S.center - p) - S.radius;
 }
 
-//
-// ─── HIT SPHERES LIST ───────────────────────────────────────────────────────────
-// Given a list of spheres, calculates the possible intersection between a Ray and
-// and the spheres list. If any sphere is hit, stores the hit information in a
-// hit_record struct.
-
-Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
-    Hit_record result, tmp;
-    bool hit_anything = false;
-    float closest_t = t_max;
-    for(int i = 0; i < ARRAY_TAM; i++){
-        if(i == size) break;
-        tmp = hit_sphere(spheres[i], R, t_min, closest_t);
-        if(tmp.hit){
-            hit_anything = true;
-            closest_t = tmp.t;
-            result = tmp;
-        }
-    }
-    return result;
+vec3 calculate_normal_sphere(vec3 p, Sphere S) {
+    return (p - S.center) / S.radius;
 }
 
-// ────────────────────────────────────────────────────────────────────────────────
+Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
+    Hit_record hr;
+    hr.hit = false;
+    float dO = t_min;
+    for(int i = 0; i < MAX_STEPS;  i++) {
+        vec3 p = ray_at(r, dO);
+        float dS = get_dist_sphere(p,S);
+        dO += dS;
+        if(dO >= t_max || dS < DIST_SURFACE) break;
+    }
+
+    if (dO < t_max) { // r hits the Sphere
+        hr.hit = true;
+        hr.t = dO;
+        hr.p = ray_at(r, hr.t);
+        hr.normal = calculate_normal_sphere(hr.p, S);
+        hr.mat = S.mat;
+    }
+
+    return hr;
+}
 
 
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
 // A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the 
 // normal vector that defines the plane.
-
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
+    Material mat;   // Material of the plane
 };
-
 //
 // ─── HIT PLANE ──────────────────────────────────────────────────────────────────
 // Calculates the possible intersection between a ray and a plane and stores the
@@ -329,6 +305,7 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
         result.t = t;
         result.p = ray_at(R, result.t);
         result.normal = normalize(P.normal);
+        result.mat = P.mat;
     }
     return result;
 }
@@ -387,30 +364,29 @@ Ray get_ray(Camera cam, float s, float t){
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
 
-vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
+vec4 ray_color(Ray r, Sphere S, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
     
-    // r hits any sphere?
-    float t_closest = 100000.0;
+    // r hits the sphere?
+
+    float t_closest = MAX_DIST;
+
     vec4 tmp_color;
-    /*Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
+    Hit_record hr = raymarch_sphere(r, S, 0.0, t_closest);
+
     if(hr.hit){
-        t_closest = hr.t;
-        vec3 N = hr.normal;
         tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        t_closest = hr.t;
+    }
+    
+
+    // r hits the ground? 
+    hr = hit_plane(ground, r, 0.0, t_closest);
+    if(hr.hit) {
+        tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        t_closest = hr.t;
     }
 
-    // r hits the plane? 
-    hr = hit_plane(P, r, 0.0, t_closest);
-    if(hr.hit){
-        t_closest = hr.t;
-        vec3 p = hr.p;
-        int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
-        int modulus = sum - (2*int(sum/2));
-        if(modulus == 0)
-            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
-        else
-            tmp_color = vec4(0.0,0.0,0.0, 1.0);
-    }*/
+    /*
 
     // r hits mandelbub?
     Hit_record hr = hit_mandelbub(r, 0.0, t_closest);
@@ -418,15 +394,18 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
         t_closest = hr.t;
         vec3 N = hr.normal;
         tmp_color = evaluateLightingModel(lights, num_lights, hr);
-    }
+    }*/
 
-    // If r hits any surface
-    if(t_closest < 10000.0) return tmp_color;
+    if(t_closest < MAX_DIST) return tmp_color;
 
-    // r does not hit any surface
+    // r does not hit the sphere
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
+    
+    
+
+
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -442,31 +421,32 @@ void main() {
     int image_height = int(float(image_width) / aspect_ratio);
 
     // WORLD
-    // Material
-    Material mat;
-    mat.ke = u_ke;
-    mat.ka = u_ka;
-    mat.kd = u_kd;
-    mat.ks = u_ks;
-    mat.sh = u_sh;
+    // Materials
+    Material mat0, mat1;
 
-    // Spheres
-    int num_spheres = 1;
-    Sphere world[ARRAY_TAM];
-    Sphere S1, S2, S3, S4;
-    S1.center = vec3(0.0, 0.0, 0.0); S1.radius = 0.5; S1.mat = mat;
-    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5; S2.mat = mat;
-    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5; S3.mat = mat;
-    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5; S4.mat = mat;
+    // Sphere material
+    mat0.ke = u_ke;
+    mat0.ka = u_ka;
+    mat0.kd = u_kd;
+    mat0.ks = u_ks;
+    mat0.sh = u_sh;
 
+    // Ground material
+    mat1.ke = vec4(236.0, 226.0, 198.0, 255.0)/255.0;
+    mat1.ka = vec4(0.0, 0.0, 0.0, 1.0);
+    mat1.kd = vec4(236.0, 226.0, 198.0, 255.0)/255.0;
+    mat1.ks = vec4(0.0, 0.0, 0.0, 1.0);
 
-    world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
+    // Sphere
+    Sphere S;
+    S.center = vec3(0.0, 0.0, 0.0); S.radius = 1.0 ; S.mat = mat0;
 
-    // Plane
-    Plane P;
-    P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = -0.5;
-
+    // Ground
+    Plane ground;
+    ground.normal = vec3(0.0, 1.0, 0.0);
+    ground.D = -2.0;
+    ground.mat = mat1;
+    
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
@@ -476,7 +456,7 @@ void main() {
     Directional_light lights[ARRAY_TAM];
     int num_lights = 2;
     Directional_light l1, l2;
-    l1.color = u_light_color; l2.color = vec4(0.0, 0.0, 1.0, 1.0);
+    l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
     l1.dir = vec3(1.0, 1.0, 1.0);
     l2.dir = vec3(-1.0, -1.0, 0.0);
     lights[0] = l1; lights[1] = l2;
@@ -488,7 +468,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = ray_color(r, world, num_spheres, P, lights, num_lights);
+    gl_FragColor = ray_color(r, S, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
