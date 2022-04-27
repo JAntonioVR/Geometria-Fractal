@@ -102,7 +102,10 @@ En el caso de (a) observamos una similitud con $r=0.5$ y $\alpha=\frac{\pi}{6}$.
 Un último detalle para la creación de SFI es la necesidad de que las transformaciones afines utilizadas sean \textit{aplicaciones contractivas}. Procedemos por tanto a definir un SFI:
 
 \begin{definicion}[Sistema de Funciones Iteradas]
+    \label{def:SFI}
     Un \textit{Sistema de Funciones Iteradas} se compone de un espacio métrico completo $(X,d)$ y de un conjunto finito de aplicaciones contractivas $w=\{w_i:i=1,\dots,n\}$.
+
+    Se denomina \textit{constante de contractividad} del SFI a la mayor de las constantes de contractividad de las aplicaciones que lo forman, $s=\max\{s_i:i=1,\dots,n\}$, siendo $s_i$ la constante de contractividad de $w_i \ \ \forall i=1,\dots,n$.
 
     Dado un subconjunto $A\subseteq X$, la imagen de $A$ por medio de $w$ es definida como
     $$
@@ -110,7 +113,7 @@ Un último detalle para la creación de SFI es la necesidad de que las transform
     $$
 \end{definicion}
 
-En nuestro caso el espacio métrico completo es el plano euclídeo $\R^2$ y utilizaremos un conjunto finito de transformaciones lineales.
+Podemos utilizar como espacio métrico completo el plano euclídeo $\R^2$ y un conjunto finito de transformaciones lineales contractivas.
 
 \begin{ejemplo}
     \label{ejemplo:sfi}
@@ -130,6 +133,7 @@ En nuestro caso el espacio métrico completo es el plano euclídeo $\R^2$ y util
 \end{ejemplo}
 
 \section{Convergencia de SFI}
+\label{section:convergencia-sfi}
 
 Probablemente el resultado de aplicar el SFI $w$ a un triángulo equilátero que vemos en el ejemplo \ref{ejemplo:sfi} le recuerde al primer paso al generar el triángulo de Sierpinski, el cual vimos en la sección \ref{subsection:triangulo-Sierpinski}. De hecho, podemos volver a aplicar $w$ a $w(T)$, a $w(w(T))$, y así sucesivamente, de forma que iterando infinitamente $w$ en $T$, el resultado final que obtenemos es efectivamente el triángulo de Sierpinski \textbf{S}, véase de nuevo la imagen \ref{fig:triangulo-Sierpinski}.
 
@@ -151,6 +155,8 @@ Este es sólo un ejemplo, pero a lo largo de esta sección veremos que todo SFI 
     \caption{Resultado de iterar 8 veces $w$ con distintas figuras iniciales}
     \label{fig:semillas-sfi}
 \end{figure}
+
+\subsection{El Espacio de Fractales y la Métrica de Hausdorff}
 
 Consideramos un espacio de Banach $(X,d)$\footnote{Recordamos que un espacio de Banach es un espacio métrico completo} y sea $\mathcal{H}(X)\subset\mathcal P (X)$ el conjunto de todos los subconjuntos compactos de $X$, el cual también se denomina \textit{espacio de fractales} de $X$. Dado un punto $x\in X$ y un subconjunto $A\in\mathcal H$ la distancia de un punto a un conjunto como
 $$
@@ -178,7 +184,111 @@ El problema es que esta definición no nos basta para definir una distancia entr
 
 En adelante denotaremos únicamente $h(\cdot,\cdot)$, omitiendo la dependencia de la distancia del espacio original.
 
-Podemos comprobar en \cite{Barnsley}[Sección 2.6] que, en efecto, $h$ es una distancia. Además, en \cite{Barnsley}[Sección 2.7] se prueba que el espacio métrico $(\mathcal{H}(X), h(d))$ es completo.
+Podemos comprobar en \cite[Sección 2.6]{Barnsley} que, en efecto, $h$ es una distancia. Además, en \cite[Sección 2.7]{Barnsley} se prueba que el espacio métrico $(\mathcal{H}(X), h(d))$ es completo.
 
+\subsection{Aplicaciones contractivas en el espacio de fractales}
 
+Consideramos un espacio métrico completo $(X,d)$ y su espacio de fractales dotado de la métrica de Hausdorff $(\mathcal H(X), h(d))$, que también es completo, y tomamos una aplicación contractiva $w:X\longrightarrow X$. Buscamos averiguar qué ocurre al iterar $w$ sobre $\mathcal{H}(X)$, siendo esta contractiva sobre $X$ y $\mathcal{H}(X)$ un espacio métrico completo. 
 
+\begin{lema}
+    \label{lema:contractivas-compactos}
+    Sea $(X,d)$ un espacio métrico y $w:X\longrightarrow X$ una aplicación contractiva, entonces 
+    $$w(\mathcal{H}(X))=\{w(A):A\in\mathcal{H}(X)\}\subseteq\mathcal{H}(X),$$
+    es decir, la imagen por $w$ de todo compacto de $X$ es un conjunto compacto de $X$.
+\end{lema}
+\begin{proof}
+    Sabemos que $w$ es continua en $X$, pues toda aplicación contractiva es lipschitziana y por tanto continua. Como la imagen de un conjunto compacto por una aplicación continua es un conjunto compacto, podemos afirmar que $w$ lleva elementos de $\mathcal{H}(X)$ a elementos de $\mathcal{H}(X)$.
+\end{proof}
+
+Ahora necesitamos alguna forma de construir aplicaciones contractivas en el espacio $(\mathcal{H}(X),h)$ a partir de aplicaciones contractivas en $(X,d)$. Gracias al siguiente lema comprobamos que la forma más natural es suficiente.
+
+\begin{lema}
+    Sea $(X,d)$ un espacio métrico y $w:X\longrightarrow X$ una aplicación contractiva con constante de Lipschitz $s$. Entonces $w:\mathcal{H}(X)\longrightarrow\mathcal{X}$, definida naturalmente como
+    $$
+    w(A)=\{w(a):a\in A\}\ \ \forall A\in\mathcal{H}(X)
+    $$
+    es una aplicación contractiva en $(\mathcal{H}(X),h)$.
+\end{lema}
+\begin{proof}
+    Gracias al lema \ref{lema:contractivas-compactos} sabemos que la aplicación $w:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ está bien definida, por lo que falta probar que en efecto es contractiva. Sean $A,B\in\mathcal{H}(X)$, tenemos que
+    \begin{eqnarray*}
+        d(w(A),w(B)) & = & \max\left\lbrace \min \left\lbrace d(w(a),w(b)): b\in B\right\rbrace : a\in A \right\rbrace \\
+                     & \leq &  \max\left\lbrace \min \left\lbrace s\cdot d(a,b): b\in B\right\rbrace : a\in A \right\rbrace \\
+                     & = & s\cdot d(A,B).
+    \end{eqnarray*}
+    Análogamente, $d(w(B),w(A))\leq s d(B,A)$. Por tanto
+    \begin{eqnarray*}
+        h(w(A),w(B)) & = & \max \{d(w(A),w(B)), d(w(B),w(A))\} \\
+                     & \leq & s \max \{d(A,B), d(B,A))\} \\
+                     & = & s\cdot h(A,B).
+    \end{eqnarray*}
+    Por lo que tenemos que $w$ es contractiva sobre $\mathcal{H}(X)$.
+\end{proof}
+
+Enunciamos una propiedad de la métrica de Hausdorff $h$ que nos hará falta dentro de poco.
+
+\begin{lema}
+    \label{lema:uniones}
+    Sean $A,B,C,D\in\mathcal{H}(X)$, entonces 
+    $$h(A\cup B, C\cup D)\leq\max\{h(A,C),h(B,D)\}$$.
+\end{lema}
+\begin{proof}
+    La prueba se sigue de otra propiedad de la distancia $d$:
+    \begin{eqnarray*}
+    d(A\cup B,C) & = & \max\{d(x,C)\ \ \forall x\in A\cup B\} \\
+                 & = & \max\left\lbrace \max\left\lbrace d(x,C):c\in A \right\rbrace, \max\left\lbrace d(x,C):c\in B \right\rbrace\right\rbrace \\
+                 & = & \max\left\lbrace d(A,C),d(A,B) \right\rbrace.
+    \end{eqnarray*}
+    Y de esta igualdad se deduce la desigualdad pedida.
+\end{proof}
+
+Seguidamente presentamos un resultado que nos ayuda a construir aplicaciones contractivas a partir de no sólo una sino de varias, a través del cual enlazaremos, esta vez en un contexto más teórico y formal, con la definición de SFI como conjunto de aplicaciones contractivas en un espacio métrico completo.
+
+\begin{proposicion}
+    Sea $(X,d)$ un espacio métrico y sea $\{w_i:i=1,\dots,n\}$ un conjunto finito de aplicaciones contractivas $w_i:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$, cada una con constante de contractividad $s_i$. Definimos la aplicación $W:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ como
+    \begin{equation}
+        \label{eqn:W}
+        W(A) := \bigcup_{i=1}^n w(A) \ \ \forall A\in\mathcal{H}(X).
+    \end{equation}
+    Entonces $W$ es una aplicación contractiva en $\mathcal{H}(X)$ y su constante de contractividad es $s=\max\{s_i:i=1,\dots,n\}$.
+\end{proposicion}
+\begin{proof}
+    Demostraremos el caso $n=2$, de forma que por inducción sería cierto para cualquier $n\leq 1$. Sean $A,B\in\mathcal{H}(X)$, tenemos que
+    \begin{eqnarray*}
+    h(W(A),W(B)) & = & h(w_1(A)\cup w_2(A), w_1(B)\cup w_2(B)) \\
+                 & \leq & \max\{h(w_1(A),w_1(B)), h(w_2(A),w_2(B))\}\text{ (lema \ref{lema:uniones})} \\
+                 & \leq & \max\{s_1\cdot h(A,B), s_2\cdot h(A,B) \} \\
+                 & \leq & \max\{s_1,s_2\} h(A,B) \\
+                 & = & s h(A,B)
+    \end{eqnarray*}
+    Lo cual completa la demostración.
+\end{proof}
+
+\subsection{El espacio de fractales y los SFI}
+
+Hasta ahora hemos probado varios resultados que nos han servido para construir aplicaciones contractivas en el espacio de fractales de un espacio métrico a partir de un conjunto finito de aplicaciones contractivas. Si añadimos la hipótesis de la complitud, tendríamos con ese conjunto de aplicaciones contractivas un SFI, el cual podemos iterar bajo la seguridad de que no perdemos dicha contractividad. Por lo tanto, y recuperando la definición \ref{def:SFI}, ya podemos recopilar toda la información que tenemos y enunciar el siguiente teorema:
+
+\begin{teorema}
+    Consideramos el SFI formado por el espacio métrico completo $(X,d)$ y el conjunto $\{w_i:i=1\dots, N\}$ de aplicaciones contractivas, siendo $s$ la constante de contractividad del SFI. Consideramos también el espacio de fractales $(\mathcal{H}(X),h)$, donde definimos la aplicación $W:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ como en (\ref{eqn:W}):
+    $$
+    W(A) := \bigcup_{i=1}^N w(A) \ \ \forall A\in\mathcal{H}(X).
+    $$
+    Entonces $W$ es una aplicación contractiva de constante $s$ y admite un único punto fijo $A^*\in\mathcal{H}(X)$, el cual está dado por 
+    $$
+    A^*=\lim_{n\rightarrow\infty} W^n(B) \ \ \forall B\in\mathcal{H}(X).
+    $$
+
+\end{teorema}
+\begin{proof}
+    Gracias a los resultados anteriores solo nos quedaría probar que $W$ admite un único punto fijo dado por la iteración infinita de $W$ e independientemente de qué $B\in\mathcal{H}(X)$ inicial se tome. Sin embargo, teniendo en cuenta que $W$ es contractiva y que $\mathcal{H}(X)$ es un espacio métrico completo, simplemente aplicando el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}) se tiene el resultado completo
+\end{proof}
+
+En resumen, tenemos que todo SFI admite un único punto fijo al que converge la iteración sucesiva de la aplicación $W$ construida a partir de su conjunto de aplicaciones contractivas. Además, esta convergencia está asegurada sea cual sea el conjunto inicial en el que se comienzan las iteradas. Como veníamos anunciando al inicio de esta sección, podemos ponerle nombre al punto fijo del SFI:
+
+\begin{definicion}[Atractor]
+    Dado un SFI, definimos que su único punto fijo como el \textbf{atractor} del SFI.    
+\end{definicion}
+
+Recordamos ahora el SFI del ejemplo \ref{ejemplo:sfi} y las imágenes \ref{fig:semillas-sfi}, que nos permitirían comprobar que el triángulo de Sierpinski es el atractor del SFI y que independientemente de la figura inicial (siempre y cuando sea un conjunto compacto de $\R^2$) la iteración conjunta de $\{w_1,w_2,w_3\}$ converge a $\mathbf{S}$ como resultado.
+
+Ahora podemos aplicar esta teoría al espacio métrico completo $\R^2$ y a las transformaciones afines, que
