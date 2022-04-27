@@ -382,7 +382,7 @@ vec4 ray_color(Ray r, Sphere S, Plane ground, Directional_light lights[ARRAY_TAM
     // r hits the ground? 
     hr = hit_plane(ground, r, 0.0, t_closest);
     if(hr.hit) {
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        tmp_color = vec4(236.0, 226.0, 198.0, 255.0)/255.0; //evaluateLightingModel(lights, num_lights, hr);
         t_closest = hr.t;
     }
 
