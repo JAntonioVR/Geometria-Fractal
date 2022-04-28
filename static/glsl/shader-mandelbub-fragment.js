@@ -7,6 +7,7 @@ const fsSource = glsl`
 // ────────────────────────────────────────────────────────────────────────────────
 //
 
+
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
@@ -28,7 +29,7 @@ uniform vec4 u_light_color;
 
 #define ARRAY_TAM 100
 #define MAX_STEPS 100
-#define MAX_DIST 10000.0
+#define MAX_DIST 100.0
 #define DIST_SURFACE 0.01
 #define PI 3.14159265359
 
@@ -150,7 +151,18 @@ struct Sphere{
 //
 // ─── MANDELBUB ──────────────────────────────────────────────────────────────────
 //
-/*
+
+vec3 f(vec3 w, vec3 c) {
+
+    float m = dot(w,w);
+    float m2 = m*m;
+    float m4 = m2*m2;
+    float r = length(w);
+    float b = 8.0*acos( w.y/r);
+    float a = 8.0*atan( w.x, w.z );
+    return c + m4 * m4 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
+}
+
 vec2 hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
 	float b = dot(oc,R.dir);
@@ -161,89 +173,51 @@ vec2 hit_sphere_limits( Sphere S, Ray R ){
     return -b + vec2(-h,h);
 }
 
+vec4 iterate_mandelbub(vec3 w, vec3 c){
 
-float mandelbub_map(vec3 p, float dw){
-    vec3 w = p;
     float m = dot(w,w);
-    // extract polar coordinates
-    float wr = sqrt(m);
-    float wo = acos(w.y/wr);
-    float wi = atan(w.x,w.z);
+    float dw = 1.0;
 
-    // scale and rotate the point
-    wr = pow( wr, 8.0 );
-    wo = wo * 8.0;
-    wi = wi * 8.0;
+    for(int i = 0; i < 50; i++) {
+        dw = 8.0*pow(m,3.5)*dw + 1.0; //TODO Hay que poner +1?
+        w = f(w,c);
+        if(length(w) > 2.0) break;
+    }
 
-    // convert back to cartesian coordinates
-    w.x = wr * sin(wo)*sin(wi);
-    w.y = wr * cos(wo);
-    w.z = wr * sin(wo)*cos(wi);
+    return vec4(w, dw);
 
-    dw = 8.0*pow(dot(w,w), 3.5)*dw +1.0;
-
-    return 0.25*log(m)*wr/dw;
-
-}
-
-vec3 calculate_normal( vec3 pos, float t, in float px )
-{
-    vec4 tmp;
-    vec2 e = vec2(1.0,-1.0)*0.5773*0.25*px;
-    return normalize( e.xyy*mandelbub_map( pos + e.xyy,tmp.x ) + 
-					  e.yyx*mandelbub_map( pos + e.yyx,tmp.y ) + 
-					  e.yxy*mandelbub_map( pos + e.yxy,tmp.z ) + 
-					  e.xxx*mandelbub_map( pos + e.xxx,tmp.w ) );
 }
 
 Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
-    Hit_record tmp_hr;
-    tmp_hr.hit = false;
-    Sphere bounding_sphere;
-    float dw = 1.0;
-    float px = 2.0/(9.0*1.5); // Magic number by iquilez
-    bounding_sphere.center = vec3(0.0, 0.0, 0.0); bounding_sphere.radius = 1.25;
-    vec2 hits = hit_sphere_limits(bounding_sphere, R);
-    if(hits.x < 0.0 && hits.y < 0.0){ // R does not hit bounding Sphere   
-        return tmp_hr;  
-    }
-    else{
-        tmp_hr.hit = true;
-        tmp_hr.t = hits.x;
-        tmp_hr.p = ray_at(R, tmp_hr.t);
-        tmp_hr.normal = tmp_hr.p-bounding_sphere.center;
-        Material mat;
-        mat.ke = vec4(0.0, 1.0, 0.0, 1.0);
-        mat.ks = vec4(0.1, 0.1, 0.1, 1.0);
-        mat.sh = 100.0;
-        tmp_hr.mat = mat;
-        return tmp_hr;
-    }
-    // R hits bounding Sphere
-    if(hits.x > t_min) t_min = hits.x;
-    if(hits.y < t_max) t_max = hits.y;
+    Hit_record hr;
+    hr.hit = false;
+    float dist;
     float t = t_min;
-    for(int i=0; i<128; i++) {
-        vec3 p = ray_at(R, t);
-        float h = mandelbub_map(p, dw);
-        if(t>t_max || abs(h)<0.01) break;
-        t += h;
+    vec3 w = ray_at(R, t); // Punto del que parto
+    vec3 c = w;
+    float dw;
+    for(int i = 0; i < MAX_STEPS; i++) {
+        vec4 iterations = iterate_mandelbub(w, w); 
+        w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
+        float length_w = length(w);
+        dist = length_w*log(length_w)/abs(dw);
+        t += dist;
+        w = ray_at(R, t);
+
+        if(dist < DIST_SURFACE || t > t_max ) break;
     }
-    if(t < t_max){      // R hits Mandelbub
-        tmp_hr.hit = true;
-        tmp_hr.t = t;
-        tmp_hr.p = ray_at(R, t);
-        tmp_hr.normal = calculate_normal(tmp_hr.p, t, px);
-        Material mat;
-        mat.ke = vec4(0.0, 1.0, 0.0, 1.0);
-        mat.ks = vec4(0.1, 0.1, 0.1, 1.0);
-        mat.sh = 100.0;
-        tmp_hr.mat = mat;
+
+    if (dist < DIST_SURFACE) { // R hits Mandelbub
+        hr.hit = true;
+        hr.t = t;
+        hr.p = w;
+        //hr.normal = calculate_normal_mandelbub(hr.p);
+        //hr.mat = TODO MATERIAL;
     }
-    return tmp_hr;
-    
+
+
+    return hr;
 }
-*/
 
 float get_dist_sphere(vec3 p, Sphere S){
     return length(S.center - p) - S.radius;
@@ -371,34 +345,31 @@ vec4 ray_color(Ray r, Sphere S, Plane ground, Directional_light lights[ARRAY_TAM
     float t_closest = MAX_DIST;
 
     vec4 tmp_color;
-    Hit_record hr = raymarch_sphere(r, S, 0.0, t_closest);
+    Hit_record hr = hit_mandelbub(r, 0.0, MAX_DIST);
 
     if(hr.hit){
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        tmp_color = vec4(1.0, 0.0, 0.0, 1.0);
         t_closest = hr.t;
     }
     
 
     // r hits the ground? 
     hr = hit_plane(ground, r, 0.0, t_closest);
-    if(hr.hit) {
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
-        t_closest = hr.t;
-    }
-
-    /*
-
-    // r hits mandelbub?
-    Hit_record hr = hit_mandelbub(r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
-        vec3 N = hr.normal;
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
-    }*/
+        vec3 p = hr.p;
+        int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+        int modulus = sum - (2*int(sum/2));
+        if(modulus == 0)
+            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+        else
+            tmp_color = vec4(0.0,0.0,0.0, 1.0);
+    }
+
 
     if(t_closest < MAX_DIST) return tmp_color;
 
-    // r does not hit the sphere
+    // r does not hit nothing
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
