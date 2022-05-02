@@ -164,14 +164,13 @@ vec3 f(vec3 w, vec3 c) {
     return c + m4 * m4 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
 }
 
-vec2 hit_sphere_limits( Sphere S, Ray R ){
+bool hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
-	float b = dot(oc,R.dir);
+    float a = dot(R.dir,R.dir);
+    float half_b = dot(oc, R.dir);
 	float c = dot(oc,oc) - S.radius*S.radius;
-    float h = b*b - c;
-    if( h<0.0 ) return vec2(-1.0);
-    h = sqrt( h );
-    return -b + vec2(-h,h);
+    float discriminant = half_b*half_b - a*c;
+    return discriminant >= 0.0;
 }
 
 vec4 iterate_mandelbub(vec3 w, vec3 c){
@@ -179,14 +178,32 @@ vec4 iterate_mandelbub(vec3 w, vec3 c){
     float m = dot(w,w);
     float dw = 1.0;
 
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < MAX_STEPS; i++) {
         dw = 8.0*pow(m,3.5)*dw + 1.0; //TODO Hay que poner +1?
         w = f(w,c);
-        if(length(w) > 2.0) break;
+        if(m > 256.0) break;
     }
 
     return vec4(w, dw);
+}
 
+float get_dist_mandelbub(vec3 p) {
+    float dist;
+    vec3 w;
+    float dw;
+    vec4 iterations = iterate_mandelbub(p, p); 
+    w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
+    float m = dot(w,w);
+    return 0.25 * log(m) * sqrt(m) / dw;
+}
+
+vec3 calculate_normal_mandelbub(vec3 p) {
+    float h = u_epsilon; // replace by an appropriate value
+    const vec2 k = vec2(1,-1);
+    return normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
+                      k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
+                      k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
+                      k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
 }
 
 Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
@@ -374,9 +391,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     p = r.orig;
 */
     for(int i = 0; i < MAX_STEPS; i++) {
-        
         dist = get_dist_plane(p, ground);
-        if(dist < closest_dist) closest_dist = dist;
+        closest_dist = dist;
         if(dist < u_epsilon) {
             hr.t = current_t;
             hr.p = ray_at(r, hr.t);
@@ -385,13 +401,30 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
             int modulus = sum - (2*int(sum/2));
             if(modulus == 0)
-                tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+                return vec4(1.0, 1.0, 1.0, 1.0);
             else
-                tmp_color = vec4(0.0,0.0,0.0, 1.0);
+                return vec4(0.0,0.0,0.0, 1.0);
             
         }
 
+        if(hit_sphere_limits(S[0], r)){
+            dist = get_dist_mandelbub(p);
+            if(dist < closest_dist) closest_dist = dist;
+            if (dist < u_epsilon) { // R hits Mandelbub
+                hr.hit = true;
+                hr.t = current_t;
+                hr.p = hr.p = ray_at(r, hr.t);;
+                hr.normal = calculate_normal_mandelbub(hr.p);
+                hr.mat = S[0].mat; // TODO Mejorar esto
+                return evaluateLightingModel(lights, num_lights, hr);
+            }
+        }
 
+        
+
+
+        
+/*
         for (int j = 0; j < ARRAY_TAM; j++) {
             if(j == num_spheres) break;
             dist = get_dist_sphere(p, S[j]);
@@ -406,6 +439,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 tmp_color = evaluateLightingModel(lights, num_lights, hr);
             }
         }
+
+        */
 
         current_t += max(closest_dist,u_epsilon);
         p = ray_at(r, current_t);
@@ -461,7 +496,7 @@ void main() {
 
     // Sphere
     Sphere S[ARRAY_TAM];
-    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = mat0;
+    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 2.0 ; S[0].mat = mat0;
     S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = mat0;
 
     // Ground
@@ -491,7 +526,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
+    gl_FragColor = ray_color(r, S, 1, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
