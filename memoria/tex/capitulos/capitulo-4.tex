@@ -58,12 +58,12 @@ La matriz $A$ también puede ser expresada de la siguiente forma:
 \end{equation}
 donde el par $(r,\alpha)$ son las coordenadas polares de $(a,c)$ y $(s,\beta+\frac \pi 2)$ son las coordenadas polares de $(b,d)$. De esta forma, una transformación afín puede verse representada por 6 números reales $r,s,\alpha,\beta,e,f$, de forma que:
 \begin{itemize}
-    \item $r,s$ representan una homotecia de razón $r$ en el eje $X$ y razón $s$ en el eje $Y$.
+    \item $r,s$ representan una homotecia o escalado de razón $r$ en el eje $X$ y razón $s$ en el eje $Y$.
     \item $\alpha,\beta$ denotan una rotación de $\alpha$ radianes en la componente $X$ y $\beta$ en la componente $Y$.
     \item $e,f$ simbolizan una traslación de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$.
 \end{itemize}
 
-Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{escalado} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$. A continuación definimos un caso concreto de transformación afín más familiar.
+Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{homotecia} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$. A continuación definimos un caso concreto de transformación afín más familiar.
 
 \begin{definicion}
     Una transformación afín de $\R^2$ $w(x)=Ax+b$, para cualquier $b\in\R^2$ se denomina \textit{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
@@ -123,7 +123,7 @@ Podemos utilizar como espacio métrico completo el plano euclídeo $\R^2$ y un c
         w_2 = \left(0.5,0.5,0,0,\frac 1 2,0\right) \\
         w_3 = \left(0.5,0.5,0,0,\frac 1 4,\frac{\sqrt{3}}{4}\right)
     \end{eqnarray*}
-    Entonces en la imagen \ref{fig:ejemplo-sfi} podemos ver tanto $T$ como el resultado de aplicar el SFI $w$ a $T$.
+    Entonces en la imagen \ref{fig:ejemplo-sfi} podemos ver tanto $T$ como el resultado de aplicar el SFI $w=\{w_1,w_2,w_3\}$ a $T$.
     \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.6]{img/C4/ejemplo-sfi.png}
@@ -158,13 +158,15 @@ Este es sólo un ejemplo, pero a lo largo de esta sección veremos que todo SFI 
 
 \subsection{El Espacio de Fractales y la Métrica de Hausdorff}
 
-Consideramos un espacio de Banach $(X,d)$\footnote{Recordamos que un espacio de Banach es un espacio métrico completo} y sea $\mathcal{H}(X)\subset\mathcal P (X)$ el conjunto de todos los subconjuntos compactos de $X$, el cual también se denomina \textit{espacio de fractales} de $X$. Dado un punto $x\in X$ y un subconjunto $A\in\mathcal H$ la distancia de un punto a un conjunto como
+Consideramos un espacio métrico completo $(X,d)$ y sea $\mathcal{H}(X)\subset\mathcal P (X)$ el conjunto de todos los subconjuntos compactos de $X$, el cual también se denomina \textit{espacio de fractales} de $X$. El objetivo ahora es dotar a $\mathcal{H}(X)$ de una distancia, la cual nos permita cuantificar la similaridad entre conjuntos compactos. 
+
+Dado un punto $x\in X$ y un subconjunto $A\in\mathcal H(X)$ la distancia de un punto a un conjunto es definida como
 $$
-d(A,B) = \inf\{d(x,b):b\in B\}=\min\{d(x,b):b\in B\},
+d(x,A) := \inf\{d(x,a):a\in A\}=\min\{d(x,a):a\in A\},
 $$
 donde el ínfimo es un mínimo porque $A$ es compacto. Si tomamos dos compactos $A,B\in\mathcal H(X)$, entonces la distancia de $A$ a $B$ se define como:
 $$
-d(A,B)=\max(d(a,B):a\in A)
+d(A,B)=\max\{d(a,B):a\in A\}
 $$
 
 El problema es que esta definición no nos basta para definir una distancia entre conjuntos, pues si $A\subset B$ tenemos que $d(A,B)=0$, pero si $b\in B\backslash A$, entonces $d(b,A)>0$, por lo que necesariamente $d(B,A)>0$. Y como sabemos, una auténtica distancia es conmutativa. Véase el contraejemplo de la figura \ref{fig:contraejemplo-distancia}. 
@@ -174,6 +176,8 @@ El problema es que esta definición no nos basta para definir una distancia entr
     \caption{Contraejemplo a la distancia entre conjuntos}
         \label{fig:contraejemplo-distancia}
 \end{figure}
+
+Por suerte, a partir de estas definiciones no es difícil encontrar una definición que cumpla las propiedades de una distancia.
 
 \begin{definicion}
     Dado un espacio de Banach $(X,d)$, en el espacio de fractales $\mathcal{H}(X)$ Se define la \textbf{distancia de Hausdorff} o \textbf{métrica de Hausdorff} como:
@@ -203,20 +207,20 @@ Consideramos un espacio métrico completo $(X,d)$ y su espacio de fractales dota
 Ahora necesitamos alguna forma de construir aplicaciones contractivas en el espacio $(\mathcal{H}(X),h)$ a partir de aplicaciones contractivas en $(X,d)$. Gracias al siguiente lema comprobamos que la forma más natural es suficiente.
 
 \begin{lema}
-    Sea $(X,d)$ un espacio métrico y $w:X\longrightarrow X$ una aplicación contractiva con constante de Lipschitz $s$. Entonces $w:\mathcal{H}(X)\longrightarrow\mathcal{X}$, definida naturalmente como
+    Sea $(X,d)$ un espacio métrico y $w:X\longrightarrow X$ una aplicación contractiva con constante de Lipschitz $s$. Entonces $w:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$, definida naturalmente como
     $$
     w(A)=\{w(a):a\in A\}\ \ \forall A\in\mathcal{H}(X)
     $$
     es una aplicación contractiva en $(\mathcal{H}(X),h)$.
 \end{lema}
 \begin{proof}
-    Gracias al lema \ref{lema:contractivas-compactos} sabemos que la aplicación $w:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ está bien definida, por lo que falta probar que en efecto es contractiva. Sean $A,B\in\mathcal{H}(X)$, tenemos que
+    Si utilizamos el lema \ref{lema:contractivas-compactos} podemos afirmar que la aplicación $w:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ está bien definida, por lo que falta probar que en efecto es contractiva. Sean $A,B\in\mathcal{H}(X)$, tenemos que
     \begin{eqnarray*}
         d(w(A),w(B)) & = & \max\left\lbrace \min \left\lbrace d(w(a),w(b)): b\in B\right\rbrace : a\in A \right\rbrace \\
                      & \leq &  \max\left\lbrace \min \left\lbrace s\cdot d(a,b): b\in B\right\rbrace : a\in A \right\rbrace \\
                      & = & s\cdot d(A,B).
     \end{eqnarray*}
-    Análogamente, $d(w(B),w(A))\leq s d(B,A)$. Por tanto
+    Análogamente, $d(w(B),w(A))\leq s\cdot d(B,A)$. Por tanto
     \begin{eqnarray*}
         h(w(A),w(B)) & = & \max \{d(w(A),w(B)), d(w(B),w(A))\} \\
                      & \leq & s \max \{d(A,B), d(B,A))\} \\
@@ -230,25 +234,25 @@ Enunciamos una propiedad de la métrica de Hausdorff $h$ que nos hará falta den
 \begin{lema}
     \label{lema:uniones}
     Sean $A,B,C,D\in\mathcal{H}(X)$, entonces 
-    $$h(A\cup B, C\cup D)\leq\max\{h(A,C),h(B,D)\}$$.
+    $$h(A\cup B, C\cup D)\leq\max\{h(A,C),h(B,D)\}.$$
 \end{lema}
 \begin{proof}
     La prueba se sigue de otra propiedad de la distancia $d$:
     \begin{eqnarray*}
     d(A\cup B,C) & = & \max\{d(x,C)\ \ \forall x\in A\cup B\} \\
-                 & = & \max\left\lbrace \max\left\lbrace d(x,C):c\in A \right\rbrace, \max\left\lbrace d(x,C):c\in B \right\rbrace\right\rbrace \\
+                 & = & \max\left\lbrace \max\left\lbrace d(x,C):x\in A \right\rbrace, \max\left\lbrace d(x,C):x\in B \right\rbrace\right\rbrace \\
                  & = & \max\left\lbrace d(A,C),d(A,B) \right\rbrace.
     \end{eqnarray*}
-    Y de esta igualdad se deduce la desigualdad pedida.
+    Y de esta igualdad se deduce la desigualdad pedida. %TODO aunque no se muy bien como.
 \end{proof}
 
-Seguidamente presentamos un resultado que nos ayuda a construir aplicaciones contractivas a partir de no sólo una sino de varias, a través del cual enlazaremos, esta vez en un contexto más teórico y formal, con la definición de SFI como conjunto de aplicaciones contractivas en un espacio métrico completo.
+Seguidamente presentamos un resultado que nos ayuda a construir aplicaciones contractivas en $\mathcal{H}(X)$ a partir de no sólo una sino de varias aplicaciones contractivas en $X$, a través del cual enlazaremos, esta vez en un contexto más teórico y formal, con la definición de SFI como conjunto de aplicaciones contractivas en un espacio métrico completo.
 
 \begin{proposicion}
     Sea $(X,d)$ un espacio métrico y sea $\{w_i:i=1,\dots,n\}$ un conjunto finito de aplicaciones contractivas $w_i:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$, cada una con constante de contractividad $s_i$. Definimos la aplicación $W:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ como
     \begin{equation}
         \label{eqn:W}
-        W(A) := \bigcup_{i=1}^n w(A) \ \ \forall A\in\mathcal{H}(X).
+        W(A) := \bigcup_{i=1}^n w_i(A) \ \ \forall A\in\mathcal{H}(X).
     \end{equation}
     Entonces $W$ es una aplicación contractiva en $\mathcal{H}(X)$ y su constante de contractividad es $s=\max\{s_i:i=1,\dots,n\}$.
 \end{proposicion}
@@ -259,7 +263,7 @@ Seguidamente presentamos un resultado que nos ayuda a construir aplicaciones con
                  & \leq & \max\{h(w_1(A),w_1(B)), h(w_2(A),w_2(B))\}\text{ (lema \ref{lema:uniones})} \\
                  & \leq & \max\{s_1\cdot h(A,B), s_2\cdot h(A,B) \} \\
                  & \leq & \max\{s_1,s_2\} h(A,B) \\
-                 & = & s h(A,B)
+                 & = & s \cdot h(A,B)
     \end{eqnarray*}
     Lo cual completa la demostración.
 \end{proof}
@@ -271,7 +275,7 @@ Hasta ahora hemos probado varios resultados que nos han servido para construir a
 \begin{teorema}
     Consideramos el SFI formado por el espacio métrico completo $(X,d)$ y el conjunto $\{w_i:i=1\dots, N\}$ de aplicaciones contractivas, siendo $s$ la constante de contractividad del SFI. Consideramos también el espacio de fractales $(\mathcal{H}(X),h)$, donde definimos la aplicación $W:\mathcal{H}(X)\longrightarrow\mathcal{H}(X)$ como en (\ref{eqn:W}):
     $$
-    W(A) := \bigcup_{i=1}^N w(A) \ \ \forall A\in\mathcal{H}(X).
+    W(A) := \bigcup_{i=1}^N w_i(A) \ \ \forall A\in\mathcal{H}(X).
     $$
     Entonces $W$ es una aplicación contractiva de constante $s$ y admite un único punto fijo $A^*\in\mathcal{H}(X)$, el cual está dado por 
     $$
@@ -291,4 +295,140 @@ En resumen, tenemos que todo SFI admite un único punto fijo al que converge la 
 
 Recordamos ahora el SFI del ejemplo \ref{ejemplo:sfi} y las imágenes \ref{fig:semillas-sfi}, que nos permitirían comprobar que el triángulo de Sierpinski es el atractor del SFI y que independientemente de la figura inicial (siempre y cuando sea un conjunto compacto de $\R^2$) la iteración conjunta de $\{w_1,w_2,w_3\}$ converge a $\mathbf{S}$ como resultado.
 
-Ahora podemos aplicar esta teoría al espacio métrico completo $\R^2$ y a las transformaciones afines, que
+Ahora podemos aplicar esta teoría al espacio métrico completo $\R^2$ y a las transformaciones afines, que para asegurar la convergencia necesitamos que sean contracciones. Afortunadamente, es sencillo probar esta condición.
+
+\begin{proposicion}
+    Sea $w =(r,s,\alpha,\beta,e,f)$ una transformación afín de $\R^2$. Si $\alpha=\beta$ y $\max\{|r|,|s|\}\leq 1$, entonces $w$ es una aplicación contractiva. 
+\end{proposicion}
+\begin{proof}
+    Por un lado, las rotaciones uniformes y las traslaciones son movimientos rígidos, en particular aplicaciones lipschitzianas de constante de Lipschitz igual a 1. Por tanto, por composición, para comprobar que $w$ es contractiva, debemos probar que un escalado (uniforme o no) es una aplicación contractiva si $\max\{|r|,|s|\}<1$. Supongamos que la aplicación $s(x_1,x_2)=(r\cdot x_1,s\cdot x_2)$ verifica $K=\max\{|r|,|s|\}\leq 1$. Entonces, para cualesquiera $x=(x_1,x_2), y=(y_1,y_2)\in\R^2$:
+    \begin{eqnarray*}
+        \|s(x) - s(y)\| & = & \|(s_1 x_1-s_1 y_1, s_2 x_2 - s_2 y_2)\| \\
+                        & = & \|(s_1(x_1-y_1), s_2(x_2-y_2))\| \\
+                        & \leq & K \|x-y\|
+    \end{eqnarray*}
+    Por tanto $s$ es contractiva.
+\end{proof}
+
+Y una vez que sabemos cómo hacer que una transformación afín sea contractiva, podemos , sin importar el conjunto de partida, obtener imágenes fractales a partir únicamente de una colección finita de sextuplas, cada una representando una transformación afín contractiva. Como posibles ejemplos, y para que se observe la diversidad que ofrece este método, en las tablas \ref{tabla:arbol-pitagoras} y \ref{tabla:helecho-Barnsley} se pueden observar los SFI cuyos atractores son el árbol pitagórico y el helecho de Barnsley (imágenes \ref{fig:atractores-sfi} (a) y (b) respectivamente), siendo este último una imagen cuya representación es ya bastante realista.
+
+\newpage
+\begin{table}
+    \centering
+    \begin{tabular}{c|cccccc} \hline
+        $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
+    1 & 1 & 1 & 0 & 0 & 0 & 0 \\ \hline
+    2 & $\dfrac{1}{\sqrt 2}$ & $\dfrac{1}{\sqrt 2}$ & $\dfrac{\pi}{4}$ & $\dfrac{\pi}{4}$ & 0 & 1 \\ \hline
+    3 & $\dfrac{1}{\sqrt 2}$ & $\dfrac{1}{\sqrt 2}$ & $-\dfrac{\pi}{4}$ & $-\dfrac{\pi}{4}$ & $\dfrac 1 2$ &  $\dfrac 3 2$ \\ \hline
+    \end{tabular}
+    \caption{SFI para el árbol pitagórico}
+    \label{tabla:arbol-pitagoras}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{c|cccccc} \hline
+        $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
+    1 & 0.85 & 0.85 & $-\dfrac{\pi}{72}$ & $-\dfrac{\pi}{72}$ & 0 & 1.6 \\ \hline
+    2 & 0.3 & 0.34 & $\dfrac{49 \pi}{180}$ & $\dfrac{49 \pi}{180}$ & 0 & 1.6 \\ \hline
+    3 & 0.3 & 0.34 & $\dfrac{2 \pi}{3}$ & $\dfrac{2 \pi}{3}$ & 0 & 0.44 \\ \hline
+    4 & 0 & 0.3 & 0 & 0 & 0 & 0 \\ \hline
+    \end{tabular}
+    \caption{SFI para el helecho de Barnsley}
+    \label{tabla:helecho-Barnsley}
+\end{table}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+      \includegraphics[scale=0.5]{./img/C4/arbol-pitagoras.png} &   \includegraphics[scale=0.4]{./img/C4/helecho-barnsley.png} \\
+    (a) Árbol pitagórico & (b) Helecho de Barnsley 
+    \end{tabular}
+    \caption{Atractores de los SFI definidos en las tablas \ref{tabla:arbol-pitagoras} y \ref{tabla:helecho-Barnsley}.}
+    \label{fig:atractores-sfi}
+\end{figure}
+
+\section{El problema inverso}
+
+Como ya hemos podido ver, los SFI nos abren un mundo de posibilidades para crear imágenes fractales, ya que todos convergen a un atractor. Sin embargo, podemos también plantearnos el problema inverso. A partir de una imagen, ¿es posible determinar un SFI tal que su atractor sea la imagen inicial? Este es el punto clave de la teoría de la compresión por imágenes fractales. Pensemos que es mucho más ligero almacenar en memoria un conjunto finito de números en coma flotante que una imagen (viéndose esta como una colección de píxeles).
+
+En este contexto, la mejor herramienta que tenemos es el conocido como \textit{teorema del collage}, que enunciamos a continuación.
+
+\begin{teorema}[El teorema del collage]
+    Sean $(X,d)$ un espacio métrico completo, $L\in\mathcal{H}(X)$ y $\varepsilon\geq 0$. Si $\{w_i:i=1,\dots,N\}$ es un SFI en $X$ con constante de contractividad $0\leq s < 1$ cumpliendo que
+    $$
+    h\left(L,\bigcup_{i=1}^N w_i(L)\right) \leq \varepsilon,
+    $$
+    donde $h(d)$ es la métrica de Hausdorff, entonces
+    $$
+    h(L,A)\leq \dfrac{\varepsilon}{1-s}
+    $$
+    donde $A$ es el atractor del SFI. Equivalentemente,
+    $$
+    h(L,A)\leq(1-s)^{-1} h\left(L, \bigcup_{i=1}^N w_i(L)\right) \ \ \forall L\in\mathcal{H}(X).
+    $$
+\end{teorema}
+
+Para probar el teorema del collage primero probamos el siguiente lema, que nos deja la mayor parte del trabajo hecho.
+
+\begin{lema}
+    Sea $(X,d)$ un espacio métrico completo. Sea $f:X\longrightarrow X$ una aplicación contractiva con constante de contractividad $0\leq s < 1$ y consideramos $x^*\in X$ el punto fijo de $f$. Entonces
+    $$
+    d(x,x^*)\leq (1-s)^{-1} d(x,f(x)) \ \ \forall x\in X.
+    $$
+    \label{lema:collage}
+\end{lema}
+\begin{proof}
+    Fijado $x\in X$, la función distancia $d(x,\cdot)$ es continua, por tanto:
+    \begin{eqnarray*}
+        d(x,x^*) & = & d(x,\lim_{n\rightarrow\infty} f^n(x)) = \lim_{n\rightarrow\infty} d(x,f^n(x)) \\
+        & \leq & \lim_{n\rightarrow\infty} \sum_{i=1}^n d(f^{i-1}(x),f^{i}(x)) \ \ \text{(desigualdad triangular)}\\ 
+        & \leq & \lim_{n\rightarrow\infty} d(x,f(x))\sum_{i=1}^n s^{i-1} \\
+        & = & (1-s)^{-1} d(x,f(x))
+    \end{eqnarray*}
+    donde en la última igualdad hemos utilizado que la suma de los elementos de una serie geométrica de razón $0\leq\alpha<1$ es $(1-\alpha)^{-1}$.
+\end{proof}
+
+Aplicando el lema \ref{lema:collage} al espacio métrico $(\mathcal{H}(X), h(d))$ y a la aplicación contractiva $W$ generada por $\{w_i:i=1,\dots,N\}$ como en (\ref{eqn:W}) tenemos probado el teorema del collage.
+
+Intuitivamente, este teorema nos dice que para encontrar un SFI cuyo atractor es similar a un conjunto dado, debemos buscar un conjunto finito de aplicaciones contractivas (transformaciones afines contractivas en $\R^2$) tales que la unión (el collage) formada por las imágenes del conjunto dado vía dichas aplicaciones se parezca a sí mismo. La forma de medir esta similaridad de manera cuantitativa es mediante la métrica de Hausdorff.
+
+\begin{ejemplo}
+    Vamos a aplicar el teorema del collage para encontrar un SFI que nos ayude a replicar la imagen \ref{fig:ejemplo-collage} (a).
+    \begin{figure}[ht]
+        \centering
+        \begin{tabular}{cc}
+          \includegraphics[scale=0.45]{./img/C4/ejemplo-collage-original.png} &   \includegraphics[scale=0.34]{./img/C4/ejemplo-collage.png} \\ (a) & (b) \\
+        \end{tabular}
+        \caption{Imagen cuyo SFI debemos determinar}
+        \label{fig:ejemplo-collage}
+    \end{figure}
+
+    Para ello, siguiendo lo que nos sugiere el teorema del collage debemos encontrar transformaciones afines tales que la unión de las imágenes de este conjunto sea lo más parecida posible al conjunto original. Llamemos $L$ al subconjunto de $\R^2$ que representa este fractal.
+
+    Fijémonos, tal y como se puede ver en la imagen \ref{fig:ejemplo-collage} (b) que $L$ está compuesto por tres copias reducidas de sí mismo. Por lo que trataremos de buscar tres transformaciones afines tales que cada una genere una de las copias del propio $L$, de forma que al unirlas obtendríamos de nuevo el mismo conjunto.
+    \begin{itemize}
+        \item La copia \textcolor{red}{roja} es simplemente el propio $L$ contraído a la mitad en ambos ejes, por lo que utilizamos la aplicación $\textcolor{red}{w_1=(0.5,0.5,0,0,0,0)}$.
+        \item La copia \textcolor{blue}{azul} es, al igual que la \textcolor{red}{roja}, el resultado de aplicar una homotecia de razón 0.5, pero esta vez también se desplaza 0.5 unidades a la derecha. La aplicación que buscamos es por tanto $\textcolor{blue}{w_2=(0.5,0.5,0,0,0.5,0)}$.
+        \item Por último, la copia \textcolor{green}{verde} debemos fijarnos que además de escalada y desplazada, está girada. Por lo que es el resultado de aplicar una similitud de razón de homotecia $0.5$ y ángulo de rotación $\frac \pi 2$, para posteriormente colocar este resultado encima de la copia \textcolor{blue}{azul}. Es decir, usamos la transformación $\textcolor{green}{w_3=(0.5,0.5,\frac{\pi}{2},\frac{\pi}{2},1,0.5)}$.
+    \end{itemize}
+
+    Por tanto, $L$ es el atractor del siguiente SFI:
+
+    \begin{table}
+        \centering
+        \begin{tabular}{c|cccccc} \hline
+        $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
+        1 & 0.5 & 0.5 & 0 & 0 & 0 & 0 \\ \hline
+        2 & 0.5 & 0.5 & 0 & 0 & 0.5 & 0 \\ \hline
+        3 & 0.5 & 0.5 & $\frac{\pi}{2}$ & $\frac{\pi}{2}$ & 1 &  0.5 \\ \hline
+        \end{tabular}
+        \caption{SFI para la imagen \ref{fig:ejemplo-collage}}
+        \label{tabla:ejemplo-collage}
+    \end{table}
+\end{ejemplo}
+
+Para una mayor cantidad y variedad de ejemplos invitamos al lector a consultar \cite[Sección 3.10]{Barnsley}, donde puede encontrar gran cantidad de ejercicios y explicaciones prácticas y más complejas.
+
+En conclusión, los SFI en $\R^2$ a pesar de ser herramientas muy simples como lo son las transformaciones afines, nos permiten originar complejas y bellas imágenes basadas en la iteración. Además, gracias al teorema del collage podemos aproximar una imagen simplemente a partir de las transformaciones afines que definen un SFI que converge a dicha aproximación. Toda esta teoría está además basada en una densa teoría que gira en torno al teorema del punto fijo de Banach.
+
