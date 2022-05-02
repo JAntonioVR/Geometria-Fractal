@@ -33,6 +33,7 @@ class Scene3D {
         ks: gl.getUniformLocation(that.shaderProgram, 'u_ks'),
         sh: gl.getUniformLocation(that.shaderProgram, 'u_sh'),
         light_color: gl.getUniformLocation(that.shaderProgram, 'u_light_color'),
+        epsilon: gl.getUniformLocation(that.shaderProgram, 'u_epsilon')
       }
     };
 
@@ -48,6 +49,7 @@ class Scene3D {
       ks: [0.0, 0.0, 0.0, 1.0],
       sh: 30.0,
       light_color: [1.0, 1.0, 1.0, 1.0],
+      epsilon: 0.005,
       
       delta: 0.1
     };
@@ -107,7 +109,8 @@ class Scene3D {
         kd = this.parameters.kd,
         ks = this.parameters.ks,
         sh = this.parameters.sh,
-        light_color = this.parameters.light_color;
+        light_color = this.parameters.light_color,
+        epsilon = this.parameters.epsilon;
         
     var that = this;
     {
@@ -155,6 +158,9 @@ class Scene3D {
     gl.uniform4f(
       this.programInfo.uniformLocations.light_color,
       light_color[0], light_color[1], light_color[2], light_color[3]);
+    gl.uniform1f(
+      this.programInfo.uniformLocations.epsilon,
+      epsilon);
 
 
     {
@@ -272,6 +278,14 @@ class Scene3D {
 
   get_light_color(){
     return this.parameters.light_color;
+  }
+
+  set_epsilon(new_epsilon) {
+    this.parameters.epsilon = new_epsilon;
+  }
+
+  get_epsilon() {
+    return this.parameters.epsilon;
   }
   
   rescaleAngles(){

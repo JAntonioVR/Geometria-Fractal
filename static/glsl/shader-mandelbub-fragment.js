@@ -25,12 +25,13 @@ uniform float u_sh;
 
 uniform vec4 u_light_color;
 
+uniform float u_epsilon;
+
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
 #define MAX_STEPS 100
 #define MAX_DIST 100.0
-#define DIST_SURFACE 0.01
 #define PI 3.14159265359
 
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
@@ -204,10 +205,10 @@ Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
         t += dist;
         w = ray_at(R, t);
 
-        if(dist < DIST_SURFACE || t > t_max ) break;
+        if(dist < u_epsilon || t > t_max ) break;
     }
 
-    if (dist < DIST_SURFACE) { // R hits Mandelbub
+    if (dist < u_epsilon) { // R hits Mandelbub
         hr.hit = true;
         hr.t = t;
         hr.p = w;
@@ -235,7 +236,7 @@ Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
         vec3 p = ray_at(r, dO);
         float dS = get_dist_sphere(p,S);
         dO += dS;
-        if(dO >= t_max || dS < DIST_SURFACE) break;
+        if(dO >= t_max || dS < u_epsilon) break;
     }
 
     if (dO < t_max) { // r hits the Sphere
@@ -283,6 +284,14 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     }
     return result;
 }
+
+float get_dist_plane (vec3 p, Plane P) {
+    float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
+    vec3 closest_point = p + t_interseccion * P.normal;
+    return length(p-closest_point);
+}
+
+
 
 // ────────────────────────────────────────────────────────────────────────────────
 
@@ -338,26 +347,22 @@ Ray get_ray(Camera cam, float s, float t){
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
 
-vec4 ray_color(Ray r, Sphere S, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
+vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
     
     // r hits the sphere?
 
     float t_closest = MAX_DIST;
-
+    Hit_record hr;
+    float dist = MAX_DIST;
+    vec3 p = r.orig;
+    float closest_dist = MAX_DIST;
+    float current_t = 0.0;
     vec4 tmp_color;
-    Hit_record hr = hit_mandelbub(r, 0.0, MAX_DIST);
 
-    if(hr.hit){
-        tmp_color = vec4(1.0, 0.0, 0.0, 1.0);
-        t_closest = hr.t;
-    }
-    
-
-    // r hits the ground? 
-    hr = hit_plane(ground, r, 0.0, t_closest);
-    if(hr.hit){
-        t_closest = hr.t;
-        vec3 p = hr.p;
+/*
+    hr = hit_plane(ground, r, current_t, MAX_DIST);
+    if(hr.hit) {    // De momento sabemos que pega en el plano, pero hay que ver si pega en alguna esfera antes
+        p = hr.p;
         int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
         int modulus = sum - (2*int(sum/2));
         if(modulus == 0)
@@ -366,15 +371,61 @@ vec4 ray_color(Ray r, Sphere S, Plane ground, Directional_light lights[ARRAY_TAM
             tmp_color = vec4(0.0,0.0,0.0, 1.0);
     }
 
+    p = r.orig;
+*/
+    for(int i = 0; i < MAX_STEPS; i++) {
+        
+        dist = get_dist_plane(p, ground);
+        if(dist < closest_dist) closest_dist = dist;
+        if(dist < u_epsilon) {
+            hr.t = current_t;
+            hr.p = ray_at(r, hr.t);
+            hr.normal = normalize(ground.normal);
+            hr.hit = true;
+            int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+            int modulus = sum - (2*int(sum/2));
+            if(modulus == 0)
+                tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+            else
+                tmp_color = vec4(0.0,0.0,0.0, 1.0);
+            
+        }
+
+
+        for (int j = 0; j < ARRAY_TAM; j++) {
+            if(j == num_spheres) break;
+            dist = get_dist_sphere(p, S[j]);
+            if(dist < closest_dist) closest_dist = dist;
+            
+            if(dist < u_epsilon) {
+                hr.t = current_t;
+                hr.p = ray_at(r, hr.t);
+                hr.normal = calculate_normal_sphere(hr.p, S[j]);
+                hr.hit = true;
+                hr.mat = S[j].mat;
+                tmp_color = evaluateLightingModel(lights, num_lights, hr);
+            }
+        }
+
+        current_t += max(closest_dist,u_epsilon);
+        p = ray_at(r, current_t);
+
+        if(current_t >= MAX_DIST) break;
+    }
+
 
     if(t_closest < MAX_DIST) return tmp_color;
 
-    // r does not hit nothing
-    vec3 unit_direction = normalize(r.dir);
-    float t = 0.5*(unit_direction.y + 1.0);
-    return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
+
+    if(!hr.hit) {
+        // r does not hit nothing
+        vec3 unit_direction = normalize(r.dir);
+        float t = 0.5*(unit_direction.y + 1.0);
+        tmp_color = vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
+    }
     
     
+    return tmp_color;
 
 
 }
@@ -409,8 +460,9 @@ void main() {
     mat1.ks = vec4(0.0, 0.0, 0.0, 1.0);
 
     // Sphere
-    Sphere S;
-    S.center = vec3(0.0, 0.0, 0.0); S.radius = 1.0 ; S.mat = mat0;
+    Sphere S[ARRAY_TAM];
+    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = mat0;
+    S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = mat0;
 
     // Ground
     Plane ground;
@@ -439,7 +491,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = ray_color(r, S, ground, lights, num_lights);
+    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────

@@ -50,6 +50,11 @@ function main(){
     const light_color_input = document.querySelector("#light_color");
     light_color_input.value = rgbToHex(theScene.get_light_color());
     light_color_input.addEventListener('input', change_light_color, true);
+
+    const epsilon_input = document.querySelector("#current_epsilon");
+    epsilon_input.value = theScene.get_epsilon();
+    document.querySelector("#valor_epsilon").innerHTML = theScene.get_epsilon();
+    epsilon_input.addEventListener('input', (event) => change_epsilon(event), true);
     
     theScene.drawScene();
     
@@ -131,6 +136,12 @@ function change_light_color() {
   theScene.drawScene();
 }
 
+function change_epsilon(event) {
+  document.querySelector("#valor_epsilon").innerHTML = event.target.value;
+  theScene.set_epsilon(event.target.value);
+  theScene.drawScene();
+}
+
 function onKeyDown(event) {
     let key = event.wich || event.keyCode;
     switch (key) {
@@ -174,6 +185,9 @@ function resetParameters() {
     document.querySelector("#sh").value = theScene.get_sh();
     document.querySelector("#valor_sh").innerHTML = theScene.get_sh();
     document.querySelector("#light_color").value = rgbToHex(theScene.get_light_color());
+
+    document.querySelector("#current_epsilon").value = theScene.get_epsilon();
+    document.querySelector("#valor_epsilon").innerHTML = theScene.get_epsilon();
     theScene.drawScene();
 }
 
