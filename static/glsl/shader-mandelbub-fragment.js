@@ -377,6 +377,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     vec4 tmp_color;
 
 /*
+    // Intersección analítica con el plano
     hr = hit_plane(ground, r, current_t, MAX_DIST);
     if(hr.hit) {    // De momento sabemos que pega en el plano, pero hay que ver si pega en alguna esfera antes
         p = hr.p;
@@ -390,7 +391,10 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
     p = r.orig;
 */
+    // Ray Marching
     for(int i = 0; i < MAX_STEPS; i++) {
+
+        // Distancia al plano
         dist = get_dist_plane(p, ground);
         closest_dist = dist;
         if(dist < u_epsilon) {
@@ -406,8 +410,10 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 return vec4(0.0,0.0,0.0, 1.0);
             
         }
-
-        if(hit_sphere_limits(S[0], r)){
+    
+        // MANDELBUB
+        Sphere BS; BS.center = vec3(0.0, 0.0, 0.0); BS.radius = 2.0;
+        if(hit_sphere_limits(BS, r)){
             dist = get_dist_mandelbub(p);
             if(dist < closest_dist) closest_dist = dist;
             if (dist < u_epsilon) { // R hits Mandelbub
@@ -420,11 +426,10 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             }
         }
 
-        
 
-
-        
 /*
+        
+        // Interseccion con las esferas
         for (int j = 0; j < ARRAY_TAM; j++) {
             if(j == num_spheres) break;
             dist = get_dist_sphere(p, S[j]);
@@ -440,8 +445,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             }
         }
 
-        */
-
+        
+*/
         current_t += max(closest_dist,u_epsilon);
         p = ray_at(r, current_t);
 
@@ -496,7 +501,7 @@ void main() {
 
     // Sphere
     Sphere S[ARRAY_TAM];
-    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 2.0 ; S[0].mat = mat0;
+    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = mat0;
     S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = mat0;
 
     // Ground
@@ -526,7 +531,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = ray_color(r, S, 1, ground, lights, num_lights);
+    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
