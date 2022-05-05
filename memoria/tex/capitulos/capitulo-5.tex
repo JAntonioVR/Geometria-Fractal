@@ -158,17 +158,15 @@ Crearemos un buffer para almacenar las posiciones de los cuatro vértices y otro
 
 Fíjese cómo hay un vértice blanco, uno rojo, uno verde y uno azul, de forma que en los píxeles intermedios hay colores intermedios entre estos, fruto de la interpolación que se realiza entre \textit{vertex} y \textit{fragment shader}.
 
-Este ejemplo se corresponde al expuesto en \cite{MDN-1}, cuya adaptación podemos encontrar en el repositorio de este proyecto, concretamente en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/js/canvas.js} %TODO Cambiar si es necesario
+Este ejemplo se corresponde al expuesto en \cite{MDN-1}, cuya adaptación podemos encontrar en el repositorio de este proyecto, concretamente en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/js/canvas.js}. Podemos observar en la imagen \ref{fig:componentes-wgl} un esquema de los componentes de WebGL y cómo se relacionan entre ellos hasta finalmente visualizar la imagen deseada.  %TODO Cambiar URL si es necesario
 
-Sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de renderizado se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
+\newpage
 
-A partir de estos cuatro vértices, en el canvas se visualizarán dos triángulos que completarán la superficie completa del mismo. El vertex shader a partir de ahora será totalmente trivial, pues solo devolverá en la variable \verb|gl_Position| la misma posición que obtiene de los buffer
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C5/WEBGL-workflow.drawio.png}
+    \caption{Componentes de WebGL e interacciones entre ellos}
+    \label{fig:componentes-wgl}
+\end{figure}
 
-\begin{lstlisting}
-attribute vec2 a_Position;
-void main() {
-    gl_Position = vec4(a_Position.x, a_Position.y, 0.0, 1.0);
-}
-\end{lstlisting}
 
-Mientras que, por su parte, el fragment shader podrá acceder a la posición (en coordenadas de dispositivo) del píxel que se está ejecutando mediante la variable \verb|gl_FragCoord| y a partir de estas coordenadas devolver un color en la variable \verb|gl_FragColor|. Es decir, estamos dibujando una escena completa, próximamente un fractal, en dos triángulos. Por ejemplo, las imágenes \ref{fig:julia-intro} y \ref{fig:mandelbrot-intro} son el resultado de esta metodología, la cual documentaremos detenidamente en los siguientes capítulos.
