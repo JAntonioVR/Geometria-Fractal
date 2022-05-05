@@ -220,26 +220,24 @@ bool hit_sphere_limits( Sphere S, Ray R ){
     return discriminant >= 0.0;
 }
 
-vec4 iterate_mandelbub(vec3 w, vec3 c){
+void iterate_mandelbub(inout vec3 w, inout float dw, vec3 c){
 
     float m = dot(w,w);
-    float dw = 1.0;
 
     for(int i = 0; i < MAX_STEPS; i++) {
         dw = 8.0*pow(m,3.5)*dw + 1.0; //TODO Hay que poner +1?
         w = f(w,c);
         if(m > 256.0) break;
     }
-
-    return vec4(w, dw);
 }
 
 float get_dist_mandelbub(vec3 p) {
     float dist;
-    vec3 w;
-    float dw;
-    vec4 iterations = iterate_mandelbub(p, p); 
-    w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
+    vec3 w = p;
+    float dw = 1.0;
+    //vec4 iterations = iterate_mandelbub(p, p); 
+    iterate_mandelbub(w,dw,w);
+    //w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
     float m = dot(w,w);
     return 0.25 * log(m) * sqrt(m) / dw;
 }
@@ -284,7 +282,56 @@ Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
     return hr;
 }*/
 
+//
+// ─── JULIA ──────────────────────────────────────────────────────────────────────
+//
 
+void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
+
+    for(int i = 0; i < MAX_STEPS; i++) {
+        dq = 2.0 * length(q) * dq; 
+        q = quat_square(q) + c;
+        if(dot(q, q) > 256.0) break;
+    }
+
+}
+
+// ANCHOR dist julia
+float get_dist_julia(vec3 p, vec4 c) {
+    float dist;
+    vec4 q = vec4(p, 0.0);
+    float dq = 1.0;
+    iterate_julia(q, dq, c);
+    float length_q = length(q);
+    return 0.5*length_q * log(length_q) / dq;
+}
+
+
+vec3 calculate_normal_julia(vec3 p, vec4 c) {
+    vec3 N;
+    vec4 qp = vec4(p, 0.0);
+    float gradX, gradY, gradZ;
+    vec4 gx1 = qp - vec4( u_epsilon, 0, 0, 0 );
+    vec4 gx2 = qp + vec4( u_epsilon, 0, 0, 0 );
+    vec4 gy1 = qp - vec4( 0, u_epsilon, 0, 0 );
+    vec4 gy2 = qp + vec4( 0, u_epsilon, 0, 0 );
+    vec4 gz1 = qp - vec4( 0, 0, u_epsilon, 0 );
+    vec4 gz2 = qp + vec4( 0, 0, u_epsilon, 0 );
+
+    for(int i = 0; i < MAX_STEPS; i++) {
+        gx1 = quat_square( gx1 ) + c;
+        gx2 = quat_square( gx2 ) + c;
+        gy1 = quat_square( gy1 ) + c;
+        gy2 = quat_square( gy2 ) + c;
+        gz1 = quat_square( gz1 ) + c;
+        gz2 = quat_square( gz2 ) + c;
+    }
+    gradX = length(gx2) - length(gx1);
+    gradY = length(gy2) - length(gy1);
+    gradZ = length(gz2) - length(gz1);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+    return N;
+}
 
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
@@ -428,7 +475,24 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 return vec4(0.0,0.0,0.0, 1.0);
             
         }
-    
+
+        // ANCHOR JULIA
+        vec4 juliaC = vec4(0.2, -0.10, 0.0, 0.0);
+        dist = get_dist_julia(p , juliaC);
+        //return vec4(dist/255.0, 0.0, 0.0, 1.0);
+        if(dist < closest_dist) closest_dist = dist;
+        if (dist < u_epsilon) { // R hits Julia
+            hr.hit = true;
+            hr.t = current_t;
+            hr.p = hr.p = ray_at(r, hr.t);
+            //hr.normal = calculate_normal_julia(hr.p, juliaC);
+            hr.mat = S[0].mat; // TODO Mejorar esto
+
+            //return evaluateLightingModel(lights, num_lights, hr);
+            return vec4(dist/u_epsilon, 0.0, 0.0, 1.0);
+        }
+
+/*
         // MANDELBUB
         Sphere BS; BS.center = vec3(0.0, 0.0, 0.0); BS.radius = 2.0;
         if(hit_sphere_limits(BS, r)){
@@ -437,7 +501,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             if (dist < u_epsilon) { // R hits Mandelbub
                 hr.hit = true;
                 hr.t = current_t;
-                hr.p = hr.p = ray_at(r, hr.t);;
+                hr.p = ray_at(r, hr.t);
                 hr.normal = calculate_normal_mandelbub(hr.p);
                 hr.mat = S[0].mat; // TODO Mejorar esto
                 return evaluateLightingModel(lights, num_lights, hr);

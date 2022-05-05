@@ -37,7 +37,7 @@ class Scene3D {
       }
     };
 
-    var initialLookfrom = [2.0, 2.0, 2.0];
+    var initialLookfrom = [-0.5, -0.32, -1.65];
 
     this.parameters = {
       lookfrom: initialLookfrom,
