@@ -44,6 +44,22 @@ float degrees_to_radians(float degrees){
 }
 
 //
+// ─── QUATERNION ─────────────────────────────────────────────────────────────────
+// Quaternion are represented by a 4-dimensional vector
+
+vec4 quat_mult(vec4 q1, vec4 q2) {
+    vec3 xyz = cross(q1.xyz, q2.xyz) + q1.w*q2.xyz + q2.w*q1.xyz;
+    float w = q1.w*q2.w - dot(q1.xyz,q2.xyz);
+    return vec4(xyz, w);
+}
+
+vec4 quat_square(vec4 q){
+    vec3 xyz = 2.0*q.w*q.xyz;
+    float w = q.w*q.w - dot(q.xyz, q.xyz);
+    return vec4(xyz, w);
+}
+
+//
 // ─── RAY ────────────────────────────────────────────────────────────────────────
 // Struct that represents a Ray, defined by a point 'origin' and a vector 
 // 'direction'
@@ -134,7 +150,7 @@ vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights,
     }
 
     return emissive + ambient + diffuse + specular;
-    
+   
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -148,6 +164,37 @@ struct Sphere{
     float radius;
     Material mat;
 };
+
+
+float get_dist_sphere(vec3 p, Sphere S){
+    return length(S.center - p) - S.radius;
+}
+
+vec3 calculate_normal_sphere(vec3 p, Sphere S) {
+    return (p - S.center) / S.radius;
+}
+
+Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
+    Hit_record hr;
+    hr.hit = false;
+    float dO = t_min;
+    for(int i = 0; i < MAX_STEPS;  i++) {
+        vec3 p = ray_at(r, dO);
+        float dS = get_dist_sphere(p,S);
+        dO += dS;
+        if(dO >= t_max || dS < u_epsilon) break;
+    }
+
+    if (dO < t_max) { // r hits the Sphere
+        hr.hit = true;
+        hr.t = dO;
+        hr.p = ray_at(r, hr.t);
+        hr.normal = calculate_normal_sphere(hr.p, S);
+        hr.mat = S.mat;
+    }
+
+    return hr;
+}
 
 //
 // ─── MANDELBUB ──────────────────────────────────────────────────────────────────
@@ -205,7 +252,7 @@ vec3 calculate_normal_mandelbub(vec3 p) {
                       k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
                       k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
 }
-
+/*
 Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
     Hit_record hr;
     hr.hit = false;
@@ -235,37 +282,8 @@ Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
 
 
     return hr;
-}
+}*/
 
-float get_dist_sphere(vec3 p, Sphere S){
-    return length(S.center - p) - S.radius;
-}
-
-vec3 calculate_normal_sphere(vec3 p, Sphere S) {
-    return (p - S.center) / S.radius;
-}
-
-Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
-    Hit_record hr;
-    hr.hit = false;
-    float dO = t_min;
-    for(int i = 0; i < MAX_STEPS;  i++) {
-        vec3 p = ray_at(r, dO);
-        float dS = get_dist_sphere(p,S);
-        dO += dS;
-        if(dO >= t_max || dS < u_epsilon) break;
-    }
-
-    if (dO < t_max) { // r hits the Sphere
-        hr.hit = true;
-        hr.t = dO;
-        hr.p = ray_at(r, hr.t);
-        hr.normal = calculate_normal_sphere(hr.p, S);
-        hr.mat = S.mat;
-    }
-
-    return hr;
-}
 
 
 //
