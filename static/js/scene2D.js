@@ -35,7 +35,7 @@ class Scene2D {
 
     this.parameters = {
       zoomCenter: [0.0, 0.0],
-      zoomSize: 3,
+      zoomSize: 3/4,
       maxIterations: 50,
       delta: 0.1,
       juliaSetConstant: [-0.12, 0.75],
