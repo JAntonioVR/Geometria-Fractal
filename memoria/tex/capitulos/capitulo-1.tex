@@ -185,8 +185,10 @@ En el caso de subconjuntos de $\R^n$ como puede ser una curva parametrizada, si 
 
 Un posible enfoque para definir la dimensión puede ser el recién presentado, el cual nos sugiere pensar en el número de parámetros que definen la libertad de movimiento de un punto. Sin embargo, pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
 
-\subsection{Dimension fractal autosimilar}
-\label{subsection:dim-frac-autosimilar}
+%\subsection{Dimension fractal autosimilar}
+%\label{subsection:dim-frac-autosimilar}
+\subsection{Dimensión por cajas}
+\label{subsection:dim-cajas}
 
 Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 2 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(2):=2=2^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 2$ del original, en el cuadrado se obtienen $N(2):=4=2^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 2$ del cuadrado inicial y en el cubo $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 2$ del cubo original.
 
@@ -205,7 +207,11 @@ Si en lugar de 2 tomamos cualquier número natural $k\geq 1$, la razón de la ho
 \frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
 \end{equation}
 
-En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definición.
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). %Para abreviar en el lenguaje introducimos la siguiente definición.
+
+De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser recubierto por otros conjuntos de $\R^n$ más pequeños.
+
+\begin{comment}
 
 \begin{definicion}[Congruencia]
 Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
@@ -247,12 +253,17 @@ En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a 
 
 Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $\dim_A(\mathbf{K})=\frac{\log 4}{\log 3} \approx 1.26186$.
 
-\subsection{Dimensión por cajas}
-\label{subsection:dim-cajas}
+
+
+%\subsection{Dimensión por cajas}
+%\label{subsection:dim-cajas}
 
 El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos un nuevo concepto de dimensión. Previamente definimos un término necesario en las futuras definiciones.
 
+\end{comment}
+
 \begin{definicion}
+  \label{def:diametro}
 Dado un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
 $$
 \diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace .
