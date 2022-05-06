@@ -21,10 +21,105 @@ Procedemos a explicar el objetivo principal de este objetivo y para el cual prog
 
 Queremos visualizar conjuntos de Julia $\mathsf{J}_c$ para distintos $c\in\C$, el conjunto de Mandelbrot, y las generalizaciones de los conjuntos de Julia y Mandelbrot ocasionadas si se itera la función $P_{c,N}(z)=z^N+c$ para distintos valores de $N\in\N$. Además, si revisitamos el algoritmo que utilizamos en la sección \ref{subsection:representacion-julia} para graficar en \textit{Mathematica} conjuntos de Julia y el que utilizamos en la sección \ref{subsection:representacion-mandelbrot} para visualizar el conjunto de Mandelbrot, podremos recordar que para aproximar qué puntos del plano complejo eran prisioneros o de escape fijábamos un número máximo de iteraciones $M$, tras las cuales se consideraba que un número $z_0\in\C$ era prisionero si la sucesión de los módulos de sus iteradas $\{P_{c,N}^n(z_0)\}$ no superaba el número de escape $e_c=\max\{2,|c|\}$ . Este valor $M$ también podría ser un parámetro modificable, para así poder ver dinámicamente cómo cambia la resolución cuando se cambia el número máximo de iteraciones.
 
+Además, conviene añadir la posibilidad de desplazarse y hacer zoom en distintas regiones del plano, para así poder explorar en detalle las regiones del fractal, permitiendo observar en detalle las autosimilaridades que nos ofrecen, como ya vimos en la sección \ref{section:autosimilaridad-julia-mandelbrot}. 
 
 
 \section{Estructurando el código}
 
 Podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la renderización de fractales. Sin embargo, tiene una estructura muy procedural. Podemos mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL y siguiendo los \href{https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898}{principios SOLID}.
 
-Esta separación se ha hecho siguiendo 
+% TODO Completar??
+
+\section{El fragment shader}
+
+Como dijimos al inicio de este capítulo, nuestro vertex shader es trivial, simplemente asigna a \verb|gl_Position| las mismas coordenadas que se introducen desde JavaScript al buffer de posiciones. Es en el fragment shader donde se realiza el grueso de la programación necesaria para poder visualizar los distintos fractales.
+
+Recordemos que el fragment shader se ejecuta una vez por cada píxel, de manera que podemos identificar la superficie completa del canvas con una región $[x_1,x_2]\times [y_1,y_2]\subseteq\R^2\cong\C$ del plano complejo y en particular cada píxel con un número complejo. Para ello, necesitamos transformar las coordenadas de dispositivo que el shader encuentra en la variable \verb|gl_FragCoord|. Supongamos que queremos inicialmente visualizar la región $[-2,2]\times[-2,2]$ y que las coordenadas de dispositivo son $(x,y)\in[0,720]\times[0,720]$, las cuales están precisamente en la región $[0,720]\times[0,720]$ porque las dimensiones del canvas son $720\times 720$ píxeles. Entonces la transformación lineal que necesitamos es 
+\begin{equation}
+\label{eq:transformacion-lineal-1}
+\begin{split}
+    \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
+    (x,y) & \longmapsto \frac{4}{720}(x,y)-(2,2)
+\end{split}
+\end{equation}
+
+De esta forma, a partir de las coordenadas de dispositivo obtenemos un punto del plano complejo. Supongamos ahora que en lugar de querer visualizar la región $[-2,2]\times[-2,2]$ queremos representar cualquier otra, pero aún centrada en el origen $(0,0)$. Podemos generalizar la transformación $\phi$ para cualquier otro intervalo, pero en lugar de ello y para mantener las proporciones introduciremos una variable que represente el \textit{zoom} que se aplica a la imagen, de tal forma que tan solo habría que multiplicar el resultado de la transformación por una constante $\lambda$. Esta constante será menor que $1$ si se desea acercar la región o mayor que $1$ si se desea alejar. Por tanto la nueva transformación será
+
+\begin{equation}
+    \label{eq:transformacion-lineal-2}
+    \begin{split}
+        \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
+        (x,y) & \longmapsto \lambda\left(\frac{4}{720}(x,y)-(2,2)\right)
+    \end{split}
+\end{equation}
+
+Y por último, procedemos a buscar la forma de representar cualquier parte del plano centrada o no. Tenemos entonces que fijar un par $(x_0,y_0)$ que sea el centro de la región en la que se hace este posible zoom, que hasta este momento hemos asumido que es el $(0,0)$, pero a partir de ahora queremos que tome cualquier valor. Aprovechando que la transformación (\ref{eq:transformacion-lineal-2}) nos devuelve coordenadas en regiones centradas simplemente tenemos que sumar este par al resultado, de forma que nos queda 
+
+\begin{equation}
+    \label{eq:transformacion-lineal-3}
+    \begin{split}
+        \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
+        (x,y) & \longmapsto (x_0,y_0) + \lambda\left(\frac{4}{720}(x,y)-(2,2)\right)
+    \end{split}
+\end{equation}
+donde las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable `uniform' para cada caso, de forma que queda el siguiente fragmento de código:
+
+\begin{lstlisting}
+// Zoom: constante lambda que define el tamano de la region a representar
+uniform float u_zoomSize;
+// Zoom center: Punto del plano situado en el centro del canvas
+uniform vec2 u_zoomCenter;
+
+// ... 
+
+vec2 get_world_coordinates() {
+    // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
+    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
+    // Punto del plano complejo al que corresponde el pixel
+    return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
+}
+\end{lstlisting}
+
+Y ya tenemos en el shader una función que calcula el punto del plano al cual corresponde el píxel. A partir de esto, y al igual que en el capítulo \ref{chap:Julia-Mandelbrot}, tan solo tenemos que iterar la función $P_{c,N}$ y en función del número de iteraciones necesarias para diverger (o no), asignar un color.
+
+\subsection{Iterando la función $f(z)=z^N+c$}
+
+Necesitamos código para la función $P_{c,N}$, pero esta requiere a su vez la programación de potencias de números complejos. Tal y como se ha evidenciado en el código recientemente presentado, y de manera natural, representaremos un número complejo $z=x+i\cdot y\cong (x,y)$ mediante una variable del tipo \verb|vec2|. Por lo que debemos implementar una función que, de forma iterativa, multiplique (usando el producto de números complejos) $N$ veces por sí mismo una variable \verb|vec2|. Como ya sabemos,
+$$
+z^2 = (\Re z+i\cdot \Im z)(\Re z+i\cdot \Im z) = ((\Re z)^2-(\Im z)^2) + 2\cdot\Re z\cdot\Im z\cdot i
+$$
+
+y como $z^n = z^{n-1}\cdot z$, entonces
+
+\begin{equation}
+    \label{eq:potencias-complejos}
+    \begin{split}
+        z^n & = z^{n-1}\cdot z = (\Re z^{n-1} + \Im z^{n-1})\cdot(\Re z + \Im z) \\
+        & = \left(\Re z^{n-1}\cdot\Re z - \Im z^{n-1}\cdot \Im z\right) + \left(\Re z^{n-1}\cdot\Im z + \Im z^{n-1}\cdot\Re z\right)\cdot i 
+    \end{split}
+\end{equation}
+y esto es válido para cualquier $n\in\N$. Podemos utilizar iterativamente la ecuación (\ref{eq:potencias-complejos}) para programar un método para potencias complejas:
+\begin{lstlisting}
+// Potencias complejas
+vec2 complex_pow(vec2 z, int n) {
+    vec2 current_pow = vec2(1,0);
+    for (int i = 1; i < 100; i++) {
+        vec2 z_ant = current_pow;
+        current_pow = vec2( z_ant.x*z.x - z_ant.y*z.y, 
+                            z_ant.x*z.y + z_ant.y*z.x);
+        if(i >= n) break;
+    }
+    return current_pow;
+}
+\end{lstlisting}
+
+Recordamos, para el que no esté acostumbrado al código GLSL, que este lenguaje no permite iterar bucles utilizando variables, por lo que necesitamos fijar un máximo de iteraciones (en este caso 100) y salir del bucle al alcanzar las \verb|n| iteraciones.
+
+Una vez tenemos esta función, es muy sencillo programar la función $P_{c,N}$ aprovechando la aritmética preprogramada para los objetos vector en GLSL.
+
+\begin{lstlisting}
+vec2 P(vec2 z, vec2 c, int n) {
+	return complex_pow(z,n) + c;
+}
+\end{lstlisting}
+
