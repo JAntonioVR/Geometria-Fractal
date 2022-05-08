@@ -97,10 +97,13 @@ function moveCamera(event){
 
   if(mouseState == MouseState.MOUSE_DOWN){
     var disp = [
-      2.0*Math.PI*(mousePosition[0] - mouseDownPosition[0])/width-Math.PI,
-      Math.PI*(mousePosition[1] - mouseDownPosition[1])/height-Math.PI/2.0
+      (mousePosition[0] - mouseDownPosition[0])/width,
+      (mousePosition[1] - mouseDownPosition[1])/height
     ]
+
     document.querySelector("#marcador-raton").innerHTML = "(" + disp[0] +", " + disp[1] +")"
+
+    console.log(disp);
 
     theScene.moveX(disp[0]);
     theScene.moveY(disp[1]);

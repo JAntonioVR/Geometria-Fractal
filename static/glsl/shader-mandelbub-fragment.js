@@ -463,7 +463,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         dist = get_dist_plane(p, ground);
         closest_dist = dist;
         object_index = 0;
-
+/*
         // Distancia a Julia
         dist = get_dist_julia(p , u_julia_set_constant);
         if(dist < closest_dist){
