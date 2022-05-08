@@ -66,7 +66,7 @@ donde el par $(r,\alpha)$ son las coordenadas polares de $(a,c)$ y $(s,\beta+\fr
 Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{homotecia} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$. A continuación definimos un caso concreto de transformación afín más familiar.
 
 \begin{definicion}
-    Una transformación afín de $\R^2$ $w(x)=Ax+b$, para cualquier $b\in\R^2$ se denomina \textit{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
+    Una transformación afín de $\R^2$ $w(x)=Ax+b$, para cualquier $b\in\R^2$ se denomina \textbf{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
     \begin{eqnarray}
         A = \begin{pmatrix}
             r\cos\alpha & -r\sin\alpha \\
@@ -78,7 +78,7 @@ Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelog
             r\sin\alpha & -r\cos\alpha
         \end{pmatrix}
     \end{eqnarray}
-    para $r\not= 0,\ \ 0\leq\alpha<2\pi$. A $r$ se le llama \textit{razón de la homotecia} o factor de escala y a $\alpha$ se le llama \textit{ángulo de rotación}.
+    para $r\not= 0,\ \ 0\leq\alpha<2\pi$. A $r$ se le llama \textbf{razón de la homotecia} o factor de escala y a $\alpha$ se le llama \textbf{ángulo de rotación}.
 \end{definicion}
 
 Nótese que en caso $\alpha=\pi,\beta=0$ se consigue una reflexión respecto al eje $Y$, y viceversa.
@@ -103,7 +103,7 @@ Un último detalle para la creación de SFI es la necesidad de que las transform
 
 \begin{definicion}[Sistema de Funciones Iteradas]
     \label{def:SFI}
-    Un \textit{Sistema de Funciones Iteradas} se compone de un espacio métrico completo $(X,d)$ y de un conjunto finito de aplicaciones contractivas $w=\{w_i:i=1,\dots,n\}$.
+    Un \textbf{Sistema de Funciones Iteradas} se compone de un espacio métrico completo $(X,d)$ y de un conjunto finito de aplicaciones contractivas $w=\{w_i:i=1,\dots,n\}$.
 
     Se denomina \textit{constante de contractividad} del SFI a la mayor de las constantes de contractividad de las aplicaciones que lo forman, $s=\max\{s_i:i=1,\dots,n\}$, siendo $s_i$ la constante de contractividad de $w_i \ \ \forall i=1,\dots,n$.
 
@@ -180,7 +180,7 @@ El problema es que esta definición no nos basta para definir una distancia entr
 Por suerte, a partir de estas definiciones no es difícil encontrar una definición que cumpla las propiedades de una distancia.
 
 \begin{definicion}
-    Dado un espacio de Banach $(X,d)$, en el espacio de fractales $\mathcal{H}(X)$ Se define la \textbf{distancia de Hausdorff} o \textbf{métrica de Hausdorff} como:
+    Dado un espacio métrico completo $(X,d)$, en el espacio de fractales $\mathcal{H}(X)$ Se define la \textbf{distancia de Hausdorff} o \textbf{métrica de Hausdorff} como:
     $$
     h(d)(A,B)=\max\{d(A,B),d(B,A)\} \ \ \forall A,B\in\mathcal H(X).
     $$
