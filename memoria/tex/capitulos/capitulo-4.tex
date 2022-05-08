@@ -318,8 +318,8 @@ Y una vez que sabemos cómo hacer que una transformación afín sea contractiva,
     \begin{tabular}{c|cccccc} \hline
         $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
     1 & 1 & 1 & 0 & 0 & 0 & 0 \\ \hline
-    2 & $\dfrac{1}{\sqrt 2}$ & $\dfrac{1}{\sqrt 2}$ & $\dfrac{\pi}{4}$ & $\dfrac{\pi}{4}$ & 0 & 1 \\ \hline
-    3 & $\dfrac{1}{\sqrt 2}$ & $\dfrac{1}{\sqrt 2}$ & $-\dfrac{\pi}{4}$ & $-\dfrac{\pi}{4}$ & $\dfrac 1 2$ &  $\dfrac 3 2$ \\ \hline
+    2 & $1/\sqrt 2$ & $1/\sqrt 2$ & $\pi/4$ & $\pi/4$ & 0 & 1 \\ \hline
+    3 & $1/\sqrt 2$ & $1/\sqrt 2$ & $-\pi/4$ & $-\pi/4$ & $1/2$ &  $3/2$ \\ \hline
     \end{tabular}
     \caption{SFI para el árbol pitagórico}
     \label{tabla:arbol-pitagoras}
@@ -329,9 +329,9 @@ Y una vez que sabemos cómo hacer que una transformación afín sea contractiva,
     \centering
     \begin{tabular}{c|cccccc} \hline
         $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
-    1 & 0.85 & 0.85 & $-\dfrac{\pi}{72}$ & $-\dfrac{\pi}{72}$ & 0 & 1.6 \\ \hline
-    2 & 0.3 & 0.34 & $\dfrac{49 \pi}{180}$ & $\dfrac{49 \pi}{180}$ & 0 & 1.6 \\ \hline
-    3 & 0.3 & 0.34 & $\dfrac{2 \pi}{3}$ & $\dfrac{2 \pi}{3}$ & 0 & 0.44 \\ \hline
+    1 & 0.85 & 0.85 & $-\pi/72$ & $-\pi/72$ & 0 & 1.6 \\ \hline
+    2 & 0.3 & 0.34 & $49 \pi/180$ & $49 \pi/180$ & 0 & 1.6 \\ \hline
+    3 & 0.3 & 0.34 & $2 \pi/3$ & $2 \pi/3$ & 0 & 0.44 \\ \hline
     4 & 0 & 0.3 & 0 & 0 & 0 & 0 \\ \hline
     \end{tabular}
     \caption{SFI para el helecho de Barnsley}
@@ -347,6 +347,59 @@ Y una vez que sabemos cómo hacer que una transformación afín sea contractiva,
     \caption{Atractores de los SFI definidos en las tablas \ref{tabla:arbol-pitagoras} y \ref{tabla:helecho-Barnsley}.}
     \label{fig:atractores-sfi}
 \end{figure}
+
+\section{SFI y conjuntos autosimilares}
+\label{section:sfi-conjuntos-autosimilares}
+
+En el capítulo \ref{chap:concepto} y concretamente en la sección \ref{subsection:relacion-dimensiones} presentamos algunas relaciones entre los distintos tipos de dimensión, y en la sección \ref{subsection:dim-cajas} hablamos de la dimensión por cajas de un conjunto. Si nos restringimos a conjuntos autosimilares el cálculo de la dimensión por cajas se simplifica gracias a algunos resultados que le debemos a la teoría de los SFI. Para ello, previamente introducimos la siguiente definición.
+
+\begin{definicion}
+    \label{def:condicion-conjunto-abierto}
+    Sean $(X,d)$ un espacio métrico completo y un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$. $w$ satisface la \textbf{condición de conjunto abierto} si existe un conjunto abierto $\emptyset\not= U\subseteq X$ tal que las imágenes $w_1(U),\dots,w_n(U)\subseteq U$ y son disjuntas.
+\end{definicion}
+
+Intuitivamente, esta condición nos afirma que podemos controlar el `tamaño' del resultado de aplicar el SFI y que además las imágenes de cada aplicación que compone el SFI no se solapan unas con otras. Gracias a esta condición podemos enunciar el siguiente teorema, que es el que nos proporcionará las herramientas esenciales para el cálculo de la dimensión en estos casos.
+
+\begin{teorema}
+    \label{th:Moran}
+    Sean $(X,d)$ un espacio métrico completo, un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$ que satisface la condición de conjunto abierto y $\{c_i:i=1,\dots,n\}$ las constantes de contractividad de las aplicaciones $w_i$. Entonces la dimensión por cajas del atractor de $w$ es el único valor real positivo $d$ que satisface la ecuación $1 = c_1^d + \cdots c_n^d$ y esta coincide con la dimensión de Hausdorff.
+\end{teorema}
+
+Podemos encontrar la prueba de este teorema en \cite{Moran}.
+
+\begin{corolario}
+    En caso de que todas las constantes de contractividad sean iguales a cierta constante $0<c<1$, entonces la dimensión $d$ es
+    $$
+    d = \dfrac{\log(n)}{\log(1/c)}.
+    $$
+\end{corolario}
+
+\begin{observacion}
+    En $\R^2$, a partir de un conjunto autosimilar según la definición \ref{def:autosimilaridad} podemos construir un SFI cuyo atractor sea el propio conjunto autosimilar.
+\end{observacion}
+
+Mediante el teorema de Moran y viendo ciertos fractales como atractores de SFI podemos rápidamente calcular su dimensión por cajas. Por ejemplo, el triángulo de Sierpinski es el atractor del SFI presentado en el ejemplo \ref{ejemplo:sfi}. El SFI cumple la condición de conjunto abierto tomando como $U$ el interior del propio triángulo equilátero inicial y viendo, como podemos observar en la imagen \ref{fig:ejemplo-sfi} que las imágenes por cada una de las aplicaciones no salen del triángulo y además son disjuntas.  En este caso tenemos tres similitudes, en todas ellas la constante de contractividad es $\frac{1}{2}$, por lo que aplicando el corolario su dimensión por cajas es $\dim_B(\mathbf{S})=\frac{\log(3)}{\log(2)}$, como ya calculamos en la sección \ref{subsection:dim-cajas}.
+
+Es por tanto el momento de calcular la dimensión por cajas de la curva de Koch \textbf{K}, la cual no hemos calculado aún. La curva de Koch es el atractor del SFI definido por las transformaciones especificadas en la tabla \ref{tabla:curva-koch}. Fijémonos que son $4$ transformaciones afines, todas ellas similitudes cuya homotecia tiene la misma razón: $\frac{1}{3}$. Por tanto, aplicando el corolario, vemos que
+$$
+\dim_B(\mathbf{K})=\dfrac{\log(4)}{\log(3)} \approx 1.2618,
+$$
+que es un valor situado entre 1 y 2.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c|cccccc} \hline
+        $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
+    1 & $1/3$ & $1/3$ & 0 & 0 & 0 & 0 \\ \hline
+    2 & $1/3$ & $1/3$ & $\pi/3$ & $\pi/3$ & $1/3$ & 0 \\ \hline
+    3 & $1/3$ & $1/3$ & $-\pi/3$ & $-\pi/3$ & $1/2$ & $\sqrt{3}/6$ \\ \hline
+    4 & $1/3$ & $1/3$ & 0 & 0 & $2/3$ & 0 \\ \hline
+    \end{tabular}
+    \caption{SFI para la curva de Koch}
+    \label{tabla:curva-koch}
+\end{table}
+
+
 
 \section{El problema inverso}
 
@@ -415,7 +468,7 @@ Intuitivamente, este teorema nos dice que para encontrar un SFI cuyo atractor es
 
     Por tanto, $L$ es el atractor del siguiente SFI:
 
-    \begin{table}
+    \begin{table}[ht]
         \centering
         \begin{tabular}{c|cccccc} \hline
         $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
