@@ -27,6 +27,7 @@ uniform vec4 u_light_color;
 
 uniform float u_epsilon;
 
+uniform int u_fractal;
 uniform vec4 u_julia_set_constant;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
@@ -386,7 +387,7 @@ float get_dist_plane (vec3 p, Plane P) {
     //float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
     //vec3 closest_point = p + t_interseccion * P.normal;
     //return length(p-closest_point);
-    return p.y-P.D;
+    return p.y - P.D;
 }
 
 
@@ -460,24 +461,32 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     for(int i = 0; i < MAX_STEPS; i++) {
 
         // Distancia al plano
+
         dist = get_dist_plane(p, ground);
         closest_dist = dist;
         object_index = 0;
-/*
-        // Distancia a Julia
-        dist = get_dist_julia(p , u_julia_set_constant);
-        if(dist < closest_dist){
-            closest_dist = dist;
-            object_index = 1;
-        } 
 
-/*        // Distancia a Mandelbub
-        dist = get_dist_mandelbub(p);
-        if(dist < closest_dist){
-            closest_dist = dist;
-            object_index = 2;
-        } 
-*/
+        if(u_fractal == 0) {    // Render Mandelbub
+            
+            // Distancia a Mandelbub
+            dist = get_dist_mandelbub(p);
+            if(dist < closest_dist){
+                closest_dist = dist;
+                object_index = 2;
+            } 
+        }
+
+        if(u_fractal == 1){ // Render Julia
+
+            // Distancia a Julia
+            dist = get_dist_julia(p , u_julia_set_constant);
+            if(dist < closest_dist){
+                closest_dist = dist;
+                object_index = 1;
+            } 
+        }
+        
+
         if(closest_dist < u_epsilon){   // Hay interseccion
 
             if(object_index == 0){      // r hits the ground
@@ -513,7 +522,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             }
         }
 
-        current_t += max(closest_dist,u_epsilon);
+        current_t += closest_dist;
         p = ray_at(r, current_t);
 
         if(current_t >= MAX_DIST) break;

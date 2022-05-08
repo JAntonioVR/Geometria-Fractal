@@ -51,6 +51,10 @@ function main(){
     light_color_input.value = rgbToHex(theScene.get_light_color());
     light_color_input.addEventListener('input', change_light_color, true);
 
+    const fractal = document.querySelector("#fractales");
+    fractal.selectedIndex = 1;
+    fractal.addEventListener('change', changeFractal, true);
+
     const juliaX_input = document.querySelector("#juliaX");
     juliaX_input.value = theScene.get_julia_constant()[0];
     document.querySelector("#valorJuliaX").innerHTML = theScene.get_julia_constant()[0];
@@ -92,8 +96,6 @@ function moveCamera(event){
   const canvas = document.querySelector("#glCanvas");
   var width = canvas.offsetWidth,
       height = canvas.offsetHeight;
-  
-  // FIXME Corregir movimiento de la camara a partir del ratón
 
   if(mouseState == MouseState.MOUSE_DOWN){
     var disp = [
@@ -157,6 +159,13 @@ function change_sh(event) {
 function change_light_color() {
   const value = hexToRgb(document.querySelector("#light_color").value);
   theScene.set_light_color(value);
+  theScene.drawScene();
+}
+
+function changeFractal() {
+  const fractales = document.querySelector("#fractales")
+  var selected = parseInt(fractales.value);
+  theScene.setFractal(selected);
   theScene.drawScene();
 }
 

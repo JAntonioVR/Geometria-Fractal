@@ -33,6 +33,7 @@ class Scene3D {
         ks: gl.getUniformLocation(that.shaderProgram, 'u_ks'),
         sh: gl.getUniformLocation(that.shaderProgram, 'u_sh'),
         light_color: gl.getUniformLocation(that.shaderProgram, 'u_light_color'),
+        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal'),
         julia_set_constant: gl.getUniformLocation(that.shaderProgram, 'u_julia_set_constant'),
         epsilon: gl.getUniformLocation(that.shaderProgram, 'u_epsilon')
       }
@@ -51,6 +52,7 @@ class Scene3D {
       sh: 30.0,
       light_color: [1.0, 1.0, 1.0, 1.0],
       epsilon: 0.005,
+      fractal: 1,
       julia_set_constant: [0.75, 0.0, 0.0, -0.12],
       delta: 0.1
     };
@@ -111,6 +113,7 @@ class Scene3D {
         ks = this.parameters.ks,
         sh = this.parameters.sh,
         light_color = this.parameters.light_color,
+        fractal = this.parameters.fractal,
         julia_set_constant = this.parameters.julia_set_constant,
         epsilon = this.parameters.epsilon;
         
@@ -160,6 +163,9 @@ class Scene3D {
     gl.uniform4f(
       this.programInfo.uniformLocations.light_color,
       light_color[0], light_color[1], light_color[2], light_color[3]);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.fractal,
+      fractal);
     gl.uniform4f(
       this.programInfo.uniformLocations.julia_set_constant,
       julia_set_constant[0], julia_set_constant[1], julia_set_constant[2], julia_set_constant[3]);
@@ -283,6 +289,10 @@ class Scene3D {
 
   get_light_color(){
     return this.parameters.light_color;
+  }
+
+  setFractal(index) {
+    this.parameters.fractal = index;
   }
 
   set_julia_constant(new_julia_constant) {
