@@ -196,20 +196,67 @@ Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
     return hr;
 }
 
+
 //
-// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+// ─── JULIA ──────────────────────────────────────────────────────────────────────
 //
 
 vec3 f(vec3 w, vec3 c) {
 
-    float m = dot(w,w);
-    float m2 = m*m;
-    float m4 = m2*m2;
+    float m = dot(w,w); // |w|^2
+    float m2 = m*m;     // |w|^4
+    float m4 = m2*m2;   // |w|^8
     float r = length(w);
     float b = 8.0*acos( w.y/r);
     float a = 8.0*atan( w.x, w.z );
-    return c + m4 * m4 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
+    return c + m4 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
 }
+
+
+void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
+
+    for(int i = 0; i < MAX_STEPS; i++) {
+        dq = 2.0 * length(q) * dq; 
+        q = quat_square(q) + c;
+        if(dot(q, q) > 256.0) break;
+    }
+
+}
+
+// ANCHOR dist julia
+float get_dist_julia(vec3 p, vec4 c) {
+    float dist;
+    vec4 q = vec4(p.y, p.z, 0.0, p.x);
+    float dq = 1.0;
+    iterate_julia(q, dq, c);
+    float length_q = length(q);
+    return 0.5*length_q * log(length_q) / dq;
+}
+
+
+vec3 calculate_normal_julia(vec3 p, vec4 c) {
+    vec3 N;
+    vec4 qp = vec4(p.y, p.z, 0.0, p.x);
+    float gradX, gradY, gradZ;
+    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, u_epsilon )).wxy;
+    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, u_epsilon )).wxy;
+    vec3 gy1 = (qp - vec4( u_epsilon, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gy2 = (qp + vec4( u_epsilon, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gz1 = (qp - vec4( 0.0, u_epsilon, 0.0, 0.0 )).wxy;
+    vec3 gz2 = (qp + vec4( 0.0, u_epsilon, 0.0, 0.0 )).wxy;
+    
+    gradX = get_dist_julia(gx2,c) - get_dist_julia(gx1,c);
+    gradY = get_dist_julia(gy2,c) - get_dist_julia(gy1,c);
+    gradZ = get_dist_julia(gz2,c) - get_dist_julia(gz1,c);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+    return N;
+}
+
+
+//
+// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+//
+
 
 bool hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
@@ -220,23 +267,23 @@ bool hit_sphere_limits( Sphere S, Ray R ){
     return discriminant >= 0.0;
 }
 
-void iterate_mandelbub(inout vec3 w, inout float dw, vec3 c){
+void iterate_mandelbub(inout vec3 w, inout float dw){
 
     float m = dot(w,w);
 
     for(int i = 0; i < MAX_STEPS; i++) {
-        dw = 8.0*pow(m,3.5)*dw + 1.0; //TODO Hay que poner +1?
-        w = f(w,c);
+        dw = 8.0*pow(m,3.5)*dw +1.0 ; //TODO Hay que poner +1?
+        w = f(w,w);
         if(m > 256.0) break;
     }
+
 }
 
 float get_dist_mandelbub(vec3 p) {
     float dist;
     vec3 w = p;
     float dw = 1.0;
-    //vec4 iterations = iterate_mandelbub(p, p); 
-    iterate_mandelbub(w,dw,w);
+    iterate_mandelbub(w,dw);
     //w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
     float m = dot(w,w);
     return 0.25 * log(m) * sqrt(m) / dw;
@@ -249,6 +296,23 @@ vec3 calculate_normal_mandelbub(vec3 p) {
                       k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
                       k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
                       k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
+    
+    /*vec3 N;
+    float gradX, gradY, gradZ;
+
+    vec3 gx1 = p - vec3( u_epsilon, 0.0, 0.0 );
+    vec3 gx2 = p + vec3( u_epsilon, 0.0, 0.0 );
+    vec3 gy1 = p - vec3( 0.0, u_epsilon, 0.0 );
+    vec3 gy2 = p + vec3( 0.0, u_epsilon, 0.0 );
+    vec3 gz1 = p - vec3( 0.0, 0.0, u_epsilon );
+    vec3 gz2 = p + vec3( 0.0, 0.0, u_epsilon );
+    
+    gradX = get_dist_mandelbub(gx2) - get_dist_mandelbub(gx1);
+    gradY = get_dist_mandelbub(gy2) - get_dist_mandelbub(gy1);
+    gradZ = get_dist_mandelbub(gz2) - get_dist_mandelbub(gz1);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+    return N;
+    */
 }
 /*
 Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
@@ -281,57 +345,6 @@ Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
 
     return hr;
 }*/
-
-//
-// ─── JULIA ──────────────────────────────────────────────────────────────────────
-//
-
-void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
-
-    for(int i = 0; i < MAX_STEPS; i++) {
-        dq = 2.0 * length(q) * dq; 
-        q = quat_square(q) + c;
-        if(dot(q, q) > 256.0) break;
-    }
-
-}
-
-// ANCHOR dist julia
-float get_dist_julia(vec3 p, vec4 c) {
-    float dist;
-    vec4 q = vec4(p, 0.0);
-    float dq = 1.0;
-    iterate_julia(q, dq, c);
-    float length_q = length(q);
-    return 0.5*length_q * log(length_q) / dq;
-}
-
-
-vec3 calculate_normal_julia(vec3 p, vec4 c) {
-    vec3 N;
-    vec4 qp = vec4(p, 0.0);
-    float gradX, gradY, gradZ;
-    vec4 gx1 = qp - vec4( u_epsilon, 0, 0, 0 );
-    vec4 gx2 = qp + vec4( u_epsilon, 0, 0, 0 );
-    vec4 gy1 = qp - vec4( 0, u_epsilon, 0, 0 );
-    vec4 gy2 = qp + vec4( 0, u_epsilon, 0, 0 );
-    vec4 gz1 = qp - vec4( 0, 0, u_epsilon, 0 );
-    vec4 gz2 = qp + vec4( 0, 0, u_epsilon, 0 );
-
-    for(int i = 0; i < MAX_STEPS; i++) {
-        gx1 = quat_square( gx1 ) + c;
-        gx2 = quat_square( gx2 ) + c;
-        gy1 = quat_square( gy1 ) + c;
-        gy2 = quat_square( gy2 ) + c;
-        gz1 = quat_square( gz1 ) + c;
-        gz2 = quat_square( gz2 ) + c;
-    }
-    gradX = length(gx2) - length(gx1);
-    gradY = length(gy2) - length(gy1);
-    gradZ = length(gz2) - length(gz1);
-    N = normalize(vec3( gradX, gradY, gradZ ));
-    return N;
-}
 
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
@@ -368,9 +381,10 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
 }
 
 float get_dist_plane (vec3 p, Plane P) {
-    float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
-    vec3 closest_point = p + t_interseccion * P.normal;
-    return length(p-closest_point);
+    //float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
+    //vec3 closest_point = p + t_interseccion * P.normal;
+    //return length(p-closest_point);
+    return p.y-P.D;
 }
 
 
@@ -430,75 +444,65 @@ Ray get_ray(Camera cam, float s, float t){
 // Given a ray and the full scene, calculates pixel's color.
 
 vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
-    
-    // r hits the sphere?
 
     float t_closest = MAX_DIST;
-    Hit_record hr;
+    Hit_record hr; hr.hit = false;
     float dist = MAX_DIST;
     vec3 p = r.orig;
     float closest_dist = MAX_DIST;
     float current_t = 0.0;
     vec4 tmp_color;
+    int object_index; // 0: Ground, 1: Julia, 2: Mandelbub
 
-/*
-    // Intersección analítica con el plano
-    hr = hit_plane(ground, r, current_t, MAX_DIST);
-    if(hr.hit) {    // De momento sabemos que pega en el plano, pero hay que ver si pega en alguna esfera antes
-        p = hr.p;
-        int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
-        int modulus = sum - (2*int(sum/2));
-        if(modulus == 0)
-            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
-        else
-            tmp_color = vec4(0.0,0.0,0.0, 1.0);
-    }
-
-    p = r.orig;
-*/
     // Ray Marching
     for(int i = 0; i < MAX_STEPS; i++) {
 
         // Distancia al plano
         dist = get_dist_plane(p, ground);
         closest_dist = dist;
-        if(dist < u_epsilon) {
-            hr.t = current_t;
-            hr.p = ray_at(r, hr.t);
-            hr.normal = normalize(ground.normal);
-            hr.hit = true;
-            int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
-            int modulus = sum - (2*int(sum/2));
-            if(modulus == 0)
-                return vec4(1.0, 1.0, 1.0, 1.0);
-            else
-                return vec4(0.0,0.0,0.0, 1.0);
-            
-        }
+        object_index = 0;
 
-        // ANCHOR JULIA
-        vec4 juliaC = vec4(0.2, -0.10, 0.0, 0.0);
-        dist = get_dist_julia(p , juliaC);
-        //return vec4(dist/255.0, 0.0, 0.0, 1.0);
-        if(dist < closest_dist) closest_dist = dist;
-        if (dist < u_epsilon) { // R hits Julia
-            hr.hit = true;
-            hr.t = current_t;
-            hr.p = hr.p = ray_at(r, hr.t);
-            //hr.normal = calculate_normal_julia(hr.p, juliaC);
-            hr.mat = S[0].mat; // TODO Mejorar esto
+        // Distancia a Julia
+        vec4 juliaC = vec4(0.25, 0.0, 0.0, -1.0);
+      dist = get_dist_julia(p , juliaC);
+        if(dist < closest_dist){
+            closest_dist = dist;
+            object_index = 1;
+        } 
 
-            //return evaluateLightingModel(lights, num_lights, hr);
-            return vec4(dist/u_epsilon, 0.0, 0.0, 1.0);
-        }
+/*        // Distancia a Mandelbub
+        dist = get_dist_mandelbub(p);
+        if(dist < closest_dist){
+            closest_dist = dist;
+            object_index = 2;
+        } 
+*/
+        if(closest_dist < u_epsilon){   // Hay interseccion
 
-/*
-        // MANDELBUB
-        Sphere BS; BS.center = vec3(0.0, 0.0, 0.0); BS.radius = 2.0;
-        if(hit_sphere_limits(BS, r)){
-            dist = get_dist_mandelbub(p);
-            if(dist < closest_dist) closest_dist = dist;
-            if (dist < u_epsilon) { // R hits Mandelbub
+            if(object_index == 0){      // r hits the ground
+                hr.t = current_t;
+                hr.p = ray_at(r, hr.t);
+                hr.normal = normalize(ground.normal);
+                hr.hit = true;
+                int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+                int modulus = sum - (2*int(sum/2));
+                if(modulus == 0)
+                    return vec4(1.0, 1.0, 1.0, 1.0);
+                else
+                    return vec4(0.0,0.0,0.0, 1.0);
+            }
+
+            if(object_index ==1) {      // r hits Julia
+                hr.hit = true;
+                hr.t = current_t;
+                hr.p = ray_at(r, hr.t);
+                hr.normal = calculate_normal_julia(hr.p, juliaC);
+                hr.mat = S[0].mat; // TODO Mejorar esto
+
+                return evaluateLightingModel(lights, num_lights, hr);
+            }
+
+            if(object_index == 2) {     // r hits Mandelbub
                 hr.hit = true;
                 hr.t = current_t;
                 hr.p = ray_at(r, hr.t);
@@ -508,35 +512,11 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             }
         }
 
-
-/*
-        
-        // Interseccion con las esferas
-        for (int j = 0; j < ARRAY_TAM; j++) {
-            if(j == num_spheres) break;
-            dist = get_dist_sphere(p, S[j]);
-            if(dist < closest_dist) closest_dist = dist;
-            
-            if(dist < u_epsilon) {
-                hr.t = current_t;
-                hr.p = ray_at(r, hr.t);
-                hr.normal = calculate_normal_sphere(hr.p, S[j]);
-                hr.hit = true;
-                hr.mat = S[j].mat;
-                tmp_color = evaluateLightingModel(lights, num_lights, hr);
-            }
-        }
-
-        
-*/
         current_t += max(closest_dist,u_epsilon);
         p = ray_at(r, current_t);
 
         if(current_t >= MAX_DIST) break;
     }
-
-
-    if(t_closest < MAX_DIST) return tmp_color;
 
 
     if(!hr.hit) {
@@ -599,11 +579,11 @@ void main() {
 
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
-    int num_lights = 1;
+    int num_lights = 2;
     Directional_light l1, l2;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(1.0, 1.0, 1.0);
-    l2.dir = vec3(-1.0, -1.0, 0.0);
+    l1.dir = vec3(0.0, 0.0, 1.0);
+    l2.dir = vec3(0.0, 0.0, -1.0);
     lights[0] = l1; lights[1] = l2;
     
     // COLOR
