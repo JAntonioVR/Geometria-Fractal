@@ -27,6 +27,8 @@ uniform vec4 u_light_color;
 
 uniform float u_epsilon;
 
+uniform vec4 u_julia_set_constant;
+
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
@@ -463,8 +465,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         object_index = 0;
 
         // Distancia a Julia
-        vec4 juliaC = vec4(0.25, 0.0, 0.0, -1.0);
-      dist = get_dist_julia(p , juliaC);
+        dist = get_dist_julia(p , u_julia_set_constant);
         if(dist < closest_dist){
             closest_dist = dist;
             object_index = 1;
@@ -496,7 +497,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.hit = true;
                 hr.t = current_t;
                 hr.p = ray_at(r, hr.t);
-                hr.normal = calculate_normal_julia(hr.p, juliaC);
+                hr.normal = calculate_normal_julia(hr.p, u_julia_set_constant);
                 hr.mat = S[0].mat; // TODO Mejorar esto
 
                 return evaluateLightingModel(lights, num_lights, hr);
@@ -583,7 +584,7 @@ void main() {
     Directional_light l1, l2;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
     l1.dir = vec3(0.0, 0.0, 1.0);
-    l2.dir = vec3(0.0, 0.0, -1.0);
+    l2.dir = vec3(0.0, 1.0, -1.0);
     lights[0] = l1; lights[1] = l2;
     
     // COLOR
