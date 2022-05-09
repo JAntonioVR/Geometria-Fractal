@@ -197,6 +197,7 @@ void assignColor(bool escaped, int iterations) {
 Como se puede observar, es una simple interpolación lineal entre los 4 colores que se acaban de presentar, que en GLSL deben codificarse como tripletas RGB donde cada componente está normalizada entre 0 y 1.
 
 \subsection{Renderizando conjuntos de Julia}
+\label{subsection:render-julia}
 
 Tenemos entonces todos los ingredientes para programar el renderizado, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,N}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,N}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero. Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
 
@@ -238,3 +239,64 @@ Julia(u_juliaSetConstant, u_order);
     \caption{Renderizado de algunos conjuntos de Julia con WebGL}
     \label{fig:julia-webgl}
 \end{figure}
+
+\subsection{Renderizando conjuntos de Mandelbrot}
+
+Ya hemos visto la metodología a utilizar si queremos visualizar conjuntos de Julia y, como es de esperar, la metodología para graficar conjuntos de Mandelbrot $\mathcal{M}_N$ no es muy distinta. Recordamos que, tal y como afirmamos en las secciones \ref{section:Mandelbrot} y \ref{subsection:julia-mandelbrot-generalizados} el conjunto de Mandelbrot $\mathcal{M}_N$ se componía de aquellos elementos $c\in\C$ tales que el conjunto de Julia $\mathcal{J}_c$ es conexo, o equivalentemente, de aquellos cuya sucesión $\{P_{c,N}^n(0)\}$ no diverge.
+
+La metodología consiste por tanto en obtener las coordenadas de mundo del píxel, iterar la función $P_{c,N}$ tomando $z_0=0$ como semilla y observar qué sucede. Por la proposición \ref{prop:mandelbrot-escape} afirmamos que en el momento que una iterada supere en módulo a 2, entonces la sucesión de iteradas es divergente. Por tanto, almacenamos en una variable el número de iteradas que se han calculado antes de que el módulo de la sucesión supere a 2 en caso de que lo haga. Si esto no ocurre, se etiqueta al punto como prisionero y por tanto el punto pertenece a $\mathcal{M}_N$. De nuevo, la forma de asignar un color al píxel depende de si la sucesión diverge o no y del número de iteraciones hasta decidir que diverge en dicho caso. El código GLSL por tanto es el siguiente:
+
+\begin{lstlisting}
+void Mandelbrot(int n) {
+    vec2 c = get_world_coordinates();
+    int iterations;
+    vec2 z = vec2(0.0);
+    bool escaped = false;
+    for (int i = 0; i < 10000; i++) {
+        if (i > u_maxIterations) break;
+        iterations = i;
+        z = P(z, c, n);
+        if (length(z) > 2.0) {
+            escaped = true;
+            break;
+        }
+    }
+    assignColor(escaped, iterations);    
+}
+\end{lstlisting}
+
+Vemos que es muy parecida a la función \verb|Julia| presentada en la sección \ref{subsection:render-julia}. La diferencia fundamental se encuentra en que mientras en los conjuntos de Julia fijamos un $c\in\C$ y usamos el complejo asociado al píxel como semilla en el caso del conjunto de Mandelbrot usamos siempre $z_0=0$ como semilla y tomamos como $c$ el complejo que representa el píxel.
+
+Por tanto, ya solo falta llamar a esta función desde \verb|main| y podremos ver el conjunto de Mandelbrot en detalle. Presentamos algunas imágenes de detalles del mismo, a la vez que animamos a revisitar las imágenes \ref{fig:mandelbrot-intro}, las cuales también se han obtenido mediante WebGL.
+
+\begin{lstlisting}
+Mandelbrot(u_order);
+\end{lstlisting}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.23]{img/C6/mandelbrot-1.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-2.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-3.png} \\
+    (a) Detalle de $\mathcal{M}_2$ & (b) Detalle de $\mathcal{M}_8$ & (c) $\mathcal{M}_3$ \\[6pt]
+    \end{tabular}
+    \caption{Renderizado de algunos conjuntos de Mandelbrot con WebGL}
+    \label{fig:mandelbrot-webgl}
+\end{figure}
+
+\subsection{Alternando conjuntos de Julia y Mandelbrot}
+
+Finalmente, queremos dotar a nuestra web de la posibilidad de alternar qué fractal visualizar (Julia o Mandelbrot) y poder ajustar los parámetros a nuestro gusto. Para ello introducimos en el fragment Shader una variable \verb|uniform| entera que, en caso de valer 0 se visualizaría el conjunto de Mandelbrot y en caso de valer 1 se visualizaría el conjunto de Julia.
+
+\begin{lstlisting}
+// Renderizar conjunto de Julia o de Mandelbrot
+uniform int u_fractal;
+
+// ... 
+
+void main() {
+    if(u_fractal == 0)
+        Mandelbrot(u_order);
+    else
+        Julia(u_juliaSetConstant, u_order);
+}
+\end{lstlisting}
