@@ -82,7 +82,7 @@ vec2 get_world_coordinates() {
 
 Y ya tenemos en el shader una función que calcula el punto del plano al cual corresponde el píxel. A partir de esto, y al igual que en el capítulo \ref{chap:Julia-Mandelbrot}, tan solo tenemos que iterar la función $P_{c,N}$ y en función del número de iteraciones necesarias para diverger (o no), asignar un color.
 
-\subsection{Iterando la función $f(z)=z^N+c$}
+\subsection{La función $f(z)=z^N+c$}
 
 Necesitamos código para la función $P_{c,N}$, pero esta requiere a su vez la programación de potencias de números complejos. Tal y como se ha evidenciado en el código recientemente presentado, y de manera natural, representaremos un número complejo $z=x+i\cdot y\cong (x,y)$ mediante una variable del tipo \verb|vec2|. Por lo que debemos implementar una función que, de forma iterativa, multiplique (usando el producto de números complejos) $N$ veces por sí mismo una variable \verb|vec2|. Como ya sabemos,
 $$
@@ -123,3 +123,118 @@ vec2 P(vec2 z, vec2 c, int n) {
 }
 \end{lstlisting}
 
+En el caso de los conjuntos de Julia debemos fijar una constante $c$ a la cual calcularle el conjunto $\textsf{J}_c$. Naturalmente esta constante es común a todos los píxeles, por lo que necesitamos una variable \verb|uniform| para desde JavaScript enviar al shader qué conjunto de Julia queremos graficar. Además, también debemos fijar el exponente $N$ que también es común a todos los píxeles, por lo que hacemos uso de otra variable \verb|uniform| al uso.
+
+\begin{lstlisting}
+// Valor c fijo en la funcion z^N + c
+uniform vec2 u_juliaSetConstant;
+// Valor N fijo en la funcion z^N +c
+uniform int u_order;
+\end{lstlisting}
+
+\subsection{Asignación de colores}
+\label{subsection:colores}
+
+Con la función $P_{c,N}$ ya programada, recordamos los algoritmos que utilizamos en \textit{Mathematica} para graficar conjuntos de Julia y Mandelbrot, reprogramándolos ahora en GLSL para poder renderizar dichos conjuntos. Estos consistían en iterar la función $P_{c,N}$, cada uno a su manera, fijando un número máximo de iteraciones $M$ tras las cuales se decidía qué puntos son prisioneros o de escape y almacenando en una variable cuántas iteraciones se han necesitado para tomar esta decisión. En función del valor de dicha variable asignamos un color. Por tanto, necesitamos una forma de, a partir de este valor asignar un color.
+
+Lo primero de todo, este número máximo de iteraciones $M$ es clave en esta asignación de colores. Queremos además que este valor sea parametrizable, por lo que declaramos en el shader una variable \verb|uniform| cuyo valor le pasaremos al shader con JavaScript.
+
+\begin{lstlisting}
+// Numero de iteraciones maximo para decidir que elementos son
+// prisioneros o escapan
+uniform int u_maxIterations;
+\end{lstlisting}
+
+Seguidamente diseñaremos una paleta de colores y mediante interpolación lineal calcularemos qué color asignar a cada píxel. Podemos tomar tantos colores como queramos y elegir qué colores. Tras varias pruebas hemos decidido asignar el color negro (\verb|rgb(0, 0, 0)=#000000|) para los puntos prisioneros (los que no divergen tras las $M$ iteraciones) y para los que escapan utilizar un gradiente entre los siguientes colores:
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C6/paleta.png}
+    \caption{Paleta de colores elegida para la visualización de fractales 2D}
+    \label{fig:paleta}
+\end{figure}
+
+La cual nos proporciona el siguiente gradiente, que proximamente podremos ver en nuestros fractales, de manera que los puntos que diverjan antes se acercarán más al azul y los que tarden más se colorearán de un color más parecido al verde.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.51]{img/C6/gradiente.png}
+    \caption{Gradiente generado por la paleta de colores \ref{fig:paleta}}
+    \label{fig:gradiente}
+\end{figure}
+
+Con esta decisión tomada, presentamos el código utilizado
+
+\begin{lstlisting}
+// Paleta de colores, a partir de un numero 0<=t<=1 y 4 
+// colores c1, c2, c3 y c4 devuelve el color 
+// correspondiente en el gradiente creado por los cuatro 
+// colores.
+vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
+    float x = 1.0 / 3.0;
+    if (t < x) return mix(c1, c2, t/x);
+    else if (t < 2.0 * x) return mix(c2, c3, (t - x)/x);
+    else if (t < 3.0 * x) return mix(c3, c4, (t - 2.0*x)/x);
+    return c4;
+}
+
+// Asignacion de colores, a partir de una variable que define
+// si el punto es prisionero o de escape y el numero de 
+// iteraciones antes de escapar se asigna a la variable 
+// gl_FragColor el color que le corresponde.
+void assignColor(bool escaped, int iterations) {
+    gl_FragColor = escaped ? vec4(palette(
+      3.0*float(iterations)/ float(u_maxIterations),
+      vec3(0.109, 0.109, 0.647), // #1C1CA5
+      vec3(0.823, 0.411,   0.0), // #D26900
+      vec3(0.769, 0.659,   0.0), // #C4A800
+      vec3(0.627, 0.878, 0.043)  // #A0E00B
+      ), 
+      1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
+}
+\end{lstlisting}
+
+Como se puede observar, es una simple interpolación lineal entre los 4 colores que se acaban de presentar, que en GLSL deben codificarse como tripletas RGB donde cada componente está normalizada entre 0 y 1.
+
+\subsection{Renderizando conjuntos de Julia}
+
+Tenemos entonces todos los ingredientes para programar el renderizado, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,N}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,N}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero. Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
+
+\begin{lstlisting}
+// A partir del valor de la constante c y el exponente n
+// iteramos la funcion P_{c,N} y asignamos el color.
+void Julia(vec2 c, int n) {
+    vec2 z0 = get_world_coordinates();
+    int iterations;
+    vec2 z = z0;
+    bool escaped = false;
+    float length_c = length(c);
+    for(int i = 0; i < 10000; i++) {
+        if(i > u_maxIterations) break;
+        iterations = i;
+        z = P(z, c, n);
+        if (length(z) > 2.0){
+            escaped = true;
+            break;
+        }
+    }
+
+    assignColor(escaped, iterations);
+}
+\end{lstlisting}
+
+Ya desde la función \verb|main|, llamamos a esta función recién presentada y obtenemos los resultados que se presentan en las imágenes \ref{fig:julia-webgl}.  
+
+\begin{lstlisting}
+Julia(u_juliaSetConstant, u_order);
+\end{lstlisting}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.2]{img/C6/julia-1.png} &   \includegraphics[scale=0.2]{img/C6/julia-2.png} &   \includegraphics[scale=0.2]{img/C6/julia-3.png} \\
+    (a) $z^2-0.38+0.62i$ & (b) $z^3+0.62+0.5i$ & (c) $z^4-0.24+0.5i$ \\[6pt]
+    \end{tabular}
+    \caption{Renderizado de algunos conjuntos de Julia con WebGL}
+    \label{fig:julia-webgl}
+\end{figure}

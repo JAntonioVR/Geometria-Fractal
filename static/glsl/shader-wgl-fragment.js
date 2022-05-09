@@ -90,6 +90,7 @@ void Julia(vec2 c, int n) {
     int iterations;
     vec2 z = z0;
     bool escaped = false;
+    float length_c = length(c);
     for(int i = 0; i < 10000; i++) {
         if(i > u_maxIterations) break;
         iterations = i;
