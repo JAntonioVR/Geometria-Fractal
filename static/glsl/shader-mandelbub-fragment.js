@@ -646,7 +646,7 @@ void main() {
     int num_lights = 1;
     Directional_light l1, l2;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(0.0, 1.0, 0.0);
+    l1.dir = vec3(-1.0, 1.0, 0.0);
     l2.dir = vec3(-0.5, 1.0, -1.0);
     lights[0] = l1; lights[1] = l2;
     
