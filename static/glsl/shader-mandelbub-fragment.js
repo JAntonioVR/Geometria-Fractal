@@ -7,7 +7,6 @@ const fsSource = glsl`
 // ────────────────────────────────────────────────────────────────────────────────
 //
 
-
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
@@ -428,16 +427,30 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     return cam;
 }
 
+vec4 color_array_average(vec4 colors[ARRAY_TAM], int size) {
+    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
+    for(int i = 0; i < ARRAY_TAM; i++) {
+        if(i == size) break;
+        sum += colors[i];
+    }
+    return vec4((sum / float(size)).xyz, 1.0);
+}
+
+Ray create_ray_origin_destiny(vec3 origin, vec3 destiny) {
+    Ray R;
+    R.orig = origin;
+    R.dir = normalize(destiny-origin);
+    return R;
+}
+
 //
 // ─── GET RAY ────────────────────────────────────────────────────────────────────
 // Creates and returns a Ray where the origin is the observer's position and
 // the direction is a point of the rendered frame.
     
 Ray get_ray(Camera cam, float s, float t){
-    Ray R;
-    R.orig = cam.origin;
-    R.dir = normalize(cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin);
-    return R;
+    vec3 destiny = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical;
+    return create_ray_origin_destiny(cam.origin, destiny);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -618,7 +631,7 @@ void main() {
     float vfov = 90.0; // Vertical field of view in degrees
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
-    
+
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
     int num_lights = 1;
@@ -635,7 +648,28 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
-    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
+    int n_samples = 2;
+    float hw = float(1.0) / (float(image_width * n_samples)),
+          hh = float(1.0) / (float(image_height * n_samples));
+    Ray rays[ARRAY_TAM];
+    vec4 colors[ARRAY_TAM]; 
+
+    for(int i = 0; i < ARRAY_TAM; i++) {
+        if(i == n_samples*n_samples) break;
+        int x =  i/n_samples;
+        int y =  i - n_samples*x;
+        u += float(x) * hw;
+        v += float(y) * hh;
+        rays[i] = get_ray(cam, u, v);
+        colors[i] = ray_color(rays[i], S, 2, ground, lights, num_lights);
+    }
+
+    gl_FragColor = color_array_average(colors, n_samples*n_samples);
+    
+
+
+
+    // gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
