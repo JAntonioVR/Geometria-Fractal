@@ -618,6 +618,7 @@ void main() {
     float vfov = 90.0; // Vertical field of view in degrees
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
+    
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
     int num_lights = 1;
