@@ -179,3 +179,48 @@ gl_FragColor = ray_color(R);
     \caption{Primera escena vacía renderizada}
     \label{fig:first-render}
 \end{figure}
+
+\section{Visualizando una escena sencilla}
+
+Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez.
+
+\subsection{Renderizando una esfera}
+
+Primero introduciremos código para visualizar una esfera. Por simple geometría euclídea sabemos que, fijado un centro $c=(c_x,c_y,c_z)\in\R^3$ y un radio $r\in\R^+$, una esfera $S$ se define como aquellos puntos de $\R^3$ tales que su distancia a $c$ es $r$, es decir:
+$$
+S = \{p\in\R^3:\|p-c\|=r\} = \{p\in\R^3:(p-c)\cdot (p-c)=r^2\}. 
+$$
+donde en esta definición el operador $\cdot$ denota el producto escalar de dos vectores. Si recordamos que los puntos que componen un rayo $R$ se pueden expresar como $R(t)= p_0 + vt$ (donde $p_0$ es el origen del rayo y el vector $v$ su dirección) con valores de $t$ reales no negativos, podemos calcular la intersección rayo-esfera sin más que resolviendo la ecuación
+$$
+(R(t)-c)\cdot(R(t)-c)=r^2
+$$
+de tal manera que, si resolvemos la ecuación en $t$ podremos saber en qué valor de $t$ golpea el rayo la esfera, si es que efectivamente lo interseca.
+\begin{eqnarray*}
+    (R(t)-c)\cdot(R(t)-c)=r^2 \\
+    (p_0 + vt - c)\cdot(p_0 + vt - c) = r^2 \\
+    (vt + (p_0 -c))\cdot (vt + (p_0 -c))= r^2 \\
+    (v\cdot v)t^2 + 2(v\cdot(p_0-c))t + (p_0 -c)\cdot (p_0 -c) - r^2 = 0 
+\end{eqnarray*}
+Y esto es una ecuación de segundo grado en $t$. Esto nos dice que el rayo puede intersecar dos veces con la esfera (secante), una única vez si el discriminante se anula (tangente) o ninguna si el discriminante es negativo (el rayo no interseca con la esfera). En caso de que exista intersección debemos quedarnos con el valor de $t$ más pequeño, que es el más cercano a la posición del espectador. También debemos quedarnos únicamente con valores de $t$ positivos, pues si es negativo significa que la esfera está detrás del observador, en cuyo caso no es visible.
+
+A nivel de código podemos codificar una esfera como un \verb|struct| cuyos elementos sean su centro y su radio
+
+\begin{lstlisting}
+struct Sphere{
+    vec3 center;
+    float radius;
+};
+\end{lstlisting}
+
+Además, para el futuro necesitaremos una estructura que almacene información sobre un impacto rayo-superficie. Información como el punto en el que se produce, en qué $t$, la normal a la superficie en ese punto, etc. En estas fases tan tempranas igual no es tan necesario pero pronto encontraremos su utilidad.
+
+\begin{lstlisting}
+struct Hit_record {
+    vec3 p;         // Punto donde se produce el impacto
+    vec3 normal;    // Normal a la superficie en el punto p
+    float t;        // Valor de t para el que el rayo impacta
+    bool hit;       // True sii se golpea alguna superficie
+};
+\end{lstlisting}
+
+Claro que los tres primeros campos solo tendrán sentido si el campo \verb|hit| es verdadero, si es falso no tiene sentido calcular ni consultar los demás. A continuación presentamos el código GLSL para visualizar una esfera utilizando estas estructuras.
