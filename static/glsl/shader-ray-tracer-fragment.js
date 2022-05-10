@@ -7,6 +7,8 @@ const fsSource = glsl`
 // ────────────────────────────────────────────────────────────────────────────────
 //
 
+#define MAX_DIST 100.0
+
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
@@ -153,17 +155,17 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     Hit_record result;
     vec3 oc = R.orig - S.center;
     float a = dot(R.dir, R.dir);
-    float half_b = dot(oc, R.dir);
+    float b = 2.0 * dot(oc, R.dir);
     float c = dot(oc, oc) - S.radius*S.radius;
-    float discriminant = half_b*half_b - a*c;
+    float discriminant = b*b - 4.0*a*c;
     if (discriminant < 0.0){
         result.hit = false;
         return result;
     }
     float sqrtd = sqrt(discriminant);
-    float root = (-half_b - sqrt(discriminant))/a; // First root
+    float root = (-b - sqrt(discriminant))/(2.0*a); // First root
     if (root < t_min || t_max < root){ // The first root is out of range
-        root = (-half_b + sqrt(discriminant))/a;     // The other root
+        root = (-b + sqrt(discriminant))/(2.0*a);     // The other root
         if(root < t_min || t_max < root){    // Both roots are out of range
             result.hit = false;
             return result;
@@ -293,16 +295,17 @@ Ray get_ray(Camera cam, float s, float t){
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
 
     // r hits any sphere?
-    float t_closest = 100000.0;
+    float t_closest = MAX_DIST;
     vec4 tmp_color;
     Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
         vec3 N = hr.normal;
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        //tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        return vec4(normalize(hr.normal), 1.0);
     }
 
-    // r hits the plane? 
+ /*   // r hits the plane? 
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
@@ -314,9 +317,9 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
         else
             tmp_color = vec4(0.0,0.0,0.0, 1.0);
     }
-
+*/
     // If r hits any surface
-    if(t_closest < 10000.0) return tmp_color;
+    //if(t_closest < 10000.0) return tmp_color;
 
     // r does not hit any surface
     vec3 unit_direction = normalize(r.dir);
@@ -346,13 +349,13 @@ void main() {
     mat.sh = u_sh;
 
     // Spheres
-    int num_spheres = 1;
+    int num_spheres = 4;
     Sphere world[ARRAY_TAM];
     Sphere S1, S2, S3, S4;
-    S1.center = vec3(0.0, 0.0, 0.0); S1.radius = 0.5; S1.mat = mat;
-    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5; S2.mat = mat;
-    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5; S3.mat = mat;
-    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5; S4.mat = mat;
+    S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5; S1.mat = mat;
+    S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0; S2.mat = mat;
+    S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5; S3.mat = mat;
+    S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0; S4.mat = mat;
 
 
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
@@ -365,8 +368,9 @@ void main() {
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
-    Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
-
+    // Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
+    // TODO DESCOMENTAR
+    Camera cam = init_camera(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, -1.0), vup, vfov, aspect_ratio);
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
     int num_lights = 2;

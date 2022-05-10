@@ -195,12 +195,16 @@ $$
 (R(t)-c)\cdot(R(t)-c)=r^2
 $$
 de tal manera que, si resolvemos la ecuación en $t$ podremos saber en qué valor de $t$ golpea el rayo la esfera, si es que efectivamente lo interseca.
-\begin{eqnarray*}
-    (R(t)-c)\cdot(R(t)-c)=r^2 \\
-    (p_0 + vt - c)\cdot(p_0 + vt - c) = r^2 \\
-    (vt + (p_0 -c))\cdot (vt + (p_0 -c))= r^2 \\
-    (v\cdot v)t^2 + 2(v\cdot(p_0-c))t + (p_0 -c)\cdot (p_0 -c) - r^2 = 0 
-\end{eqnarray*}
+\begin{equation}
+    \label{eq:rayo-recta}
+    \begin{split}
+        (R(t)-c)\cdot(R(t)-c)&=r^2 \\
+        (p_0 + vt - c)\cdot(p_0 + vt - c) &= r^2 \\
+        (vt + (p_0 -c))\cdot (vt + (p_0 -c))&= r^2 \\
+        (v\cdot v)t^2 + 2(v\cdot(p_0-c))t + (p_0 -c)\cdot (p_0 -c) - r^2 &= 0 
+    \end{split}
+\end{equation}
+
 Y esto es una ecuación de segundo grado en $t$. Esto nos dice que el rayo puede intersecar dos veces con la esfera (secante), una única vez si el discriminante se anula (tangente) o ninguna si el discriminante es negativo (el rayo no interseca con la esfera). En caso de que exista intersección debemos quedarnos con el valor de $t$ más pequeño, que es el más cercano a la posición del espectador. También debemos quedarnos únicamente con valores de $t$ positivos, pues si es negativo significa que la esfera está detrás del observador, en cuyo caso no es visible.
 
 A nivel de código podemos codificar una esfera como un \verb|struct| cuyos elementos sean su centro y su radio
@@ -224,3 +228,87 @@ struct Hit_record {
 \end{lstlisting}
 
 Claro que los tres primeros campos solo tendrán sentido si el campo \verb|hit| es verdadero, si es falso no tiene sentido calcular ni consultar los demás. A continuación presentamos el código GLSL para visualizar una esfera utilizando estas estructuras.
+
+\begin{lstlisting}
+// Calculates the intersection between a Ray and a 
+// Sphere and stores the hit information in a Hit_record struct.
+
+Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
+    Hit_record result;
+    vec3 oc = R.orig - S.center;
+    float a = dot(R.dir, R.dir);
+    float b = 2.0 * dot(oc, R.dir);
+    float c = dot(oc, oc) - S.radius*S.radius;
+    float discriminant = b*b - 4.0*a*c;
+    if (discriminant < 0.0){
+        result.hit = false;
+        return result;
+    }
+    float sqrtd = sqrt(discriminant);
+    float root = (-b - sqrt(discriminant))/(2.0*a); // First root
+    if (root < t_min || t_max < root){ 
+        // The first root is out of range
+        root = (-b + sqrt(discriminant))/(2.0*a); // The other root
+        if(root < t_min || t_max < root){ 
+            // Both roots are out of range
+            result.hit = false;
+            return result;
+        }
+    } 
+    result.hit = true;
+    result.t = root;
+    result.p = ray_at(R, result.t);
+    result.normal = (result.p - S.center) / S.radius;
+    return result;
+}
+\end{lstlisting}
+
+Fijémonos que hemos introducido unas variables \verb|t_min| y \verb|t_max| de forma que sólo nos interesamos por los puntos del rayo $R(t)=p_0+vt$ para valores de $t$ situados entre un valor mínimo y un máximo. Esto sirve para fijar una distancia mínima y máxima en la que buscar intersecciones, evitando así valores de $t$ negativos o demasiado grandes. El código implementa la ecuación (\ref{eq:rayo-recta}) de forma que en caso de no haber impacto asigna \verb|false| al campo \verb|hit| de la estructura \verb|Hit_record| y true en caso contrario. Además, solo calcula el punto de intersección más cercano.
+
+A partir de la estructura \verb|Hit_record| y la información que contiene podemos asignar el color que deseemos. Lo ideal es evaluar un modelo de iluminación, como haremos en próximas secciones, pero de momento aprovecharemos la normal en cada punto para mapear una componente de $\R^3$ normalizada en una terna RGB. Esto es una forma de simular un material conocido popularmente como `\textit{normal material}'\footnote{Consultar por ejemplo la implementación en Three.js para más información \url{https://threejs.org/docs/\#api/en/materials/MeshNormalMaterial}}, llamado así por utilizar la normal en un punto para calcular un color.
+% TODO Referenciar seccion del modelo de iluminacion
+
+Realizamos por tanto la primera modificación del código de \verb|ray_color|, que ahora acepta como argumento una esfera.
+
+\begin{lstlisting}
+// Fijamos una distancia maxima
+#define MAX_DIST 100.0
+
+// ... 
+
+vec4 ray_color(Ray R, Sphere S) {
+
+    // R hits the sphere?
+    Hit_record hr = hit_sphere(S, R, 0.0, MAX_DIST);
+    if(hr.hit){
+        return vec4(normalize(hr.normal), 1.0);
+    }
+
+    // R does not hit any surface
+    vec3 unit_direction = normalize(R.dir);
+    float t = 0.5*(unit_direction.y + 1.0);
+    return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
+}
+
+// ... 
+// R is the Ray
+
+Sphere S; 
+S.center = vec3(0.0, 0.0, -1.0); S.radius = 0.5;
+gl_FragColor = ray_color(R, S);
+\end{lstlisting}
+
+El resultado que obtenemos es el que podemos observar en la imagen \ref{fig:una-esfera}. Obsérvese la variedad de colores que ofrece la esfera, concordante con la variedad de normales que posee.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/esfera_renderizada.png}
+    \caption{Escena con una esfera}
+    \label{fig:una-esfera}
+\end{figure}
+
+\subsection{Renderizando varias esferas}
+
+Veamos ahora cómo poder visualizar varias esferas, aunque el procedimiento una vez se ha conseguido visualizar una es bastante natural. Podemos declarar en lugar de una un array de esferas, cada una con sus parámetros y crear una función que itere llamando a la función \verb|hit_sphere| con cada esfera. Sin embargo, como es obvio un rayo puede intersecar varias esferas, pero consideramos que únicamente hemos golpeado la más cercana a efectos prácticos. Este problema se extiende en general a escenas con varios objetos, no sólo esferas, pero la solución es la misma, evaluar únicamente la más cercana de las intersecciones. Aquí es también donde ponemos en valor el parámetro \verb|t_max| de la función \verb|hit_sphere|, pues una vez hemos encontrado una intersección con una de las esferas no debemos considerar impactos más lejanos.
+
+Por tanto, buscamos implementar una función que dado un array de esferas devuelva en una estructura \verb|Hit_record| la información sobre la intersección rayo-esfera más cercana. 
