@@ -46,6 +46,18 @@ float degrees_to_radians(float degrees){
 }
 
 //
+// ─── COLOR ARRAY AVERAGE ────────────────────────────────────────────────────────
+// Calculates the average color of a array of colors
+vec4 color_array_average(vec4 colors[ARRAY_TAM], int size) {
+    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
+    for(int i = 0; i < ARRAY_TAM; i++) {
+        if(i == size) break;
+        sum += colors[i];
+    }
+    return sum / float(size);
+}
+
+//
 // ─── QUATERNION ─────────────────────────────────────────────────────────────────
 // Quaternion are represented by a 4-dimensional vector
 
@@ -254,6 +266,27 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
     return N;
 }
 
+    
+//
+// ─── SHADOW ─────────────────────────────────────────────────────────────────────
+// Defines (using ray-marching and the Julia SDF) if the point p is in the Julia
+// set shadow. If it's in the shadow it returns 1.0, and if it's near the shadow
+// returns a [0,1] normaliced value where 0 means it's so far of the shadow    
+float shadow(vec3 p, Directional_light light) {
+    Ray R;
+    R.orig = p; R.dir = light.dir;
+    float res = 1.0;
+    float t = 0.0;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        float h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+        if(h < u_epsilon)
+            return 0.0;
+        res = min(res, 8.0*h/t);
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return res;
+}
 
 //
 // ─── MANDELBUB ──────────────────────────────────────────────────────────────────
@@ -357,6 +390,7 @@ struct Plane{
     float D;        // Independent term
     Material mat;   // Material of the plane
 };
+
 //
 // ─── HIT PLANE ──────────────────────────────────────────────────────────────────
 // Calculates the possible intersection between a ray and a plane and stores the
@@ -427,15 +461,6 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     return cam;
 }
 
-vec4 color_array_average(vec4 colors[ARRAY_TAM], int size) {
-    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
-    for(int i = 0; i < ARRAY_TAM; i++) {
-        if(i == size) break;
-        sum += colors[i];
-    }
-    return vec4((sum / float(size)).xyz, 1.0);
-}
-
 Ray create_ray_origin_destiny(vec3 origin, vec3 destiny) {
     Ray R;
     R.orig = origin;
@@ -454,22 +479,6 @@ Ray get_ray(Camera cam, float s, float t){
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-
-float shadow(vec3 p, Directional_light light) {
-    Ray R;
-    R.orig = p; R.dir = light.dir;
-    float res = 1.0;
-    float t = 0.0;
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        float h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
-        if(h < u_epsilon)
-            return 0.0;
-        res = min(res, 8.0*h/t);
-        t += h;
-        if(t >= MAX_DIST) break;
-    }
-    return res;
-}
 
 //
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
@@ -516,7 +525,6 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             } 
         }
         
-
         if(closest_dist < u_epsilon){   // Hay interseccion
 
             if(object_index == 0){      // r hits the ground
@@ -539,8 +547,9 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 hr.mat = M;
 
+                // Is it in the JuliaSet Shadow?
                 float julia_shadow = shadow(hr.p, lights[0]);
-                float alpha = 0.2;
+                float alpha = 0.2;      // Smooth constant
                 julia_shadow = julia_shadow/(1.0 - alpha) + alpha;
 
                 return vec4((julia_shadow*evaluateLightingModel(lights, num_lights, hr)).xyz, 1.0);
@@ -646,8 +655,11 @@ void main() {
     float u = uv.x;
     float v = uv.y;
 
+    // No antiliasing
     Ray r = get_ray(cam, u, v);
+    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 
+    // Antiliasing
     /*
     int n_samples = 2;
     float hw = float(1.0) / (float(image_width * n_samples)),
@@ -669,8 +681,6 @@ void main() {
     
 
 */
-
-    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
