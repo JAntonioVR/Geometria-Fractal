@@ -648,6 +648,7 @@ void main() {
 
     Ray r = get_ray(cam, u, v);
 
+    /*
     int n_samples = 2;
     float hw = float(1.0) / (float(image_width * n_samples)),
           hh = float(1.0) / (float(image_height * n_samples));
@@ -667,9 +668,9 @@ void main() {
     gl_FragColor = color_array_average(colors, n_samples*n_samples);
     
 
+*/
 
-
-    // gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
+    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
