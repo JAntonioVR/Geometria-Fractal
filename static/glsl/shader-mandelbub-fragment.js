@@ -33,7 +33,7 @@ uniform vec4 u_julia_set_constant;
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
-#define MAX_STEPS 100
+#define MAX_STEPS 1000
 #define MAX_DIST 100.0
 #define PI 3.14159265359
 
@@ -436,7 +436,7 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
 Ray get_ray(Camera cam, float s, float t){
     Ray R;
     R.orig = cam.origin;
-    R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
+    R.dir = normalize(cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin);
     return R;
 }
 
@@ -483,6 +483,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             if(dist < closest_dist){
                 closest_dist = dist;
                 object_index = 1;
+
             } 
         }
         
@@ -494,7 +495,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.p = ray_at(r, hr.t);
                 hr.normal = normalize(ground.normal);
                 hr.hit = true;
-                int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+                int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
                 if(modulus == 0)
                     return vec4(1.0, 1.0, 1.0, 1.0);
