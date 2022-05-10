@@ -119,7 +119,7 @@ struct Directional_light{
 
 vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
 
-    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 color_average = vec4(0.0, 0.0, 0.0, 0.0);
     Material mat = hr.mat;
     Directional_light light;
     vec3 light_dir;
@@ -152,7 +152,7 @@ vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights,
         ambient = mat.ka * color_average;
     }
 
-    return emissive + ambient + diffuse + specular;
+    return vec4((emissive + ambient + diffuse + specular).xyz, 1.0);
    
 }
 
@@ -442,6 +442,22 @@ Ray get_ray(Camera cam, float s, float t){
 
 // ────────────────────────────────────────────────────────────────────────────────
 
+float shadow(vec3 p, Directional_light light) {
+    Ray R;
+    R.orig = p; R.dir = light.dir;
+    float res = 1.0;
+    float t = 0.0;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        float h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+        if(h < u_epsilon)
+            return 0.0;
+        res = min(res, 8.0*h/t);
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return res;
+}
+
 //
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
@@ -493,14 +509,28 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             if(object_index == 0){      // r hits the ground
                 hr.t = current_t;
                 hr.p = ray_at(r, hr.t);
-                hr.normal = normalize(ground.normal);
+                hr.normal = vec3(0.0, 1.0, 0.0); //normalize(ground.normal);
                 hr.hit = true;
+
+                Material M;
+                M.ka = vec4(0.0, 0.0, 0.0, 1.0);
+                M.ke = vec4(0.0, 0.0, 0.0, 1.0);
+                M.kd = vec4(0.0, 0.0, 0.0, 0.0);
+
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
                 if(modulus == 0)
-                    return vec4(1.0, 1.0, 1.0, 1.0);
+                    M.ks = vec4(0.5, 0.5, 0.5, 1.0);
                 else
-                    return vec4(0.0,0.0,0.0, 1.0);
+                    M.ks = vec4(0.0, 0.0, 0.0, 1.0);
+
+                hr.mat = M;
+
+                float julia_shadow = shadow(hr.p, lights[0]);
+                float alpha = 0.2;
+                julia_shadow = julia_shadow/(1.0 - alpha) + alpha;
+
+                return vec4((julia_shadow*evaluateLightingModel(lights, num_lights, hr)).xyz, 1.0);
             }
 
             if(object_index ==1) {      // r hits Julia
@@ -590,11 +620,11 @@ void main() {
 
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
-    int num_lights = 2;
+    int num_lights = 1;
     Directional_light l1, l2;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(0.0, 0.0, 1.0);
-    l2.dir = vec3(0.0, 1.0, -1.0);
+    l1.dir = vec3(0.0, 1.0, 0.0);
+    l2.dir = vec3(-0.5, 1.0, -1.0);
     lights[0] = l1; lights[1] = l2;
     
     // COLOR
