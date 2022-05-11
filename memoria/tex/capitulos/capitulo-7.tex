@@ -111,8 +111,8 @@ Ray get_ray(vec3 lookfrom, vec3 lookat,
         - viewport_height/float(2.0)*vec3(0.0, 1.0, 0.0) 
         - df*vec3(0.0, 0.0, 1.0);
     R.dir = lower_left_corner 
-        + u*viewport_width 
-        + v*viewport_height 
+        + u*vec3(viewport_width, 0.0, 0.0)
+        + v*vec3(0.0, viewport_height, 0.0) 
         - lookfrom;
     return R;
 }
@@ -187,6 +187,7 @@ gl_FragColor = ray_color(R);
 Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez.
 
 \subsection{Renderizando una esfera}
+\label{subsection:esfera}
 
 Primero introduciremos código para visualizar una esfera. Por simple geometría euclídea sabemos que, fijado un centro $c=(c_x,c_y,c_z)\in\R^3$ y un radio $r\in\R^+$, una esfera $S$ se define como aquellos puntos de $\R^3$ tales que su distancia a $c$ es $r$, es decir:
 $$
@@ -508,27 +509,210 @@ gl_FragColor = ray_color(r, world, num_spheres, P);
 
 Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos al principio de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que el observador se mantiene fijo carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y de la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
 
-Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa, es decir, la posición del espectador; y \textit{lookat} al punto sobre el cual se fija la mirada. Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 rad$, sea $h=\tan\left(\frac \theta 2\right)$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica que la altura del plano de proyección (\verb|viewport_height|) es $PP_{height}=2h$, por lo que la anchura es 
+Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa, es decir, la posición del espectador; y \textit{lookat} al punto sobre el cual se fija la mirada. Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 rad$, sea $h=\tan\left(\frac \theta 2\right)=1$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica, asumiendo una distancia focal de $1$, que la altura del plano de proyección (\verb|viewport_height|) es $PP_{height}=2h$, por lo que la anchura es 
 $PP_width=AR\cdot PP_{height}$. 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/fov.png}
+    \includegraphics[scale = 0.25]{img/C7/fov.png}
     \caption{Field Of View}
     \label{fig:fov}
 \end{figure}
 
-Pensemos por otro lado que aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado la cabeza y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}. Normalmente, por convención se hace la elección $vup=(0,1,0)$. Mediante el vector $VD=lookat-lookfrom$ \textit{view direction} y el vector $vup$ podemos crear una base ortogonal del plano ortogonal a $VD$ que pasa por el punto $lookfrom$ y que define la orientación de la cámara
+Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}, el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $vup=(0,1,0)$. Mediante el vector $VD=lookat-lookfrom$ \textit{view direction} y el vector $vup$ podemos crear una base ortonormal del plano ortogonal a $VD$ que pasa por el punto $lookfrom$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente tienen una misma base, y son por tanto paralelos, son planos afines distintos. Precisamente de este hecho nos aprovecharemos más tarde.
 \begin{eqnarray*}
     w = \dfrac{lookat-lookfrom}{\|lookat-lookfrom\|}, \\
     u = \dfrac{vup\times w}{vup \times w}, \\
     v = w\times u,
 \end{eqnarray*}
-de forma que los vectores $u,v$ son, por su propia definición ortogonales a $VD$ y ortogonales entre sí. Además están normalizados por lo que constituyen una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}.
+de forma que los vectores $u,v$ son, por su propia definición ortogonales a $VD$ y ortogonales entre sí. Además están normalizados, por lo que constituyen una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}.
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/plano.png}
+    \includegraphics[scale = 0.3]{img/C7/plano.png}
     \caption{Vectores que forman una base del plano de proyección}
     \label{fig:vectores}
 \end{figure}
+
+Ahora recordamos que para crear el rayo en la seccion \ref{section:rayo} calculamos la esquina inferior izquierda, transformamos las coordenadas de dispositivo en coordenadas de mundo del plano de proyección en $[0,PP_{width}]\times[0,PP_{height}]$ y con ello calculamos el punto destino. En el caso generalizado la metodología es la misma, pero necesitamos aclarar, a partir de los datos de entrada como son el punto $lookfrom$, el punto $lookat$, el vector $vup$ (usualmente (0,1,0)), el ángulo $fov$ y el el ratio ancho/alto (16:9) en nuestro caso, cuáles son las dimensiones del plano de proyección y la esquina inferior izquierda. Para ello introducimos una estructura que representará una cámara, que almacena los siguientes campos:
+
+\begin{lstlisting}
+struct Camera{
+    vec3 origin;            // Punto desde el que se observa
+    vec3 horizontal;        // Vector horizontal de modulo PP_width
+    vec3 vertical;          // Vector vertical de modulo PP_height
+    vec3 lower_left_corner; // Punto situado en la esquina
+};
+\end{lstlisting}
+donde \verb|origin| son las coordenadas de mundo del punto en el que se sitúa la cámara, \verb|horizontal| es un vector cuyo módulo es el ancho del plano de proyección y su dirección el vector $u$ recién presentado, análogamente \verb|vertical| es un vector cuyo módulo es la altura del plano de proyección y su vector director es $v$, por último \verb|lower_left_corner| son las coordenadas de mundo del punto situado en la esquina inferior izquierda del plano de proyección.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/camera-fields.png}
+    \caption{Representación gráfica de los campos de `Camera'}
+    \label{fig:camera-fields}
+\end{figure}
+
+
+Es claro que el origen es el punto \textit{lookfrom}, el vector horizontal es $PP_{width}\cdot u$ y el vector vertical es $PP_{height}\cdot v$. Por tanto, la esquina inferior izquierda sería
+$$
+LLC = lookfrom - PP_{width}\cdot u - PP_{height}\cdot v - w.
+$$
+Reflejamos estos cálculos y asignaciones en el siguiente código, que corresponde a una función que dados los parámetros de una escena, crea, inicializa y devuelve un objeto \verb|Camera|.
+\begin{lstlisting}
+Camera init_camera (vec3 lookfrom, vec3 lookat, 
+    vec3 vup, float vfov, 
+    float aspect_ratio){
+    
+    Camera cam;
+    float focal_length = 1.0;
+    float theta = degrees_to_radians(vfov); // Vertical FOV
+    float h = tan(theta/2.0);
+    float viewport_height = 2.0*h*focal_length;
+    float viewport_width = aspect_ratio * viewport_height;
+
+    vec3 w = normalize(lookfrom - lookat);
+    vec3 u = normalize(cross(vup,w));
+    vec3 v = cross(w,u);
+
+    cam.origin = lookfrom;
+    cam.horizontal = viewport_width * u;
+    cam.vertical = viewport_height * v;
+    cam.lower_left_corner = cam.origin 
+        - cam.horizontal/float(2.0) 
+        - cam.vertical/float(2.0)
+        - w;
+
+    return cam;
+}
+\end{lstlisting}
+
+Y una vez tenemos estos parámetros almacenados en un objeto \verb|Camera| la función \verb|get_ray|, a la cual ahora en lugar de todos los parámetros con la cual la programamos primitivamente en la sección \ref{section:rayo} la reprogramaremos para que acepte únicamente como argumentos la cámara y las coordenadas de dispositivo normalizadas $[0,1]$. Tomará estas coordenadas $u,v\in[0,1]$ y multiplicará por los vectores horizontal y vertical respectivamente, definiendo así el destino del rayo.
+
+\begin{lstlisting}
+Ray get_ray(Camera cam, float u, float v){
+    Ray R;
+    R.orig = cam.origin;
+    R.dir = cam.lower_left_corner 
+        + u*cam.horizontal + v*cam.vertical 
+        - cam.origin;
+    return R;
+}
+\end{lstlisting}
+
+Vemos que ahora son los vectores \verb|cam.horizontal| y \verb|cam.vertical| los que hacen la función que en la primera implementación hacián los vectores \verb|vec3(viewport_width, 0.0, 0.0)| y \verb|vec3(0.0, viewport_height, 0.0)|.
+
+Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_camera| y observar cómo cambia el punto de vista aunque la escena sea la misma. En principio vamos a mantener constantes el $fov=90^\circ$, el vector $vup=(0,1,0)$ y el ratio 16:9, pero como nos gustaría poder movernos con libertad por la escena, declararemos dos variables \verb|uniform| que representen el punto $lookfrom$ y el punto $lookat$, a las cuales podremos asignarle variables dinámicamente desde JavaScript y dar la sensación de movimiento.
+
+\begin{lstlisting}
+
+uniform vec3 u_lookfrom;    // lookfrom point
+uniform vec3 u_lookat;      // lookat point
+
+// ... 
+// aspect_ratio = 16/9
+// image_width = 1280 pixels
+// image_height = 720 pixels
+
+// CAMERA
+vec3 vup = vec3(0.0, 1.0, 0.0);
+float vfov = 90.0; // Vertical field of view in degrees
+Camera cam = init_camera(u_lookfrom, u_lookat, 
+    vup, vfov, aspect_ratio);
+
+// [0,1] normalized device coordinates
+vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
+float u = uv.x;
+float v = uv.y;
+
+Ray r = get_ray(cam, u, v);
+\end{lstlisting}
+
+Por ejemplo, si fijamos $lookfrom = (1,1,1)$ y $lookat = (0,0,0)$ obtenemos la imagen \ref{fig:escena-camara} (a), y con $lookfrom=(5, 5, -5)$, $lookat=(1,2,-5)$ la imagen \ref{fig:escena-camara} (b). En este último caso podemos de hecho ver la escena desde el lado negativo del eje $Z$, lo que antes de parametrizar la cámara llamábamos `el interior de la pantalla'.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+          \includegraphics[scale=0.25]{img/C7/camera-1.png} &   \includegraphics[scale=0.25]{img/C7/camera-2.png} \\
+    (a) & (b)\\[6pt]
+    \end{tabular}
+    \caption{Escena \ref{fig:escena-completa} desde otros puntos de vista}
+    \label{fig:escena-camara}
+\end{figure}
+
+\section{Modelo de iluminación de Phong}
+
+En este punto hemos creado una escena sencilla y podemos movernos libremente por ella, pero vendría bien una dosis de realismo a la escena. Para finalizar este capítulo de introducción al Ray-Tracing, dotaremos a la escena de fuentes de luz y añadiremos a los objetos que componen la escena un material que nos permita observar sus irregularidades más allá del material normal que definimos en la sección \ref{subsection:esfera} a la hora de darle color a la esfera.
+
+La iluminación real es imposible de simular porque cada punto de cada objeto irradia una cantidad de luz en todas las direcciones que es inviable de computar, por ello necesitamos de modelos que simulen en mayor o menor medida dicha iluminación. Existen muchos y muy distintos modelos de iluminación, tan complejos y realistas como queramos. El conocido \textit{modelo de Phong} no es ni el más realista, ni el más complejo, pero es suficiente para nuestro cometido, pues nos permite darle colores a los materiales y apariencias mate además de posibles brillos que consiguen efectos metalizados.
+
+Primero de todo, haremos una clasificación de los distintos modelos de iluminación que se suelen utilizar en informática gráfica. La luz que recibe un punto de una superficie puede deberse a :
+\begin{itemize}
+    \item \textbf{Iluminación directa}: Provocada por una fuente de luz que incide directamente sobre dicho punto.
+    \item \textbf{Iluminación indirecta}: Luz que llega a la superficie tras haber rebotado en otras superficies.
+\end{itemize}
+Como consecuencia de esta clasificación, los modelos de iluminación pueden clasificarse en:
+\begin{itemize}
+    \item \textbf{Modelos locales}: Únicamente consideran la iluminación directa
+    \item \textbf{Modelos globales}: Consideran tanto iluminación direcra como indirecta.
+\end{itemize}
+El modelo de Phong es un modelo de iluminación local, es decir, tan solo consideraremos la posible acción directa de una fuente de luz sobre los objetos. Este modelo se basa en descomponer la luz que incide sobre un punto de un objeto en tres componentes RGB: ambiental, difusa y especular.
+
+Consideraremos también únicamente el efecto de luces direccionales, las cuales se componen, tal y como su propio nombre indica, de un vector director $L\in\R^3$ y de una tripleta RGB que es la intensidad de la luz. El rasgo principal de este tipo de fuentes de luz es que inciden sobre todos los puntos del objeto con el mismo vector, a diferencia de las fuentes de luz puntuales. Por conveniencia, consideraremos que el vector $L$, al igual que todos los vectores que utilizaremos, están normalizados.
+
+A continuación describiremos cada una de las componentes del modelo de Phong y explicaremos su efecto.
+
+\subsection{Componente ambiental}
+
+La componente ambiental representa la luz del entorno y afecta uniformemente a todos los puntos del objeto independientemente de la forma de éste. Por ejemplo, en un día de calima todos los objetos en todos sus puntos tenían una componente ambiental naranja. Este valor $I_a$, que denominamos iluminación ambiental, se deduce del producto (componente a componente) de las siguientes tripletas:
+\begin{itemize}
+    \item Intensidad de la luz ambiente ($I_{la}\in\R^3$): Es la intensidad de la luz direccional de la escena o la media de ellas si hay varias fuentes de luz.
+    \item Reflectancia del material $(k_a\in\R^3)$: Depende únicamente del materiañ de la superficie y expresa la respuesta del material a este tipo de luz. 
+\end{itemize}
+\begin{equation}
+    I_a = I_{la} k_a,
+\end{equation}
+donde ahora el producto es componente a componente de dos elementos de $\R^3$.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.2]{img/C7/calima.jpg}
+    \caption{La calima: un ejemplo del efecto de la componente ambiental}
+    \label{fig:calima}
+\end{figure}
+
+\subsection{Componente difusa}
+
+Cuando la luz impacta sobre un objeto, si este es opaco la luz es reflejada a muchas direcciones, si es translúcido entra en el objeto. Esta componente representa la cantidad de luz que es reflejada. Nosotros consideraremos que la misma cantidad de luz que incide es la que se refleja en todas las direcciones, y esta depende tanto del ángulo de incidencia como de la normal a la superficie en dicho punto. A esta componente también se le llama reflexión de Lambert por su relación con el modelo de Lambert.
+
+Fijada una fuente de luz, la intensidad difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto $N$ y la dirección de la fuente de luz $L$, el cual, si $N$ y $L$ están normalizados se calcula simplemente como el producto escalar $N\cdot L$. Por tanto,
+\begin{equation}
+    I_d = I_p k_d (N\cdot L)
+\end{equation}
+La componente difusa final es la suma de las componentes difusas calculadas para cada una de las fuentes de luz.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/difusa.png}
+    \caption{Esquema de los vectores utilizados en la componente difusa}
+    \label{fig:difusa}
+\end{figure}
+
+Fijémonos que este cálculo es independiente de la posición de la cámara, solo depende de la superficie y la fuente de luz.
+
+\subsection{Componente especular}
+
+Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto brillante. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí de la posición del observador respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con la posición del espectador, llamémoslo  $V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $R$. Véase la imagen \ref{fig:difusa} para mayor claridad. El tamaño de estos brillos se regula con una constante de brillo real $n\in\R$ que es parte de las propiedades del material.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/especular.png}
+    \caption{Esquema de los vectores utilizados en la componente especular}
+    \label{fig:especular}
+\end{figure}
+
+A partir de toda esta información, la componente especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $R$ y $V$ son unitarios, $\cos\alpha=-L\cdot N$, por lo que tenemos que
+\begin{equation}
+    I_s = I_p k_s (R\cdot V)
+\end{equation}   
+Al igual que en el caso de la componente difusa, el resultado final es la suma de las componentes especulares generadas por todas las fuentes de luz.
