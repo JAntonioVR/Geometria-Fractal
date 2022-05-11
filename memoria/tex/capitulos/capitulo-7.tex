@@ -30,6 +30,7 @@ Sin embargo, a pesar de dicha desventaja veremos que nuestro código puede ejecu
 En este caso, y de manera similar a la efectuada con los fractales 2D, el vertex shader utilizado es trivial, de hecho es exactamente el mismo que se puede encontrar al inicio del capítulo \ref{chap:fractales-2D}. Por tanto el grueso de la programación se hará de nuevo en el fragment shader, que es el que se ejecuta una vez por píxel. Por su parte, usaremos JavaScript para pasarle variables uniform al shader y para añadir interactividad a la escena. Las siguientes secciones irán dedicadas a explicar la programación del fragment shader.
 
 \section{Creación del rayo}
+\label{section:rayo}
 
 Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección}, que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dicho píxel. En este caso utilizamos un canvas de $1280\times 720$ píxeles, que guarda una proporción de $16:9$, que es de hecho la más habitual.
 \begin{lstlisting}
@@ -181,6 +182,7 @@ gl_FragColor = ray_color(R);
 \end{figure}
 
 \section{Visualizando una escena sencilla}
+\label{section:escena}
 
 Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez.
 
@@ -311,4 +313,222 @@ El resultado que obtenemos es el que podemos observar en la imagen \ref{fig:una-
 
 Veamos ahora cómo poder visualizar varias esferas, aunque el procedimiento una vez se ha conseguido visualizar una es bastante natural. Podemos declarar en lugar de una un array de esferas, cada una con sus parámetros y crear una función que itere llamando a la función \verb|hit_sphere| con cada esfera. Sin embargo, como es obvio un rayo puede intersecar varias esferas, pero consideramos que únicamente hemos golpeado la más cercana a efectos prácticos. Este problema se extiende en general a escenas con varios objetos, no sólo esferas, pero la solución es la misma, evaluar únicamente la más cercana de las intersecciones. Aquí es también donde ponemos en valor el parámetro \verb|t_max| de la función \verb|hit_sphere|, pues una vez hemos encontrado una intersección con una de las esferas no debemos considerar impactos más lejanos.
 
-Por tanto, buscamos implementar una función que dado un array de esferas devuelva en una estructura \verb|Hit_record| la información sobre la intersección rayo-esfera más cercana. 
+Por tanto, buscamos implementar una función que dado un array de esferas devuelva en una estructura \verb|Hit_record| la información sobre la intersección rayo-esfera más cercana. El método consiste en llamar a \verb|hit_sphere| almacenando la información de la intersección pero sólo mantenemos la información de la más próxima, buscando en cada iteración únicamente intersecciones más cercanas que las anteriores (en caso de haberlas).
+\begin{lstlisting}
+// Tamano de los arrays
+#define ARRAY_TAM 100
+
+// ... 
+
+Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], 
+    int size, Ray R, float t_min, float t_max) {
+
+    Hit_record result, tmp;
+    float closest_t = t_max;
+    for(int i = 0; i < ARRAY_TAM; i++){
+        if(i == size) break;
+        // Buscamos tan lejos como la ultima interseccion
+        tmp = hit_sphere(spheres[i], R, t_min, closest_t);
+        if(tmp.hit){    // Hay una interseccion mas cercana
+            closest_t = tmp.t;
+            result = tmp;
+        }
+    }
+    return result;
+}
+\end{lstlisting} 
+
+Y en la función \verb|main| inicializamos algunas esferas, editamos \verb|ray_color| para que acepte como argumento un array de esferas y desde ahí hacemos llamada a \verb|hit_spheres_list|.
+
+\begin{lstlisting}
+vec4 ray_color(Ray R, Sphere world[ARRAY_TAM], int size) {
+
+    // R hits any sphere?
+    Hit_record hr = hit_spheres_list(world, size, R, 0.0, MAX_DIST);
+    if(hr.hit)
+        return vec4(normalize(hr.normal), 1.0);
+
+    // R does not hit any surface
+    // Background code ... 
+}
+
+// ... 
+// R is the Ray
+
+// Spheres
+int num_spheres = 4;
+Sphere world[ARRAY_TAM];
+Sphere S1, S2, S3, S4;
+S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5; 
+S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0;
+S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5;
+S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0;
+world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
+
+gl_FragColor = ray_color(R, world, num_spheres);
+
+\end{lstlisting}
+
+Y así obtenemos la imagen \ref{fig:varias-esferas}, en la que podemos ver varias esferas de distintos tamaños y con distintas posiciones.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/varias-esferas.png}
+    \caption{Escena con varias esferas}
+    \label{fig:varias-esferas}
+\end{figure}
+
+\subsection{Renderizando un plano con textura de ajedrez}
+
+Para orientarnos en la escena cuando podamos modificar la posición de la cámara dinámicamente y hacernos también a la idea del movimiento que estamos haciendo y a qué velocidad es útil utilizar un plano con textura similar a la de un tablero de ajedrez a modo de suelo. Necesitamos por tanto ahora implementar la intersección rayo-plano y una vez encontrada la intersección discernir entre colorear el punto negro o blanco.
+
+En geometría euclídea una forma de caracterizar los puntos de un plano $P$ es mediante una ecuación lineal
+$$
+P = \{(x,y,z)\in\R^3:Ax+By+Cz=D\}
+$$
+donde el vector $N=(A,B,C)\in\R^3$ es un vector normal al plano ($-(A,B,C)$ también lo sería) y $D\in\R$ es una constante que define la posición del plano. Podemos entonces ver un plano de la siguiente forma equivalente
+$$
+P = \{p=(x,y,z)\in\R^3:N\cdot p = D\}
+$$
+donde de nuevo el punto $\cdot$ denota el producto escalar. Si ahora queremos calcular la intersección del plano $P$ con un rayo $R(t)=p_0+vt$ tenemos que resolver una ecuación que además es lineal:
+\begin{equation}
+    \label{eq:plano-recta}
+    \begin{split}
+        R(t)\cdot N &= D \\
+        (p_0+vt)\cdot N & = D\\
+        t &=\dfrac{D-p_0\cdot N}{v\cdot N}
+    \end{split}
+\end{equation}
+Lo cual nos dice en qué $t$ se produce la intersección. Obsérvese que en el caso de que la dirección del rayo $v$ y la normal al plano $N$ sean perpendiculares (i.e. $v\cdot N=0$), lo cual se traduce en que el rayo es paralelo al plano o está incluido en el mismo, no existe intersección. Sin embargo esta situación es muy remota y difícilmente se nos presentará.
+
+Como ya hemos dicho, podemos representar un plano a partir de su normal en cualquier punto y una constante $D\in\R$, por lo que mediante una estructura podemos representar en GLSL un plano.
+
+\begin{lstlisting}
+struct Plane{
+    vec3 normal;    // Vector normal al plano
+    float D;        // Termino independiente
+};
+\end{lstlisting}
+
+Y a partir de la ecuación (\ref{eq:plano-recta}) podemos implementar la función \verb|hit_plane|, que hace lo correspondiente a \verb|hit_sphere| pero acepta como argumento un plano y devuelve la intersección con dicho plano.
+
+\begin{lstlisting}
+Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
+    Hit_record result;
+    float oc = dot(P.normal, R.dir);
+    if(oc == 0.0){  // No hay interseccion
+        result.hit = false;
+        return result;
+    }
+    float t = (P.D - dot(P.normal, R.orig))/oc;
+    if (t < t_min || t > t_max)
+        result.hit = false;
+    else{
+        result.hit = true;
+        result.t = t;
+        result.p = ray_at(R, result.t);
+        result.normal = normalize(P.normal);
+    }
+    return result;
+}
+\end{lstlisting}
+
+Y ahora desde \verb|ray_color| debemos considerar la posibilidad de intersecar con el plano o con las esferas, pero solo debemos darle color a la intersección más próxima. Por eso debemos mantener una variable \verb|t_closest| que represente el valor de $t$ más cercano en el que hemos detectado una intersección. Puede ocurrir que el rayo impacte primero con una esfera y después con el plano o al revés, primero el plano y después una esfera; en estos casos se daría color atendiendo la intersección con la esfera y con el plano respectivamente. 
+
+Como es natural, utilizaremos como suelo un plano horizontal, como puede ser el plano $P\equiv y=-2$, en cuyo caso $N=(0,1,0)$, $D=-2$. Los puntos de $P$ son de la forma $(x,-2,z), x,z\in\R$, y a partir de los pares $(x,z)$ definiremos qué puntos colorear de negro y cuáles de blanco. Lo primero es quedarnos con la parte entera de ambos valores, de forma que dividimos el plano en cuadrados. Si la suma de las partes enteras es un número par, colorearemos el píxel de blanco, y si es impar de negro. En la imagen \ref{fig:ajedrez} podemos ver cómo identificando cada punto con las partes enteras de cada componente y coloreando de negro las partes enteras cuya suma sea impar se obtiene una textura de ajedrez.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/ajedrez.png}
+    \caption{Textura de ajedrez a partir de las partes enteras}
+    \label{fig:ajedrez}
+\end{figure}
+
+Debemos, por tanto, en \verb|ray_color| añadir esta funcionalidad.
+
+\begin{lstlisting}
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], 
+    int size, Plane P) {
+    
+    float t_closest = MAX_DIST;   
+    // r hits any sphere?
+    vec4 tmp_color;
+    Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        tmp_color = vec4(normalize(hr.normal), 1.0);
+    }
+
+    // r hits the plane? 
+    // Solo intersecciones mas cercanas
+    hr = hit_plane(P, r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        vec3 p = hr.p;
+        int x_int = int(floor(p.x)), // Parte entera de x
+            z_int = int(floor(p.z)), // Parte entera de z
+            sum = x_int + z_int;     // Suma de partes enteras
+        // Modulo 2
+        int modulus = sum - (2*int(sum/2));
+        if(modulus == 0)    // Suma par
+            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+        else                // Suma impar
+            tmp_color = vec4(0.0,0.0,0.0, 1.0);
+    }
+    // If r hits any surface
+    if(t_closest < MAX_DIST) return tmp_color;
+    // r does not hit any surface
+    // Background code ... 
+}
+\end{lstlisting}
+
+Y tras declarar el plano $y=-2$ y, las esferas y realizar la llamada a \verb|ray_color|, al fin podemos visualizar una escena completa compuesta de varias esferas y un plano, tal y como nos propusimos al inicio de esta sección \ref{section:escena}
+
+\begin{lstlisting}
+// ... 
+// R is the Ray
+// world is the Sphere array
+
+// Plane
+Plane P;
+P.normal = vec3(0.0, 1.0, 0.0);
+P.D = -2.0;     // y = -2.0
+
+gl_FragColor = ray_color(r, world, num_spheres, P);
+\end{lstlisting}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/escena-completa.png}
+    \caption{Escena compuesta por esferas y un plano}
+    \label{fig:escena-completa}
+\end{figure}
+
+\section{Configurando la cámara}
+
+Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos al principio de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que el observador se mantiene fijo carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y de la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
+
+Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa, es decir, la posición del espectador; y \textit{lookat} al punto sobre el cual se fija la mirada. Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 rad$, sea $h=\tan\left(\frac \theta 2\right)$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica que la altura del plano de proyección (\verb|viewport_height|) es $PP_{height}=2h$, por lo que la anchura es 
+$PP_width=AR\cdot PP_{height}$. 
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/fov.png}
+    \caption{Field Of View}
+    \label{fig:fov}
+\end{figure}
+
+Pensemos por otro lado que aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado la cabeza y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}. Normalmente, por convención se hace la elección $vup=(0,1,0)$. Mediante el vector $VD=lookat-lookfrom$ \textit{view direction} y el vector $vup$ podemos crear una base ortogonal del plano ortogonal a $VD$ que pasa por el punto $lookfrom$ y que define la orientación de la cámara
+\begin{eqnarray*}
+    w = \dfrac{lookat-lookfrom}{\|lookat-lookfrom\|}, \\
+    u = \dfrac{vup\times w}{vup \times w}, \\
+    v = w\times u,
+\end{eqnarray*}
+de forma que los vectores $u,v$ son, por su propia definición ortogonales a $VD$ y ortogonales entre sí. Además están normalizados por lo que constituyen una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/plano.png}
+    \caption{Vectores que forman una base del plano de proyección}
+    \label{fig:vectores}
+\end{figure}
