@@ -658,21 +658,20 @@ Como consecuencia de esta clasificación, los modelos de iluminación pueden cla
 \end{itemize}
 El modelo de Phong es un modelo de iluminación local, es decir, tan solo consideraremos la posible acción directa de una fuente de luz sobre los objetos. Este modelo se basa en descomponer la luz que incide sobre un punto de un objeto en tres componentes RGB: ambiental, difusa y especular.
 
-Consideraremos también únicamente el efecto de luces direccionales, las cuales se componen, tal y como su propio nombre indica, de un vector director $L\in\R^3$ y de una tripleta RGB que es la intensidad de la luz. El rasgo principal de este tipo de fuentes de luz es que inciden sobre todos los puntos del objeto con el mismo vector, a diferencia de las fuentes de luz puntuales. Por conveniencia, consideraremos que el vector $L$, al igual que todos los vectores que utilizaremos, están normalizados.
+Consideraremos también únicamente el efecto de luces direccionales, las cuales se componen, tal y como su propio nombre indica, de un vector director $L_p\in\R^3$ y de una tripleta RGB que es la intensidad de la luz $I_p$. El rasgo principal de este tipo de fuentes de luz es que inciden sobre todos los puntos del objeto con el mismo vector, a diferencia de las fuentes de luz puntuales. Por conveniencia, consideraremos que el vector $L_p$, al igual que todos los vectores que utilizaremos, están normalizados. Sean entonces $k$ fuentes de luz, cada una con su vector director $L_p$ y su intensidad $I_p$, $p=1,\dots,k$.
 
-A continuación describiremos cada una de las componentes del modelo de Phong y explicaremos su efecto.
+En adelante fijaremos un punto cualquiera de una superficie el cual queremos calcular el color que asignarle al píxel correspondiente, calculando el mismo mediante las ecuaciones del modelo de Phong. A continuación describiremos cada una de las componentes y explicaremos su efecto.
 
 \subsection{Componente ambiental}
 
 La componente ambiental representa la luz del entorno y afecta uniformemente a todos los puntos del objeto independientemente de la forma de éste. Por ejemplo, en un día de calima todos los objetos en todos sus puntos tenían una componente ambiental naranja. Este valor $I_a$, que denominamos iluminación ambiental, se deduce del producto (componente a componente) de las siguientes tripletas:
 \begin{itemize}
-    \item Intensidad de la luz ambiente ($I_{la}\in\R^3$): Es la intensidad de la luz direccional de la escena o la media de ellas si hay varias fuentes de luz.
-    \item Reflectancia del material $(k_a\in\R^3)$: Depende únicamente del materiañ de la superficie y expresa la respuesta del material a este tipo de luz. 
+    \item Intensidad de la luz ambiente ($I_{la}\in\R^3$): Es la media de las intensidades de las luces de la escena: $I_{la}=\frac{1}{k}\sum_{p=1}^k I_p$.
+    \item Reflecitividad ambiental del material $(k_a\in\R^3)$: Depende únicamente del material de la superficie y expresa la respuesta del material a este tipo de iluminación. 
 \end{itemize}
 \begin{equation}
     I_a = I_{la} k_a,
 \end{equation}
-donde ahora el producto es componente a componente de dos elementos de $\R^3$.
 
 \begin{figure} [ht]
     \centering
@@ -685,15 +684,18 @@ donde ahora el producto es componente a componente de dos elementos de $\R^3$.
 
 Cuando la luz impacta sobre un objeto, si este es opaco la luz es reflejada a muchas direcciones, si es translúcido entra en el objeto. Esta componente representa la cantidad de luz que es reflejada. Nosotros consideraremos que la misma cantidad de luz que incide es la que se refleja en todas las direcciones, y esta depende tanto del ángulo de incidencia como de la normal a la superficie en dicho punto. A esta componente también se le llama reflexión de Lambert por su relación con el modelo de Lambert.
 
-Fijada una fuente de luz, la intensidad difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto $N$ y la dirección de la fuente de luz $L$, el cual, si $N$ y $L$ están normalizados se calcula simplemente como el producto escalar $N\cdot L$. Por tanto,
+Fijada una fuente de luz, la iluminación difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto $N$ y la dirección de la fuente de luz $L$, el cual, si $N$ y $L$ están normalizados se calcula simplemente como el producto escalar $N\cdot L$. Por tanto,
 \begin{equation}
-    I_d = I_p k_d (N\cdot L)
+    I_{d_p} = I_p k_d (N\cdot L_p)
 \end{equation}
 La componente difusa final es la suma de las componentes difusas calculadas para cada una de las fuentes de luz.
+\begin{equation}
+    I_d = \sum_{p=1}^k I_p k_d (N\cdot L_p)
+\end{equation}
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/difusa.png}
+    \includegraphics[scale = 0.25]{img/C7/difusa.png}
     \caption{Esquema de los vectores utilizados en la componente difusa}
     \label{fig:difusa}
 \end{figure}
@@ -702,7 +704,7 @@ Fijémonos que este cálculo es independiente de la posición de la cámara, sol
 
 \subsection{Componente especular}
 
-Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto brillante. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí de la posición del observador respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con la posición del espectador, llamémoslo  $V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $R$. Véase la imagen \ref{fig:difusa} para mayor claridad. El tamaño de estos brillos se regula con una constante de brillo real $n\in\R$ que es parte de las propiedades del material.
+Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto con brillo. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí de la posición del observador respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con la posición del espectador, llamémoslo  $V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $R_p$. Véase la imagen \ref{fig:especular} para mayor claridad. El tamaño del resplandor que causan estos brillos se regula con una constante real $n\in\R$ que es parte de las propiedades del material.
 
 \begin{figure} [ht]
     \centering
@@ -711,8 +713,44 @@ Esta componente representa a las reflexiones directas de la fuente de luz sobre 
     \label{fig:especular}
 \end{figure}
 
-A partir de toda esta información, la componente especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $R$ y $V$ son unitarios, $\cos\alpha=-L\cdot N$, por lo que tenemos que
+A partir de toda esta información, la iluminación especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $R_p$ y $V$ son unitarios, $\cos\alpha=R\cdot V$, por lo que tenemos que
 \begin{equation}
-    I_s = I_p k_s (R\cdot V)
+    I_{s_p} = I_p k_s (R_p\cdot V)^n
 \end{equation}   
 Al igual que en el caso de la componente difusa, el resultado final es la suma de las componentes especulares generadas por todas las fuentes de luz.
+\begin{equation}
+    I_s = \sum_{p=1}^k I_p k_s (R_p \cdot V)^n
+\end{equation}
+
+\subsection{Evaluación del modelo de iluminación}
+
+Una vez se han explicado las tres componentes y cómo se calculan podemos evaluar el modelo de iluminación completo con solo sumar las tres intensidades calculadas.
+
+\begin{equation}
+    \begin{split}
+        I &= I_a + I_d + I_p \\
+        &=\frac{1}{k}\sum_{p=1}^k I_p k_a + \sum_{p=1}^{k}I_p k_d (N\cdot L_p) + \sum_{p=1}^{k} I_p k_s (R_p\cdot V)^n \\
+        &=\sum_{p=1}^{k}\left(\frac{1}{k}I_p k_a + I_p k_d (N\cdot L_p) +  I_p k_s (R_p\cdot V)^n\right)
+    \end{split}
+\end{equation}
+
+A modo de adelanto, pero también con el objetivo de aclarar conceptos, obsérvese cómo afecta cada componente del modelo. En las imágenes \ref{fig:componentes-aisladas} vemos el efecto de cada tipo de iluminación por separado. En la imagen (a) observamos en rojo que el efecto de la parte ambiental afecta por igual a todos los puntos, de forma que realmente no da ninguna sensación de volumen. En (b) se puede ver cómo la componente difusa colorea de forma mate en color verde el objeto. Por último, en (c) se observan únicamente brillos especulares azules.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.17]{img/C7/solo-ambiental.png} &   \includegraphics[scale=0.17]{img/C7/solo-difusa.png} &   \includegraphics[scale=0.17]{img/C7/solo-especular.png} \\
+    (a) Ambiental & (b) Difusa & (c) Especular \\[6pt]
+    \end{tabular}
+    \caption{Componentes aisladas del modelo de Phong}
+    \label{fig:componentes-aisladas}
+\end{figure}
+
+Y ahora observemos una imagen en la que se aprecian las tres componentes a la vez: la imagen \ref{fig:todas-componentes}. En las esferas predomina el verde, pero se aprecian brillos azules y sombras rojas, pudiendo apreciar perfectamente qué papel desarrolla cada componente del modelo.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/todas-componentes.png}
+    \caption{Acción de todas las componentes}
+    \label{fig:todas-componentes}
+\end{figure}
