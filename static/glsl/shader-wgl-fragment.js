@@ -34,7 +34,7 @@ uniform int u_fractal;
 // ─── COMPLEX POW ────────────────────────────────────────────────────────────────
 //  
 vec2 complex_pow(vec2 z, int n) {
-  vec2 current_pow = vec2(1,0);
+  vec2 current_pow = vec2(1.0, 0.0);
   for (int i = 1; i < 100; i++) {
     vec2 z_ant = current_pow;
     current_pow = vec2(z_ant.x*z.x - z_ant.y*z.y, z_ant.x*z.y + z_ant.y*z.x);

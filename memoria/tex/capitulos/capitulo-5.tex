@@ -2,7 +2,7 @@
 % ─── CAPITULO 5: INTRODUCCION A LAS HERRAMIENTAS DE RENDERIZACION ───────────────
 %
 
-Durante los capítulos anteriores hemos tratado los fractales desde un punto de vista teórico y matemático, ayudándonos del software \textit{Mathematica} para visualizar imágenes de naturaleza fractal, desde los primeros ejemplos clásicos como el triángulo de Sierpinski o el copo de Koch (imágenes \ref{fig:triangulo-Sierpinski} y \ref{fig:copo-Koch}), representaciones de cuencas de atracción en el capítulo \ref{chap:iteracion}, conjuntos de Julia y Mandelbrot en el capítulo \ref{chap:Julia-Mandelbrot} y atractores de sistemas de funciones iteradas. %TODO referenciar capítulo 4
+Durante los capítulos anteriores hemos tratado los fractales desde un punto de vista teórico y matemático, ayudándonos del software \textit{Mathematica} para visualizar imágenes de naturaleza fractal, desde los primeros ejemplos clásicos como el triángulo de Sierpinski o el copo de Koch (imágenes \ref{fig:triangulo-Sierpinski} y \ref{fig:copo-Koch}), representaciones de cuencas de atracción en el capítulo \ref{chap:iteracion}, conjuntos de Julia y Mandelbrot en el capítulo \ref{chap:Julia-Mandelbrot} y atractores de sistemas de funciones iteradas en el capítulo \ref{chap:SFI}.
 
 Queda claro que \textit{Mathematica} es un software de cálculo muy útil, pero también es lento, ya que realmente no está orientado a el renderizado de imágenes. En este sentido, obsérvese que sólo hemos utilizado \textit{Mathematica} para visualizar fractales 2D, que se presentan como subconjuntos del plano euclídeo $\R^2$ o coloreando el plano complejo $\C$. Esto se debe no solo a la simplicidad algoritmica que nos proporciona limitar los razonamientos a 2 dimensiones, sino a que el software es realmente lento en 3 dimensiones.
 
@@ -52,7 +52,7 @@ El \textit{vertex shader} se ejecuta una vez por cada vértice de la figura, su 
     \label{fig:clipspace}
 \end{figure}
 
-Por su parte, el \textit{fragment shader}, que es en el que nos centraremos mayormente, es un programa cuyo código se ejecuta una vez por cada píxel y siempre después de que se ejecute el \textit{vertex shader}. Su objetivo es determinar el color del píxel en cuestión en función de la escena que tengamos dibujada, posiblemente aplicando un modelo de iluminación a los objetos que la componen.
+Por su parte, el \textit{fragment shader}, que es en el que nos centraremos mayormente, es un programa cuyo código se ejecuta una vez por cada píxel y siempre después de que se ejecute el \textit{vertex shader}. Su objetivo es determinar el color del píxel en cuestión en función de la escena que queramos dibujar, posiblemente aplicando un modelo de iluminación a los objetos que la componen.
 
 El conjunto formado por el \textit{vertex shader} y el \textit{fragment shader} es conocido como \textbf{shader program}, que comúnmente se refiere al mismo únicamente como \textit{shader}. A partir del código fuente de ambos \textit{shaders}, cada uno se crea y compila por separado, para seguidamente unirse en único programa. En el siguiente código se puede ver este procedimiento, siendo el objeto \verb|shaderProgram| el objeto que representa el \textit{programa shader}.
 
@@ -86,7 +86,7 @@ Vemos por tanto que mediante estas variables podemos intercambiar información e
 \subsection{Los \textit{Buffer}}
 \label{subsection:buffer}
 
-En el sentido más general de la palabra, un \textit{buffer} es una memoria de almacenamiento temporal de información que permite transferir los datos entre unidades funcionales con características de transferencia diferentes. En nuestro contexto, existen estructuras que almacenan las variables definidas en JavaScript y se transfieren como variables \verb|attribute| o \verb|uniform| al programa \textit{shader}. Por ejemplo, en el siguiente código creamos, a partir de un array de JavaScript que almacena 4 tripletas, cada una representando un color para un vértice, un buffer que las almacena.
+En el sentido más general de la palabra, un \textit{buffer} es una memoria de almacenamiento temporal de información que permite transferir los datos entre unidades funcionales con características de transferencia diferentes. En nuestro contexto, existen estructuras que almacenan las variables definidas en JavaScript y se transfieren como variables \verb|attribute| o \verb|uniform| al programa \textit{shader}. Por ejemplo, en el siguiente código creamos un buffer que almacena los valores que componen un array de JavaScript de 16 elementos agrupados de 4 en 4, cada grupo representando un color RGBA para un vértice.
 
 \begin{lstlisting}
 const colors = [
@@ -106,7 +106,8 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 Y una vez creados los buffers y el \textit{shader} por separado, debemos especificarle al buffer que transfiera la información que contiene a las posiciones de memoria que tiene el \textit{shader} reservadas para las variables que espera. Supongamos que hemos creado en un \textit{vertex shader} una variable \verb|attribute vec4 aVertexColor;| de forma que queremos asociar los colores del código anterior a esta variable por cada uno de los 4 vértices. Mostramos a continuación la forma de hacerlo, pudiendo encontrar más información clarificadora en la documentación de la clase \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext}{WebGLRenderingContext}.
 
 \begin{lstlisting}
-const location = gl.getAttribLocation(shaderProgram, 'aVertexColor');
+const location = gl.getAttribLocation(
+    shaderProgram, 'aVertexColor');
 const numComponents = 4;    // Number of vertex
 const type = gl.FLOAT;      // GLSL type of the vars
 const normalize = false;    // Do not normalize
@@ -139,7 +140,7 @@ gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
 Una vez conocemos los componentes principales de WebGL, es momento de utilizarlos para crear alguna imagen.
 
-A modo de ejemplo, y aprovechando las situaciones concretas que se han explicado a lo largo de esta sección, supongamos que queremos dibujar en el canvas un cuadrado de colores. Para ello, necesitamos 4 vértices, y para cada vértice su posición y un color, de forma que necesitamos variables \verb|attribute| en el \textit{vertex shader} que representen posición y color. Además, dicho color queremos que se interpole en cada píxel a partir del color de los vértices, para ello usaremos una variable \verb|varying| a la que le asociaremos el color del vértice en el \textit{vertex shader} y recibirá el color del pixel en el \textit{fragment shader} (es decir, recibirá del vertex shader precisamente lo que tiene que devolver).
+A modo de ejemplo, y aprovechando las situaciones concretas que se han explicado a lo largo del capítulo, supongamos que queremos dibujar en el canvas un cuadrado de colores. Para ello, necesitamos 4 vértices, y para cada vértice su posición y un color, de forma que necesitamos variables \verb|attribute| en el \textit{vertex shader} que representen posición y color. Además, dicho color queremos que se interpole en cada píxel a partir del color de los vértices, para ello usaremos una variable \verb|varying| a la que le asociaremos el color del vértice en el \textit{vertex shader} y recibirá el color del pixel en el \textit{fragment shader} (es decir, recibirá del vertex shader precisamente lo que tiene que devolver).
 \begin{lstlisting}
 attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
