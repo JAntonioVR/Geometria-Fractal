@@ -727,6 +727,7 @@ Al igual que en el caso de la componente difusa, el resultado final es la suma d
 Una vez se han explicado las tres componentes y cómo se calculan podemos evaluar el modelo de iluminación completo con solo sumar las tres intensidades calculadas.
 
 \begin{equation}
+    \label{eq:phong}
     \begin{split}
         I &= I_a + I_d + I_p \\
         &=\frac{1}{k}\sum_{p=1}^k I_p k_a + \sum_{p=1}^{k}I_p k_d (N\cdot L_p) + \sum_{p=1}^{k} I_p k_s (R_p\cdot V)^n \\
@@ -734,23 +735,189 @@ Una vez se han explicado las tres componentes y cómo se calculan podemos evalua
     \end{split}
 \end{equation}
 
+Sin embargo, hay algunas situaciones en las que las que no se aplica iluminación difusa ni especular, y es en el caso de que la luz no incida directamente sobre el punto. Esto se traduce en que el coseno del ángulo $\theta$ sea negativo, es decir, que $(N\cdot L_p)<0$. Al no existir luz incidente el material no puede irradiar ningún tipo de luz, pues no hay luz que incida, produciendo efectos de sombras, donde únicamente afecta la componente ambiental. Fíjese en la imagen \ref{fig:excepcion}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/excepcion.png}
+    \caption{Punto donde no se aplica componente difusa ni especular}
+    \label{fig:excepcion}
+\end{figure}
+
 A modo de adelanto, pero también con el objetivo de aclarar conceptos, obsérvese cómo afecta cada componente del modelo. En las imágenes \ref{fig:componentes-aisladas} vemos el efecto de cada tipo de iluminación por separado. En la imagen (a) observamos en rojo que el efecto de la parte ambiental afecta por igual a todos los puntos, de forma que realmente no da ninguna sensación de volumen. En (b) se puede ver cómo la componente difusa colorea de forma mate en color verde el objeto. Por último, en (c) se observan únicamente brillos especulares azules.
 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.17]{img/C7/solo-ambiental.png} &   \includegraphics[scale=0.17]{img/C7/solo-difusa.png} &   \includegraphics[scale=0.17]{img/C7/solo-especular.png} \\
+      \includegraphics[scale=0.13]{img/C7/solo-ambiental.png} &   \includegraphics[scale=0.13]{img/C7/solo-difusa.png} &   \includegraphics[scale=0.13]{img/C7/solo-especular.png} \\
     (a) Ambiental & (b) Difusa & (c) Especular \\[6pt]
     \end{tabular}
     \caption{Componentes aisladas del modelo de Phong}
     \label{fig:componentes-aisladas}
 \end{figure}
 
-Y ahora observemos una imagen en la que se aprecian las tres componentes a la vez: la imagen \ref{fig:todas-componentes}. En las esferas predomina el verde, pero se aprecian brillos azules y sombras rojas, pudiendo apreciar perfectamente qué papel desarrolla cada componente del modelo.
+Y ahora observemos una imagen en la que se aprecian las tres componentes a la vez: la imagen \ref{fig:todas-componentes}. En las esferas predomina el verde, pero se aprecian brillos azules y sombras rojas, pudiendo apreciar perfectamente qué papel desarrolla cada componente del modelo. Fijémonos como efectivamente en los puntos que no incide la luz se ven rojos por el efecto de la componente ambiental.
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/todas-componentes.png}
+    \includegraphics[scale = 0.3]{img/C7/todas-componentes.png}
     \caption{Acción de todas las componentes}
     \label{fig:todas-componentes}
 \end{figure}
+
+\subsection{Implementación del modelo de Phong}
+
+Veamos ahora cómo a partir de la teoría introducida podemos obtener resultados como los de las imágenes \ref{fig:componentes-aisladas} y \ref{fig:todas-componentes}. El elemento básico de un modelo de iluminación es, como no podría ser de otro modo, la fuente de luz. Una fuente de luz ya dijimos que se compone de un vector director y una tripleta RGB que define su intensidad, pero en GLSL los colores vienen representados por 4 componentes, siendo la última la que corresponde a transparencia. Por simplicidad nosotros la consideraremos siempre igual a $1.0$. Por tanto, representamos en GLSL una fuente de luz direccional mediante el siguiente struct.
+\begin{lstlisting}
+struct Directional_light{
+    vec3 dir;   // Direccion de la luz
+    vec4 color; // Intensidad RBGA de la luz
+};    
+\end{lstlisting}
+
+Lo siguiente es fijarnos en que el material del objeto desempeña una labor fundamental, de hecho es el que define finalmente la apariencia del mismo. Este material tiene como elementos las reflectividades ambiental ($k_a$), difusa ($k_d$) y especular ($k_s$), las cuales son también tripletas RGB. Además de las reflectividades, el exponente de brillo $n$ también es una propiedad del material. De esta forma, podemos representar un material con un struct tal que así:
+
+\begin{lstlisting}
+struct Material {
+    vec4 ka;    // Reflecitividad ambiental
+    vec4 kd;    // Reflecitividad difusa
+    vec4 ks;    // Reflecitividad especular
+    float sh;   // Exponente de brillo
+};
+\end{lstlisting}
+
+Como ya hemos comentado, cada objeto tiene un único material, por lo que añadimos a las estructuras \verb|Sphere| y \verb|Plane| un nuevo campo \verb|Material mat;| de forma que a cada esfera y al plano se le puede asignar un material. Además, en caso de intersección almacenábamos información en una estructura \verb|Hit_record|, y esa información es la que nos servía para calcular el color. De igual manera que necesitábamos por ejemplo la normal ahora necesitamos saber el material del objeto con el que impacta el rayo, por lo que añadimos a \verb|Hit_record| también un campo \verb|Material mat;| al cual se le asignaría el material del objeto con el que se produce el choque.
+
+Con estas variaciones ya podríamos implementar una función que evalue el modelo de iluminación completo a partir de la ecuación (\ref{eq:phong}). Esta función necesita como argumentos las fuentes de luz, el material, el punto en el que se evalúa el modelo, la normal a la superficie en dicho punto y la posición del espectador. Toda esta información puede ser recogida en un array de objetos \verb|Directional_light|, en la estructura \verb|Hit_record| que almacena la información del choque y en la variable global \verb|u_lookfrom|. Presentamos por tanto el código de dicha función.
+
+\begin{lstlisting}
+vec4 evaluate_lighting_model( 
+    Directional_light lights[ARRAY_TAM], 
+    int num_lights, Hit_record hr ) {
+
+    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
+    Material mat = hr.mat;  // Material
+    Directional_light light;
+    vec3 light_dir;
+    vec3 view_dir = normalize(u_lookfrom - hr.p); // V
+    vec3 normal = normalize(hr.normal); // N
+
+    vec4 ambient, diffuse, specular;
+    ambient = vec4(0.0, 0.0, 0.0, 1.0);
+    diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+    specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    if(num_lights > 0){
+        for(int i = 0; i < ARRAY_TAM; i++){
+            if(i == num_lights) break;
+            light = lights[i];
+            color_average += light.color; // Suma de las intensidades
+            light_dir = normalize(light.dir); // L_p
+            float cos_theta = max(0.0, dot(normal, light_dir));
+            
+            // Solo si la luz es visible desde ese punto
+            if(cos_theta > 0.0) {
+                // R_p
+                vec3 reflection_dir = 
+                    reflect(-light_dir, normal);
+
+                diffuse += mat.kd * light.color * cos_theta;
+                specular += mat.ks * light.color * pow( 
+                    max(0.0, dot(reflection_dir, view_dir)), 
+                    mat.sh);
+            }
+        }
+        color_average /= float(num_lights);
+        ambient = mat.ka * color_average;
+    }
+    return ambient + diffuse + specular;
+}
+\end{lstlisting}
+
+Lo siguiente es editar, aunque muy brevemente, las funciones \verb|hit_sphere| y \verb|hit_plane| para que asignen a \verb|result.mat| el material de la esfera \verb|S.mat| y el del plano \verb|P.mat| respectivamente. Por último debemos, una vez más, editar \verb|ray_color| para que acepte como argumentos las luces y hacer las llamadas correspondientes a la función \verb|evaluate_lighting_model|.
+
+Sin embargo, recordemos que el suelo tenía textura de tablero de ajedrez, por lo que no podemos asignar de manera uniforme un material al plano. Lo que sí podemos es editar la reflectancia especular de ese material, asignandole blanco o negro según corresponda, aunque a partir de este momento y por pura estética se utilizará un color gris claro \verb|rgb(178,178,178)| en lugar del blanco.
+
+\begin{lstlisting}
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, 
+    Plane P, Directional_light lights[ARRAY_TAM], 
+    int num_lights) {
+
+    // r hits any sphere?
+    // ...
+    if(hr.hit){
+        // ... 
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
+    }
+
+    // r hits the plane? 
+    // ...
+    if(hr.hit){
+        // ... 
+        if(modulus == 0)
+            hr.mat.ks = vec4(0.7, 0.7, 0.7, 1.0);
+        else
+            hr.mat.ks = vec4(0.0,0.0,0.0, 1.0);
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
+    }
+    // ...
+}
+\end{lstlisting}
+
+Y ya por último tan solo tenemos que inicializar las luces y los materiales. En nuestros ejemplos estamos utilizando una luz blanca cuya dirección es $(1,1,1)$ y una luz azul cuya dirección es $(-1,-1,0)$. Respecto a los materiales, el del plano únicamente tiene la componente especular que se le asigna en \verb|ray_color| y el de las esferas es editable por el usuario, de forma que tenemos 4 variables \verb|uniform| que son editables dinámicamente y a partir de las cuales se inicializa el material de las esferas.
+
+\begin{lstlisting}
+// Material parametrizable
+uniform vec4 u_ka;
+uniform vec4 u_kd;
+uniform vec4 u_ks;
+uniform float u_sh;
+
+// ... 
+
+// Materials
+Material mat, ground_material;
+mat.ka = u_ka;
+mat.kd = u_kd;
+mat.ks = u_ks;
+mat.sh = u_sh;
+
+ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
+ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+ground_material.sh = 1.0;
+
+// Spheres
+// ... 
+S1.mat = mat; S2.mat = mat;
+S3.mat = mat; S4.mat = mat;
+// ...
+
+// Plane
+// ...
+P.mat = ground_material;
+// ... 
+
+// Lights
+Directional_light lights[ARRAY_TAM];
+int num_lights = 2;
+Directional_light l1, l2;
+l1.color = vec4(1.0, 1.0, 1.0, 1.0); 
+l2.color = vec4(0.0, 0.0, 1.0, 1.0);
+l1.dir = vec3(1.0, 1.0, 1.0);
+l2.dir = vec3(-1.0, -1.0, 0.0);
+lights[0] = l1; lights[1] = l2;
+// ... 
+
+gl_FragColor = ray_color(r, world, num_spheres, 
+    P, lights, num_lights);
+\end{lstlisting}
+
+Evidentemente todos estos parámetros se pueden modificar y poner los que queramos, para finalmente obtener las imágenes y la coloración que deseemos. Como ejemplos tenemos las imágenes que se han presentado al inicio de esta sección, aunque para terminar esta exposición y este capítulo mostraremos una última imagen que resume todo lo desarrollado: Ray-Tracing, intersecciones con distintos cuerpos, posicionamiento de cámara e iluminación.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/phong-final.png}
+    \caption{Imagen final del capítulo \ref{chap:ray-tracing}}
+    \label{fig:imagen-final}
+\end{figure}
+
