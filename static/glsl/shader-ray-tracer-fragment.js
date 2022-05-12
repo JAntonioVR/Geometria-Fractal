@@ -6,6 +6,9 @@ const fsSource = glsl`
 //   :::::: F R A G M E N T   S H A D E R : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────────
 //
+
+#define MAX_DIST 100.0
+
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
@@ -48,12 +51,16 @@ vec3 ray_at(Ray r, float t){
 // ─── MATERIAL ───────────────────────────────────────────────────────────────────
 // Struct that defines a material RGB components.
 struct Material {
-    vec4 ke;    // Emissive component
     vec4 ka;    // Ambient component
     vec4 kd;    // Diffuse component
     vec4 ks;    // Specular component
     float sh;   // Shiness
 };
+
+// Ground material
+Material ground_material;
+
+
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
 // Stores information about an intersection between a ray and a surface.
@@ -71,15 +78,16 @@ struct Directional_light{
     vec3 dir;   // Light direction
     vec4 color; // Light RGB color
 };
-vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
+
+vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ) {
+
     vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
     Material mat = hr.mat;
     Directional_light light;
     vec3 light_dir;
     vec3 view_dir = normalize(u_lookfrom - hr.p);
     vec3 normal = normalize(hr.normal);
-    vec4 emissive, ambient, diffuse, specular;
-    emissive = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 ambient, diffuse, specular;
     ambient = vec4(0.0, 0.0, 0.0, 1.0);
     diffuse = vec4(0.0, 0.0, 0.0, 1.0);
     specular = vec4(0.0, 0.0, 0.0, 1.0);
@@ -100,10 +108,10 @@ vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights,
             }
         }
         color_average /= float(num_lights);
-        emissive = mat.ke * color_average;
         ambient = mat.ka * color_average;
     }
-    return emissive + ambient + diffuse + specular;
+
+    return ambient + diffuse + specular;
     
 }
 // ────────────────────────────────────────────────────────────────────────────────
@@ -123,17 +131,17 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     Hit_record result;
     vec3 oc = R.orig - S.center;
     float a = dot(R.dir, R.dir);
-    float half_b = dot(oc, R.dir);
+    float b = 2.0 * dot(oc, R.dir);
     float c = dot(oc, oc) - S.radius*S.radius;
-    float discriminant = half_b*half_b - a*c;
+    float discriminant = b*b - 4.0*a*c;
     if (discriminant < 0.0){
         result.hit = false;
         return result;
     }
     float sqrtd = sqrt(discriminant);
-    float root = (-half_b - sqrt(discriminant))/a; // First root
+    float root = (-b - sqrt(discriminant))/(2.0*a); // First root
     if (root < t_min || t_max < root){ // The first root is out of range
-        root = (-half_b + sqrt(discriminant))/a;     // The other root
+        root = (-b + sqrt(discriminant))/(2.0*a);     // The other root
         if(root < t_min || t_max < root){    // Both roots are out of range
             result.hit = false;
             return result;
@@ -153,13 +161,11 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
 // hit_record struct.
 Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
     Hit_record result, tmp;
-    bool hit_anything = false;
     float closest_t = t_max;
     for(int i = 0; i < ARRAY_TAM; i++){
         if(i == size) break;
         tmp = hit_sphere(spheres[i], R, t_min, closest_t);
         if(tmp.hit){
-            hit_anything = true;
             closest_t = tmp.t;
             result = tmp;
         }
@@ -174,6 +180,7 @@ Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
+    Material mat;   // Plane material
 };
 //
 // ─── HIT PLANE ──────────────────────────────────────────────────────────────────
@@ -195,6 +202,7 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
         result.t = t;
         result.p = ray_at(R, result.t);
         result.normal = normalize(P.normal);
+        result.mat = P.mat;
     }
     return result;
 }
@@ -213,11 +221,13 @@ struct Camera{
 // Initializes and returns a Camera given its parameters
 Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
     Camera cam;
-    float theta = degrees_to_radians(vfov);
-    float h = tan(theta/2.0);
-    float viewport_height = 2.0*h;
-    float viewport_width = aspect_ratio * viewport_height;
     float focal_length = 1.0;
+    float theta = degrees_to_radians(vfov); // Vertical FOV
+    float h = tan(theta/2.0);
+    float viewport_height = 2.0*h*focal_length;
+    float viewport_width = aspect_ratio * viewport_height;
+
+
     vec3 w = normalize(lookfrom - lookat);
     vec3 u = normalize(cross(vup,w));
     vec3 v = cross(w,u);
@@ -244,28 +254,31 @@ Ray get_ray(Camera cam, float s, float t){
 // Given a ray and the full scene, calculates pixel's color.
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
     // r hits any sphere?
-    float t_closest = 100000.0;
+    float t_closest = MAX_DIST;
     vec4 tmp_color;
     Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
         vec3 N = hr.normal;
-        tmp_color = evaluateLightingModel(lights, num_lights, hr);
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
+        //tmp_color = vec4(normalize(hr.normal), 1.0);
     }
     // r hits the plane? 
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
         t_closest = hr.t;
         vec3 p = hr.p;
-        int x_int = int(p.x), z_int = int(p.z), sum = x_int + z_int;
+        int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
         int modulus = sum - (2*int(sum/2));
         if(modulus == 0)
-            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+            hr.mat.ks = vec4(0.7, 0.7, 0.7, 1.0);
         else
-            tmp_color = vec4(0.0,0.0,0.0, 1.0);
+            hr.mat.ks = vec4(0.0,0.0,0.0, 1.0);
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
     }
     // If r hits any surface
-    if(t_closest < 10000.0) return tmp_color;
+    if(t_closest < MAX_DIST) return tmp_color;
+
     // r does not hit any surface
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
@@ -283,35 +296,45 @@ void main() {
     // WORLD
     // Material
     Material mat;
-    mat.ke = u_ke;
     mat.ka = u_ka;
     mat.kd = u_kd;
     mat.ks = u_ks;
     mat.sh = u_sh;
+
+    ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.sh = 1.0;
+
     // Spheres
-    int num_spheres = 1;
+    int num_spheres = 4;
     Sphere world[ARRAY_TAM];
     Sphere S1, S2, S3, S4;
-    S1.center = vec3(0.0, 0.0, 0.0); S1.radius = 0.5; S1.mat = mat;
-    S2.center = vec3(0.0, 0.5, -3.0); S2.radius = 0.5; S2.mat = mat;
-    S3.center = vec3(2.0, 0.5, 3.0); S3.radius = 0.5; S3.mat = mat;
-    S4.center = vec3(-3.0, 0.5, -2.0); S4.radius = 0.5; S4.mat = mat;
+    S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5; S1.mat = mat;
+    S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0; S2.mat = mat;
+    S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5; S3.mat = mat;
+    S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0; S4.mat = mat;
+
+
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
     // Plane
     Plane P;
     P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = -0.5;
+    P.D = -2.0;
+    P.mat = ground_material;
+
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
+    vec3 lookfrom = vec3(0.0, 0.0, 0.0), lookat = vec3(0.0, 0.0, -1.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
+    
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
     int num_lights = 2;
     Directional_light l1, l2;
-    l1.color = u_light_color; l2.color = vec4(0.0, 0.0, 1.0, 1.0);
-    l1.dir = vec3(1.0, 1.0, 1.0);
-    l2.dir = vec3(-1.0, -1.0, 0.0);
+    l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
+    l1.dir = vec3(-0.5, 0.5, 0.0);
+    l2.dir = vec3(0.5, 0.5, 0.0);
     lights[0] = l1; lights[1] = l2;
     
     // COLOR

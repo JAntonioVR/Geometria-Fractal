@@ -30,18 +30,30 @@ uniform int u_order;
 /* Render Mandelbrot or Julia set */
 uniform int u_fractal;
 
-vec2 pow(vec2 z, int n) {
-  vec2 current_pow = vec2(1,0);
+//
+// ─── COMPLEX POW ────────────────────────────────────────────────────────────────
+//  
+vec2 complex_pow(vec2 z, int n) {
+  vec2 current_pow = vec2(1.0, 0.0);
   for (int i = 1; i < 100; i++) {
-    vec2 z_ant = vec2(current_pow.x, current_pow.y);
+    vec2 z_ant = current_pow;
     current_pow = vec2(z_ant.x*z.x - z_ant.y*z.y, z_ant.x*z.y + z_ant.y*z.x);
     if(i >= n) break;
   }
   return current_pow;
 }
 
-vec2 f(vec2 x, vec2 c, int n) {
-	return pow(x,n) + c;
+//
+// ─── P(z) ───────────────────────────────────────────────────────────────────────
+// Función que se itera para generar los conjuntos de Julia y Mandelbrot
+// Parametros:
+//  vec2 z: Variable que toma la función
+//  vec2 c: Constante c de la función z^n +c
+//  int n:  Exponente al que se eleva la variable
+// Devuelve: Una variable vec2 resultado de la operación z^n+c
+
+vec2 P(vec2 z, vec2 c, int n) {
+	return complex_pow(z,n) + c;
 }
 
 /*vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
@@ -56,6 +68,12 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
   return c4;
 }
 
+// Decide which point on the complex plane this fragment corresponds to.
+vec2 get_world_coordinates() {
+    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
+    return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
+}
+
 void assignColor(bool escaped, int iterations) {
     gl_FragColor = escaped ? vec4(palette(
       3.0*float(iterations)/ float(u_maxIterations),
@@ -68,16 +86,15 @@ void assignColor(bool escaped, int iterations) {
 }
 
 void Julia(vec2 c, int n) {
-    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
-    vec2 z0 = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
-
+    vec2 z0 = get_world_coordinates();
     int iterations;
     vec2 z = z0;
     bool escaped = false;
+    float length_c = length(c);
     for(int i = 0; i < 10000; i++) {
         if(i > u_maxIterations) break;
         iterations = i;
-        z = f(z, c, n);
+        z = P(z, c, n);
         if (length(z) > 2.0){
             escaped = true;
             break;
@@ -88,10 +105,8 @@ void Julia(vec2 c, int n) {
 }
 
 void Mandelbrot(int n) {
-    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
-  
-  /* Decide which point on the complex plane this fragment corresponds to.*/
-  vec2 c = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
+
+  vec2 c = get_world_coordinates();
   
   /* Now iterate the function. */
   int iterations;
@@ -102,7 +117,7 @@ void Mandelbrot(int n) {
        conditions so we have to do this ugly thing instead. */
     if (i > u_maxIterations) break;
     iterations = i;
-    z = f(z, c, n);
+    z = P(z, c, n);
     if (length(z) > 2.0) {
       escaped = true;
       break;

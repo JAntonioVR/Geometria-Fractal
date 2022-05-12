@@ -4,7 +4,7 @@
 function main() {
     const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
-    const gl = canvas.getContext("webgl");
+    const gl = canvas.getContext("webgl2");
   
     // Only continue if WebGL is available and working
     if (gl === null) {
@@ -31,7 +31,7 @@ function main() {
       },
     };
 
-    buffers = initBuffers(gl)
+    var buffers = initBuffers(gl);
     drawScene(gl, programInfo, buffers)
 }
 
@@ -152,7 +152,7 @@ function initBuffers(gl) {
   const colorBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-          
+        
   return {
     position: positionBuffer,
     color: colorBuffer,

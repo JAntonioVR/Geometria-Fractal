@@ -185,27 +185,34 @@ En el caso de subconjuntos de $\R^n$ como puede ser una curva parametrizada, si 
 
 Un posible enfoque para definir la dimensión puede ser el recién presentado, el cual nos sugiere pensar en el número de parámetros que definen la libertad de movimiento de un punto. Sin embargo, pensemos ahora en el triángulo de Sierpinski y en su dimensión. Comprobamos en la sección \ref{subsection:triangulo-Sierpinski} que su área 2-dimensional es nula, pero en el objeto final pareciera que un punto se pudiera mover en varias direcciones. No se puede afirmar que \textbf{S} tenga dimensión 1 por la movilidad, pero tampoco dimensión 2 porque tiene área 0, pero sería un valor situado entre estos dos enteros.
 
-\subsection{Dimension fractal autosimilar}
-\label{subsection:dim-frac-autosimilar}
+\subsection{Dimensión por cajas}
+\label{subsection:dim-cajas}
 
-Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 2 tal y como indica la imagen \ref{fig:divisiones}. Entonces en el segmento aparecen $N(2):=2=2^1$ segmentos que son imagen de una homotecia de razón $r=\frac 1 2$ del original, en el cuadrado se obtienen $N(2):=4=2^2$ cuadrados, cada uno imagen de una homotecia de razón $\frac 1 2$ del cuadrado inicial y en el cubo $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos imagen de una homotecia de razón $\frac 1 2$ del cubo original.
+Pensemos ahora en un segmento de recta, un cuadrado y un cubo, que son objetos indudablemente de 1, 2 y 3 dimensiones respectivamente. Ahora dividamos los lados de cada objeto en 2 tal y como indica la imagen \ref{fig:divisiones}. Entonces vemos que podemos recubrir el segmento con $N(2):=2=2^1$ segmentos de longitud $\frac{1}{2}$, el cuadrado se puede cubrir con $N(2):=4=2^2$ cuadrados de lado $\frac{1}{2}$ y el cubo con $N(2):=8=2^3$ cubos, de nuevo cada uno de ellos de lado $\frac 1 2$.
 
 \begin{figure}[ht]
+  \centering
 \begin{tabular}{ccc}
   \includegraphics[scale=0.15]{./img/linea-dividida.png} &   \includegraphics[scale=0.15]{./img/cuadrado-dividido.png} & \includegraphics[scale=0.2]{./img/cubo-dividido.png}\\
-(a) Segmento dividido en 2 & (b) Cuadrado dividido en 4 & (c) Cubo dividido en 8 \\[4pt]
+(a) 2 segmentos & (b) 4 cuadrados & (c) 8 cubos \\[4pt]
 \end{tabular}
-\caption{Segmento, cuadrado y cubo divididos en objetos a razón $\frac 1 2$}
+\caption{Segmento, cuadrado y cubo recubierpos por objetos de lado $\frac 1 2$}
 \label{fig:divisiones}
 \end{figure}
 
-Si en lugar de 2 tomamos cualquier número natural $k\geq 1$, la razón de la homotecia sería $r=\frac 1 k$ y en ese caso se obtendrían $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos a escala $r=\frac 1 k$ de los objetos originales. Estas igualdades se pueden reescribir como:
+Si en lugar de 2 tomamos cualquier número natural $k\geq 1$, los recubrimientos serían de $N(k)=k^1$ segmentos de recta, $N(k)=k^2$ cuadrados y $N(k)=k^3$ cubos, en todos los casos de lado $r=\frac 1 k$. Estas igualdades se pueden reescribir como:
 
 \begin{equation}\label{eq:relaciones-dimension}
 \frac{N(k)}{k^1}=1 \hspace{2cm} \frac{N(k)}{k^2}=1 \hspace{2cm} \frac{N(k)}{k^3}=1
 \end{equation}
 
-En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la razón de la homotecia $k$ para obtener la relación (\ref{eq:relaciones-dimension}). Para abreviar en el lenguaje introducimos la siguiente definición.
+En este sentido, vemos que la dimensión de cada objeto es el \textit{exponente} al que habría que elevar la longitud del lado $1/k$ para obtener la relación (\ref{eq:relaciones-dimension}). Por lo que si llamamos $d$ a este valor y lo despejamos, nos quedaría
+$$
+d=\dfrac{\log(N(k))}{\log(k)}.
+$$
+De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser recubierto por otros conjuntos de $\R^n$ más pequeños.
+
+\begin{comment}
 
 \begin{definicion}[Congruencia]
 Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
@@ -229,13 +236,6 @@ En un subconjunto $X$ de $\R^n$ autosimilar el valor de la dimension fractal aut
 TODO
 \end{proof}
 
-\begin{wrapfigure}{l}{0cm}
-\includegraphics[scale=0.14, trim={0cm 0.35cm 0cm 0.5cm}, clip]{./img/triangulo-dividido.png}
-\end{wrapfigure}
-
-Un ejemplo distinto pero clarificador podría ser el de un triángulo equilátero, el cual podemos dividir en 4 copias congruentes entre sí, cada una a escala $r=\frac 1 2$ del triángulo original, de forma que tendríamos $k=2$ y $N(2)=4$. 
-
-Con estos valores, tenemos que $N(k)=4=k^d=2^d$, por lo que necesariamente $d=2$ y por tanto un triángulo equilátero es un objeto 2-dimensional, lo cual tampoco nos sorprende.
 
 \begin{observacion}
 La dimensión $d$ ya no tiene por qué ser necesariamente un número entero. A esta posibilidad de tener dimensiones no enteras es a lo que llamamos \textbf{dimensión fractal autosimilar}, y lo denotamos con $\dim_A$.
@@ -247,12 +247,17 @@ En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a 
 
 Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $\dim_A(\mathbf{K})=\frac{\log 4}{\log 3} \approx 1.26186$.
 
-\subsection{Dimensión por cajas}
-\label{subsection:dim-cajas}
+
+
+%\subsection{Dimensión por cajas}
+%\label{subsection:dim-cajas}
 
 El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos un nuevo concepto de dimensión. Previamente definimos un término necesario en las futuras definiciones.
 
+\end{comment}
+
 \begin{definicion}
+  \label{def:diametro}
 Dado un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
 $$
 \diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace .
@@ -283,6 +288,7 @@ $$
 $$
 donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
 
+
 \begin{figure}[ht]
 \begin{tabular}{cc}
 \includegraphics[scale=0.17]{./img/cajas-grandes.png} &   \includegraphics[scale=0.17]{./img/cajas-peques.png} \\
@@ -290,6 +296,29 @@ donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de di
 \caption{Una forma de calcular la dimensión por cajas de la curva de Koch}
 \label{fig:dim-cajas}
 \end{figure}
+
+\begin{wrapfigure}{l}{0cm}
+\includegraphics[scale=0.14, trim={0cm 0.35cm 0cm 0.5cm}, clip]{./img/triangulo-dividido.png}
+\end{wrapfigure}
+Un ejemplo clarificador podría ser el de un triángulo equilátero $T$ de lado 1, el cual podemos recubrir con 4 triángulos equiláteros de lado $\frac 1 2$. A su vez podríamos recubrir estos 4 triángulos con otros 4 triángulos de lado $\frac{1}{4}$, obteniendo así un recubrimiento de $T$ con $16=2^{2\cdot 2}$ triángulos de lado $\frac{1}{4}=\frac{1}{2^2}$. Si repetimos este proceso y teniendo en cuenta que el diámetro de un triángulo equilátero es la longitud de sus lados, podemos tomar $\delta=\frac{1}{2^n}$ y recubrir $T$ con $N_\delta(T)=2^{2n}$ triángulos equiláteros. Aplicando (\ref{eq:dim-cajas}), tenemos por tanto que
+$$
+\dim_B(T)=\lim_{n\rightarrow\infty}\dfrac{\log(2^{2n})}{\log(2^n)} = \dfrac{2n\log(2)}{n\log(2)}=2.
+$$
+
+Concluimos entonces que la dimensión por cajas de un triángulo es 2, lo cual tampoco nos sorprende.
+
+De manera similar podemos ya calcular la dimensión por cajas de algunos fractales clásicos. Retomemos ahora el triángulo \textbf{S} de Sierpinski, que por su génesis (véase sección \ref{subsection:triangulo-Sierpinski}) puede ser inicialmente cubierto por un triángulo equilátero de lado 1, el cual si lo dividimos en 4 triángulos equiláteros y sustraemos el central sigue recubriendo a \textbf{S}, de forma que tenemos un recubrimiento de 3 triángulos de lado $\frac{1}{2}$. Si repetimos esta operación con cada uno de los tres triángulos podríamos recubrir el triángulo de Sierpinski con $9$ triángulos equiláteros de lado $\frac 1 4$, y así sucesivamente. Por tanto, tomando $\delta=\frac{1}{2^n}$ obtenemos un recubrimiento de $N_\delta(\mathbf{S})=3^n$ triángulos. Por tanto, la dimensión por cajas del triángulo de Sierpinski es 
+$$
+\dim_B(\mathbf{S})=\lim_{n\rightarrow\infty}\dfrac{\log(3^{n})}{\log(2^n)} = \dfrac{n\log(3)}{n\log(2)}=\dfrac{\log(3)}{\log(2)}\approx 1.58496.
+$$
+
+Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
+
+Por su parte, el conjunto de Cantor \textbf{C} puede ser recubierto utilizando segmentos de recta, cuyo diámetro es precisamente la longitud de dicho segmento. Tomando $\delta=\dfrac{1}{3^n}$ podemos recubir a \textbf{C} con $N_\delta(\mathbf{C})=2^n$ segmentos de recta (véase sección \ref{subsection:Cantor}). Por lo que podemos calcular la dimensión por cajas del conjunto de Cantor como
+$$
+\dim_B(\mathbf{C})=\lim_{n\rightarrow\infty}\dfrac{\log(2^{n})}{\log(3^n)} = \dfrac{n\log(2)}{n\log(3)}=\dfrac{\log(2)}{\log(3)}\approx 0.63093,
+$$
+que es un valor situado entre 0 y 1.
 
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
@@ -393,8 +422,9 @@ En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llam
 \end{ejemplo}
 
 \subsection{Relación entre los distintos tipos de dimensión fractal}
+\label{subsection:relacion-dimensiones}
 
-La dimensión por cajas, aunque útil en la práctica, al comienzo de la sección \ref{subsection:dim-Hausdorff} hemos comprobado que tiene algunos problemas. No obstante, para muchos fractales, y en particular para los que cumplen la \textit{condición de conjunto abierto}\footnote{Wagon, S. (2010). Mathematica in Action. Springer Publishing. p. 124}, resulta más sencillo computacionalmente calcular su dimensión por cajas frente a su dimensión de Hausdorff.
+La dimensión por cajas, aunque útil en la práctica, al comienzo de la sección \ref{subsection:dim-Hausdorff} hemos comprobado que tiene algunos problemas. No obstante, para muchos fractales, y en particular para los que cumplen la \textit{condición de conjunto abierto} (véase sección \ref{section:sfi-conjuntos-autosimilares}), resulta más sencillo computacionalmente calcular su dimensión por cajas frente a su dimensión de Hausdorff.
 
 En general, y como se puede comprobar en \cite[Sección 3.1]{alma991007022459704990}, ocurre que la dimensión por cajas acota superiormente a la dimensión de Hausdorff, esto es, dado $A\subset\R^n$:
 $$
@@ -409,7 +439,7 @@ $$
 
 Este resultado fue originalmente probado por \textit{Edward Szpilrajn}, véase \cite[Capítulo VII]{Hurewicz-Wallman}.
 
-Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran \cite{Moran}. Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden.
+Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran (véase teorema \ref{th:Moran}). Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden. 
 
 En conclusión, para un conjunto no vacío y acotado $A\subseteq\R^n$, se tiene que:
 
