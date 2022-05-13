@@ -230,28 +230,6 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
     return N;
 }
 
-    
-//
-// ─── SHADOW ─────────────────────────────────────────────────────────────────────
-// Defines (using ray-marching and the Julia SDF) if the point p is in the Julia
-// set shadow. If it's in the shadow it returns 1.0, and if it's near the shadow
-// returns a [0,1] normaliced value where 0 means it's so far of the shadow    
-float shadow(vec3 p, Directional_light light) {
-    Ray R;
-    R.orig = p; R.dir = light.dir;
-    float res = 1.0;
-    float t = 0.0;
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        float h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
-        if(h < u_epsilon)
-            return 0.0;
-        res = min(res, 8.0*h/t);
-        t += h;
-        if(t >= MAX_DIST) break;
-    }
-    return res;
-}
-
 //
 // ─── MANDELBUB ──────────────────────────────────────────────────────────────────
 //
@@ -267,14 +245,6 @@ bool hit_sphere_limits( Sphere S, Ray R ){
 }
 
 vec3 f_Mandelbub(vec3 w, vec3 c) {
-    /*
-
-    float m = dot(w,w); // |w|^2
-    float m2 = m*m;     // |w|^4
-    float r = length(w);
-    float b = 8.0*acos( w.y/r);
-    float a = 8.0*atan( w.x, w.z );
-    return c + m2 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );*/
 
     // extract polar coordinates
     float wr = sqrt(dot(w,w));
@@ -303,7 +273,7 @@ void iterate_mandelbub(inout vec3 w, inout float dw){
         m = length(w);      // |z|
         dw = 8.0*m*m*m*m*m*m*m*dw + 1.0; // 8*|z|^7*z' + 1.0
         w = f_Mandelbub(w,c);   // w_n^8 + w_0
-        if(m > 2.0) break;     // |z| > 16
+        if(m > 2.0) break;     // |z| > 2
     }
 }
 
@@ -316,28 +286,12 @@ float get_dist_mandelbub(vec3 p) {
 }
 
 vec3 calculate_normal_mandelbub(vec3 p) {
-    /*float h = u_epsilon; // replace by an appropriate value
+    float h = u_epsilon; // replace by an appropriate value
     const vec2 k = vec2(1,-1);
     return normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
                       k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
                       k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
                       k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
-    */
-    vec3 N;
-    float gradX, gradY, gradZ;
-
-    vec3 gx1 = p - vec3( u_epsilon, 0.0, 0.0 );
-    vec3 gx2 = p + vec3( u_epsilon, 0.0, 0.0 );
-    vec3 gy1 = p - vec3( 0.0, u_epsilon, 0.0 );
-    vec3 gy2 = p + vec3( 0.0, u_epsilon, 0.0 );
-    vec3 gz1 = p - vec3( 0.0, 0.0, u_epsilon );
-    vec3 gz2 = p + vec3( 0.0, 0.0, u_epsilon );
-    
-    gradX = get_dist_mandelbub(gx2) - get_dist_mandelbub(gx1);
-    gradY = get_dist_mandelbub(gy2) - get_dist_mandelbub(gy1);
-    gradZ = get_dist_mandelbub(gz2) - get_dist_mandelbub(gz1);
-    N = normalize(vec3( gradX, gradY, gradZ ));
-    return N;
 }
 
 //
@@ -350,39 +304,50 @@ struct Plane{
     Material mat;   // Material of the plane
 };
 
-//
-// ─── HIT PLANE ──────────────────────────────────────────────────────────────────
-// Calculates the possible intersection between a ray and a plane and stores the
-// information in a Hit_record struct.
-    
-Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
-    Hit_record result;
-    float oc = dot(P.normal, R.dir);
-    if(oc == 0.0){
-        result.hit = false;
-        return result;
-    }
-    float t = (P.D - dot(P.normal, R.orig))/oc;
-    if (t < t_min || t > t_max)
-        result.hit = false;
-    else{
-        result.hit = true;
-        result.t = t;
-        result.p = ray_at(R, result.t);
-        result.normal = normalize(P.normal);
-        result.mat = P.mat;
-    }
-    return result;
-}
-
 float get_dist_plane (vec3 p, Plane P) {
-    //float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
-    //vec3 closest_point = p + t_interseccion * P.normal;
-    //return length(p-closest_point);
-    return p.y - P.D;
+    float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
+    vec3 closest_point = p + t_interseccion * P.normal;
+    return length(p-closest_point);
 }
 
+//
+// ─── SHADOW ─────────────────────────────────────────────────────────────────────
+// Defines (using ray-marching and SDFs) if the point p is in the Julia/Mandelbub
+// set shadow. If it's in the shadow it returns 1.0, and if it's near the shadow
+// returns a [0,1] normaliced value where 0 means it's so far of the shadow
 
+float one_light_shadow(vec3 p, Directional_light light) {
+    Ray R;
+    R.orig = p; R.dir = light.dir;
+    float res = 1.0;
+    float t = 0.0;
+    float h;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        if(u_fractal == 0)
+            h = get_dist_mandelbub(ray_at(R, t));
+        if(u_fractal == 1)
+            h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+        if(h < u_epsilon)
+            return 0.0;
+        res = min(res, 8.0*h/t);
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return res;
+}
+
+float multi_light_shadow(vec3 p, Directional_light[ARRAY_TAM] lights, int num_lights) {
+    float shadow = 0.0;
+    for(int i = 0; i < ARRAY_TAM; i++) {
+        if(i == num_lights) break;
+        shadow += one_light_shadow(p, lights[i]);
+    }
+    shadow /= float(num_lights);
+    float alpha = 0.0;      // Smooth constant
+    shadow = shadow/(1.0 - alpha) + alpha;
+
+    return shadow;
+}
 
 // ────────────────────────────────────────────────────────────────────────────────
 
@@ -501,17 +466,9 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 hr.mat = ground_material;
 
-                // Is it in the JuliaSet Shadow?
-                float julia_shadow = 0.0;
-                for(int i = 0; i < ARRAY_TAM; i++) {
-                    if(i == num_lights) break;
-                    julia_shadow += shadow(hr.p, lights[i]);
-                }
-                julia_shadow /= float(num_lights);
-                float alpha = 0.0;      // Smooth constant
-                julia_shadow = julia_shadow/(1.0 - alpha) + alpha;
-
-                return vec4((julia_shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
+                // Is it in any set shadow?
+                float shadow = multi_light_shadow(hr.p, lights, num_lights);
+                return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
             }
 
             if(object_index ==1) {      // r hits Julia
@@ -600,13 +557,15 @@ void main() {
 
 
     Directional_light lights[ARRAY_TAM];
-    int num_lights = 2;
-    Directional_light l1, l2;
+    int num_lights = 3;
+    Directional_light l1, l2, l3;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
+    l3.color = vec4(1.0, 1.0, 1.0, 1.0);
     l1.dir = vec3(-0.5, 0.5, 0.0);
     //l1.dir = vec3(0.0, 1.0, 0.0);
     l2.dir = vec3(0.5, 0.5, 0.0);
-    lights[0] = l1; lights[1] = l2;
+    l3.dir = vec3(0.0, -1.0, 0.0);
+    lights[0] = l1; lights[1] = l2; lights[2] = l3;
     
     
     // COLOR
