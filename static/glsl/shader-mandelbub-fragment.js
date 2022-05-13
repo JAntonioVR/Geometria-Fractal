@@ -185,60 +185,10 @@ vec3 calculate_normal_sphere(vec3 p, Sphere S) {
     return (p - S.center) / S.radius;
 }
 
-Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
-    Hit_record hr;
-    hr.hit = false;
-    float dO = t_min;
-    for(int i = 0; i < MAX_STEPS;  i++) {
-        vec3 p = ray_at(r, dO);
-        float dS = get_dist_sphere(p,S);
-        dO += dS;
-        if(dO >= t_max || dS < u_epsilon) break;
-    }
-
-    if (dO < t_max) { // r hits the Sphere
-        hr.hit = true;
-        hr.t = dO;
-        hr.p = ray_at(r, hr.t);
-        hr.normal = calculate_normal_sphere(hr.p, S);
-        hr.mat = S.mat;
-    }
-
-    return hr;
-}
-
 
 //
 // ─── JULIA ──────────────────────────────────────────────────────────────────────
 //
-
-vec3 f(vec3 w, vec3 c) {
-    /*
-
-    float m = dot(w,w); // |w|^2
-    float m2 = m*m;     // |w|^4
-    float r = length(w);
-    float b = 8.0*acos( w.y/r);
-    float a = 8.0*atan( w.x, w.z );
-    return c + m2 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );*/
-
-    // extract polar coordinates
-    float wr = sqrt(dot(w,w));
-    float wo = acos(w.y/wr);
-    float wi = atan(w.x,w.z);
-
-    // scale and rotate the point
-    wr = pow( wr, 8.0 );
-    wo = wo * 8.0;
-    wi = wi * 8.0;
-
-    // convert back to cartesian coordinates
-    w.x = wr * sin(wo)*sin(wi);
-    w.y = wr * cos(wo);
-    w.z = wr * sin(wo)*cos(wi);
-
-    return c + w;
-}
 
 
 void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
@@ -316,37 +266,64 @@ bool hit_sphere_limits( Sphere S, Ray R ){
     return discriminant >= 0.0;
 }
 
+vec3 f_Mandelbub(vec3 w, vec3 c) {
+    /*
+
+    float m = dot(w,w); // |w|^2
+    float m2 = m*m;     // |w|^4
+    float r = length(w);
+    float b = 8.0*acos( w.y/r);
+    float a = 8.0*atan( w.x, w.z );
+    return c + m2 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );*/
+
+    // extract polar coordinates
+    float wr = sqrt(dot(w,w));
+    float wo = acos(w.y/wr);
+    float wi = atan(w.x,w.z);
+
+    // scale and rotate the point
+    wr = pow( wr, 8.0 );
+    wo = wo * 8.0;
+    wi = wi * 8.0;
+
+    // convert back to cartesian coordinates
+    w.x = wr * sin(wo)*sin(wi);
+    w.y = wr * cos(wo);
+    w.z = wr * sin(wo)*cos(wi);
+
+    return c + w;
+}
+
 void iterate_mandelbub(inout vec3 w, inout float dw){
 
-    float m = dot(w,w);
+    float m;
+    vec3 c = w;
 
     for(int i = 0; i < MAX_STEPS; i++) {
-        dw = 8.0*pow(m,3.5)*dw +1.0 ; //TODO Hay que poner +1?
-        w = f(w,w);
-        if(m > 256.0) break;
+        m = length(w);      // |z|
+        dw = 8.0*m*m*m*m*m*m*m*dw + 1.0; // 8*|z|^7*z' + 1.0
+        w = f_Mandelbub(w,c);   // w_n^8 + w_0
+        if(m > 2.0) break;     // |z| > 16
     }
-
 }
 
 float get_dist_mandelbub(vec3 p) {
-    float dist;
     vec3 w = p;
     float dw = 1.0;
-    iterate_mandelbub(w,dw);
-    //w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
-    float m = dot(w,w);
-    return 0.25 * log(m) * sqrt(m) / dw;
+    iterate_mandelbub(w,dw);    // Iteramos w y dw
+    float m2 = dot(w,w);        // |w|^2
+    return 0.25 * log(m2) * sqrt(m2) / dw; 
 }
 
 vec3 calculate_normal_mandelbub(vec3 p) {
-    float h = u_epsilon; // replace by an appropriate value
+    /*float h = u_epsilon; // replace by an appropriate value
     const vec2 k = vec2(1,-1);
     return normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
                       k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
                       k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
                       k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
-    
-    /*vec3 N;
+    */
+    vec3 N;
     float gradX, gradY, gradZ;
 
     vec3 gx1 = p - vec3( u_epsilon, 0.0, 0.0 );
@@ -361,39 +338,7 @@ vec3 calculate_normal_mandelbub(vec3 p) {
     gradZ = get_dist_mandelbub(gz2) - get_dist_mandelbub(gz1);
     N = normalize(vec3( gradX, gradY, gradZ ));
     return N;
-    */
 }
-/*
-Hit_record hit_mandelbub(Ray R, float t_min, float t_max){
-    Hit_record hr;
-    hr.hit = false;
-    float dist;
-    float t = t_min;
-    vec3 w = ray_at(R, t); // Punto del que parto
-    vec3 c = w;
-    float dw;
-    for(int i = 0; i < MAX_STEPS; i++) {
-        vec4 iterations = iterate_mandelbub(w, w); 
-        w = iterations.xyz; dw = iterations.w; // Tenemos ya w y dw suficientemente iteradas
-        float length_w = length(w);
-        dist = length_w*log(length_w)/abs(dw);
-        t += dist;
-        w = ray_at(R, t);
-
-        if(dist < u_epsilon || t > t_max ) break;
-    }
-
-    if (dist < u_epsilon) { // R hits Mandelbub
-        hr.hit = true;
-        hr.t = t;
-        hr.p = w;
-        //hr.normal = calculate_normal_mandelbub(hr.p);
-        //hr.mat = TODO MATERIAL;
-    }
-
-
-    return hr;
-}*/
 
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────

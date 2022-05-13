@@ -52,7 +52,7 @@ class Scene3D {
       sh: 30.0,
       light_color: [1.0, 1.0, 1.0, 1.0],
       epsilon: 0.005,
-      fractal: 1,
+      fractal: 0,
       julia_set_constant: [0.75, 0.0, 0.0, -0.12],
       delta: 0.1
     };
