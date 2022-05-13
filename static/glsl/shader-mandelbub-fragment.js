@@ -473,27 +473,32 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         closest_dist = dist;
         object_index = 0;
 
+        Sphere bounding_sphere;
+        bounding_sphere.center = vec3(0.0, 0.0, 0.0);
+        bounding_sphere.radius = 1.5 + float(u_fractal); // 0: 1.5, 1: 2.5
         
+        if(hit_sphere_limits(bounding_sphere, r)) {
 
-        if(u_fractal == 0) {    // Render Mandelbub
+            if(u_fractal == 0) {    // Render Mandelbub
             
-            // Distancia a Mandelbub
-            dist = get_dist_mandelbub(p);
-            if(dist < closest_dist){
-                closest_dist = dist;
-                object_index = 2;
-            } 
-        }
-
-        if(u_fractal == 1){ // Render Julia
-
-            // Distancia a Julia
-            dist = get_dist_julia(p , u_julia_set_constant);
-            if(dist < closest_dist){
-                closest_dist = dist;
-                object_index = 1;
-
-            } 
+                // Distancia a Mandelbub
+                dist = get_dist_mandelbub(p);
+                if(dist < closest_dist){
+                    closest_dist = dist;
+                    object_index = 2;
+                } 
+            }
+    
+            if(u_fractal == 1){ // Render Julia
+    
+                // Distancia a Julia
+                dist = get_dist_julia(p , u_julia_set_constant);
+                if(dist < closest_dist){
+                    closest_dist = dist;
+                    object_index = 1;
+    
+                } 
+            }
         }
 
         if(closest_dist < u_epsilon){   // Hay interseccion
