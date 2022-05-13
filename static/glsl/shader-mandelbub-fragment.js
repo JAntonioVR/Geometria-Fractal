@@ -534,39 +534,25 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
         Sphere bounding_sphere;
         bounding_sphere.center = vec3(0.0, 0.0, 0.0);
-        bounding_sphere.radius = 1.5 + float(u_fractal); // 0: 1.5, 1: 2.5
-        
-        //if(hit_sphere_limits(bounding_sphere, r)) {
-
-            if(u_fractal == 1) {    // Render Mandelbub
+        //bounding_sphere.radius = 1.5 + float(u_fractal); // 0: 1.5, 1: 2.5
+        bounding_sphere.radius = u_fractal == 1 ? 1.5 : (u_fractal == 2 ? 2.5 : 2.0);
+        if(hit_sphere_limits(bounding_sphere, r)) {
             
-                // Distancia a Mandelbub
+            if(u_fractal == 1)      // Render Mandelbub
                 dist = get_dist_mandelbub(p);
-                if(dist < closest_dist){
-                    closest_dist = dist;
-                    object_index = 1;
-                } 
-            }
-    
-           if(u_fractal == 2) { // Render Julia
-    
-                // Distancia a Julia
+            if(u_fractal == 2)      // Render Julia
                 dist = get_dist_julia(p , u_julia_set_constant);
-                if(dist < closest_dist){
-                    closest_dist = dist;
-                    object_index = 2;
-    
-                } 
-            }
-            // TODO ESTE CODIGO SE PUEDE SIMPLIFICAR
-            if(u_fractal == 3) {    // Render Mandelbrot
+            if(u_fractal == 3)      // Render Mandelbrot
                 dist = get_dist_mandelbrot(p);
-                if(dist < closest_dist) {
-                    closest_dist = dist;
-                    object_index = 3;
-                }
+
+            if(dist < closest_dist){
+                closest_dist = dist;
+                object_index = u_fractal;
             }
-        //}
+            
+        }
+
+        
 
         if(closest_dist < u_epsilon){   // Hay interseccion
 
