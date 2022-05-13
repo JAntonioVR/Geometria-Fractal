@@ -35,6 +35,8 @@ uniform vec4 u_julia_set_constant;
 #define MAX_DIST 100.0
 #define PI 3.14159265359
 
+#define NORMAL 1
+
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 
 // ─── DEGREES TO RADIANS ─────────────────────────────────────────────────────────
@@ -214,19 +216,34 @@ float get_dist_julia(vec3 p, vec4 c) {
 
 vec3 calculate_normal_julia(vec3 p, vec4 c) {
     vec3 N;
+    float h = u_epsilon;
+
+    #if NORMAL == 0
+
+    const vec2 k = vec2(1,-1);
+    N = normalize( k.xyy*get_dist_julia( p + k.xyy*h, c ) + 
+                   k.yyx*get_dist_julia( p + k.yyx*h, c ) + 
+                   k.yxy*get_dist_julia( p + k.yxy*h, c ) + 
+                   k.xxx*get_dist_julia( p + k.xxx*h, c ) );
+
+    #else
+
     vec4 qp = vec4(p.y, p.z, 0.0, p.x);
     float gradX, gradY, gradZ;
-    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, u_epsilon )).wxy;
-    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, u_epsilon )).wxy;
-    vec3 gy1 = (qp - vec4( u_epsilon, 0.0, 0.0, 0.0 )).wxy;
-    vec3 gy2 = (qp + vec4( u_epsilon, 0.0, 0.0, 0.0 )).wxy;
-    vec3 gz1 = (qp - vec4( 0.0, u_epsilon, 0.0, 0.0 )).wxy;
-    vec3 gz2 = (qp + vec4( 0.0, u_epsilon, 0.0, 0.0 )).wxy;
+    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gy1 = (qp - vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gy2 = (qp + vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
     
     gradX = get_dist_julia(gx2,c) - get_dist_julia(gx1,c);
     gradY = get_dist_julia(gy2,c) - get_dist_julia(gy1,c);
     gradZ = get_dist_julia(gz2,c) - get_dist_julia(gz1,c);
     N = normalize(vec3( gradX, gradY, gradZ ));
+
+    #endif
+
     return N;
 }
 
@@ -286,12 +303,36 @@ float get_dist_mandelbub(vec3 p) {
 }
 
 vec3 calculate_normal_mandelbub(vec3 p) {
-    float h = u_epsilon; // replace by an appropriate value
+
+    vec3 N;
+    float h = u_epsilon;
+    #if NORMAL == 0
+
     const vec2 k = vec2(1,-1);
-    return normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
-                      k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
-                      k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
-                      k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
+    N= normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
+                  k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
+                  k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
+                  k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
+    
+    #else
+
+    vec4 qp = vec4(p.y, p.z, 0.0, p.x);
+    float gradX, gradY, gradZ;
+    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gy1 = (qp - vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gy2 = (qp + vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    
+    gradX = get_dist_mandelbub(gx2) - get_dist_mandelbub(gx1);
+    gradY = get_dist_mandelbub(gy2) - get_dist_mandelbub(gy1);
+    gradZ = get_dist_mandelbub(gz2) - get_dist_mandelbub(gz1);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+                  
+    #endif
+
+    return N;
 }
 
 //
@@ -322,11 +363,15 @@ float one_light_shadow(vec3 p, Directional_light light) {
     float res = 1.0;
     float t = 0.0;
     float h;
+    
     for(int i = 0; i < MAX_STEPS; i++ ) {
         if(u_fractal == 0)
             h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 1)
             h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+        
+        if(i == 0 && h > 10.0)  // The ground points too far of the set are not in the shadow 
+            return 1.0;
         if(h < u_epsilon)
             return 0.0;
         res = min(res, 8.0*h/t);
@@ -427,6 +472,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         dist = get_dist_plane(p, ground);
         closest_dist = dist;
         object_index = 0;
+
+        
 
         if(u_fractal == 0) {    // Render Mandelbub
             
