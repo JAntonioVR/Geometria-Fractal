@@ -108,7 +108,7 @@ struct Material {
 };
 
 // Ground material
-Material ground_material;
+Material ground_material, fractal_material;
 
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
@@ -537,7 +537,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         //bounding_sphere.radius = 1.5 + float(u_fractal); // 0: 1.5, 1: 2.5
         bounding_sphere.radius = u_fractal == 1 ? 1.5 : (u_fractal == 2 ? 2.5 : 2.0);
         if(hit_sphere_limits(bounding_sphere, r)) {
-            
+
             if(u_fractal == 1)      // Render Mandelbub
                 dist = get_dist_mandelbub(p);
             if(u_fractal == 2)      // Render Julia
@@ -556,11 +556,12 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
         if(closest_dist < u_epsilon){   // Hay interseccion
 
+            hr.hit = true;
+            hr.t = current_t;
+            hr.p = ray_at(r, hr.t);
+
             if(object_index == 0){      // r hits the ground
-                hr.t = current_t;
-                hr.p = ray_at(r, hr.t);
                 hr.normal = vec3(0.0, 1.0, 0.0); //normalize(ground.normal);
-                hr.hit = true;
 
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
@@ -576,36 +577,19 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
             }
 
-            if(object_index == 1) {     // r hits Mandelbub
-                hr.hit = true;
-                hr.t = current_t;
-                hr.p = ray_at(r, hr.t);
+            hr.mat = S[0].mat; // TODO Crear un material
+
+            if(object_index == 1)     // r hits Mandelbub
                 hr.normal = calculate_normal_mandelbub(hr.p);
-                hr.mat = S[0].mat; // TODO Mejorar esto
-                return evaluate_lighting_model(lights, num_lights, hr);
-            }
 
-            if(object_index == 2) {      // r hits Julia
-                hr.hit = true;
-                hr.t = current_t;
-                hr.p = ray_at(r, hr.t);
+            if(object_index == 2)     // r hits Julia
                 hr.normal = calculate_normal_julia(hr.p, u_julia_set_constant);
-                hr.mat = S[0].mat; // TODO Mejorar esto
 
-                return evaluate_lighting_model(lights, num_lights, hr);
-            }
-
-            if(object_index == 3) {
-                hr.hit = true;
-                hr.t = current_t;
-                hr.p = ray_at(r, hr.t);
+            if(object_index == 3)     // r hits Mandelbrot
                 hr.normal = calculate_normal_mandelbrot(hr.p);
-                hr.mat = S[0].mat; // TODO Mejorar esto
 
-                return evaluate_lighting_model(lights, num_lights, hr);
-            }
+            return evaluate_lighting_model(lights, num_lights, hr);
         }
-        
 
         current_t += closest_dist;
         p = ray_at(r, current_t);
@@ -641,23 +625,22 @@ void main() {
 
     // WORLD
     // Materials
-    Material mat0, mat1;
 
-    // Sphere material
-    mat0.ka = u_ka;
-    mat0.kd = u_kd;
-    mat0.ks = u_ks;
-    mat0.sh = u_sh;
+    // Fractal material
+    fractal_material.ka = u_ka;
+    fractal_material.kd = u_kd;
+    fractal_material.ks = u_ks;
+    fractal_material.sh = u_sh;
 
     // Ground material
     ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
-    ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.kd = vec4(0.0, 0.0, 0.0, 1.0);
     ground_material.sh = 1.0;
 
     // Sphere
     Sphere S[ARRAY_TAM];
-    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = mat0;
-    S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = mat0;
+    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = fractal_material;
+    S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = fractal_material;
 
     // Ground
     Plane ground;
