@@ -187,6 +187,14 @@ vec3 calculate_normal_sphere(vec3 p, Sphere S) {
     return (p - S.center) / S.radius;
 }
 
+bool hit_sphere_limits( Sphere S, Ray R ){
+    vec3 oc = R.orig - S.center;
+    float a = dot(R.dir,R.dir);
+    float half_b = dot(oc, R.dir);
+	float c = dot(oc,oc) - S.radius*S.radius;
+    float discriminant = half_b*half_b - a*c;
+    return discriminant >= 0.0;
+}
 
 //
 // ─── JULIA ──────────────────────────────────────────────────────────────────────
@@ -248,18 +256,67 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
 }
 
 //
-// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+// ─── MANDELBROT ─────────────────────────────────────────────────────────────────
 //
 
+void iterate_mandelbrot(inout vec4 q, inout float dq) {
 
-bool hit_sphere_limits( Sphere S, Ray R ){
-    vec3 oc = R.orig - S.center;
-    float a = dot(R.dir,R.dir);
-    float half_b = dot(oc, R.dir);
-	float c = dot(oc,oc) - S.radius*S.radius;
-    float discriminant = half_b*half_b - a*c;
-    return discriminant >= 0.0;
+    vec4 c = q;
+    q = vec4(0.0);
+
+    for(int i = 0; i < MAX_STEPS; i++) {
+        dq = 2.0 * length(q) * dq + 1.0; 
+        q = quat_square(q) + c;
+        if(dot(q, q) > 256.0) break;
+    }
+
 }
+
+float get_dist_mandelbrot(vec3 p) {
+    float dist;
+    vec4 q = vec4(p.y, p.z, 0.0, p.x);
+    float dq = 0.0;
+    iterate_mandelbrot(q, dq);
+    float length_q = length(q);
+    return 0.5*length_q * log(length_q) / dq;
+}
+
+vec3 calculate_normal_mandelbrot(vec3 p) {
+    vec3 N;
+    float h = u_epsilon;
+
+    #if NORMAL == 0
+
+    const vec2 k = vec2(1,-1);
+    N = normalize( k.xyy*get_dist_mandelbrot( p + k.xyy*h) + 
+                   k.yyx*get_dist_mandelbrot( p + k.yyx*h) + 
+                   k.yxy*get_dist_mandelbrot( p + k.yxy*h) + 
+                   k.xxx*get_dist_mandelbrot( p + k.xxx*h) );
+
+    #else
+
+    vec4 qp = vec4(p.y, p.z, 0.0, p.x);
+    float gradX, gradY, gradZ;
+    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gy1 = (qp - vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gy2 = (qp + vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    
+    gradX = get_dist_mandelbrot(gx2) - get_dist_mandelbrot(gx1);
+    gradY = get_dist_mandelbrot(gy2) - get_dist_mandelbrot(gy1);
+    gradZ = get_dist_mandelbrot(gz2) - get_dist_mandelbrot(gz1);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+
+    #endif
+
+    return N;
+}
+
+//
+// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+//
 
 vec3 f_Mandelbub(vec3 w, vec3 c) {
 
@@ -365,10 +422,12 @@ float one_light_shadow(vec3 p, Directional_light light) {
     float h;
     
     for(int i = 0; i < MAX_STEPS; i++ ) {
-        if(u_fractal == 0)
-            h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 1)
+            h = get_dist_mandelbub(ray_at(R, t));
+        if(u_fractal == 2)
             h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+        if(u_fractal == 3)
+            h = get_dist_mandelbrot(ray_at(R,t));
         
         if(i == 0 && h > 10.0)  // The ground points too far of the set are not in the shadow 
             return 1.0;
@@ -462,7 +521,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     float closest_dist = MAX_DIST;
     float current_t = 0.0;
     vec4 tmp_color;
-    int object_index; // 0: Ground, 1: Julia, 2: Mandelbub
+    int object_index; // 0: Ground, 1: Julia, 2: Mandelbub, 3: Mandelbrot
 
     // Ray Marching
     for(int i = 0; i < MAX_STEPS; i++) {
@@ -477,29 +536,37 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
         bounding_sphere.center = vec3(0.0, 0.0, 0.0);
         bounding_sphere.radius = 1.5 + float(u_fractal); // 0: 1.5, 1: 2.5
         
-        if(hit_sphere_limits(bounding_sphere, r)) {
+        //if(hit_sphere_limits(bounding_sphere, r)) {
 
-            if(u_fractal == 0) {    // Render Mandelbub
+            if(u_fractal == 1) {    // Render Mandelbub
             
                 // Distancia a Mandelbub
                 dist = get_dist_mandelbub(p);
                 if(dist < closest_dist){
                     closest_dist = dist;
-                    object_index = 2;
+                    object_index = 1;
                 } 
             }
     
-            if(u_fractal == 1){ // Render Julia
+           if(u_fractal == 2) { // Render Julia
     
                 // Distancia a Julia
                 dist = get_dist_julia(p , u_julia_set_constant);
                 if(dist < closest_dist){
                     closest_dist = dist;
-                    object_index = 1;
+                    object_index = 2;
     
                 } 
             }
-        }
+            // TODO ESTE CODIGO SE PUEDE SIMPLIFICAR
+            if(u_fractal == 3) {    // Render Mandelbrot
+                dist = get_dist_mandelbrot(p);
+                if(dist < closest_dist) {
+                    closest_dist = dist;
+                    object_index = 3;
+                }
+            }
+        //}
 
         if(closest_dist < u_epsilon){   // Hay interseccion
 
@@ -523,7 +590,16 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
             }
 
-            if(object_index ==1) {      // r hits Julia
+            if(object_index == 1) {     // r hits Mandelbub
+                hr.hit = true;
+                hr.t = current_t;
+                hr.p = ray_at(r, hr.t);
+                hr.normal = calculate_normal_mandelbub(hr.p);
+                hr.mat = S[0].mat; // TODO Mejorar esto
+                return evaluate_lighting_model(lights, num_lights, hr);
+            }
+
+            if(object_index == 2) {      // r hits Julia
                 hr.hit = true;
                 hr.t = current_t;
                 hr.p = ray_at(r, hr.t);
@@ -533,12 +609,13 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 return evaluate_lighting_model(lights, num_lights, hr);
             }
 
-            if(object_index == 2) {     // r hits Mandelbub
+            if(object_index == 3) {
                 hr.hit = true;
                 hr.t = current_t;
                 hr.p = ray_at(r, hr.t);
-                hr.normal = calculate_normal_mandelbub(hr.p);
+                hr.normal = calculate_normal_mandelbrot(hr.p);
                 hr.mat = S[0].mat; // TODO Mejorar esto
+
                 return evaluate_lighting_model(lights, num_lights, hr);
             }
         }
