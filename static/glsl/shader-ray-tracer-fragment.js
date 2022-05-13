@@ -12,60 +12,44 @@ const fsSource = glsl`
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
-
 // ─── UNIFORM VARIABLES ──────────────────────────────────────────────────────────
-
 uniform vec3 u_lookfrom;
 uniform vec3 u_lookat;
-
 uniform vec4 u_ke;
 uniform vec4 u_ka;
 uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
-
 uniform vec4 u_light_color;
-
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
-
 #define ARRAY_TAM 100
 #define PI 3.14159265359
-
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
-
 // ─── DEGREES TO RADIANS ─────────────────────────────────────────────────────────
 // Transform an angle measure from degrees to radians
-
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
 }
-
 //
 // ─── RAY ────────────────────────────────────────────────────────────────────────
 // Struct that represents a Ray, defined by a point 'origin' and a vector 
 // 'direction'
-
 struct Ray {
     vec3 orig;      // Ray's origin
     vec3 dir;       // Ray's direction
 };
-
 // ─── AT ─────────────────────────────────────────────────────────────────────────
 // Given a Ray, it returns the point given by origin + t * direction.    
 vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 //
 // ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
 // 
-
 //
 // ─── MATERIAL ───────────────────────────────────────────────────────────────────
 // Struct that defines a material RGB components.
-
 struct Material {
     vec4 ka;    // Ambient component
     vec4 kd;    // Diffuse component
@@ -80,7 +64,6 @@ Material ground_material;
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
 // Stores information about an intersection between a ray and a surface.
-
 struct Hit_record {
     vec3 p;         // Intersection point
     vec3 normal;    // Surface's normal at p point
@@ -88,17 +71,15 @@ struct Hit_record {
     bool hit;       // True if surface is hit, false otherwise
     Material mat;   // Material of the hit surface
 };
-
 //
 // ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
 // Struct that defines a directional light source.
-
 struct Directional_light{
     vec3 dir;   // Light direction
     vec4 color; // Light RGB color
 };
 
-vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
+vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ) {
 
     vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
     Material mat = hr.mat;
@@ -122,7 +103,6 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
             if(cos_theta > 0.0) {
                 // Reflection direction
                 vec3 reflection_dir = reflect(-light_dir, normal);
-
                 diffuse += mat.kd * light.color * cos_theta;
                 specular += mat.ks * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
             }
@@ -134,24 +114,19 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
     return ambient + diffuse + specular;
     
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 //
 // ─── SPHERE ─────────────────────────────────────────────────────────────────────
 // Represents a sphere, defined by the center and the radius
-
 struct Sphere{
     vec3 center;
     float radius;
     Material mat;
 };
-
 //
 // ─── HIT SPHERE ─────────────────────────────────────────────────────────────────
 // Calculates the intersection between a Ray and a Sphere and stores the hit
 // information in a Hit_record struct.
-
 Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     Hit_record result;
     vec3 oc = R.orig - S.center;
@@ -179,13 +154,11 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     result.mat = S.mat;
     return result;
 }
-
 //
 // ─── HIT SPHERES LIST ───────────────────────────────────────────────────────────
 // Given a list of spheres, calculates the possible intersection between a Ray and
 // and the spheres list. If any sphere is hit, stores the hit information in a
 // hit_record struct.
-
 Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
     Hit_record result, tmp;
     float closest_t = t_max;
@@ -199,21 +172,16 @@ Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_
     }
     return result;
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
-
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
 // A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the 
 // normal vector that defines the plane.
-
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
     Material mat;   // Plane material
 };
-
 //
 // ─── HIT PLANE ──────────────────────────────────────────────────────────────────
 // Calculates the possible intersection between a ray and a plane and stores the
@@ -238,24 +206,19 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     }
     return result;
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 //
 // ─── CAMERA ─────────────────────────────────────────────────────────────────────
 // Stores information about the camera and the rendered frame. 
-
 struct Camera{
     vec3 origin;                // Where the observer is located
     vec3 horizontal;            // Viewport width in WC
     vec3 vertical;              // Viewport height in WC
     vec3 lower_left_corner;     // Point in WC that is in the corner of the screen
 };
-
 //
 // ─── INIT CAMERA ────────────────────────────────────────────────────────────────
 // Initializes and returns a Camera given its parameters
-
 Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
     Camera cam;
     float focal_length = 1.0;
@@ -268,14 +231,12 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     vec3 w = normalize(lookfrom - lookat);
     vec3 u = normalize(cross(vup,w));
     vec3 v = cross(w,u);
-
     cam.origin = lookfrom;
     cam.horizontal = viewport_width * u;
     cam.vertical = viewport_height * v;
     cam.lower_left_corner = cam.origin - cam.horizontal/float(2.0) - cam.vertical/float(2.0) - w;
     return cam;
 }
-
 //
 // ─── GET RAY ────────────────────────────────────────────────────────────────────
 // Creates and returns a Ray where the origin is the observer's position and
@@ -287,15 +248,11 @@ Ray get_ray(Camera cam, float s, float t){
     R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
     return R;
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 //
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
-
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
-
     // r hits any sphere?
     float t_closest = MAX_DIST;
     vec4 tmp_color;
@@ -306,7 +263,6 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
         tmp_color = evaluate_lighting_model(lights, num_lights, hr);
         //tmp_color = vec4(normalize(hr.normal), 1.0);
     }
-
     // r hits the plane? 
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
@@ -320,7 +276,6 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
             hr.mat.ks = vec4(0.0,0.0,0.0, 1.0);
         tmp_color = evaluate_lighting_model(lights, num_lights, hr);
     }
-
     // If r hits any surface
     if(t_closest < MAX_DIST) return tmp_color;
 
@@ -329,19 +284,15 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 //
 // ─── MAIN ───────────────────────────────────────────────────────────────────────
 //
-
 void main() {
     // IMAGE
     float aspect_ratio = float(16.0) / float(9.0);
     int image_width = 1280;
     int image_height = int(float(image_width) / aspect_ratio);
-
     // WORLD
     // Material
     Material mat;
@@ -365,11 +316,10 @@ void main() {
 
 
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
-
     // Plane
     Plane P;
     P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = -10.0;
+    P.D = -2.0;
     P.mat = ground_material;
 
     // CAMERA
@@ -391,14 +341,10 @@ void main() {
     vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
     float u = uv.x;
     float v = uv.y;
-
     Ray r = get_ray(cam, u, v);
-
     gl_FragColor = ray_color(r, world, num_spheres, P, lights, num_lights);
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
-
 
 `;
 

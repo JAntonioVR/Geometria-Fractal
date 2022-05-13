@@ -1,7 +1,8 @@
 
 import { Scene3D } from "./scene3D.js";
 import { vsSource } from "../glsl/shader-wgl-vertex.js";
-import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
+import { fsSource } from "../glsl/shader-mandelbub-fragment.js";
+//import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
 import { hexToRgb, rgbToHex } from "./utils.js";
 
 
@@ -50,6 +51,38 @@ function main(){
     const light_color_input = document.querySelector("#light_color");
     light_color_input.value = rgbToHex(theScene.get_light_color());
     light_color_input.addEventListener('input', change_light_color, true);
+
+    const fractal = document.querySelector("#fractales");
+    fractal.value = theScene.getFractal();
+    fractal.addEventListener('change', changeFractal, true);
+
+    const juliaX_input = document.querySelector("#juliaX");
+    juliaX_input.value = theScene.get_julia_constant()[0];
+    document.querySelector("#valorJuliaX").innerHTML = theScene.get_julia_constant()[0];
+    juliaX_input.addEventListener('input', (event) => change_julia_constant_x(event), true);
+    
+    const juliaY_input = document.querySelector("#juliaY");
+    juliaY_input.value = theScene.get_julia_constant()[1];
+    document.querySelector("#valorJuliaY").innerHTML = theScene.get_julia_constant()[1];
+    juliaY_input.addEventListener('input', (event) => change_julia_constant_y(event), true);
+    
+    const juliaZ_input = document.querySelector("#juliaZ");
+    juliaZ_input.value = theScene.get_julia_constant()[2];
+    document.querySelector("#valorJuliaZ").innerHTML = theScene.get_julia_constant()[2];
+    juliaZ_input.addEventListener('input', (event) => change_julia_constant_z(event), true);
+    
+    const juliaW_input = document.querySelector("#juliaW");
+    juliaW_input.value = theScene.get_julia_constant()[3];
+    document.querySelector("#valorJuliaW").innerHTML = theScene.get_julia_constant()[3];
+    juliaW_input.addEventListener('input', (event) => change_julia_constant_w(event), true);
+    
+
+    const epsilon_input = document.querySelector("#current_epsilon");
+    var epsilon_value = theScene.get_epsilon();
+    var exp = Math.log10(epsilon_value);
+    epsilon_input.value = -exp;
+    document.querySelector("#valor_epsilon").innerHTML = 10**(exp);
+    epsilon_input.addEventListener('input', (event) => change_epsilon(event), true);
     
     theScene.drawScene();
     
@@ -66,15 +99,16 @@ function moveCamera(event){
   const canvas = document.querySelector("#glCanvas");
   var width = canvas.offsetWidth,
       height = canvas.offsetHeight;
-  
-  // FIXME Corregir movimiento de la camara a partir del ratón
 
   if(mouseState == MouseState.MOUSE_DOWN){
     var disp = [
-      2.0*Math.PI*(mousePosition[0] - mouseDownPosition[0])/width-Math.PI,
-      Math.PI*(mousePosition[1] - mouseDownPosition[1])/height-Math.PI/2.0
+      (mousePosition[0] - mouseDownPosition[0])/width,
+      (mousePosition[1] - mouseDownPosition[1])/height
     ]
+
     document.querySelector("#marcador-raton").innerHTML = "(" + disp[0] +", " + disp[1] +")"
+
+    console.log(disp);
 
     theScene.moveX(disp[0]);
     theScene.moveY(disp[1]);
@@ -131,6 +165,51 @@ function change_light_color() {
   theScene.drawScene();
 }
 
+function changeFractal() {
+  const fractales = document.querySelector("#fractales")
+  var selected = parseInt(fractales.value);
+  theScene.setFractal(selected);
+  theScene.drawScene();
+}
+
+function change_julia_constant_x(event) {
+  document.querySelector("#valorJuliaX").innerHTML = event.target.value;
+  let C = theScene.get_julia_constant();
+  C[0] = event.target.value;
+  theScene.set_julia_constant(C);
+  theScene.drawScene();
+}
+
+function change_julia_constant_y(event) {
+  document.querySelector("#valorJuliaY").innerHTML = event.target.value;
+  let C = theScene.get_julia_constant();
+  C[1] = event.target.value;
+  theScene.set_julia_constant(C);
+  theScene.drawScene();
+}
+
+function change_julia_constant_z(event) {
+  document.querySelector("#valorJuliaZ").innerHTML = event.target.value;
+  let C = theScene.get_julia_constant();
+  C[2] = event.target.value;
+  theScene.set_julia_constant(C);
+  theScene.drawScene();
+}
+
+function change_julia_constant_w(event) {
+  document.querySelector("#valorJuliaW").innerHTML = event.target.value;
+  let C = theScene.get_julia_constant();
+  C[3] = event.target.value;
+  theScene.set_julia_constant(C);
+  theScene.drawScene();
+}
+
+function change_epsilon(event) {
+  document.querySelector("#valor_epsilon").innerHTML = 10**(-event.target.value);
+  theScene.set_epsilon(10**(-event.target.value));
+  theScene.drawScene();
+}
+
 function onKeyDown(event) {
     let key = event.wich || event.keyCode;
     switch (key) {
@@ -169,11 +248,27 @@ function resetParameters() {
     theScene.setInitialParameters();
     document.querySelector("#ke").value = rgbToHex(theScene.get_ke());
     document.querySelector("#ka").value = rgbToHex(theScene.get_ka());
+    console.log(theScene.get_kd());
     document.querySelector("#kd").value = rgbToHex(theScene.get_kd());
     document.querySelector("#ks").value = rgbToHex(theScene.get_ks());
     document.querySelector("#sh").value = theScene.get_sh();
     document.querySelector("#valor_sh").innerHTML = theScene.get_sh();
     document.querySelector("#light_color").value = rgbToHex(theScene.get_light_color());
+
+
+    document.querySelector("#juliaX").value = theScene.get_julia_constant()[0];
+    document.querySelector("#valorJuliaX").innerHTML = theScene.get_julia_constant()[0];
+    document.querySelector("#juliaY").value = theScene.get_julia_constant()[1];
+    document.querySelector("#valorJuliaY").innerHTML = theScene.get_julia_constant()[1];
+    document.querySelector("#juliaZ").value = theScene.get_julia_constant()[2];
+    document.querySelector("#valorJuliaZ").innerHTML = theScene.get_julia_constant()[2];
+    document.querySelector("#juliaW").value = theScene.get_julia_constant()[3];
+    document.querySelector("#valorJuliaW").innerHTML = theScene.get_julia_constant()[3];
+
+    document.querySelector("#current_epsilon").value = theScene.get_epsilon();
+    document.querySelector("#valor_epsilon").innerHTML = theScene.get_epsilon();
+
+
     theScene.drawScene();
 }
 

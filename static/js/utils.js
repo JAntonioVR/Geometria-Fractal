@@ -55,9 +55,10 @@ function rgbToHex(rgba) {
     let r = rgba[0],
         g = rgba[1],
         b = rgba[2]
-    return "#" + componentToHex(r*255) + 
-                 componentToHex(g*255) + 
-                 componentToHex(b*255);
+    return "#" + componentToHex(parseInt(r*255,10)) + 
+                 componentToHex(parseInt(g*255,10)) + 
+                 componentToHex(parseInt(b*255,10));
 }
+
 
 export {cartesianToSpheric, sphericToCartesian, hexToRgb, rgbToHex}

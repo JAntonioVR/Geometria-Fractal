@@ -1,7 +1,6 @@
 import { glsl } from './glsl.js';
 
 const vsSource = glsl`
-
 //
 // ─── CODIGO DEL VERTEX SHADER ───────────────────────────────────────────────────
 //    

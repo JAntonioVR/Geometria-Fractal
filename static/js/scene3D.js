@@ -33,10 +33,13 @@ class Scene3D {
         ks: gl.getUniformLocation(that.shaderProgram, 'u_ks'),
         sh: gl.getUniformLocation(that.shaderProgram, 'u_sh'),
         light_color: gl.getUniformLocation(that.shaderProgram, 'u_light_color'),
+        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal'),
+        julia_set_constant: gl.getUniformLocation(that.shaderProgram, 'u_julia_set_constant'),
+        epsilon: gl.getUniformLocation(that.shaderProgram, 'u_epsilon')
       }
     };
 
-    var initialLookfrom = [2.0, 2.0, 1.0];
+    var initialLookfrom = [-0.5, -0.32, -1.65];
 
     this.parameters = {
       lookfrom: initialLookfrom,
@@ -44,11 +47,13 @@ class Scene3D {
       lookfrom_spheric: cartesianToSpheric(initialLookfrom),
       ke: [0.0, 0.0, 0.0, 1.0],
       ka: [0.0, 0.0, 0.0, 1.0],
-      kd: [0.0, 0.0, 1.0, 1.0],
-      ks: [0.0, 0.0, 0.0, 1.0],
+      kd: [0.84, 0.25, 0.25, 1.0],
+      ks: [0.37, 0.25, 0.57, 1.0],
       sh: 30.0,
-      light_color: [0.0, 0.0, 1.0, 1.0],
-      
+      light_color: [1.0, 1.0, 1.0, 1.0],
+      epsilon: 0.001,
+      fractal: 1,
+      julia_set_constant: [0.75, 0.0, 0.0, -0.12],
       delta: 0.1
     };
 
@@ -107,7 +112,10 @@ class Scene3D {
         kd = this.parameters.kd,
         ks = this.parameters.ks,
         sh = this.parameters.sh,
-        light_color = this.parameters.light_color;
+        light_color = this.parameters.light_color,
+        fractal = this.parameters.fractal,
+        julia_set_constant = this.parameters.julia_set_constant,
+        epsilon = this.parameters.epsilon;
         
     var that = this;
     {
@@ -155,6 +163,15 @@ class Scene3D {
     gl.uniform4f(
       this.programInfo.uniformLocations.light_color,
       light_color[0], light_color[1], light_color[2], light_color[3]);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.fractal,
+      fractal);
+    gl.uniform4f(
+      this.programInfo.uniformLocations.julia_set_constant,
+      julia_set_constant[0], julia_set_constant[1], julia_set_constant[2], julia_set_constant[3]);
+    gl.uniform1f(
+      this.programInfo.uniformLocations.epsilon,
+      epsilon);
 
 
     {
@@ -272,6 +289,33 @@ class Scene3D {
 
   get_light_color(){
     return this.parameters.light_color;
+  }
+
+  getFractal() {
+    return this.parameters.fractal;
+  }
+
+  setFractal(index) {
+    this.parameters.fractal = index;
+  }
+
+  set_julia_constant(new_julia_constant) {
+    this.parameters.julia_set_constant = [
+      new_julia_constant[0], new_julia_constant[1],
+      new_julia_constant[2], new_julia_constant[3]
+    ];
+  }
+
+  get_julia_constant() {
+    return this.parameters.julia_set_constant;
+  }
+
+  set_epsilon(new_epsilon) {
+    this.parameters.epsilon = new_epsilon;
+  }
+
+  get_epsilon() {
+    return this.parameters.epsilon;
   }
   
   rescaleAngles(){
