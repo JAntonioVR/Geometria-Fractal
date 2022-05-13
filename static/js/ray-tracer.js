@@ -53,7 +53,7 @@ function main(){
     light_color_input.addEventListener('input', change_light_color, true);
 
     const fractal = document.querySelector("#fractales");
-    fractal.selectedIndex = 1;
+    fractal.value = theScene.getFractal();
     fractal.addEventListener('change', changeFractal, true);
 
     const juliaX_input = document.querySelector("#juliaX");
@@ -78,8 +78,10 @@ function main(){
     
 
     const epsilon_input = document.querySelector("#current_epsilon");
-    epsilon_input.value = theScene.get_epsilon();
-    document.querySelector("#valor_epsilon").innerHTML = theScene.get_epsilon();
+    var epsilon_value = theScene.get_epsilon();
+    var exp = Math.log10(epsilon_value);
+    epsilon_input.value = -exp;
+    document.querySelector("#valor_epsilon").innerHTML = 10**(exp);
     epsilon_input.addEventListener('input', (event) => change_epsilon(event), true);
     
     theScene.drawScene();
@@ -203,8 +205,8 @@ function change_julia_constant_w(event) {
 }
 
 function change_epsilon(event) {
-  document.querySelector("#valor_epsilon").innerHTML = event.target.value;
-  theScene.set_epsilon(event.target.value);
+  document.querySelector("#valor_epsilon").innerHTML = 10**(-event.target.value);
+  theScene.set_epsilon(10**(-event.target.value));
   theScene.drawScene();
 }
 

@@ -51,7 +51,7 @@ class Scene3D {
       ks: [0.37, 0.25, 0.57, 1.0],
       sh: 30.0,
       light_color: [1.0, 1.0, 1.0, 1.0],
-      epsilon: 0.005,
+      epsilon: 0.001,
       fractal: 1,
       julia_set_constant: [0.75, 0.0, 0.0, -0.12],
       delta: 0.1
@@ -289,6 +289,10 @@ class Scene3D {
 
   get_light_color(){
     return this.parameters.light_color;
+  }
+
+  getFractal() {
+    return this.parameters.fractal;
   }
 
   setFractal(index) {
