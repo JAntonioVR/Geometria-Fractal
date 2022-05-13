@@ -2,6 +2,7 @@
 import { Scene3D } from "./scene3D.js";
 import { vsSource } from "../glsl/shader-wgl-vertex.js";
 import { fsSource } from "../glsl/shader-mandelbub-fragment.js";
+//import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
 import { hexToRgb, rgbToHex } from "./utils.js";
 
 

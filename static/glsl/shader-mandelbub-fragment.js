@@ -16,7 +16,6 @@ precision mediump float;
 uniform vec3 u_lookfrom;
 uniform vec3 u_lookat;
 
-uniform vec4 u_ke;
 uniform vec4 u_ka;
 uniform vec4 u_kd;
 uniform vec4 u_ks;
@@ -100,12 +99,14 @@ vec3 ray_at(Ray r, float t){
 // Struct that defines a material RGB components.
 
 struct Material {
-    vec4 ke;    // Emissive component
     vec4 ka;    // Ambient component
     vec4 kd;    // Diffuse component
     vec4 ks;    // Specular component
     float sh;   // Shiness
 };
+
+// Ground material
+Material ground_material;
 
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
@@ -122,22 +123,20 @@ struct Hit_record {
 //
 // ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
 // Struct that defines a directional light source.
-
 struct Directional_light{
     vec3 dir;   // Light direction
     vec4 color; // Light RGB color
 };
 
-vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
+vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ) {
 
-    vec4 color_average = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
     Material mat = hr.mat;
     Directional_light light;
     vec3 light_dir;
     vec3 view_dir = normalize(u_lookfrom - hr.p);
     vec3 normal = normalize(hr.normal);
-    vec4 emissive, ambient, diffuse, specular;
-    emissive = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 ambient, diffuse, specular;
     ambient = vec4(0.0, 0.0, 0.0, 1.0);
     diffuse = vec4(0.0, 0.0, 0.0, 1.0);
     specular = vec4(0.0, 0.0, 0.0, 1.0);
@@ -153,18 +152,16 @@ vec4 evaluateLightingModel( Directional_light lights[ARRAY_TAM], int num_lights,
             if(cos_theta > 0.0) {
                 // Reflection direction
                 vec3 reflection_dir = reflect(-light_dir, normal);
-
                 diffuse += mat.kd * light.color * cos_theta;
                 specular += mat.ks * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
             }
         }
         color_average /= float(num_lights);
-        emissive = mat.ke * color_average;
         ambient = mat.ka * color_average;
     }
 
-    return vec4((emissive + ambient + diffuse + specular).xyz, 1.0);
-   
+    return ambient + diffuse + specular;
+    
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -216,14 +213,31 @@ Hit_record raymarch_sphere(Ray r, Sphere S, float t_min, float t_max) {
 //
 
 vec3 f(vec3 w, vec3 c) {
+    /*
 
     float m = dot(w,w); // |w|^2
     float m2 = m*m;     // |w|^4
-    float m4 = m2*m2;   // |w|^8
     float r = length(w);
     float b = 8.0*acos( w.y/r);
     float a = 8.0*atan( w.x, w.z );
-    return c + m4 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );
+    return c + m2 * vec3( sin(b)*sin(a), cos(b), sin(b)*cos(a) );*/
+
+    // extract polar coordinates
+    float wr = sqrt(dot(w,w));
+    float wo = acos(w.y/wr);
+    float wi = atan(w.x,w.z);
+
+    // scale and rotate the point
+    wr = pow( wr, 8.0 );
+    wo = wo * 8.0;
+    wi = wi * 8.0;
+
+    // convert back to cartesian coordinates
+    w.x = wr * sin(wo)*sin(wi);
+    w.y = wr * cos(wo);
+    w.z = wr * sin(wo)*cos(wi);
+
+    return c + w;
 }
 
 
@@ -524,7 +538,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
             } 
         }
-        
+
         if(closest_dist < u_epsilon){   // Hay interseccion
 
             if(object_index == 0){      // r hits the ground
@@ -533,26 +547,26 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.normal = vec3(0.0, 1.0, 0.0); //normalize(ground.normal);
                 hr.hit = true;
 
-                Material M;
-                M.ka = vec4(0.0, 0.0, 0.0, 1.0);
-                M.ke = vec4(0.0, 0.0, 0.0, 1.0);
-                M.kd = vec4(0.0, 0.0, 0.0, 0.0);
-
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
                 if(modulus == 0)
-                    M.ks = vec4(0.5, 0.5, 0.5, 1.0);
+                    ground_material.ks = vec4(0.7, 0.7, 0.7, 1.0);
                 else
-                    M.ks = vec4(0.0, 0.0, 0.0, 1.0);
+                    ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
 
-                hr.mat = M;
+                hr.mat = ground_material;
 
                 // Is it in the JuliaSet Shadow?
-                float julia_shadow = shadow(hr.p, lights[0]);
-                float alpha = 0.2;      // Smooth constant
+                float julia_shadow = 0.0;
+                for(int i = 0; i < ARRAY_TAM; i++) {
+                    if(i == num_lights) break;
+                    julia_shadow += shadow(hr.p, lights[i]);
+                }
+                julia_shadow /= float(num_lights);
+                float alpha = 0.0;      // Smooth constant
                 julia_shadow = julia_shadow/(1.0 - alpha) + alpha;
 
-                return vec4((julia_shadow*evaluateLightingModel(lights, num_lights, hr)).xyz, 1.0);
+                return vec4((julia_shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
             }
 
             if(object_index ==1) {      // r hits Julia
@@ -562,7 +576,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.normal = calculate_normal_julia(hr.p, u_julia_set_constant);
                 hr.mat = S[0].mat; // TODO Mejorar esto
 
-                return evaluateLightingModel(lights, num_lights, hr);
+                return evaluate_lighting_model(lights, num_lights, hr);
             }
 
             if(object_index == 2) {     // r hits Mandelbub
@@ -571,9 +585,10 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.p = ray_at(r, hr.t);
                 hr.normal = calculate_normal_mandelbub(hr.p);
                 hr.mat = S[0].mat; // TODO Mejorar esto
-                return evaluateLightingModel(lights, num_lights, hr);
+                return evaluate_lighting_model(lights, num_lights, hr);
             }
         }
+        
 
         current_t += closest_dist;
         p = ray_at(r, current_t);
@@ -612,17 +627,15 @@ void main() {
     Material mat0, mat1;
 
     // Sphere material
-    mat0.ke = u_ke;
     mat0.ka = u_ka;
     mat0.kd = u_kd;
     mat0.ks = u_ks;
     mat0.sh = u_sh;
 
     // Ground material
-    mat1.ke = vec4(236.0, 226.0, 198.0, 255.0)/255.0;
-    mat1.ka = vec4(0.0, 0.0, 0.0, 1.0);
-    mat1.kd = vec4(236.0, 226.0, 198.0, 255.0)/255.0;
-    mat1.ks = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+    ground_material.sh = 1.0;
 
     // Sphere
     Sphere S[ARRAY_TAM];
@@ -633,7 +646,7 @@ void main() {
     Plane ground;
     ground.normal = vec3(0.0, 1.0, 0.0);
     ground.D = -2.0;
-    ground.mat = mat1;
+    ground.mat = ground_material;
     
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
@@ -641,14 +654,15 @@ void main() {
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
 
-    // LIGHTING
     Directional_light lights[ARRAY_TAM];
-    int num_lights = 1;
+    int num_lights = 2;
     Directional_light l1, l2;
     l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(-1.0, 1.0, 0.0);
-    l2.dir = vec3(-0.5, 1.0, -1.0);
+    l1.dir = vec3(-0.5, 0.5, 0.0);
+    //l1.dir = vec3(0.0, 1.0, 0.0);
+    l2.dir = vec3(0.5, 0.5, 0.0);
     lights[0] = l1; lights[1] = l2;
+    
     
     // COLOR
     vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
