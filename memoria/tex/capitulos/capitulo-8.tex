@@ -247,7 +247,7 @@ De igual forma, menos iteraciones implica más rapidez, pero peores resultados, 
 \section{Signed Distance Functions (SDFs)}
 \label{section:SDFs}
 
-Durante toda la sección anterior hemos hablado de que para aplicar ray-marching es necesario que cada objeto que componga la escena cuente con una función que estime la distancia de un punto cualquiera de $\R^3$ a su superficie. En esta sección introduciremos el concepto de SDF y explicaremos cómo obtener esas funciones para fractales 3D.
+Durante toda la sección anterior hemos hablado de que para aplicar ray-marching es necesario que cada objeto que componga la escena cuente con una función que estime la distancia de un punto cualquiera de $\R^3$ a su superficie. En esta sección introduciremos el concepto de SDF y pondremos un ejemplo sencillo con una esfera.
 
 Primero explicaremos brevemente el fundamento matemático. Sea $f:\R^n\longrightarrow\R$ una función continua que define implícitamente el conjunto 
 $$
@@ -256,7 +256,7 @@ $$
 Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\partial A$ define la \textit{superficie implícita} de $f$. De hecho, $f$ es negativa en el interior de $A$ ($f(x)<0 \ \ \forall x\in\mathring A$), por lo que podemos decir que dicha superficie implícita $\partial A$ coincide precisamente con el conjunto $f^{-1}(0)$. A partir de una función real y continua podemos entonces definir una superficie en $\R^n$.
 
 \begin{definicion}[SDF]
-    Una función continua $f:\R^3\longrightarrow\R$ se conoce como una \textbf{`Signed Distance Bound'} (distancia a la frontera con signo) de su superficie implícita $f^{-1}(0)$ si, y solo si
+    Una función continua $f:\R^3\longrightarrow\R$ se conoce como una \textbf{`Signed Distance Bound'} (cota de la distancia con signo) de su superficie implícita $f^{-1}(0)$ si, y solo si
     \begin{equation}
         \label{eq:SDB}
         |f(x)|\leq d(x,f^{-1}(0)) \ \ \forall x\in\R^3
@@ -265,4 +265,157 @@ Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\p
     Si se tiene la igualdad en (\ref{eq:SDB}), entonces $f$ es una \textbf{`Signed Distance Function'} (función distancia con signo).
 \end{definicion}
 
-Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera. En \cite[Table 1]{Hart-1995} podemos encontrar una lista de primitivas con referencias a sus correspondientes SDFs.
+Una forma sencilla de entender este concepto es concibiendo una superficie como los puntos en los que se anula la función distancia. Es decir, si un punto se sitúa a distancia 0 es porque pertenece a dicha superficie. En caso de que la distancia sea positiva en módulo el punto se sitúa fuera, tan lejos como diga dicho módulo.
+
+Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera (ver imagen \ref{fig:SDF-esfera}). En \cite[Table 1]{Hart-1995} podemos encontrar una lista de primitivas con referencias a sus correspondientes SDFs.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/SDF-esfera.png}
+    \caption{Ejemplos de puntos con distintos valores de la SDF de una esfera}
+    \label{fig:SDF-esfera}
+\end{figure}
+
+\section{Visualización tridimensional de conjuntos de Julia}
+
+Una vez tenemos definido el algoritmo que usaremos para la visualización de fractales, que es el algortimo de ray-marching acompañado de una SDF concreta, es momento de trabajar en la visualización de fractales 3D. Comenzaremos, siguiendo el mismo orden que adoptamos en el capítulo \ref{chap:fractales-2D}, por los conjuntos de Julia en 3D.
+
+Recordemos de la sección \ref{section:Julia} que el conjunto de Julia $\mathcal{J}_c$ de un número complejo fijo $c\in\C$ se define como la frontera entre el conjunto de puntos prisioneros y el conjunto de puntos de escape bajo la iteración de la función $P_{c}(z)=z^2+c$. Es decir, $\mathcal{J}_c = \partial \mathsf{E}_c$, donde
+\begin{equation}
+    \mathsf{E}_c = \{z_0\in\C: \{|P_c^n(z_0)|\}\rightarrow \infty \}
+\end{equation}
+
+Queda por tanto a la vista una clara dependencia de los números complejos en esta definición, los cuales podemos identificar únicamente con puntos del plano euclídeo $\R^2$. Necesitamos por tanto una generalización tridimensional de los números complejos. Estrictamente, no existe como tal una generalización tridimensional que mantenga la aritmética compleja, pero sí que existe una en cuatro dimensiones: los cuaternios, usualmente denotados como $\H$.
+
+Podemos encontrar información sobre los cuaternios en \cite{quaternions}, pero introduciremos brevemente su aritmética. De igual forma que para los números complejos se utiliza la unidad imaginaria $i$, en los cuaternios se tienen tres unidades imaginarias: $i,j,k$, de tal manera que un cuaternio se compone de una parte real y tres imaginarias, pudiendo expresarlo como:
+\begin{equation}
+    q = x\cdot i + y\cdot j + z \cdot k + w \cong (x,y,z,w)\in \R^4.
+\end{equation}
+
+Nótese que estamos denotando como componente real a $w$, la última de la terna $(x,y,z,w)$. Las unidades imaginarias se multiplican entre ellas siguiendo las siguien reglas:
+\begin{equation}
+    \label{eq:relaciones-cuaternios}
+    \begin{split}
+        ij = k \quad jk &= i \quad ki = j \\
+        ji = -k \quad kj &= -i \quad ik = -j \\
+        i^2 = j^2 &= k^2 = -1. 
+    \end{split}
+\end{equation}
+
+Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = q_x\cdot i + q_y\cdot j + q_z \cdot k + q_w\cong (q_x,q_y,q_z,q_w)$ y $q' = q'_x\cdot i + q'_y\cdot j + q'_z \cdot k + q'_w\cong (q'_x,q'_y,q'_z,q'_w)$ es expandiendo la expresión
+
+\begin{equation}
+    qq' = (q_x\cdot i + q_y\cdot j + q_z \cdot k + q_w)(q'_x\cdot i + q'_y\cdot j + q'_z \cdot k + q'_w) 
+\end{equation}
+
+Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{xyz},q_w), q'=(q'_{xyz},q_w)$, agrupando términos y aplicando las relaciones \ref{eq:relaciones-cuaternios} el resultado puede expresarse mediante productos vectoriales y escalares:
+\begin{equation}
+    \label{eq:producto-cuaternios}
+    \begin{split}
+        (qq')_{xyz} &= q_{xyz}\times q'_{xyz} + q_w q'_{xyz} + q'_wq_{xyz} \\
+        (qq)_w &= q_wq'_w - (q_{xyz}\cdot q'_{xyz})
+    \end{split}
+\end{equation}
+
+Aplicando estas relaciones podemos deducir el cuadrado de un cuaternio con tan solo multiplicar un cuaternio $q$ por sí mismo, obteniendo
+
+\begin{equation}
+    \label{eq:cuadrado-cuaternio}
+    \begin{split}
+        (q^2)_{xyz} &= 2q_w q_{xyz} \\
+        (q^2)_w &= q_w^2 - q_{xyz}\cdot q_{xyz},
+    \end{split}
+\end{equation}
+que realmente es una simplificación de las ecuaciones (\ref{eq:producto-cuaternios}) teniendo en cuenta que el producto vectorial de un vector por sí mismo es $0$.
+
+Y una vez tenemos clara la aritmética básica de los cuaternios, podemos generalizar fácilmente los conjuntos de Julia sin más que extender la función $P_c(z)$ a $\H$, fijando un cuaternio $c\in\H$:
+\begin{equation}
+    \label{eq:f-julia-cuaternios}
+    \begin{split}
+        P_c :& \H \longrightarrow \H \\
+        q & \longmapsto q^2 + c
+    \end{split}
+\end{equation}
+
+De forma que ahora separamos el espacio $\H$ en puntos prisioneros y de escape frente a la iteración de $P_c(q)$ y redefinimos los conjuntos de Julia en 4D como la frontera entre los puntos prisioneros y de escape. 
+
+Sin embargo, es claro que no podemos visualizar conjuntos en 4D de forma tan directa como lo hacemos en 2D, pero sí podemos generarlos y visualizar una proyección en 3D. Pensemos en los mapas de curvas de nivel que se usan en topografía (imagen \ref{fig:curva-de-nivel}), los cuales fijando una altura concreta representan la curva que dibujaría una montaña al intersecarla con un plano horizontal situado a esa altura, permitiéndonos hacernos una idea de la forma en 3D de la montaña a partir de un plano en 2D. 
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C8/curvas-de-nivel2.png}
+    \caption{Representación de una montaña con curvas de nivel}
+    \label{fig:curva-de-nivel}
+\end{figure}
+
+En nuestro contexto, podemos fijar una dimensión y visualizar el conjunto de Julia para las otras tres, pudiendo modificar después la dimensión que hemos fijado. 
+
+Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La manera más natural es identificar $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias. Es decir,
+\begin{equation}
+    p=(x,y,z)\cong q = x + yi + zj \cong (y,z,0,x)
+\end{equation}
+Tengamos en cuenta que en principio los rayos van a partir de un punto que está fuera del conjunto de Julia, es decir, al iterar la función $P_c$ la sucesión va a ser divergente, por lo que la SDF nos debe de dar una distancia positiva. La idea es que cada vez nos dé un valor menor conforme nos acerquemos a $\mathcal{J}_c$ hasta prácticamente anularse en caso de que el rayo interseque con el conjunto. 
+
+Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta distancia al conjunto, de forma que si tras cierto número $M$ de iteraciones el módulo de la iterada $|P_c^M(q)|$ no es suficientemente grande consideraremos que el punto es convergente, aunque esto probablemente nunca ocurra durante el proceso de ray-marching, pues se evaluarán puntos que están en el conjunto de puntos de escape, en búsqueda de esta frontera. Es decir, iteramos el punto con una amplia posibilidad de que antes o después la $n$-ésima iterada tenga un módulo grande. Denotamos como $q_n=P_c^n(q)$ a esta $n$-ésima iterada. A partir de este valor, definimos la SDF del conjunto de Julia como 
+\begin{equation}
+    \label{eq:SDF-Julia}
+    \begin{split}
+        d_c&:\R^3\longrightarrow\R \\
+        d_c(p) &= \dfrac{|q_n|\log|q_n|}{2|q'_n|}
+    \end{split}
+\end{equation}
+
+donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$. Intuitivamente, fíjese que realmente es una forma iterativa de aplicar la derivada de (\ref{eq:f-julia-cuaternios})
+
+Es difícil explicar y entender la génesis de esta fórmula, aunque los detalles matemáticos concretos pueden encontrarse en \cite[Capítulo 8]{Hubbard-Douady}. 
+
+Es decir, iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$.
+
+\subsection{Aproximando la normal}
+
+Teniendo esta estimación de la distancia podemos calcular el posible punto de intersección de un rayp con $\mathcal{J}_c$, pero si queremos evaluar el modelo de iluminación en dicho punto, antes necesitamos conocer la normal a la superficie en dicho punto. Y aquí es donde tenemos que afrontar la dificultad que supone la propia belleza de los fractales, que es su irregularidad y que su superficie en general no es diferenciable. No existen formas de calcular de forma exacta esta normal, pero en realidad nosotros estamos fijando una resolución que limita el nivel de detalle de la figura, por lo que podemos utilizar ciertos métodos para aproximar esta normal.
+
+\subsubsection{Método 1: Gradiente de la SDF}
+
+La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer ray-marching. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado.
+
+\begin{algorithm}[H]
+    \caption{Cálculo de la normal mediante el gradiente de la SDF} \label{alg:normal-gradiente-sdf}
+    \begin{algorithmic}
+    \State $h\gets\varepsilon$
+    \State $g_{x+}\gets p + (h,0,0)$
+    \State $g_{x-}\gets p - (h,0,0)$
+    \State $g_{y+}\gets p + (0,h,0)$
+    \State $g_{y-}\gets p - (0,h,0)$
+    \State $g_{z+}\gets p + (0,0,h)$
+    \State $g_{z-}\gets p - (0,0,h)$
+
+    \State $\nabla d_{c_x} \gets d_c(g_{x+})-d_c(g_{x-})$
+    \State $\nabla d_{c_y} \gets d_c(g_{y+})-d_c(g_{y-})$
+    \State $\nabla d_{c_z} \gets d_c(g_{z+})-d_c(g_{z-})$
+        \State \textbf{return} $\dfrac{(\nabla d_{c_x},\nabla d_{c_y},\nabla d_{c_z})}{\|(\nabla d_{c_x},\nabla d_{c_y},\nabla d_{c_z})\|}$
+    \end{algorithmic}
+\end{algorithm}
+
+En realidad debería tomarse en cada componente del gradiente la diferencia dividida entre $2h$, pero la propia normalización del vector se encarga de reescalar el vector adecuadamente.    
+
+\subsubsection{Método 2: Técnica del tetraedro}
+
+Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
+
+\begin{algorithm}[H]
+    \caption{Técnica del tetraedro para el cálculo de normales} \label{alg:normal-tetraedro}
+    \begin{algorithmic}
+    \State $h\gets\varepsilon$
+    \State $p_0 \gets p + h(1,-1,-1)$
+    \State $p_1 \gets p + h(-1,-1,1)$
+    \State $p_2 \gets p + h(-1,1,-1)$
+    \State $p_3 \gets p + h(1,1,1)$
+
+    \State $N\gets \sum_{i=0}^3 k_i d_c(p_i)$
+
+    \State \textbf{return} $\dfrac{N}{\|N\|}$
+    \end{algorithmic}
+\end{algorithm}
+
+%Una vez tenemos claro el procedimiento necesario para calcular esta distancia, la implementación es bastante sencilla. Basta con programar funciones que calculen la SDF y sustituir las llamadas a \verb|get_dist_sphere| por una llamada a dicha función.
