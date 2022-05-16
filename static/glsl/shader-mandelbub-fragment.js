@@ -35,7 +35,7 @@ uniform vec4 u_julia_set_constant;
 #define MAX_DIST 100.0
 #define PI 3.14159265359
 
-#define NORMAL 1
+#define NORMAL 0
 
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 
@@ -213,7 +213,6 @@ void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
 
 // ANCHOR dist julia
 float get_dist_julia(vec3 p, vec4 c) {
-    float dist;
     vec4 q = vec4(p.y, p.z, 0.0, p.x);
     float dq = 1.0;
     iterate_julia(q, dq, c);
@@ -227,15 +226,7 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
     float h = u_epsilon;
 
     #if NORMAL == 0
-
-    const vec2 k = vec2(1,-1);
-    N = normalize( k.xyy*get_dist_julia( p + k.xyy*h, c ) + 
-                   k.yyx*get_dist_julia( p + k.yyx*h, c ) + 
-                   k.yxy*get_dist_julia( p + k.yxy*h, c ) + 
-                   k.xxx*get_dist_julia( p + k.xxx*h, c ) );
-
-    #else
-
+    // Gradiente de la SDF
     vec4 qp = vec4(p.y, p.z, 0.0, p.x);
     float gradX, gradY, gradZ;
     vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
@@ -245,13 +236,20 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
     vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
     vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
     
-    gradX = get_dist_julia(gx2,c) - get_dist_julia(gx1,c);
-    gradY = get_dist_julia(gy2,c) - get_dist_julia(gy1,c);
-    gradZ = get_dist_julia(gz2,c) - get_dist_julia(gz1,c);
+    gradX = (get_dist_julia(gx2,c) - get_dist_julia(gx1,c))/(2.0*h);
+    gradY = (get_dist_julia(gy2,c) - get_dist_julia(gy1,c))/(2.0*h);
+    gradZ = (get_dist_julia(gz2,c) - get_dist_julia(gz1,c))/(2.0*h);
     N = normalize(vec3( gradX, gradY, gradZ ));
 
-    #endif
+    #else
+    // Método del tetraedro
+    const vec2 k = vec2(1,-1);
+    N = normalize( k.xyy*get_dist_julia( p + k.xyy*h, c ) + 
+                   k.yyx*get_dist_julia( p + k.yyx*h, c ) + 
+                   k.yxy*get_dist_julia( p + k.yxy*h, c ) + 
+                   k.xxx*get_dist_julia( p + k.xxx*h, c ) );
 
+    #endif
     return N;
 }
 
@@ -514,13 +512,13 @@ Ray get_ray(Camera cam, float s, float t){
 
 vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
 
-    float t_closest = MAX_DIST;
     Hit_record hr; hr.hit = false;
     float dist = MAX_DIST;
     vec3 p = r.orig;
     float closest_dist = MAX_DIST;
     float current_t = 0.0;
     vec4 tmp_color;
+    Sphere S_hit;
     int object_index; // 0: Ground, 1: Julia, 2: Mandelbub, 3: Mandelbrot
 
     // Ray Marching
@@ -528,9 +526,25 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
         // Distancia al plano
 
+        closest_dist = MAX_DIST;
+/*
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == num_spheres) break;
+            dist = get_dist_sphere(p, S[i]);
+            if(dist < closest_dist) {
+                closest_dist = dist;
+                object_index = i;
+                S_hit = S[i];
+            }
+        }*/
+
         dist = get_dist_plane(p, ground);
-        closest_dist = dist;
-        object_index = 0;
+        if(dist < closest_dist) {
+            closest_dist = dist;
+            object_index = num_spheres;
+        }
+
+        
 
         Sphere bounding_sphere;
         bounding_sphere.center = vec3(0.0, 0.0, 0.0);
@@ -560,8 +574,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
             hr.t = current_t;
             hr.p = ray_at(r, hr.t);
 
-            if(object_index == 0){      // r hits the ground
-                hr.normal = vec3(0.0, 1.0, 0.0); //normalize(ground.normal);
+            if(object_index == num_spheres){      // r hits the ground
+                hr.normal = normalize(ground.normal);
 
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
@@ -572,12 +586,20 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 hr.mat = ground_material;
 
-                // Is it in any set shadow?
-                float shadow = multi_light_shadow(hr.p, lights, num_lights);
-                return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
-            }
+                return evaluate_lighting_model(lights, num_lights, hr);
 
-            hr.mat = S[0].mat; // TODO Crear un material
+                // Is it in any set shadow?
+                //float shadow = multi_light_shadow(hr.p, lights, num_lights);
+                //return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
+            }
+/*
+            else {      // r hits a sphere
+                hr.normal = calculate_normal_sphere(hr.p, S_hit);
+                hr.mat = fractal_material;
+                return evaluate_lighting_model(lights, num_lights, hr);
+            }*/
+
+           hr.mat = fractal_material; // TODO Crear un material
 
             if(object_index == 1)     // r hits Mandelbub
                 hr.normal = calculate_normal_mandelbub(hr.p);
@@ -596,14 +618,11 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
         if(current_t >= MAX_DIST) break;
     }
-
-
-    if(!hr.hit) {
-        // r does not hit nothing
-        vec3 unit_direction = normalize(r.dir);
-        float t = 0.5*(unit_direction.y + 1.0);
-        tmp_color = vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
-    }
+    
+    // r does not hit nothing
+    vec3 unit_direction = normalize(r.dir);
+    float t = 0.5*(unit_direction.y + 1.0);
+    tmp_color = vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
     
     
     return tmp_color;
@@ -637,10 +656,15 @@ void main() {
     ground_material.kd = vec4(0.0, 0.0, 0.0, 1.0);
     ground_material.sh = 1.0;
 
-    // Sphere
-    Sphere S[ARRAY_TAM];
-    S[0].center = vec3(0.0, 0.0, 0.0); S[0].radius = 1.0 ; S[0].mat = fractal_material;
-    S[1].center = vec3(1.0, 0.0, 2.0); S[1].radius = 1.0 ; S[1].mat = fractal_material;
+    // Spheres
+    int num_spheres = 4;
+    Sphere world[ARRAY_TAM];
+    Sphere S1, S2, S3, S4;
+    S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5; S1.mat = fractal_material;
+    S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0; S2.mat = fractal_material;
+    S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5; S3.mat = fractal_material;
+    S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0; S4.mat = fractal_material;
+    world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
     // Ground
     Plane ground;
@@ -673,7 +697,7 @@ void main() {
 
     // No antiliasing
     Ray r = get_ray(cam, u, v);
-    gl_FragColor = ray_color(r, S, 2, ground, lights, num_lights);
+    gl_FragColor = ray_color(r, world, num_spheres, ground, lights, num_lights);
 
     // Antiliasing
     /*

@@ -418,4 +418,142 @@ Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, 
     \end{algorithmic}
 \end{algorithm}
 
-%Una vez tenemos claro el procedimiento necesario para calcular esta distancia, la implementación es bastante sencilla. Basta con programar funciones que calculen la SDF y sustituir las llamadas a \verb|get_dist_sphere| por una llamada a dicha función.
+\subsection{Implementación en GLSL}
+
+Tenemos por tanto ya la forma de calcular tanto la distancia de un punto al conjunto de Julia de un $c\in\H$ fijo como un método para calcular la normal a la superficie del fractal en un punto, dos de hecho. Es por tanto momento de la implementación. Basta con programar funciones que calculen la SDF y sustituir las llamadas a \verb|get_dist_sphere| por una llamada a dicha función, y una vez se conoce el punto de intersección calcular la normal y evaluar el modelo de iluminación.
+
+De manera natural, igual que identificamos un cuaternio con un elemento de $\R^4$ utilizaremos el tipo \verb|vec4| para representar a los mismos en GLSL. Recordemos que en este caso es la última componente la parte real del cuaternio.
+
+\begin{lstlisting}
+vec4 q; // Representa un cuaternio (x,y,z,w)
+// q = xi + yj + zk + w
+\end{lstlisting}
+
+Si ahora seguimos la ecuación (\ref{eq:cuadrado-cuaternio}) podemos rápidamente implementar una función que dado un cuaternio calcule su cuadrado.
+
+\begin{lstlisting}
+// Dado un cuaternio q, calcula su cuadrado q^2
+vec4 quat_square(vec4 q){
+    vec3 xyz = 2.0*q.w*q.xyz;
+    float w = q.w*q.w - dot(q.xyz, q.xyz);
+    return vec4(xyz, w);
+}
+\end{lstlisting}
+
+Por lo que gracias a esta función y a la aritmética ya programada es sencillo programar la función $P_c(q)=q^2+c$. Utilizamos una función para iterar el cuaternio asociado a un punto $p$, aprovechando la posibilidad que nos ofrece GLSL de simular el paso de parámetros por referencia mediante las variables \verb|out| e \verb|inout|. En el último caso, una función recibe un parámetro y en caso de que su valor cambie éste mantiene su valor tras el retorno de la función. El código de la función es 
+\begin{lstlisting}
+// Itera la funcion P_c y obtiene tanto q_n como |q'_n|
+// q: Cuaternio que se itera
+// dq: Sucesion |q'_n|
+// c: Constante fija de P_c asociada al conjunto de Julia
+void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
+    for(int i = 0; i < MAX_STEPS; i++) {
+        dq = 2.0 * length(q) * dq;
+        q = quat_square(q) + c;     // P_c(q) = q^2 +c
+        if(dot(q, q) > 256.0) break;    // |q| es grande
+    }
+}
+\end{lstlisting}
+
+Fíjese que esta función itera un cuaternio mediante la función $P_c(q)$ y a la vez calcula la sucesión recurrente $|q'_{i+1}|=2|q_n||q'_n|$. Por tanto, el cálculo de la distancia de un punto $p$ al conjunto $\mathcal{J}_c$ se reduce a identificar $p\in\R^3$ con un cuaternio $q\in\H$, iterar $q$ y $|q'|$ teniendo en cuenta que la iteración de $q'$ comienza en $1$ y aplicar la función (\ref{eq:SDF-Julia}).
+
+\begin{lstlisting}
+float get_dist_julia(vec3 p, vec4 c) {
+    float dist;
+    vec4 q = vec4(p.y, p.z, 0.0, p.x);
+    float dq = 1.0;     // q'_0 = 1
+    iterate_julia(q, dq, c);
+    float length_q = length(q);
+    return 0.5*length_q * log(length_q) / dq;
+}
+\end{lstlisting}
+
+Y ya tenemos implementada la SDF de Julia. únicamente resta un método para calcular normales. Como hemos presentado dos, implementaremos los dos, utilizando ahora compilación condicional mediante macros para decidir cuál emplear. Tan solo tenemos que implementar los algoritmos \ref{alg:normal-gradiente-sdf} y \ref{alg:normal-tetraedro}. % TODO Seguimos con esto?
+
+\begin{lstlisting}
+// Calcula la normal al conjunto J_c en el punto p
+vec3 calculate_normal_julia(vec3 p, vec4 c) {
+    vec3 N;
+    float h = u_epsilon;
+
+    #if NORMAL == 0
+    // Gradiente de la SDF
+    vec4 qp = vec4(p.y, p.z, 0.0, p.x);
+    float gradX, gradY, gradZ;
+    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, h )).wxy;
+    vec3 gy1 = (qp - vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gy2 = (qp + vec4( h, 0.0, 0.0, 0.0 )).wxy;
+    vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
+    
+    gradX = (get_dist_julia(gx2,c) - get_dist_julia(gx1,c))/(2.0*h);
+    gradY = (get_dist_julia(gy2,c) - get_dist_julia(gy1,c))/(2.0*h);
+    gradZ = (get_dist_julia(gz2,c) - get_dist_julia(gz1,c))/(2.0*h);
+    N = normalize(vec3( gradX, gradY, gradZ ));
+
+    #else
+    // Metodo del tetraedro
+    const vec2 k = vec2(1,-1);
+    N = normalize( k.xyy*get_dist_julia( p + k.xyy*h, c ) + 
+                   k.yyx*get_dist_julia( p + k.yyx*h, c ) + 
+                   k.yxy*get_dist_julia( p + k.yxy*h, c ) + 
+                   k.xxx*get_dist_julia( p + k.xxx*h, c ) );
+
+    #endif
+    return N;
+}
+\end{lstlisting}
+
+Y ya únicamente resta sustituir en el ray-marching las SDFs y el método para calcular normales de las esferas por el código que corresponde a los conjuntos de Julia. Para poder dinamizar el cuaternio $c\in\H$ que se considera fijo en los cálculos declaramos una variable \verb|uniform| al igual que se hizo a la hora de los conjuntos de Julia 2D. También creamos una variable global que es \verb|Material fractal_material;| que como su propio nombre indica es el material que se le asignará al objeto fractal.
+
+\begin{lstlisting}
+// Cuaternio c fijo. Visualizaremos el conjunto J_c
+uniform vec4 u_julia_set_constant;
+// Material que se asigna al fractal
+Material fractal_material
+// ...
+
+vec4 ray_color(Ray r, Plane ground, 
+    Directional_light lights[ARRAY_TAM], int num_lights) {
+
+    // ... 
+    int object_index; // 0: Ground, 1: Julia
+
+    // Ray Marching
+    for(int i = 0; i < MAX_STEPS; i++) {
+        closest_dist = MAX_DIST;
+        // Distancia al plano
+        dist = get_dist_plane(p, ground);
+        if(dist < closest_dist) {
+            closest_dist = dist;
+            object_index = 0;
+        }
+        // Distancia a Julia
+        dist = get_dist_julia(p , u_julia_set_constant);
+        if(dist < closest_dist){
+            closest_dist = dist;
+            object_index = 1;
+        }
+
+        if(closest_dist < u_epsilon){   // Hay interseccion
+            hr.hit = true;
+            hr.t = current_t;
+            hr.p = ray_at(r, hr.t);
+            if(object_index == 0){      // r hits the ground
+                // ... 
+            else {      // r hits Julia
+                hr.mat = fractal_material;
+                hr.normal = calculate_normal_julia(
+                    hr.p, u_julia_set_constant);
+            return evaluate_lighting_model(lights, num_lights, hr);
+        }
+        current_t += closest_dist;
+        p = ray_at(r, current_t);
+        if(current_t >= MAX_DIST) break;
+    }
+    // r does not hit nothing
+    // ... 
+}
+\end{lstlisting}
+
