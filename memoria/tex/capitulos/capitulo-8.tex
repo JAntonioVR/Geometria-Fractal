@@ -557,3 +557,19 @@ vec4 ray_color(Ray r, Plane ground,
 }
 \end{lstlisting}
 
+Y con esta modificación de \verb|ray_color| podemos ya visualizar conjuntos de Julia tridimensionales. Podemos también cambiar los parámetros del material para observar distintas apariencias. 
+
+En las imágenes \ref{fig:julia-3D} podemos ver algunos de los resultados que, después de este largo camino, hemos podido obtener modificando los parámetros.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+      \includegraphics[scale=0.28]{img/C8/julia-1.png} &     \includegraphics[scale=0.36]{img/C8/julia-2.png} \\
+    (a) $c=-0.12+0.75 i$ & (b) $c=0.3+1.09j+0.3k$ \\[6pt]
+    \includegraphics[scale=0.21]{img/C8/julia-3.png} &     \includegraphics[scale=0.25]{img/C8/julia-4.png} \\
+    (c) $c=0.1+0.74i+0.62j+0.14k$ & (d) $c=-0.81-0.48j-0.1k$ \\[6pt]
+    \end{tabular}
+    \caption{Conjuntos de Julia 3D para distintos $c\in\H$}
+    \label{fig:julia-3D}
+\end{figure}
+
