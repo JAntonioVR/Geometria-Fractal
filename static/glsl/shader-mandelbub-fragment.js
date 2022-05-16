@@ -271,7 +271,6 @@ void iterate_mandelbrot(inout vec4 q, inout float dq) {
 }
 
 float get_dist_mandelbrot(vec3 p) {
-    float dist;
     vec4 q = vec4(p.y, p.z, 0.0, p.x);
     float dq = 0.0;
     iterate_mandelbrot(q, dq);
@@ -284,14 +283,6 @@ vec3 calculate_normal_mandelbrot(vec3 p) {
     float h = u_epsilon;
 
     #if NORMAL == 0
-
-    const vec2 k = vec2(1,-1);
-    N = normalize( k.xyy*get_dist_mandelbrot( p + k.xyy*h) + 
-                   k.yyx*get_dist_mandelbrot( p + k.yyx*h) + 
-                   k.yxy*get_dist_mandelbrot( p + k.yxy*h) + 
-                   k.xxx*get_dist_mandelbrot( p + k.xxx*h) );
-
-    #else
 
     vec4 qp = vec4(p.y, p.z, 0.0, p.x);
     float gradX, gradY, gradZ;
@@ -306,6 +297,14 @@ vec3 calculate_normal_mandelbrot(vec3 p) {
     gradY = get_dist_mandelbrot(gy2) - get_dist_mandelbrot(gy1);
     gradZ = get_dist_mandelbrot(gz2) - get_dist_mandelbrot(gz1);
     N = normalize(vec3( gradX, gradY, gradZ ));
+
+    #else
+
+    const vec2 k = vec2(1,-1);
+    N = normalize( k.xyy*get_dist_mandelbrot( p + k.xyy*h) + 
+                   k.yyx*get_dist_mandelbrot( p + k.yyx*h) + 
+                   k.yxy*get_dist_mandelbrot( p + k.yxy*h) + 
+                   k.xxx*get_dist_mandelbrot( p + k.xxx*h) );
 
     #endif
 
@@ -353,8 +352,8 @@ float get_dist_mandelbub(vec3 p) {
     vec3 w = p;
     float dw = 1.0;
     iterate_mandelbub(w,dw);    // Iteramos w y dw
-    float m2 = dot(w,w);        // |w|^2
-    return 0.25 * log(m2) * sqrt(m2) / dw; 
+    float length_w = length(w);        // |w|
+    return 0.5*length_w * log(length_w) / dw;
 }
 
 vec3 calculate_normal_mandelbub(vec3 p) {
@@ -362,14 +361,6 @@ vec3 calculate_normal_mandelbub(vec3 p) {
     vec3 N;
     float h = u_epsilon;
     #if NORMAL == 0
-
-    const vec2 k = vec2(1,-1);
-    N= normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
-                  k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
-                  k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
-                  k.xxx*get_dist_mandelbub( p + k.xxx*h ) );
-    
-    #else
 
     vec4 qp = vec4(p.y, p.z, 0.0, p.x);
     float gradX, gradY, gradZ;
@@ -384,6 +375,14 @@ vec3 calculate_normal_mandelbub(vec3 p) {
     gradY = get_dist_mandelbub(gy2) - get_dist_mandelbub(gy1);
     gradZ = get_dist_mandelbub(gz2) - get_dist_mandelbub(gz1);
     N = normalize(vec3( gradX, gradY, gradZ ));
+    
+    #else
+
+    const vec2 k = vec2(1,-1);
+    N= normalize( k.xyy*get_dist_mandelbub( p + k.xyy*h ) + 
+                  k.yyx*get_dist_mandelbub( p + k.yyx*h ) + 
+                  k.yxy*get_dist_mandelbub( p + k.yxy*h ) + 
+                  k.xxx*get_dist_mandelbub( p + k.xxx*h ) );    
                   
     #endif
 
