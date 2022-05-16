@@ -6,7 +6,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
 
 \section{Iteración de funciones}
 \begin{definicion}
-    Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.} $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textit{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textit{órbita} $O_f(z)$ de $f$ en $z$.
+    Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.} $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textbf{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textbf{órbita} $O_f(z)$ de $f$ en $z$.
     $$
     O_f(z):=\left\lbrace z, f(z), f^2(z), \dots, f^n(z), \dots\right\rbrace.
     $$
@@ -150,7 +150,7 @@ Produciendo como resultado la imagen \ref{fig:cuencas-1}. La forma de deducir a 
 
 
 \begin{definicion}[Cuenca de atracción]
-    Definimos como \textit{cuenca de atracción} de una raíz $a\in\C$ de una función compleja $f:\C\longrightarrow\C$ (\textit{i.e.} $f(a)=0$), y denotamos como $A(a)$ al conjunto de puntos $z_0\in\C$ tales que la sucesión $\{z_n\}$ dada por $z_{n+1}=N_f(z_n)$ converge a $a$ utilizando a $z_0$ como primer valor de la sucesión. 
+    Definimos como \textbf{cuenca de atracción} de una raíz $a\in\C$ de una función compleja $f:\C\longrightarrow\C$ (\textit{i.e.} $f(a)=0$), y denotamos como $A(a)$ al conjunto de puntos $z_0\in\C$ tales que la sucesión $\{z_n\}$ dada por $z_{n+1}=N_f(z_n)$ converge a $a$ utilizando a $z_0$ como primer valor de la sucesión. 
 \end{definicion}
 
 En muchas de las funciones que trataremos ocurre que existen distintas cuencas de atracción y la distinción sobre a cuál de ellas pertenece cada punto del plano complejo es la que nos permitirá graficar imágenes fractales. Si aplicamos el mismo procedimiento antes descrito en el ejemplo \ref{ejemplo:cuencas-1} con otras funciones encontramos las imágenes \ref{fig:cuencas-raiz}.

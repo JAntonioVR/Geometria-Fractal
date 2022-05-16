@@ -78,8 +78,6 @@ Sin dejar de tener en cuenta la familia de funciones $\{P_c(z)\}_{c\in\C}$ intro
 
 A partir de estas dos definiciones, que insisten en clasificar los puntos del plano complejo entre de escape o prisioneros según su órbita, podemos introducir la definición que esperábamos.
 
-\textit{He buscado información acerca de la duda que le planteé y ya tendría material para completar formalmente este apartado. Sin embargo, creo que es un poco técnica y realmente no termino de entenderla bien. La realidad es que se define el conjunto de Julia como el conjunto de puntos en los que la dinámica es caótica y por una serie de resultados acaba siendo equivalente a estas definiciones más sencillas. Pero para llegar a eso hay que meter artillería un poco pesada y quizá un poco fuera de contexto. Podemos verlo juntos y en función decidir.}
-
 \begin{definicion}[Conjunto de Julia]
 Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota como $\mathcal{J}_c$ a la frontera de $\mathsf{E}_c$. Es en este conjunto donde las iteradas tienen un comportamiento caótico. Se denomina \textbf{conjunto de Fatou} al complemento del conjunto de Julia.
 \end{definicion}
@@ -182,6 +180,7 @@ En realidad el teorema en su versión original está enunciado para polinomios d
 Sobre la dicotomía entre qué conjuntos de Julia son conexos y cuales son polvareda surge el conocido \textbf{conjunto de Mandelbrot}, el cual adelantamos que está formado por los números complejos $c$ tales que su conjunto de Julia $\mathcal{J}_c$ es conexo. 
 
 \section{El conjunto de Mandelbrot}
+\label{section:Mandelbrot}
 
 Como ya veníamos anunciando al final de la sección \ref{section:conexos-polvaredas}, el conjunto de Mandelbrot está formado por los $c\in\C$ tales que $\mathcal{J}_c$ es conexo. La idea inicial de \textit{Benoit Mandelbrot} para graficar el conjunto que denotaremos a partir de ahora como $\mathcal{M}$ fue pintar de negro los puntos del plano cuyo conjunto de Julia fuese conexo y de blanco el resto. De entrada parece una tarea titánica graficar, para cada punto del plano (aunque realmente sería solo un subconjunto suficientemente representativo), su conjunto de Julia y decidir si éste es o no conexo, pues en algunos casos la decisión se torna muy complicada.
 
@@ -195,6 +194,7 @@ Por resumir, de momento sabemos que:
 \end{eqnarray*}
 
 \subsection{Representación gráfica del conjunto de Mandelbrot}
+\label{subsection:representacion-mandelbrot}
 
 Buscamos ahora obtener alguna figura similar a la imagen \ref{fig:mandelbrot-intro} a partir del conocimiento que tenemos de $\mathcal M$. Como ya viene siendo costumbre, la idea es dividir el plano en una cantidad finita de píxeles, asignando a cada uno un número complejo $c$ y evaluar en cada uno si la órbita en $z=0$ converge o diverge. Para tomar esta decisión nos podemos apoyar en el teorema \ref{th:escape} para probar este resultado.
 
@@ -258,6 +258,7 @@ Al igual que en el caso de los conjuntos de Julia, \textit{Mathematica} tiene un
 El conjunto de Mandelbrot es considerado por muchos como el objeto más complejo de la matemática. Además de la belleza que muestra por sí solo, los detalles de $\mathcal{M}$ esconden bonitas estructuras: bulbos, valles, antenas, copias reducidas del propio $\mathcal{M}$\dots
 
 \section{Autosimilaridad de los conjuntos de Julia y Mandelbrot}
+\label{section:autosimilaridad-julia-mandelbrot}
 
 Ya en el comienzo de este capítulo mencionamos, y en las propias imágenes presentadas se puede comprobar, que los conjuntos de Julia y el conjunto de Mandelbrot no son objetos autosimilares, no al menos en el sentido de la definición \ref{def:autosimilaridad}. Sin embargo, sí contienen regiones y detalles que son autosimilares. En esta sección presentaremos algunas de las mismas.
 
@@ -321,6 +322,7 @@ En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación d
 Hasta el momento todo lo explicado y todas las imágenes obtenidas se han basado en la familia de funciones $\{P_c(z)\}_{c\in\C}=\{z^2+c\}_{c\in\C}$. Sin embargo, y como cabe esperar, la definición de los conjuntos de Julia como conjuntos frontera entre el conjunto de puntos prisioneros y de escape es completamente válido para las iteradas de cualquier función, o mejor dicho, para cualquier familia de funciones. En esta sección trataremos de extender los conocimientos obtenidos hasta ahora a otras funciones.
 
 \subsection{Familia $\{z^N+c\}_{c\in\C}$}
+\label{subsection:julia-mandelbrot-generalizados}
 
 La extensión más natural y la que nos proporcionará resultados más llamativos consiste en cambiar el exponente de la función polinómica $P_c(z)$, a la cual ahora denotaremos como $P_{c,N}(z)=z^N+c$, con $N\geq 2$ natural para enfatizar el exponente. Es fácil comprobar que el teorema \ref{th:escape} es igual de válido con esta familia de funciones independientemente del exponente, por lo que el algoritmo sigue siendo el mismo, solo que en la función \verb|Julia| debemos cambiar el exponente. Además, la orden \verb|JuliaSetPlot| ya presentada en la sección \ref{subsection:representacion-julia} admite la posibilidad de indicarle una función arbitraria. Es esta la forma en la que hemos graficado las imágenes \ref{fig:julia-generalizados}.
 
