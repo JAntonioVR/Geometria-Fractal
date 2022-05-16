@@ -565,10 +565,15 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
-                if(modulus == 0)
+                if(modulus == 0){
+                    ground_material.kd = vec4(0.0, 0.0, 0.0, 1.0);
                     ground_material.ks = vec4(0.7, 0.7, 0.7, 1.0);
-                else
+                }
+                else{
+                    ground_material.kd = vec4(0.0, 0.0, 0.0, 1.0);
                     ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+                }
+                    
 
                 hr.mat = ground_material;
 
