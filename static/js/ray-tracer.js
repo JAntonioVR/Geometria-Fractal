@@ -26,6 +26,9 @@ function main(){
     botonReset.onclick = resetParameters;
     actualizaValorPosicion(theScene.getPosition());
 
+    const botonContador = document.querySelector("#contador");
+    botonContador.onclick = timeRedraw;
+
     const ke_input = document.querySelector("#ke");
     ke_input.value = rgbToHex(theScene.get_ke());
     ke_input.addEventListener('input', change_ke, true);
@@ -270,6 +273,13 @@ function resetParameters() {
 
 
     theScene.drawScene();
+}
+
+function timeRedraw() {
+  var start = performance.now();
+  theScene.drawScene();
+  var end = performance.now();
+  document.querySelector("#contador-valor").innerHTML = end-start;
 }
 
 function actualizaValorPosicion(posicion) {
