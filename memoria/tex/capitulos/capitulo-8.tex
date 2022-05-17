@@ -741,6 +741,7 @@ Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el con
 Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos añadiendo sombras arrojadas en el suelo y la técnica conocida como antiliasing.
 
 \subsection{Sombras arrojadas}
+\label{subsection:sombras}
 
 En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo. Es momento por tanto de graficar estas posibles sombras.
 
@@ -849,3 +850,155 @@ En este caso hemos tomado $\alpha=0$ porque con un valor más alto a penas se ha
     \caption{Sombras arrojadas por varias fuentes de luz}
     \label{fig:sombra-varias-fuentes}
 \end{figure}
+
+\subsection{Antiliasing}
+
+El \textit{antiliasing} es una técnica que nos permite suavizar las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre los píxeles, de forma que si ampliamos la imagen se vería muy pixelada.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/no-antiliasing.png}
+    \caption{Suelo antes de aplicar antiliasing}
+    \label{fig:no-antiliasing}
+\end{figure}
+
+Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un pixel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en su mayoría el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto representaría un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. La forma de solucionar este impedimento es lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del píxel y se promedie el color que devuelve cada rayo en cada píxel. Para ello, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.35]{img/C8/pixeles-sin-antiliasing.png} &
+      \includegraphics[scale=0.23]{img/C8/pixeles-con-antiliasing.png} \\    
+    (a) Sin antiliasing & (b) Con antiliasing  \\
+    \end{tabular}
+    \caption{Representación de los rayos que se lanzan a una pantalla}
+    \label{fig:pantalla-antiliasing}
+\end{figure}
+
+Por tanto, en \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
+\begin{lstlisting}
+vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
+float u = uv.x;
+float v = uv.y;
+\end{lstlisting}
+
+Por lo que ahora debemos sumarle a estas variables pequeños incrementos hasta completar el píxel. Concretamente, ahora dividimos el ancho de un píxel en $n$ intervalos, análogamente con el alto. Por tanto, el incremento sería de $h_w:=\frac{1}{image\_width\cdot n}$ en anchura y de $h_h:=\frac{1}{image\_height\cdot n}$ en altura. Pensemos que si normalizamos la pantalla a $[0,1]\times[0,1]$, entonces las dimensiones de un píxel son $\frac{1}{image\_width}\times\frac{1}{image\_height}$, y si cada dimensión la queremos dividir en $n$, hay que dividir cada dimensión por $n$, de ahí el valor del incremento.
+
+Seguidamente, creamos un array de colores, el cual tendrá $n^2$ elementos, uno por cada rayo que lancemos. Por cada posición del array calculamos la coordenada de dispositivo normalizada del punto al cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y almacenamos el valor de retorno de esta última en el array. Finalmente calculamos la media de todos los colores del array y ese es el valor que finalmente devolvemos. 
+
+La forma de, a partir del índice $i$ del array, obtener la coordenada correspondiente es imaginar que dividimos el array en $n$ grupos de $n$ componentes cada uno. Cada grupo representa una fila de puntos del píxel. Por tanto, aplicando la división entera, $i/n$ será la fila e $i\%n$ la columna. Por lo que habría que sumar $(i/n)h_w$ a la coordenada anchura inicial e $(i\%n)h_h$ para obtener la coordenada a la que lanzar el rayo.
+
+El código por tanto sería el siguiente
+
+\begin{lstlisting}
+// Antiliasing
+vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
+float u,v;
+int n_samples = 3;  // O cualquier valor
+float hw = 1.0 / (float(image_width * n_samples)),
+      hh = 1.0 / (float(image_height * n_samples));
+Ray r;
+vec4 colors[ARRAY_TAM]; 
+for(int i = 0; i < ARRAY_TAM; i++) {
+    if(i == n_samples*n_samples) break;
+    int x =  i/n_samples;
+    int y =  i - n_samples*x;
+    u = uv.x + float(x) * hw;
+    v = uv.y + float(y) * hh;
+    r = get_ray(cam, u, v);
+    colors[i] = ray_color(r, ground, lights, num_lights);
+}
+gl_FragColor = color_array_average(colors, n_samples*n_samples);
+\end{lstlisting}
+Donde la función \verb|color_array_average|, tal y como su nombre indica, calcula la media de un array de colores.
+
+Con esta modificación y fijando el valor que consideremos en \verb|n_samples| se consiguen resultados como el de la figura \ref{fig:antiliasing}. Como se puede ver, los bordes son más suaves y de mejor calidad
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/antiliasing.png}
+    \caption{Suelo tras de aplicar antiliasing}
+    \label{fig:antiliasing}
+\end{figure}
+
+El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que lanzar un único rayo por píxel, por lo que ralentiza muchísimo la ejecución, comprometiendo incluso la posibilidad de hacer ejecuciones en tiempo real. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor incluso para valores de $\varepsilon$ muy pequeños, fíjese por ejemplo en la representación de la imagen \ref{fig:julia-antiliasing}, la cual tiene una gran calidad y un alto nivel de detalle a pesar de haber usado $\varepsilon=10^{-5}$.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C8/julia-antiliasing.png}
+    \caption{Conjunto de Julia aplicando antiliasing}
+    \label{fig:julia-antiliasing}
+\end{figure}
+
+\section{Posibles optimizaciones}
+
+El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del ray-marching, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs: las esferas englobantes y la limitación de las sombras.
+
+\subsection{Esferas englobantes}
+ 
+Si se lanza un rayo que está muy lejano al conjunto que se esté visualizando o que apunta directamente al cielo o al suelo, antes de converger al suelo o diverger al cielo hay que evaluar, sobre todo en este último caso, hasta mil veces la SDF cuando realmente casi desde el principio podría saberse que no va a intersecar al conjunto. Para ahorrarnos todas estas evaluaciones podemos utilizar lo que se denominan esferas englobantes (\textit{bounding spheres}).
+
+La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente dentro de la misma. Antes de aplicar ray-marching, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
+
+Para implementar este método, hemos probado empíricamente qué radio de esfera se ajusta mejor a los conjuntos de Julia, al conjunto de Mandelbrot y al conjunto de Mandelbub, obteniendo respectivamente $2.5$, $2$ y $1.5$ respectivamente. Por tanto, ajustamos el radio de esta esfera y sólo calculamos las SDFs en caso de impacto.
+
+\begin{lstlisting}
+// Returns true if R hits S, false otherwise
+bool hit_sphere_limits( Sphere S, Ray R ){
+    vec3 oc = R.orig - S.center;
+    float a = dot(R.dir,R.dir);
+    float b = 2.0 * dot(oc, R.dir);
+	float c = dot(oc,oc) - S.radius*S.radius;
+    float discriminant = b*b - 4.0*a*c;
+    return discriminant >= 0.0;
+}
+
+vec4 ray_color(Ray r, ...) {
+    // ... 
+    Sphere bounding_sphere;
+    bounding_sphere.center = vec3(0.0, 0.0, 0.0);
+    bounding_sphere.radius = u_fractal == 1 ? 1.5 : 
+        (u_fractal == 2 ? 2.5 : 2.0);
+    bool hits_bounding_sphere = hit_sphere_limits(bounding_sphere, r);
+    
+    // Ray Marching
+    for(int i = 0; i < MAX_STEPS; i++) {
+        // Distancia al plano ... 
+        // ... 
+        // Distancia Julia/Mandelbrot/Mandelbub
+        if(hits_bounding_sphere) {
+            dist = get_dist(p)
+            // ... 
+        }
+        // ... 
+    }
+    // ...
+}
+\end{lstlisting}
+
+Y con esta simple técnica podemos optimizar bastante las escenas en las que el conjunto aparece más lejano. Sin embargo, si queremos ampliar detalles del conjunto no influiría, pues la gran mayoría de los rayos impactan con la esfera englobante. Aún así, en caso de estar cerca las iteraciones que se dan representan un número pequeño, así que mejoramos el rendimiento de una u otra forma.
+
+\subsection{Limitación de las sombras}
+
+En ciertos píxeles hay que aplicar varias veces ray-marching, es el caso de los píxeles que corresponden a puntos del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto del plano donde se produce la intersección con el rayo, aplicar ray-marching en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena. Aplicar varias veces ray-marching implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
+
+Sin embargo, pensemos que un punto del plano que esté lejano al conjunto no va a estar en la sombra salvo que el ángulo incidente sea muy horizontal, caso que ignoraremos, pues estamos usando fuentes de luz con ángulos incidentes de $45^\circ = \pi/4\ \rad$ y de $135^\circ = 3\pi/4\ \rad$. Entonces aplicaremos este posible shading únicamente en puntos que estén cercanos al conjunto. Es decir, calcularemos la primera vez la SDF y si esta nos devuelve un valor grande (mayor que 10, por ejemplo), dejaremos de ejecutar el método y devolveremos $1$. Esto se puede hacer con una ligera modificación del método \verb|one_light_shadow|.
+
+\begin{lstlisting}
+float one_light_shadow(vec3 p, Directional_light light) {
+        // ... 
+        for(int i = 0; i < MAX_STEPS; i++ ) {
+            h = get_dist(ray_at(R, t));
+            if(i == 0 && h > 10.0)  
+                // The point is too far of the set 
+                return 1.0;
+            if(h < u_epsilon)
+                return 0.0;
+            // Calculamos el nuevo factor de penumbra
+            // ... 
+            }
+        // ...
+}
+\end{lstlisting}
+
+El inconveniente es que esta mejora sólo puede aplicarse a ocasiones en las que el canvas visualice puntos lejanos al conjunto, por lo que cuando se esté graficando un detalle de un fractal puede ser poco útil. No obstante, en estos casos al haber menos puntos del plano directamente no tiene por qué ejecutarse en gran medida el código correspondiente a las sombras, por lo que hemos mejorado la eficiencia en los casos donde se ejecutaba dicho código más veces, es decir, en planos más abiertos y lejanos al conjunto.
