@@ -735,3 +735,117 @@ Con este nuevo código junto con el necesario para calcular las normales y las m
 \end{figure}
 
 Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el conjunto de Mandelbrot generalizado a cuaternios de las imágenes \ref{fig:mandelbrot-3D}. Sin embargo, recordamos que el álgebra y el rigor utilizado para visualizarlo está lejos de ser correcto, siendo aún así el resultado más llamativo hasta ahora. Este es el colofón a toda la teoría y todas las implementaciones que se han hecho desde que se inició con un cuadrado de colores en el capítulo \ref{chap:renderizacion}, pudiendo al fin observar fractales tridimensionales desde distintas perspectivas, con distintos materiales y por tanto diferentes apariencias.
+
+\section{Efectos realistas en la escena}
+
+Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos añadiendo sombras arrojadas en el suelo y la técnica conocida como antiliasing.
+
+\subsection{Sombras arrojadas}
+
+En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo. Es momento por tanto de graficar estas posibles sombras.
+
+Pensemos primero en cómo hacer notar el efecto de una única fuente de luz direccional sobre el plano. Aprovecharemos el algoritmo ray-marching para esto. El método consiste en, una vez detectada una intersección rayo-plano y conocer el punto $p$ del plano en el que se produce dicha intersección, crear un rayo en la dirección de la fuente de luz y mediante ray-marching detectar una posible intersección con el conjunto que se esté visualizando en ese momento. En caso de encontrarla, consideraremos que el punto está en la sombra provocada por dicha fuente de luz, por lo que multiplicaríamos por una constante cercana a 0 el color que calcula el modelo de iluminación, de tal forma que el color se oscurece, dando esa sensación de sombra. Crearemos entonces una función que devuelva una constante igual a $0$ si el punto está a la sombra e igual a $1$ si no. Para abreviar el código, llamamos en el siguiente código \verb|get_dist| a la SDF del objeto que se esté visualizando, la cual depende de la variable \verb|u_fractal|.
+
+\begin{lstlisting}
+float one_light_shadow(vec3 p, Directional_light light) {
+    Ray R;
+    R.orig = p; R.dir = light.dir;
+    float t = 0.0;
+    float h;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        h = get_dist(ray_at(R, t));
+        if(h < u_epsilon)
+            return 0.0;
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return 1.0;
+}
+\end{lstlisting}
+
+Sin embargo, si multiplicamos por $0$ el valor que devuelva el modelo de iluminación el resultado sería una sombra completamente negra, como en la imagen \ref{fig:sombras-feas} (a). Para evitarlo, fijaremos una constante $\alpha$ tal que ese será el valor mínimo por el cual se multiplicaría el color. Por ejemplo, si fijamos $\alpha=0.3$ y el punto está a la sombra multiplicaríamos el color que calcula el modelo de Phong por 0.3, de forma que se oscurecería el píxel pero no sería completamente negro, como en la imagen \ref{fig:sombras-feas} (b). Para ello necesitamos una transformación lineal que transforme reales en $[0,1]$ a valores en $[\alpha,1]$. La transformación deseada sería por tanto $t\mapsto\frac{t}{1-\alpha}+\alpha$. 
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.28]{img/C8/sombra-1.png} &
+      \includegraphics[scale=0.315]{img/C8/sombra-2.png} \\    
+    (a) $\alpha=0$ & (b) $\alpha=0.3$  \\
+    \end{tabular}
+    \caption{Primera forma de representar sombras}
+    \label{fig:sombras-feas}
+\end{figure}
+
+Aún así, los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén a la sombra del conjunto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con el conjunto, pasen muy cerca de él. En estos casos pondríamos los puntos del plano en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de ray-marching y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir una línea de código.
+
+\begin{lstlisting}
+float one_light_shadow(vec3 p, Directional_light light) {
+    // ... 
+    float res = 1.0; // Inicialmente 1
+    float k = 8.0; // Constante de suavizado
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        h = get_dist(ray_at(R, t));
+        if(h < u_epsilon)
+            return 0.0;
+        // Calculamos el nuevo factor de penumbra
+        res = min(res, k*h/t); 
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    float alpha = 0.3;      // Smooth constant
+    res = res/(1.0 - alpha) + alpha;
+    return res;
+}
+\end{lstlisting}
+
+La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $8$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombra-una-fuente}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy suave y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/sombra-4.png}
+    \caption{Sombra arrojada con suavizado}
+    \label{fig:sombra-una-fuente}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.335]{img/C8/sombra-3.png} &
+      \includegraphics[scale=0.35]{img/C8/sombra-5.png} \\    
+    (a) $k=2$ & (b) $k=32$  \\
+    \end{tabular}
+    \caption{Sombras con el parámetro $k=2,32$}
+    \label{fig:sombras-k}
+\end{figure}
+
+Una vez tenemos un método de representar las sombras provocadas por una única fuente de luz es momento de extender la técnica para poder representar sombras con varias fuentes de luz. Pensemos en un objeto iluminado por varias fuentes de luz. Cada una provoca su propia sombra, pero un punto del suelo puede estar en la sombra provocada por una fuente de luz mientras está iluminado por otra, que hace la sobra de la primera menos notable. La forma de simular este efecto es promediar el efecto de las distintas luces. Por ejemplo, si suponemos dos fuentes de luz:
+\begin{itemize}
+    \item Un punto que esté lejos del objeto y por tanto iluminado por las dos fuentes tendrá un factor de 1 en ambos casos, promediando 1, es decir, no hay ninguna sombra.
+    \item Si el punto está en la sombra de una fuente pero iluminado por otra tendrá un factor de 0 por la primera y de 1 por la segunda, resultando en $0.5$, es decir, una sombra moderada.
+    \item En un último caso, puede estar en la sombra de ambas, resultando un factor de $0$ en cada una de ellas, promediando $0$.
+\end{itemize}
+
+Por tanto, el código sería el siguiente:
+\begin{lstlisting}
+float multi_light_shadow(vec3 p, 
+    Directional_light[ARRAY_TAM] lights, int num_lights) {
+    float shadow = 0.0;
+    for(int i = 0; i < ARRAY_TAM; i++) {
+        if(i == num_lights) break;
+        shadow += one_light_shadow(p, lights[i]);
+    }
+    shadow /= float(lights_shading);
+    float alpha = 0.0;      // Smooth constant
+    shadow = shadow/(1.0 - alpha) + alpha;
+    return shadow;
+}
+\end{lstlisting}
+
+En este caso hemos tomado $\alpha=0$ porque con un valor más alto a penas se hacían notar las sombras. El resultado obtenido es el observable en la imagen \ref{fig:sombra-varias-fuentes}, en la cual podemos ver el efecto suavizado provocado por la interacción entre las dos fuentes de luz.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C8/sombras-final.png}
+    \caption{Sombras arrojadas por varias fuentes de luz}
+    \label{fig:sombra-varias-fuentes}
+\end{figure}
