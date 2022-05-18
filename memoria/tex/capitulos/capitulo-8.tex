@@ -9,9 +9,9 @@ Para ello, antes aún debemos asentar una serie de conceptos que son los que nos
 \section{El algoritmo Ray-Marching}
 \label{section:ray-arching}
 
-Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Aunque no tengamos una forma de calcular analíticamente la intersección, si contamos con funciones que nos estiman, fijado un punto, a qué distancia se halla este punto del fractal mediante una cota, las conocidas como SDFs (sección \ref{section:SDFs}). De igual manera, si fijamos un punto $p\in\R^3$, podemos calcular a qué distancia se encuentra dicho punto de una esfera o de un plano. 
+Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Aunque no tengamos una forma de calcular analíticamente la intersección, sí contamos con funciones que nos estiman, fijado un punto, a qué distancia se halla este punto del fractal mediante una cota, las conocidas como SDFs (sección \ref{section:SDFs}). Empezando por abajo, si fijamos un punto $p\in\R^3$, podemos calcular a qué distancia se encuentra dicho punto de una esfera o de un plano. 
 
-El algoritmo \textit{Ray-Marching}, también conocido como \textit{Sphere-Tracing} es una técnica utilizada en Ray-Tracing y que se basa en estimar la distancia a la que se encuentra un punto de cada una de las superficies que componen la escena y avanzar en el rayo una distancia correspondiente a la mínima de estas distancias, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia es lo suficientemente pequeña como para considerar que el punto interseca con la superficie. Los fundamentos matemáticos de este método y las propiedades que deben cumplir las funciones estimadoras se pueden encontrar en \cite{Hart-1995}. 
+El algoritmo \textit{Ray-Marching}, también conocido como \textit{Sphere-Tracing}, es una técnica utilizada en Ray-Tracing y que se basa en estimar la distancia a la que se encuentra un punto de cada una de las superficies que componen la escena y avanzar en el rayo una distancia correspondiente a la mínima de estas distancias, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia es lo suficientemente pequeña como para considerar que el punto forma parte de la superficie. Los fundamentos matemáticos de este método y las propiedades que deben cumplir las funciones estimadoras se pueden encontrar en \cite{Hart-1995}. 
 
 Pongamos un ejemplo. Supongamos que tenemos una escena con una esfera tangente al plano horizontal $y=0$, un rayo $R$ fijo y queremos aplicar Ray-Marching para encontrar la intersección.
 
@@ -27,8 +27,7 @@ La distancia de un punto $p$ a una esfera $S$ de centro $c$ y radio $r$ es
     \label{eq:distancia-punto-esfera}
     d(p,S) = \|p-c\| - r 
 \end{equation}
-
-y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por tanto, partiendo del origen, calculamos la distancia a la esfera y la distancia al plano, vemos que es menor la distancia al plano, por lo que avanzamos en el rayo una distancia igual a la distancia que había al plano (imagen \ref{fig:iteraciones-RM} (a)). Seguidamente repetimos la operación: volvemos a calcular la distancia a la esfera y al plano. De nuevo es menor la distancia al plano, por lo que avanzamos en el rayo la misma distancia que había en el plano (imagen \ref{fig:iteraciones-RM} (b)).
+y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por tanto, partiendo del origen, calculamos la distancia a la esfera y la distancia al plano, vemos que es menor la del plano, por lo que avanzamos en el rayo una distancia igual a la calculada para el plano (imagen \ref{fig:iteraciones-RM} (a)). Seguidamente repetimos la operación: volvemos a calcular la distancia a la esfera y al plano. De nuevo el plano es el objeto más cercano, por lo que avanzamos en el rayo la misma distancia que había hasta el plano (imagen \ref{fig:iteraciones-RM} (b)).
 
 \begin{figure}[ht]
     \centering
@@ -40,7 +39,7 @@ y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por 
     \label{fig:iteraciones-RM}
 \end{figure}
 
-Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto está en la esfera y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no intersecar con ninguna superficie se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida o un número máximo de iteraciones como parámetro del algoritmo.
+Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto está en la esfera y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no encontrar nunca una distancia suficientemente pequeña se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida y/o un número máximo de iteraciones como parámetro del algoritmo.
 
 \begin{figure}[ht]
     \centering
@@ -52,7 +51,7 @@ Si repetimos este proceso indefinidamente, llegará el momento en el que la dist
     \label{fig:finales}
 \end{figure}
 
-Por tanto, el algoritmo, si consideramos un conjunto de $objetos$, un rato $R(t)=p_0 + \vec v t$ y un número máximo de avances en el rayo antes de decidir que no existe intersección $MAX\_STEPS$, se describiría como indica el algoritmo \ref{alg:Ray-Marching}.
+Por tanto, el algoritmo, si consideramos un conjunto de $objetos$, un rayo $R(t)=p_0 + \vec v t$ y un número máximo de avances en el rayo antes de decidir que no existe intersección $MAX\_STEPS$, se describiría como indica el algoritmo \ref{alg:Ray-Marching}.
 
 \begin{algorithm}[H]
 \caption{Ray-Marching} \label{alg:Ray-Marching}
@@ -87,12 +86,12 @@ Por tanto, el algoritmo, si consideramos un conjunto de $objetos$, un rato $R(t)
 
 \begin{observacion}
 \label{observacion:vector-normalizado}
-    Cabe destacar un importante detalle, y es que a partir de este momento es indispensable que en la creación del rayo el vector dirección esté normalizado, pues si queremos avanzar $min\_dist$ unidades en la dirección $\vec v$ y $|v| \not= 1$ se avanzaría una distancia distinta y el algoritmo no funcionaría correctamente.
+    Cabe destacar un importante detalle, y es que a partir de este momento es indispensable que en la creación del rayo el vector dirección esté normalizado, pues si queremos avanzar $min\_dist$ unidades en la dirección $\vec v$ y $|v| \not= 1$ se avanzaría una distancia distinta y el algoritmo no funcionaría correctamente, véase imagen \ref{fig:vectores-no-normalizados}.
 \end{observacion}
 
 \subsection{Implementación de Ray-Marching en GLSL}
 
-Veámos ahora cómo podemos llevarnos todos estos nuevos conocimientos a la GPU con GLSL. El objetivo ahora es modificar el fragment shader eliminando la dependencia de \verb|Hit_Sphere| y de \verb|Hit_Plane| para utilizar Ray-Marching para calcular las intersecciones. Realmente el resultado de estas modificaciones debería ser el mismo que en el final del capítulo anterior, pero ahora calcularemos las intersecciones de forma distinta. 
+Veámos ahora cómo podemos llevarnos todos estos nuevos conocimientos a la GPU con GLSL. El objetivo ahora es modificar el fragment shader eliminando la dependencia de \verb|Hit_Sphere| y de \verb|Hit_Plane| para utilizar Ray-Marching en el momento de calcular las intersecciones. Realmente el resultado de estas modificaciones debería ser el mismo que en el final del capítulo anterior, pero ahora encontraremos las intersecciones del rayo de forma distinta. 
 
 Lo primero que necesitaremos es una función que calcule la distancia de un punto a una esfera $S$. Esto es tan sencillo como implementar una función que calcule la fórmula \ref{eq:distancia-punto-esfera}.
 
@@ -131,7 +130,7 @@ Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones
     #define MAX_STEPS 1000
 \end{lstlisting}
 
-Y ya tenemos todo preparado para implementar el Ray-Marching. La función que dado un rayo calcula posibles intersecciones con los cuerpos y asigna un color en función es \verb|ray_color|, por lo que lo más natural es editar el código de esta función. En lugar de llamar a \verb|hit_sphere_list| y \verb|hit_plane| como hicimos en la sección \ref{subsection:plano} aplicaremos Ray-Marching. Como GLSL no nos permite mantener un array heterogéneo en el que almacenar todos los objetos independientemente de su tipo, tenemos que hacerlo de forma secuencial. Y como tampoco permite acceder a elementos de un array a partir de índices no constantes, utilizaremos una variable donde almacenar la esfera más cercana, para recuperarla en caso de intersección, véase el código.
+Y ya tenemos todo preparado para implementar el Ray-Marching. La función que dado un rayo calcula posibles intersecciones con los cuerpos y asigna un color es \verb|ray_color|, por lo que lo más natural es editar el código de esta función. En lugar de llamar a \verb|hit_sphere_list| y \verb|hit_plane| como hicimos en la sección \ref{subsection:plano} aplicaremos Ray-Marching. Como GLSL no nos permite mantener un array heterogéneo en el que almacenar todos los objetos independientemente de su tipo, tenemos que hacerlo de forma secuencial. Y como tampoco permite acceder a elementos de un array a partir de índices no constantes, utilizaremos una variable donde almacenar la esfera más cercana, para recuperarla en caso de intersección, véase el código.
 
 \begin{lstlisting}
 vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, 
@@ -219,12 +218,13 @@ Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser
 \end{figure}
 
 \subsection{Comentarios sobre Ray-Marching}
+\label{subsection:comentarios}
 
-Una vez hemos introducido e implementado el algoritmo Ray-Marching, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular aplicar ray-marching ralentiza el procesado. Sin embargo muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
+Una vez hemos introducido e implementado el algoritmo Ray-Marching, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos, cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular, aplicar ray-marching ralentiza el procesado. Sin embargo, muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
 
-Sin embargo, ray-marching sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto. A partir de un rayo y dichas funciones se puede aplicar ray-marching, de forma que se converge finalmente al punto de intersección. Por contra, si buscamos intersecciones analíticas hay que resolver ecuaciones, en ocasiones para acabar aproximando las soluciones, y retener la más pequeña.
+Sin embargo, ray-marching sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto y esta cota disminuya conforme el rayo se acerca al conjunto (condición de Lipschitz). A partir de un rayo y dichas funciones se puede aplicar ray-marching, de forma que se converge finalmente al punto de intersección. Por contra, si buscamos intersecciones analíticas hay que resolver ecuaciones, en ocasiones para acabar aproximando las soluciones, y retener la más pequeña.
 
-Un aspecto a destacar de ray-marching es la dependencia de sus parámetros. Es importante fijar un valor $\varepsilon$ adecuado, ya que si es demasiado grande puede brindarnos resultados muy pobres. En la imagen \ref{fig:esferas-RM} se ha utilizado $\varepsilon=0.001$ y nos da un resultado muy bueno, pero obsérvese en la imagen \ref{fig:epsilon-grande} qué ocurre si se fija $\varepsilon=0.1$. Los límites de los cuadrados del suelo se distorsionan y las apariencias de las esferas también se ven muy resentidas. Sin embargo es cierto que a mayor valor de $\varepsilon$ menos iteraciones y por tanto más velocidad, pero los resultados son peores. Es por tanto necesario utilizar valores de $\varepsilon$ adecuados a la situación, siendo suficientemente pequeños como para obtener un buen resultado pero suficientemente grandes como para que sea computacionalmente viable.
+Un aspecto a destacar de ray-marching es la dependencia de sus parámetros. Es importante fijar un valor $\varepsilon$ adecuado, ya que si es demasiado grande puede brindarnos resultados muy pobres. En la imagen \ref{fig:esferas-RM} se ha utilizado $\varepsilon=0.001$ y nos da un resultado muy bueno, pero obsérvese en la imagen \ref{fig:epsilon-grande} qué ocurre si se fija $\varepsilon=0.1$. Los límites de los cuadrados del suelo se distorsionan y las apariencias de las esferas también se ven muy resentidas. No obstante, es cierto que a mayor valor de $\varepsilon$ menos iteraciones y por tanto más velocidad, pero los resultados son peores. Es por tanto necesario utilizar valores de $\varepsilon$ adecuados a la situación, siendo suficientemente pequeños como para obtener un buen resultado pero suficientemente grandes como para que sea computacionalmente viable.
 
 \begin{figure} [ht]
     \centering
@@ -302,10 +302,10 @@ Nótese que estamos denotando como componente real a $w$, la última de la terna
     \end{split}
 \end{equation}
 
-Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = q_x\cdot i + q_y\cdot j + q_z \cdot k + q_w\cong (q_x,q_y,q_z,q_w)$ y $q' = q'_x\cdot i + q'_y\cdot j + q'_z \cdot k + q'_w\cong (q'_x,q'_y,q'_z,q'_w)$ es expandiendo la expresión
+Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = q_x i + q_y j + q_z k + q_w\cong (q_x,q_y,q_z,q_w)$ y $q' = q'_x i + q'_y j + q'_z  k + q'_w\cong (q'_x,q'_y,q'_z,q'_w)$ es expandiendo la expresión
 
 \begin{equation}
-    qq' = (q_x\cdot i + q_y\cdot j + q_z \cdot k + q_w)(q'_x\cdot i + q'_y\cdot j + q'_z \cdot k + q'_w) 
+    qq' = (q_x i + q_y j + q_z k + q_w)(q'_x i + q'_y j + q'_z k + q'_w) 
 \end{equation}
 
 Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{xyz},q_w), q'=(q'_{xyz},q_w)$, agrupando términos y aplicando las relaciones \ref{eq:relaciones-cuaternios} el resultado puede expresarse mediante productos vectoriales y escalares:
@@ -317,7 +317,7 @@ Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{xyz},q_w), q
     \end{split}
 \end{equation}
 
-Aplicando estas relaciones podemos deducir el cuadrado de un cuaternio con tan solo multiplicar un cuaternio $q$ por sí mismo, obteniendo
+Aplicando estas relaciones podemos deducir el cuadrado de un cuaternio con tan solo multiplicarlo por sí mismo, obteniendo
 
 \begin{equation}
     \label{eq:cuadrado-cuaternio}
@@ -348,15 +348,15 @@ Sin embargo, es claro que no podemos visualizar conjuntos en 4D de forma tan dir
     \label{fig:curva-de-nivel}
 \end{figure}
 
-En nuestro contexto, podemos fijar una dimensión y visualizar el conjunto de Julia para las otras tres, pudiendo modificar después la dimensión que hemos fijado. 
+En nuestro contexto, podemos fijar una dimensión y visualizar el conjunto de Julia para las otras tres. 
 
-Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La manera más natural es identificar $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias. Es decir,
+Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La manera más natural es identificar $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias, fijando a $0$ la tercera componente imaginaria ($k$). Es decir,
 \begin{equation}
     p=(x,y,z)\cong q = x + yi + zj \cong (y,z,0,x)
 \end{equation}
 Tengamos en cuenta que en principio los rayos van a partir de un punto que está fuera del conjunto de Julia, es decir, al iterar la función $P_c$ la sucesión va a ser divergente, por lo que la SDF nos debe de dar una distancia positiva. La idea es que cada vez nos dé un valor menor conforme nos acerquemos a $\mathcal{J}_c$ hasta prácticamente anularse en caso de que el rayo interseque con el conjunto. 
 
-Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta distancia al conjunto, de forma que si tras cierto número $M$ de iteraciones el módulo de la iterada $|P_c^M(q)|$ no es suficientemente grande consideraremos que el punto es convergente, aunque esto probablemente nunca ocurra durante el proceso de ray-marching, pues se evaluarán puntos que están en el conjunto de puntos de escape, en búsqueda de esta frontera. Es decir, iteramos el punto con una amplia posibilidad de que antes o después la $n$-ésima iterada tenga un módulo grande. Denotamos como $q_n=P_c^n(q)$ a esta $n$-ésima iterada. A partir de este valor, definimos la SDF del conjunto de Julia como 
+Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta distancia al conjunto, de forma que si tras cierto número $M$ de iteraciones el módulo de la iterada $|P_c^M(q)|$ no es suficientemente grande consideraremos que el punto es convergente, aunque esto probablemente ocurra únicamente si se evalúa en un punto muy cercano a la superficie del conjunto. Es decir, iteramos el punto con una amplia posibilidad de que antes o después la $n$-ésima iterada tenga un módulo grande, y en caso contrario la iterada convergerá a algún valor tras las $M$ iteraciones. Denotamos como $q_n=P_c^n(q)$ a esta $n$-ésima iterada. A partir de este cuaternio, definimos la SDF del conjunto de Julia como 
 \begin{equation}
     \label{eq:SDF-Julia}
     \begin{split}
@@ -365,16 +365,16 @@ Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta dista
     \end{split}
 \end{equation}
 
-donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$. Intuitivamente, fíjese que realmente es una forma iterativa de aplicar la derivada de (\ref{eq:f-julia-cuaternios})
+donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$\footnote{El módulo de un cuaternio es $|xi+yj+zk+w|=\sqrt{x^2+y^2+z^2+w^2}$}. Intuitivamente, fíjese que realmente es una forma iterativa de aplicar la derivada de (\ref{eq:f-julia-cuaternios})
 
 Es difícil explicar y entender la génesis de esta fórmula, aunque los detalles matemáticos concretos pueden encontrarse en \cite[Capítulo 8]{Hubbard-Douady}. 
 
-Es decir, iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$.
+Sabemos hasta ahora que iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$.
 
 \subsection{Aproximando la normal}
 \label{subsection:normal-sdf}
 
-Teniendo esta estimación de la distancia podemos calcular el posible punto de intersección de un rayp con $\mathcal{J}_c$, pero si queremos evaluar el modelo de iluminación en dicho punto, antes necesitamos conocer la normal a la superficie en dicho punto. Y aquí es donde tenemos que afrontar la dificultad que supone la propia belleza de los fractales, que es su irregularidad y que su superficie en general no es diferenciable. No existen formas de calcular de forma exacta esta normal, pero en realidad nosotros estamos fijando una resolución que limita el nivel de detalle de la figura, por lo que podemos utilizar ciertos métodos para aproximar esta normal.
+Teniendo esta estimación de la distancia podemos calcular el posible punto de intersección de un rayo con $\mathcal{J}_c$, pero si queremos evaluar el modelo de iluminación en dicho punto, antes necesitamos conocer la normal a la superficie en dicho punto. Y aquí es donde tenemos que afrontar la dificultad que supone la propia belleza de los fractales, que es su irregularidad y que su superficie en general no es diferenciable. No existen formas de calcular de forma exacta esta normal, pero en realidad nosotros estamos fijando una resolución que limita el nivel de detalle de la figura, por lo que podemos utilizar ciertos métodos para aproximar esta normal.
 
 \subsubsection{Método 1: Gradiente de la SDF}
 
@@ -402,7 +402,7 @@ En realidad debería tomarse en cada componente del gradiente la diferencia divi
 
 \subsubsection{Método 2: Técnica del tetraedro}
 
-Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
+Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces una aproximación de la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
 
 \begin{algorithm}[H]
     \caption{Técnica del tetraedro para el cálculo de normales} \label{alg:normal-tetraedro}
@@ -441,26 +441,27 @@ vec4 quat_square(vec4 q){
 }
 \end{lstlisting}
 
-Por lo que gracias a esta función y a la aritmética ya programada es sencillo programar la función $P_c(q)=q^2+c$. Utilizamos una función para iterar el cuaternio asociado a un punto $p$, aprovechando la posibilidad que nos ofrece GLSL de simular el paso de parámetros por referencia mediante las variables \verb|out| e \verb|inout|. En el último caso, una función recibe un parámetro y en caso de que su valor cambie éste mantiene su valor tras el retorno de la función. El código de la función es 
+Por lo que gracias a esta función y a la aritmética ya programada es sencillo programar la función $P_c(q)=q^2+c$. Utilizamos una función para iterar el cuaternio asociado a un punto $p$, aprovechando la posibilidad que nos ofrece GLSL de simular el paso de parámetros por referencia mediante las variables \verb|out| e \verb|inout|. En el último caso, una función recibe un parámetro y en caso de que su valor cambie durante la ejecución éste mantiene su valor tras el retorno de la función. El código es 
 \begin{lstlisting}
 // Itera la funcion P_c y obtiene tanto q_n como |q'_n|
 // q: Cuaternio que se itera
 // dq: Sucesion |q'_n|
 // c: Constante fija de P_c asociada al conjunto de Julia
 void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
-    for(int i = 0; i < MAX_STEPS; i++) {
+    for(int i = 0; i < 50; i++) {   // 50 son suficientes
         dq = 2.0 * length(q) * dq;
         q = quat_square(q) + c;     // P_c(q) = q^2 +c
-        if(dot(q, q) > 256.0) break;    // |q| es grande
+        if(dot(q, q) > 64.0) break;    // |q| es grande
     }
 }
 \end{lstlisting}
 
-Fíjese que esta función itera un cuaternio mediante la función $P_c(q)$ y a la vez calcula la sucesión recurrente $|q'_{i+1}|=2|q_n||q'_n|$. Por tanto, el cálculo de la distancia de un punto $p$ al conjunto $\mathcal{J}_c$ se reduce a identificar $p\in\R^3$ con un cuaternio $q\in\H$, iterar $q$ y $|q'|$ teniendo en cuenta que la iteración de $q'$ comienza en $1$ y aplicar la función (\ref{eq:SDF-Julia}).
+Fíjese que esta función itera un cuaternio mediante la función $P_c(q)$ y a la vez calcula la sucesión recurrente $|q'_{i+1}|=2|q_n||q'_n|$. 
+
+Por tanto, el cálculo de la distancia de un punto $p$ al conjunto $\mathcal{J}_c$ se reduce a identificar $p\in\R^3$ con un cuaternio $q\in\H$, iterar $q$ y $|q'|$ teniendo en cuenta que la iteración de $q'$ comienza en $1$ y aplicar la función (\ref{eq:SDF-Julia}).
 
 \begin{lstlisting}
-float get_dist_julia(vec3 p, vec4 c) {
-    float dist;
+float get_dist_julia(vec3 p, vec4 c) { 
     vec4 q = vec4(p.y, p.z, 0.0, p.x);
     float dq = 1.0;     // q'_0 = 1
     iterate_julia(q, dq, c);
@@ -472,6 +473,7 @@ float get_dist_julia(vec3 p, vec4 c) {
 Y ya tenemos implementada la SDF de Julia. únicamente resta un método para calcular normales. Como hemos presentado dos, implementaremos los dos, utilizando ahora compilación condicional mediante macros para decidir cuál emplear. Tan solo tenemos que implementar los algoritmos \ref{alg:normal-gradiente-sdf} y \ref{alg:normal-tetraedro}. % TODO Seguimos con esto?
 
 \begin{lstlisting}
+#define NORMAL 0 // O 1
 // Calcula la normal al conjunto J_c en el punto p
 vec3 calculate_normal_julia(vec3 p, vec4 c) {
     vec3 N;
@@ -581,7 +583,7 @@ $$
 \mathcal{M}=\{c\in\C : \{P_c^n(0)\}\not\rightarrow\infty\}
 $$
 
-Por tanto, la manera de iterar $q$ y $q'$ cambia levemente. En lugar de utilizar $q$ como semilla e iterar $q^2+c$ con un $c\in\H$ fijo, utilizaremos a $0$ como semilla e iteraremos $q^2+c$ con $c=q$ inicial. La iteración de $|q'|$ también cambia, ya que intuitivamente la derivada de la función que iteramos es $2qq'+1$, por lo que ahora la sucesión sería $|q'_{i+1}|=2|q_i||q'_i|+1$, con $q'_0=0$. Puede consultarse una explicación más detallada de esta diferencia en \cite{distance-fractals}.Finalmente, tras suficientes iteraciones, se obtienen los valores $q_n$ y $q'_n$ necesarios en la SDF.
+Por tanto, la manera de iterar $q$ y $q'$ cambia levemente. En lugar de utilizar un cuaternio $q_0$ como semilla e iterar $q^2+c$ con un $c\in\H$ fijo, utilizaremos a $0$ como semilla e iteraremos $q^2+c$ con $c=q_0$. La iteración de $|q'|$ también cambia, ya que intuitivamente la derivada de la función que iteramos es $2qq'+1$, por lo que ahora la sucesión sería $|q'_{i+1}|=2|q_i||q'_i|+1$, con $q'_0=0$. Puede consultarse una explicación más detallada de esta diferencia en \cite{distance-fractals}.Finalmente, tras suficientes iteraciones, se obtienen los valores $q_n$ y $q'_n$ necesarios en la SDF.
 
 \begin{lstlisting}
 // Itera la funcion P_c y obtiene tanto q_n como |q'_n|
@@ -590,10 +592,10 @@ Por tanto, la manera de iterar $q$ y $q'$ cambia levemente. En lugar de utilizar
 void iterate_mandelbrot(inout vec4 q, inout float dq) {
     vec4 c = q;     // Constante inicialmente igual a q
     q = vec4(0.0);  // Semilla inicial
-    for(int i = 0; i < MAX_STEPS; i++) {
+    for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq + 1.0;
         q = quat_square(q) + c;
-        if(dot(q, q) > 256.0) break;
+        if(dot(q, q) > 64.0) break;
     }
 }
 \end{lstlisting}
@@ -636,13 +638,13 @@ Tras esta pequeña modificación y darle a \verb|u_fractal| el valor $2$ mediant
     \label{fig:mandelbrot-3D}
 \end{figure}
 
-Hay que reconocer que el resultado es un poco decepcionante, parecería un cuerpo generado por la revolución de la frontera del conjunto de Mandelbrot en torno al eje $X$.
+Hay que reconocer que el resultado es un poco decepcionante, parecería un cuerpo generado por la revolución de la frontera del conjunto de Mandelbrot 2-dimensional en torno al eje $X$.
 
 \section{El conjunto de Mandelbub}
 
 Gracias a los cuaternios hemos podido generalizar la definición de los números complejos a 4D y visualizar en 3D proyecciones de los conjuntos de Julia y el conjunto de Mandelbrot. Sin embargo, la apariencia del conjunto de Mandelbrot nos ha dejado un mal sabor de boca, y es que dista bastante de la belleza que nos ofrecía $\mathcal{M}$ en dos dimensiones. En realidad, a día de hoy no se ha conseguido ninguna generalización matemáticamente correcta que posea la complejidad y la belleza del conjunto de Mandelbrot en 2D, aunque ha habido varios intentos. El conjunto de Mandelbub es uno de estos intentos. Es una generalización tridimensional del conjunto de Mandelbrot alejada del álbegra que ofrecen cuaternios, hipercomplejos y otros tipos de álgebras, a veces inconsistentes. 
 
-Pensemos en $P_c(z)=z^2+c$, esta vez con $z,c\in\C$ como la operación que, dado un complejo $z$ multiplica su módulo por sí mismo, duplica su argumento y suma una cierta constante $c$. Si recurrimos en 3D a las coordenadas esféricas, las cuales identifican un punto $p\in\R^3$ mediante su módulo $r$, el ángulo que forma con el eje $X$ $\phi$ y el ángulo que forma con el plano $y=0$ $\theta$, podemos extender esta operación. El procedimiento sería pasar el punto $(x,y,z)$ de coordenadas cartesianas a esféricas $(r,\phi,\theta)$, elevar al cuadrado $r$, duplicar $\phi$ y $\theta$ y devolver a coordenadas cartesianas. Es decir, tendríamos la composición 
+Pensemos en $P_c(z)=z^2+c$, esta vez con $z,c\in\C$ como la operación que, dado un complejo $z$ multiplica su módulo por sí mismo, duplica su argumento y suma una cierta constante $c$. Si recurrimos en 3D a las coordenadas esféricas, las cuales identifican un punto $p\in\R^3$ mediante su módulo $r$, el ángulo que forma con el eje $X$ ($\phi$) y el ángulo que forma con el plano $y=0$ ($\theta$), podemos extender esta operación. El procedimiento sería pasar el punto $(x,y,z)$ de coordenadas cartesianas a esféricas $(r,\phi,\theta)$, elevar al cuadrado $r$, duplicar $\phi$ y $\theta$ y devolver a coordenadas cartesianas. Es decir, tendríamos la composición 
 
 $$
 (x,y,z)\longmapsto(r,\phi,\theta)\longmapsto(r^2,2\phi,2\theta)\longmapsto(x',y',z')
@@ -671,7 +673,7 @@ Una vez $w$ y $|w'|$ han sido suficientemente iteradas, tenemos el punto $w_n$ y
 
 Como dijimos anteriormente, el método del gradiente de la SDF y el método del tetraedro descritos en la sección \ref{subsection:normal-sdf} son igualmente válidos para cualquier superficie supuesta conocida su SDF. Por lo que podemos también calcular las normales al conjunto de Mandelbub a partir de estos métodos.
 
-La implementación necesaria para la visualización del conjunto de Mandelbub se basa en programar la función $f$ (la transformación \ref{eq:f-Mandelbub}), una función que itere un punto concreto y la sucesión de `derivadas', y una que invoque a la iteración y calcule la estimación de la distancia y una que calcule las normales.
+La implementación necesaria para la visualización del conjunto de Mandelbub se basa en programar la función $f$ (la transformación \ref{eq:f-Mandelbub}), una función que itere un punto concreto y la sucesión de `derivadas', una que invoque a la iteración y calcule la estimación de la distancia y otra que calcule las normales.
 
 Respecto de la primera, podemos aprovechar que la GPU es muy rápida calculando funciones trigonométricas. Existen alternativas polinómicas que evitan el uso de trigonometría, la cual suele ser lenta en CPU, pero como en GPU suelen ser más rápidas, haremos uso de estas. 
 \begin{lstlisting}
@@ -692,7 +694,7 @@ vec3 f_Mandelbub(vec3 w, vec3 c) {
 }
 \end{lstlisting}
 
-Seguidamente, una función que invoque a \verb|f_Mandelbub| para iterar \verb|w| y \verb|dw|. Puede llamar la atención que en este caso se rompa el bucle cuando la longitud supera el valor 2 en contraste con los 16 que se utilizan en los conjuntos de Julia y Mandelbrot, pero se ha comprobado empíricamente que de esta forma los resultados son óptimos.
+Seguidamente, una función que invoque a \verb|f_Mandelbub| para iterar \verb|w| y \verb|dw|. Puede llamar la atención que en este caso se rompa el bucle cuando la longitud supera el valor 2 en contraste con los 8 que se utilizan en los conjuntos de Julia y Mandelbrot, pero se ha comprobado empíricamente que de esta forma los resultados son óptimos. Además 10 iteraciones a lo sumo son también suficientes, ya que elevar el módulo a $8$ es una transformación que en general cambia muchísimo los valores por lo que la convergencia o divergencia es rápida.
 
 \begin{lstlisting}
 // Itera un punto de R^3 segun la funcion f_Mandelbub y
@@ -700,7 +702,7 @@ Seguidamente, una función que invoque a \verb|f_Mandelbub| para iterar \verb|w|
 void iterate_mandelbub(inout vec3 w, inout float dw){
     float m;
     vec3 c = w;
-    for(int i = 0; i < MAX_STEPS; i++) {
+    for(int i = 0; i < 10; i++) {
         m = length(w);      // |z|
         dw = 8.0*m*m*m*m*m*m*m*dw + 1.0; // 8*|z|^7*z' + 1.0
         w = f_Mandelbub(w,c);   // w_n^8 + w_0
@@ -853,7 +855,7 @@ En este caso hemos tomado $\alpha=0$ porque con un valor más alto a penas se ha
 
 \subsection{Antiliasing}
 
-El \textit{antiliasing} es una técnica que nos permite suavizar las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre los píxeles, de forma que si ampliamos la imagen se vería muy pixelada.
+El \textit{antiliasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
 
 \begin{figure} [ht]
     \centering
@@ -862,7 +864,7 @@ El \textit{antiliasing} es una técnica que nos permite suavizar las imágenes p
     \label{fig:no-antiliasing}
 \end{figure}
 
-Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un pixel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en su mayoría el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto representaría un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. La forma de solucionar este impedimento es lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del píxel y se promedie el color que devuelve cada rayo en cada píxel. Para ello, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
+Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un pixel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en su mayoría el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. La forma de solucionar este impedimento es lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve cada rayo en cada uno de los puntos. Para ello, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
 
 \begin{figure}[ht]
     \centering
@@ -882,11 +884,11 @@ float u = uv.x;
 float v = uv.y;
 \end{lstlisting}
 
-Por lo que ahora debemos sumarle a estas variables pequeños incrementos hasta completar el píxel. Concretamente, ahora dividimos el ancho de un píxel en $n$ intervalos, análogamente con el alto. Por tanto, el incremento sería de $h_w:=\frac{1}{image\_width\cdot n}$ en anchura y de $h_h:=\frac{1}{image\_height\cdot n}$ en altura. Pensemos que si normalizamos la pantalla a $[0,1]\times[0,1]$, entonces las dimensiones de un píxel son $\frac{1}{image\_width}\times\frac{1}{image\_height}$, y si cada dimensión la queremos dividir en $n$, hay que dividir cada dimensión por $n$, de ahí el valor del incremento.
+Por lo que ahora debemos sumarle a estas variables pequeños incrementos hasta completar el píxel. Concretamente, ahora dividimos el ancho de un píxel en $n$ intervalos, análogamente con el alto. Por tanto, el incremento sería de $h_w:=\frac{1}{image\_width\cdot n}$ en anchura y de $h_h:=\frac{1}{image\_height\cdot n}$ en altura. Pensemos que si normalizamos la pantalla a $[0,1]\times[0,1]$, entonces las dimensiones de un píxel son $\frac{1}{image\_width}\times\frac{1}{image\_height}$, y cada dimensión la queremos dividir en $n$, de ahí el valor del incremento.
 
 Seguidamente, creamos un array de colores, el cual tendrá $n^2$ elementos, uno por cada rayo que lancemos. Por cada posición del array calculamos la coordenada de dispositivo normalizada del punto al cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y almacenamos el valor de retorno de esta última en el array. Finalmente calculamos la media de todos los colores del array y ese es el valor que finalmente devolvemos. 
 
-La forma de, a partir del índice $i$ del array, obtener la coordenada correspondiente es imaginar que dividimos el array en $n$ grupos de $n$ componentes cada uno. Cada grupo representa una fila de puntos del píxel. Por tanto, aplicando la división entera, $i/n$ será la fila e $i\%n$ la columna. Por lo que habría que sumar $(i/n)h_w$ a la coordenada anchura inicial e $(i\%n)h_h$ para obtener la coordenada a la que lanzar el rayo.
+La forma de, a partir del índice $i$ del array, obtener la coordenada correspondiente es imaginar que lo dividimos en $n$ grupos de $n$ componentes cada uno. Cada grupo representa una fila de puntos del píxel. Por tanto, aplicando la división entera, $i/n$ será la fila e $i\%n$ la columna. Por lo que habría que sumar $(i/n)h_w$ a la coordenada anchura inicial e $(i\%n)h_h$ a la altua para obtener la coordenada a la que lanzar el rayo.
 
 El código por tanto sería el siguiente
 

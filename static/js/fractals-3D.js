@@ -51,9 +51,19 @@ function main(){
     sh_input.addEventListener('input', (event) => change_sh(event), true);
 
 
-    const light_color_input = document.querySelector("#light_color");
-    light_color_input.value = rgbToHex(theScene.get_light_color());
-    light_color_input.addEventListener('input', change_light_color, true);
+    const light_color_0_input = document.querySelector("#light_color_0");
+    light_color_0_input.value = rgbToHex(theScene.get_light_color(0));
+    light_color_0_input.addEventListener('input', change_light_color_0, true);
+
+    const shadows_0 = document.querySelector("#shadows_0");
+    shadows_0.addEventListener('change', change_shadow_0, true);
+
+    const light_color_1_input = document.querySelector("#light_color_1");
+    light_color_1_input.value = rgbToHex(theScene.get_light_color(1));
+    light_color_1_input.addEventListener('input', change_light_color_1, true);
+
+    const shadows_1 = document.querySelector("#shadows_1");
+    shadows_1.addEventListener('change', change_shadow_1, true);
 
     const fractal = document.querySelector("#fractales");
     fractal.value = theScene.getFractal();
@@ -78,7 +88,19 @@ function main(){
     juliaW_input.value = theScene.get_julia_constant()[3];
     document.querySelector("#valorJuliaW").innerHTML = theScene.get_julia_constant()[3];
     juliaW_input.addEventListener('input', (event) => change_julia_constant_w(event), true);
+
+    if(theScene.getFractal() != 2)
+      document.querySelector("#constanteJulia").style.display = 'none';
+
+    const antiliasing = document.querySelector("#antiliasing");
+    antiliasing.addEventListener('change', change_antiliasing, true);
+
     
+    const nSamples_input = document.querySelector("#nSamples");
+    nSamples_input.value = theScene.get_julia_constant()[0];
+    document.querySelector("#valorNSamples").innerHTML = theScene.get_n_samples()**2;
+    nSamples_input.addEventListener('input', (event) => change_n_samples(event), true);
+    if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
 
     const epsilon_input = document.querySelector("#current_epsilon");
     var epsilon_value = theScene.get_epsilon();
@@ -162,15 +184,36 @@ function change_sh(event) {
   theScene.drawScene();
 }
 
-function change_light_color() {
-  const value = hexToRgb(document.querySelector("#light_color").value);
-  theScene.set_light_color(value);
+function change_light_color_0() {
+  const value = hexToRgb(document.querySelector("#light_color_0").value);
+  theScene.set_light_color(0, value);
+  theScene.drawScene();
+}
+
+function change_shadow_0(){
+  theScene.change_shadow(0);
+  theScene.drawScene();
+}
+
+function change_light_color_1() {
+  const value = hexToRgb(document.querySelector("#light_color_1").value);
+  console.log("#light_color_1")
+  theScene.set_light_color(1, value);
+  theScene.drawScene();
+}
+
+function change_shadow_1(){
+  theScene.change_shadow(1);
   theScene.drawScene();
 }
 
 function changeFractal() {
   const fractales = document.querySelector("#fractales")
   var selected = parseInt(fractales.value);
+  if(selected != 2) 
+    document.querySelector("#constanteJulia").style.display = 'none';
+  else
+    document.querySelector("#constanteJulia").style.display = 'block'
   theScene.setFractal(selected);
   theScene.drawScene();
 }
@@ -204,6 +247,21 @@ function change_julia_constant_w(event) {
   let C = theScene.get_julia_constant();
   C[3] = event.target.value;
   theScene.set_julia_constant(C);
+  theScene.drawScene();
+}
+
+function change_antiliasing(){
+  theScene.change_antiliasing();
+  if(theScene.get_antiliasing())
+    document.querySelector("#deslizadorNSamples").style.display = 'flex';
+  else
+    document.querySelector("#deslizadorNSamples").style.display = 'none';   
+  theScene.drawScene();
+}
+
+function change_n_samples(event) {
+  document.querySelector("#valorNSamples").innerHTML = event.target.value**2;
+  theScene.set_n_samples(event.target.value);
   theScene.drawScene();
 }
 
@@ -256,8 +314,10 @@ function resetParameters() {
     document.querySelector("#ks").value = rgbToHex(theScene.get_ks());
     document.querySelector("#sh").value = theScene.get_sh();
     document.querySelector("#valor_sh").innerHTML = theScene.get_sh();
-    document.querySelector("#light_color").value = rgbToHex(theScene.get_light_color());
-
+    document.querySelector("#light_color_0").value = rgbToHex(theScene.get_light_color(0));
+    document.querySelector("#shadows_0").checked = false;
+    document.querySelector("#light_color_1").value = rgbToHex(theScene.get_light_color(1));
+    document.querySelector("#shadows_1").checked = false;
 
     document.querySelector("#juliaX").value = theScene.get_julia_constant()[0];
     document.querySelector("#valorJuliaX").innerHTML = theScene.get_julia_constant()[0];
@@ -267,8 +327,16 @@ function resetParameters() {
     document.querySelector("#valorJuliaZ").innerHTML = theScene.get_julia_constant()[2];
     document.querySelector("#juliaW").value = theScene.get_julia_constant()[3];
     document.querySelector("#valorJuliaW").innerHTML = theScene.get_julia_constant()[3];
+    if(theScene.getFractal() != 2)
+      document.querySelector("#constanteJulia").style.display = 'none';
 
-    document.querySelector("#current_epsilon").value = theScene.get_epsilon();
+    document.querySelector("#antiliasing").checked = false;
+    document.querySelector("#nSamples").value = theScene.get_n_samples();
+    document.querySelector("#valorNSamples").innerHTML = theScene.get_n_samples()**2;
+    if(!theScene.get_antiliasing()) 
+      document.querySelector("#deslizadorNSamples").style.display = 'none';
+
+    document.querySelector("#current_epsilon").value = -Math.log10(theScene.get_epsilon());
     document.querySelector("#valor_epsilon").innerHTML = theScene.get_epsilon();
 
 
