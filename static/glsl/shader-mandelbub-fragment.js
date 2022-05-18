@@ -21,12 +21,16 @@ uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
 
-uniform vec4 u_light_color;
+uniform vec4 u_light_color_0;
+uniform vec4 u_light_color_1;
+uniform bvec3 u_shadows;
 
 uniform float u_epsilon;
 
 uniform int u_fractal;
 uniform vec4 u_julia_set_constant;
+uniform bool u_antiliasing;
+uniform int u_n_samples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
@@ -185,7 +189,7 @@ void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
     for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq; 
         q = quat_square(q) + c;
-        if(dot(q, q) > 32.0) break;
+        if(dot(q, q) > 64.0) break;
     }
 
 }
@@ -244,7 +248,7 @@ void iterate_mandelbrot(inout vec4 q, inout float dq) {
     for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq + 1.0; 
         q = quat_square(q) + c;
-        if(dot(q, q) > 32.0) break;
+        if(dot(q, q) > 64.0) break;
     }
 
 }
@@ -398,7 +402,7 @@ float one_light_shadow(vec3 p, Directional_light light) {
             return 1.0;
         if(h < u_epsilon)
             return 0.0;
-        res = min(res, 32.0*h/t);
+        res = min(res, 8.0*h/t);
         t += h;
         if(t >= MAX_DIST) break;
     }
@@ -468,7 +472,8 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
 
             light = lights[i];
             ambient = mat.ka*light.color;
-            visibility = light_is_visible(light, hr.p);
+            if(!u_shadows[i]) visibility = 1.0;
+            else visibility = light_is_visible(light, hr.p);
 
             light_dir = normalize(light.dir);
             float cos_theta = max(0.0, dot(normal, light_dir));
@@ -616,10 +621,14 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
                 int modulus = sum - (2*int(sum/2));
-                if(modulus == 0)
-                    ground_material.ks = vec4(0.7, 0.7, 0.7, 1.0);
+                if(modulus == 0){
+                    ground_material.kd = vec4(0.5, 0.5, 0.5, 1.0);
+                    ground_material.ks = vec4(0.5, 0.5, 0.5, 1.0);
+                    ground_material.sh = 10.0;
+                }
+                    
                 else
-                    ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+                    ground_material.kd = vec4(0.0, 0.0, 0.0, 1.0);
 
                 hr.mat = ground_material;
 
@@ -717,14 +726,14 @@ void main() {
 
     Directional_light lights[ARRAY_TAM];
     int num_lights = 3;
-    Directional_light l1, l2, l3;
-    l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l3.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(-0.5, 0.5, 0.0);
-    //l1.dir = vec3(0.0, 1.0, 0.0);
-    l2.dir = vec3(0.5, 0.5, 0.0);
-    l3.dir = vec3(0.0, -1.0, 0.0);
-    lights[0] = l1; lights[1] = l2; lights[2] = l3;
+    Directional_light l0, l1, l2;
+    l0.color = u_light_color_0; l1.color = u_light_color_1;
+    l2.color = vec4(1.0, 1.0, 1.0, 1.0);
+    l0.dir = vec3(-0.5, 0.5, 0.0);
+
+    l1.dir = vec3(0.5, 0.5, 0.0);
+    l2.dir = vec3(0.0, -1.0, 0.0);
+    lights[0] = l0; lights[1] = l1; lights[2] = l2;
     
     
     // COLOR
@@ -732,31 +741,31 @@ void main() {
     float u = uv.x;
     float v = uv.y;
 
-    // No antiliasing
-    Ray r = get_ray(cam, u, v);
-    gl_FragColor = ray_color(r, world, num_spheres, ground, lights, num_lights);
+    if(u_antiliasing) {
+        // Antiliasing
+        int n_samples = u_n_samples;
+        float hw = 1.0 / (float(image_width * n_samples)),
+            hh = 1.0 / (float(image_height * n_samples));
+        Ray r;
+        vec4 colors[ARRAY_TAM]; 
 
-    // Antiliasing
-/*    
-    int n_samples = 3;
-    float hw = 1.0 / (float(image_width * n_samples)),
-          hh = 1.0 / (float(image_height * n_samples));
-    Ray r;
-    vec4 colors[ARRAY_TAM]; 
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == n_samples*n_samples) break;
+            int x =  i/n_samples;
+            int y =  i - n_samples*x;
+            u = uv.x + float(x) * hw;
+            v = uv.y + float(y) * hh;
+            r = get_ray(cam, u, v);
+            colors[i] = ray_color(r, world, 2, ground, lights, num_lights);
+        }
 
-    for(int i = 0; i < ARRAY_TAM; i++) {
-        if(i == n_samples*n_samples) break;
-        int x =  i/n_samples;
-        int y =  i - n_samples*x;
-        u = uv.x + float(x) * hw;
-        v = uv.y + float(y) * hh;
-        r = get_ray(cam, u, v);
-        colors[i] = ray_color(r, world, 2, ground, lights, num_lights);
+        gl_FragColor = color_array_average(colors, n_samples*n_samples);
     }
-
-    gl_FragColor = color_array_average(colors, n_samples*n_samples);
-    */
-
+    else {
+        // No antiliasing
+        Ray r = get_ray(cam, u, v);
+        gl_FragColor = ray_color(r, world, num_spheres, ground, lights, num_lights);
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
