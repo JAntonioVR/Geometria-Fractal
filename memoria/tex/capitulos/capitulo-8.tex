@@ -740,12 +740,27 @@ Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el con
 
 \section{Efectos realistas en la escena}
 
-Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos añadiendo sombras arrojadas en el suelo y la técnica conocida como antiliasing.
+Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos modificando el modelo de iluminación para que el fractal proyecte sombras arrojadas en el suelo y sobre sí mismo y mediante la técnica conocida como antiliasing.
 
 \subsection{Sombras arrojadas}
 \label{subsection:sombras}
 
-En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo. Es momento por tanto de graficar estas posibles sombras.
+En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo o las sombras que pueda provocar un fractal sobre sí mismo. Es momento por tanto de graficar estas posibles sombras.
+
+En las ecuaciones del modelo de Phong tuvimos en cuenta que si la luz no incide sobre el punto, no se calcularían posibles efectos de iluminación difusa y especular. Esto se hizo pensando que si el coseno del ángulo que forman la dirección de la luz y la normal al objeto en el punto es cuestión es positivo entonces la fuente incide sobre el punto (imagen \ref{fig:excepcion}). Sin embargo, si lo pensamos, esta condición es suficiente únicamente en objetos convexos, ya que no pueden estar en la sombra de sí mismos en ningún caso. Pensemos por ejemplo en el tubo de la imagen \ref{fig:objeto-no-convexo}. Aunque el coseno de $\theta$ sea positivo, el punto señalado quedaría tapado por la sombra del propio tubo, por lo que ahí el modelo de iluminación debería evaluar únicamente la componente ambiental, estableciendo que el punto está en la sombra.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C8/no-convexo.png}
+    \caption{Sombra en un objeto no convexo}
+    \label{fig:objeto-no-convexo}
+\end{figure}
+
+La forma por tanto de saber si el punto está o no a la sombra es lanzar un rayo en la misma dirección que la luz y averiguar si existe alguna intersección con el fractal. En caso de que la haya multiplicamos por $0$ el valor de la componente difusa y la especular (el punto está a la sombra). Si no existe impacto se establece que la luz incide directamente sobre el punto y se multiplicarían por $1$ las componentes difusa y especular. Este proceso debe repetirse con cada una de las fuentes de luz que se utilicen.
+
+Y para calcular si un rayo impacta o no con el fractal utilizamos ray-marching, por este motivo no ha sido posible hacer esta mejora antes. 
+
+%%%%%%%%%%%%%%%%%%%%%%% AQUI %%%%%%%%%%%%%%%%%%%%
 
 Pensemos primero en cómo hacer notar el efecto de una única fuente de luz direccional sobre el plano. Aprovecharemos el algoritmo ray-marching para esto. El método consiste en, una vez detectada una intersección rayo-plano y conocer el punto $p$ del plano en el que se produce dicha intersección, crear un rayo en la dirección de la fuente de luz y mediante ray-marching detectar una posible intersección con el conjunto que se esté visualizando en ese momento. En caso de encontrarla, consideraremos que el punto está en la sombra provocada por dicha fuente de luz, por lo que multiplicaríamos por una constante cercana a 0 el color que calcula el modelo de iluminación, de tal forma que el color se oscurece, dando esa sensación de sombra. Crearemos entonces una función que devuelva una constante igual a $0$ si el punto está a la sombra e igual a $1$ si no. Para abreviar el código, llamamos en el siguiente código \verb|get_dist| a la SDF del objeto que se esté visualizando, la cual depende de la variable \verb|u_fractal|.
 

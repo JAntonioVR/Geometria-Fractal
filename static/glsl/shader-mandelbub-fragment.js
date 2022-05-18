@@ -471,7 +471,7 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
             specular = vec4(0.0, 0.0, 0.0, 1.0);
 
             light = lights[i];
-            ambient = mat.ka*light.color;
+            ambient = mat.ka*light.color/float(num_lights);
             if(!u_shadows[i]) visibility = 1.0;
             else visibility = light_is_visible(light, hr.p);
 
