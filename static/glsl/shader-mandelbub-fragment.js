@@ -372,6 +372,10 @@ vec3 calculate_normal_mandelbub(vec3 p) {
     return N;
 }
 
+//
+// ─── BOUNDING SPHERE ────────────────────────────────────────────────────────────
+//    
+Sphere bounding_sphere;
 
 //
 // ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
@@ -428,11 +432,15 @@ float multi_light_shadow(vec3 p, Directional_light[ARRAY_TAM] lights, int num_li
 float light_is_visible(Directional_light light, vec3 p) {
     Ray R;
     R.dir = normalize(light.dir);
-    R.orig = p + 0.1*R.dir;//2.0*u_epsilon*R.dir;
+    R.orig = p;
     float res = 1.0;
-    float t = 0.0;
+    float t = 2.0*u_epsilon;
     float h;
     
+    if(!hit_sphere_limits(bounding_sphere, R))
+        return 1.0;
+    
+
     for(int i = 0; i < 50; i++ ) {
         if(u_fractal == 1)
             h = get_dist_mandelbub(ray_at(R, t));
@@ -440,17 +448,13 @@ float light_is_visible(Directional_light light, vec3 p) {
             h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
         if(u_fractal == 3)
             h = get_dist_mandelbrot(ray_at(R,t));
-        
-        if(i == 0 && h > 10.0)  // The ground points too far of the set are not in the shadow 
-            return 1.0;
+
         if(h < u_epsilon)
             return 0.0;
-        res = min(res, 8.0*h/t);
+        res = min(res, 16.0*h/t);
         t += h;
         if(t >= MAX_DIST) break;
     }
-    float alpha = 0.0;      // Smooth constant
-    res = res/(1.0 - alpha) + alpha;
     return res;
 }
 
@@ -471,7 +475,7 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
             specular = vec4(0.0, 0.0, 0.0, 1.0);
 
             light = lights[i];
-            ambient = mat.ka*light.color/float(num_lights);
+            ambient += mat.ka*light.color;
             if(!u_shadows[i]) visibility = 1.0;
             else visibility = light_is_visible(light, hr.p);
 
@@ -485,10 +489,11 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
                 diffuse = mat.kd * cos_theta;
                 specular = mat.ks * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
             }
-            L_in += ambient + visibility * light.color * (diffuse + specular);
+            L_in += visibility * light.color * (diffuse + specular);
 
         }
     }
+    L_in += ambient/float(num_lights);
     return vec4(L_in.xyz, 1.0);
 }
 
@@ -563,9 +568,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     int object_index; // 0: Ground, 1: Julia, 2: Mandelbub, 3: Mandelbrot
 
 
-    Sphere bounding_sphere;
-    bounding_sphere.center = vec3(0.0, 0.0, 0.0);
-    bounding_sphere.radius = u_fractal == 1 ? 1.5 : (u_fractal == 2 ? 2.5 : 2.0);
+   
     bool hits_bounding_sphere = hit_sphere_limits(bounding_sphere, r);
     
     // Ray Marching
@@ -712,6 +715,11 @@ void main() {
     S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0; S4.mat = fractal_material;
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
+    // Bounding Sphere
+    bounding_sphere.center = vec3(0.0, 0.0, 0.0);
+    bounding_sphere.radius = u_fractal == 1 ? 1.5 : (u_fractal == 2 ? 2.5 : 2.0);
+
+
     // Ground
     Plane ground;
     ground.normal = vec3(0.0, 1.0, 0.0);
@@ -721,6 +729,7 @@ void main() {
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
+    //vec3 lookfrom = vec3(0.0,0.0, 2.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
 
@@ -730,6 +739,7 @@ void main() {
     l0.color = u_light_color_0; l1.color = u_light_color_1;
     l2.color = vec4(1.0, 1.0, 1.0, 1.0);
     l0.dir = vec3(-0.5, 0.5, 0.0);
+    // l0.dir = vec3(0.0, 0.5, 0.5);
 
     l1.dir = vec3(0.5, 0.5, 0.0);
     l2.dir = vec3(0.0, -1.0, 0.0);
