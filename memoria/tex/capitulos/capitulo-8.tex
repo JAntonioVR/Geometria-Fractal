@@ -852,7 +852,7 @@ La constante \verb|k| es un factor que indica si el suavizado es más o menos no
     \label{fig:sombras-k}
 \end{figure}
 
-Por último, para apreciar de una forma más claro el efecto de la fuente de luz que ilumina la parte baja del fractal, presentamos en la imagen \ref{fig:desde-abajo} el conjunto de ejemplo que estamos utilizando en todas las imágenes de esta sección visto desde abajo, que gracias a la luz direccional cuya dirección es $(0,-1,0)$ se ve alumbrado.
+Para apreciar de una forma más claro el efecto de la fuente de luz que ilumina la parte baja del fractal, presentamos en la imagen \ref{fig:desde-abajo} el conjunto de ejemplo que estamos utilizando en todas las imágenes de esta sección visto desde abajo, que gracias a la luz direccional cuya dirección es $(0,-1,0)$ se ve alumbrado.
 
 \begin{figure} [ht]
     \centering
@@ -861,6 +861,11 @@ Por último, para apreciar de una forma más claro el efecto de la fuente de luz
     \label{fig:desde-abajo}
 \end{figure}
 
+Con el objetivo de añadir eficiencia e interactividad se ha añadido una variable \verb|uniform| de tipo \verb|bvec3|, es decir, una tripleta de booleanos, que sirve para especificar desde JavaScript qué luces queremos que proyecten sombras. Así podemos proyectar las sombras de la luz que queramos cuando busquemos realismo o desactivarlas cuando queramos mayor rapidez en la ejecución.
+
+\begin{lstlisting}
+uniform bvec3 u_shadows;
+\end{lstlisting}
 
 \subsection{Antiliasing}
 
@@ -941,15 +946,35 @@ El principal y mayor inconveniente que presenta esta técnica es que, como se pu
     \label{fig:julia-antiliasing}
 \end{figure}
 
+Precisamente por este costo, se incluye la posibilidad de decidir si se desea o no aplicar antiliasing, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante una variable \verb|uniform| booleana que en caso de valer \verb|true| se ejecutaría el código del antiliasing y en caso contrario se ejecutaría el código normal con un rayo por píxel. El primero obviamente es más ligero y favorece la fluidez, pero el segundo ofrece mejores resultados a cambio de sacrificar dicha fluidez.
+
+\begin{lstlisting}
+    uniform bool u_antiliasing;
+    uniform int u_n_samples;
+// ...
+void main() {
+    // ... 
+    if(u_antiliasing) {
+        // Antiliasing
+        int n_samples = u_n_samples;
+        // ... 
+    }
+    else {
+        // No antiliasing
+        // ...
+    }
+}   
+\end{lstlisting}
+
 \section{Posibles optimizaciones}
 
-El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del ray-marching, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs: las esferas englobantes y la limitación de las sombras.
+El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del ray-marching, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs, todas ellas basadas en una misma idea: las esferas englobantes.
 
 \subsection{Esferas englobantes}
  
 Si se lanza un rayo que está muy lejano al conjunto que se esté visualizando o que apunta directamente al cielo o al suelo, antes de converger al suelo o diverger al cielo hay que evaluar, sobre todo en este último caso, hasta mil veces la SDF cuando realmente casi desde el principio podría saberse que no va a intersecar al conjunto. Para ahorrarnos todas estas evaluaciones podemos utilizar lo que se denominan esferas englobantes (\textit{bounding spheres}).
 
-La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente dentro de la misma. Antes de aplicar ray-marching, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
+La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente en el interior de la misma. Antes de aplicar ray-marching, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto en ninguna iteración, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
 
 Para implementar este método, hemos probado empíricamente qué radio de esfera se ajusta mejor a los conjuntos de Julia, al conjunto de Mandelbrot y al conjunto de Mandelbub, obteniendo respectivamente $2.5$, $2$ y $1.5$ respectivamente. Por tanto, ajustamos el radio de esta esfera y sólo calculamos las SDFs en caso de impacto.
 
@@ -987,28 +1012,27 @@ vec4 ray_color(Ray r, ...) {
 }
 \end{lstlisting}
 
-Y con esta simple técnica podemos optimizar bastante las escenas en las que el conjunto aparece más lejano. Sin embargo, si queremos ampliar detalles del conjunto no influiría, pues la gran mayoría de los rayos impactan con la esfera englobante. Aún así, en caso de estar cerca las iteraciones que se dan representan un número pequeño, así que mejoramos el rendimiento de una u otra forma.
+Y con esta simple técnica podemos optimizar bastante las escenas en las que el fractal aparece más lejano. Sin embargo, si queremos ampliar detalles del conjunto no influiría, pues la gran mayoría de los rayos impactan con la esfera englobante. Aún así, en caso de estar cerca las iteraciones que se dan representan un número pequeño, así que mejoramos el rendimiento de una u otra forma.
 
-\subsection{Limitación de las sombras}
+\subsection{Optimización de sombras con esferas englobantes}
 
-En ciertos píxeles hay que aplicar varias veces ray-marching, es el caso de los píxeles que corresponden a puntos del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto del plano donde se produce la intersección con el rayo, aplicar ray-marching en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena. Aplicar varias veces ray-marching implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
+En ciertos píxeles hay que aplicar varias veces ray-marching, es el caso de los píxeles que corresponden a puntos del fractal o del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto donde se produce la intersección con el rayo, aplicar ray-marching en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena, asignando así a cada fuente un coeficiente de visibilidad. Aplicar varias veces ray-marching implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
 
-Sin embargo, pensemos que un punto del plano que esté lejano al conjunto no va a estar en la sombra salvo que el ángulo incidente sea muy horizontal, caso que ignoraremos, pues estamos usando fuentes de luz con ángulos incidentes de $45^\circ = \pi/4\ \rad$ y de $135^\circ = 3\pi/4\ \rad$. Entonces aplicaremos este posible shading únicamente en puntos que estén cercanos al conjunto. Es decir, calcularemos la primera vez la SDF y si esta nos devuelve un valor grande (mayor que 10, por ejemplo), dejaremos de ejecutar el método y devolveremos $1$. Esto se puede hacer con una ligera modificación del método \verb|one_light_shadow|.
+Sin embargo, al igual que con el ray-marching principal de ray-color, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante.Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
 
 \begin{lstlisting}
-float one_light_shadow(vec3 p, Directional_light light) {
+float light_is_visible(Directional_light light, vec3 p) {
+    Ray R;
+    R.dir = normalize(light.dir);
+    R.orig = p;
+    // ... 
+    if(!hit_sphere_limits(bounding_sphere, R))
+        return 1.0;
+    // Ray Marching
+    for(int i = 0; i < 50; i++ ) {
         // ... 
-        for(int i = 0; i < MAX_STEPS; i++ ) {
-            h = get_dist(ray_at(R, t));
-            if(i == 0 && h > 10.0)  
-                // The point is too far of the set 
-                return 1.0;
-            if(h < u_epsilon)
-                return 0.0;
-            // Calculamos el nuevo factor de penumbra
-            // ... 
-            }
-        // ...
+    }
+    return res;
 }
 \end{lstlisting}
 
