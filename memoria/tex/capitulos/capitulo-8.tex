@@ -577,6 +577,7 @@ En las imágenes \ref{fig:julia-3D} podemos ver algunos de los resultados que, d
 \end{figure}
 
 \section{Visualización tridimensional del conjunto de Mandelbrot}
+\label{section:Mandelbrot-3D}
 
 La pregunta más natural tras visualizar conjuntos de Julia es si podemos aprovechar todo el código que tenemos para, bajo ligeras modificaciones, visualizar lo que sería el conjunto de Mandelbrot en 3D. Afortunadamente, la respuesta es sí. Recordemos ahora la sección \ref{section:Mandelbrot}, en la cual definimos, en $\C$, al conjunto de Mandelbrot $\mathcal{M}$ de varias formas equivalentes, entre las que destacamos
 $$
@@ -738,6 +739,104 @@ Con este nuevo código junto con el necesario para calcular las normales y las m
 
 Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el conjunto de Mandelbrot generalizado a cuaternios de las imágenes \ref{fig:mandelbrot-3D}. Sin embargo, recordamos que el álgebra y el rigor utilizado para visualizarlo está lejos de ser correcto, siendo aún así el resultado más llamativo hasta ahora. Este es el colofón a toda la teoría y todas las implementaciones que se han hecho desde que se inició con un cuadrado de colores en el capítulo \ref{chap:renderizacion}, pudiendo al fin observar fractales tridimensionales desde distintas perspectivas, con distintos materiales y por tanto diferentes apariencias.
 
+
+\section{Comparación con los fractales 2D}
+
+En las secciones anteriores y a lo largo de todo el recorrido que hemos hecho desde el capítulo \ref{chap:renderizacion}, el objetivo era conseguir generalizar a tres dimensiones los fractales del capítulo \ref{chap:Julia-Mandelbrot} y que con ayuda de WebGL pudimos revisualizar en el \ref{chap:fractales-2D}: conjuntos de Julia y Mandelbrot. Es por tanto momento de comparar los resultados obtenidos en 2D con los resultados obtenidos en 3D.
+
+\subsection{Comparación entre conjuntos de Julia 2D y 3D}
+
+Los conjuntos de Julia generalizados a tres dimensiones no son sino proyecciones a partir de un punto $p=(x,y,z)\in\R^3$ identificándolo con un cuaternio al cual se le anula su última componente imaginaria $q=x + yi +zj + 0k\in\H$. En particular, podemos tomar la tercera componente también como nula e identificar un punto $p'=(x,y)\in\R^2$ con un cuaternio $q'=x + yi + 0j + 0k\in\H$, y como además $i^2=-1$, podemos restringir la aritmética de los cuaternios a la de los complejos. Esto, a nivel teórico, nos lleva a decir que si tomamos los puntos del plano $z=0$, los identificamos con un cuaternio y los iteramos bajo $P_c(q)=q^2+c$ el resultado es precisamente el conjunto de Julia 2-dimensional.
+
+Es decir, la sección provocada por el plano $z=0$ en los conjuntos de Julia 3D debe coincidir con los conjuntos de Julia 2D (no olvidemos que el conjunto en sí es la frontera entre conjuntos prisioneros y de escape). Esto se puede apreciar bastante bien si observamos el conjunto $\mathcal{J}_{-1}$ en 3D, que a la vista queda su parecido con su análodo 2-dimensional, fíjese en la figura \ref{fig:julia-3D-2D}.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.37]{img/C8/julia-3D-frontal-1.png} &
+      \includegraphics[scale=0.31]{img/C8/julia-2D-1.png} \\    
+    (a) En 3D & (b) En 2D  \\
+    \end{tabular}
+    \caption{Conjunto $\mathcal{J}_{-1}$}
+    \label{fig:julia-3D-2D}
+\end{figure}
+
+De hecho, la generalización tridimensional es la superficie generada por la revolución del conjunto en 2D en torno al eje $X$, fíjese en la vista ofrecida por la figura \ref{fig:julia-3D-abajo-1}. Esto de hecho ocurre con todos los conjuntos de Julia de números puramente reales (se puede comprobar interactuando con la web \url{https://jantoniovr.github.io/Geometria-Fractal/3D-fractals.html}).
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/julia-3D-abajo-1.png}
+    \caption{$\mathcal{J}_{-1}$ visto desde abajo}
+    \label{fig:julia-3D-abajo-1}
+\end{figure}
+
+De igual manera que anulando la componente en $z$ se obtiene en la sección del plano $z=0$ el conjunto 2D, si se anula la componente en $y$ y se libera la $z$ pasa lo propio en el plano $y=0$. Fíjese como la sección de $\mathcal{J}_{-0.71-0.31i}$ en el plano $z=0$ (imagen \ref{fig:julia-3D-varias} (a)) es la misma que la de $\mathcal{J}_{-0.71-0.31j}$ en el plano $y=0$ (imagen \ref{fig:julia-3D-varias} (b)).
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.4]{img/C8/julia-3D-frontal-2.png} &
+      \includegraphics[scale=0.44]{img/C8/julia-3D-abajo-2.png} \\    
+    (a) $\mathcal{J}_{-0.71-0.31i}\subseteq\H$ & (b) $\mathcal{J}_{-0.71-0.31j}\subseteq\H$  \\
+    \end{tabular}
+    \caption{Generalizaciones de $\mathcal{J}_{-0.71-0.31i}\subseteq\C$}
+    \label{fig:julia-3D-varias}
+\end{figure}
+
+Además, aunque los detalles 3D no nos dejan apreciar claramente las similitudes entre el conjunto $\mathcal{J}_{-0.71-0.31i}$ en $\C$ y en $\H$, en la figura \ref{fig:julia-2D-3D-2} podemos observar ciertos parecidos entre los bulbos que tiene el fractal en 3D a su derecha y los que tiene el fractal en 2D.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.42]{img/C8/julia-3D-oblicuo-2.png} &
+        \includegraphics[scale=0.28]{img/C8/julia-2D-2.png} \\
+          
+    (a) Detalle en 3D & (b) En 2D  \\
+    \end{tabular}
+    \caption{Conjunto $\mathcal{J}_{-0.71-0.31i}$}
+    \label{fig:julia-2D-3D-2}
+\end{figure}
+
+\subsection{Comparación entre el conjunto de Mandelbrot 2D y 3D}
+
+De manera análoga a lo explicado para conjuntos de Julia basados en la iteración de cuaternios, un cuaternio $q=x+yi+0j+0k$ puede ser identificado con un número complejo $x+yi$. Entonces, si un complejo $c=c_x+c_yi\in\C$ pertenece a $\mathcal{M}$, necesariamente un cuaternio $q=c_x+c_yi+0j+0k$, el cual en 3D se identifica con un punto $(c_x,c_y,0)$ perteneciente al plano $z=0$, debe también pertenecer al conjunto de Mandelbrot en 3D. Entonces, el conjunto de Mandelbrot tridimensional debe dibujar al conjunto de Mandelbrot 2D en el plano $z=0$. Análogamente, esto también ocurre en el plano $y=0$ si anulamos la coordenada en $y$ en lugar de la $z$. Nos remitimos a la sección \ref{section:Mandelbrot-3D} y a las imágenes \ref{fig:mandelbrot-3D} para recordar que la generalización 3D no era más que la superficie generada por la revolución de $\mathcal{M}$ en torno al eje $X$, por lo que queda comprobada la propiedad que acabamos de describir.
+
+No obstante, en las imágenes \ref{fig:mandelbrot-2D-3D} presentamos algunas imágenes comparativas para que se pueda apreciar directamente la similitud entre $\mathcal{M}$ en 2D y en 3D. Precisamente por la revolución dejan de observarse a simple vista detalles como los bulbos o la cardioide que constituye el cuerpo principal de $\mathcal{M}$.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.53]{img/C8/mandelbrot-3d.png} &
+        \includegraphics[scale=0.23]{img/C8/mandelbrot-2d.png} \\
+          
+    (a) En 3D & (b) En 2D  \\
+    \end{tabular}
+    \caption{Conjunto de Mandelbrot}
+    \label{fig:mandelbrot-2D-3D}
+\end{figure}
+
+\subsection{Comparación entre el conjunto de Mandelbub y $\mathcal{M}_8$}
+
+En realidad el conjunto de Mandelbub no es sino una forma de generalizar, de forma matemáticamente poco precisa, el conjunto de Mandelbrot de orden 8, el cual nos remitimos a la sección \ref{subsection:julia-mandelbrot-generalizados} para recordar su génesis. En la imagen \ref{fig:mandelbubbrot} (b) podemos recordar el aspecto que tenía $\mathcal{M}_8$. Aparentemente, está dividido en lo que parecen 7 regiones, cada una con infinitos bulbos donde destaca uno que es más grande que los demás. 
+
+La parte de Mandelbub que más recuerda a $\mathcal{M}_8$ es la parte inferior (imagen \ref{fig:mandelbubbrot} (a)), que aunque no es igual, también se aprecia que está dividida en 7 regiones iguales. A su vez, el propio cuerpo de Mandelbub tiene 7 salientes en cada uno de sus dos niveles (imagen \ref{fig:mandelbub}), haciendo cierta analogía con $\mathcal{M}_8$. 
+
+\newpage
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.46]{img/C8/mandelbub-abajo.png} &
+        \includegraphics[scale=0.25]{img/C8/M-8.png} \\
+          
+    (a) Vista desde abajo de Mandelbub & (b) $\mathcal{M}_8$  \\
+    \end{tabular}
+    \caption{Conjunto de Mandelbub y de Mandelbrot de orden 8}
+    \label{fig:mandelbubbrot}
+\end{figure}
+
+
+
 \section{Efectos realistas en la escena}
 
 Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos modificando el modelo de iluminación para que el fractal proyecte sombras arrojadas en el suelo y sobre sí mismo y mediante la técnica conocida como antiliasing.
@@ -747,7 +846,7 @@ Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 
 
 En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo o las sombras que pueda provocar un fractal sobre sí mismo. Es momento por tanto de graficar estas posibles sombras.
 
-En las ecuaciones del modelo de Phong tuvimos en cuenta que si la luz no incide sobre el punto, no se calcularían posibles efectos de iluminación difusa y especular. Esto se hizo pensando que si el coseno del ángulo que forman la dirección de la luz y la normal al objeto en el punto es cuestión es positivo entonces la fuente incide sobre el punto (imagen \ref{fig:excepcion}). Sin embargo, si lo pensamos, esta condición es suficiente únicamente en objetos convexos, ya que no pueden estar en la sombra de sí mismos en ningún caso. Pensemos por ejemplo en el tubo de la imagen \ref{fig:objeto-no-convexo}. Aunque el coseno de $\theta$ sea positivo, el punto señalado quedaría tapado por la sombra del propio tubo, por lo que ahí el modelo de iluminación debería evaluar únicamente la componente ambiental, estableciendo que el punto está en la sombra.
+En las ecuaciones del modelo de Phong tuvimos en cuenta que si la luz no incide sobre el punto, no se calcularían posibles efectos de iluminación difusa y especular. Esto se hizo pensando que si el coseno del ángulo que forman la dirección de la luz y la normal al objeto en el punto es cuestión es positivo entonces la fuente incide sobre el punto, en caso contrario la fuente de luz no alcanza el punto (imagen \ref{fig:excepcion}). Sin embargo, si lo pensamos, esta condición es suficiente únicamente en objetos convexos, ya que no pueden estar en la sombra de sí mismos en ningún caso. Pensemos por ejemplo en el tubo de la imagen \ref{fig:objeto-no-convexo}. Aunque el coseno de $\theta$ sea positivo, el punto señalado quedaría tapado por la sombra del propio tubo, por lo que ahí el modelo de iluminación debería evaluar únicamente la componente ambiental, estableciendo que el punto está en la sombra.
 
 \begin{figure} [ht]
     \centering
@@ -760,7 +859,9 @@ La forma por tanto de saber si el punto está o no a la sombra es lanzar un rayo
 
 Y para calcular si un rayo impacta o no con el fractal utilizamos ray-marching, por este motivo no ha sido posible hacer esta mejora antes. 
 
-Necesitamos entonces una función que, dado un punto, trace un rayo en dirección de una función dada y devuelva 0 si hay intersección con el fractal y 1 si no lo hace. Fijémonos que las iteraciones de ray-marching deben comenzar a una pequeña distancia (mayor que $\varepsilon$) del punto que queremos evaluar, porque en caso de que este punto esté en el propio fractal y se comience a distancia $0$ el ray marching finalizaría en la primera iteración y consideraría que todos los puntos del fractal están a la sombra, cosa que no tiene sentido. Para abreviar el código, llamamos en el siguiente código \verb|get_dist| a la SDF del objeto que se esté visualizando, la cual depende de la variable \verb|u_fractal|.
+Necesitamos entonces una función que, dado un punto, trace un rayo en dirección de una fuente de luz dada y devuelva 0 si hay intersección con el fractal y 1 si no la hay. Fijémonos que las iteraciones de ray-marching deben comenzar a una pequeña distancia (mayor que $\varepsilon$) del punto que queremos evaluar, porque en caso de que este punto esté en el propio fractal y se comience a distancia $0$ el proceso finalizaría en la primera iteración y consideraría que todos los puntos del fractal están a la sombra, cosa que no tiene sentido. 
+
+Para abreviar el código, llamamos en el siguiente código \verb|get_dist| a la SDF del objeto que se esté visualizando, la cual depende de la variable \verb|u_fractal|.
 \begin{lstlisting}
 float light_is_visible(Directional_light light, vec3 p) {
     Ray R;
@@ -792,10 +893,10 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM],
         // ... 
         visibility = light_is_visible(light, hr.p);
         // ... 
-        L_in += ambient + visibility * light.color * (diffuse + specular);
-
+        L_in += visibility * light.color 
+                * (diffuse + specular);
     }
-}
+    L_in += ambient;
     return vec4(L_in.xyz, 1.0);
 }
 \end{lstlisting}
@@ -809,7 +910,7 @@ El resultado es el que se puede observar en la imagen \ref{fig:sombra-sin-suaviz
     \label{fig:sombra-sin-suavizado}
 \end{figure}
 
-Así conseguimos sombras arrojadas por todas las luces que tengamos en la escena. La manera más óptima y correcta que hemos conseguido de iluminar la escena es mediante dos luces direccionales blancas cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$, es decir, dos luces que iluminan `desde arriba y por ambos lados' la escena. Sin embargo, esto provoca que la parte de abajo de los fractales siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
+Así conseguimos sombras arrojadas por todas las luces que tengamos. La manera más óptima y correcta que hemos conseguido de iluminar la escena es mediante dos luces direccionales blancas cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$, es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los fractales siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
 
 El resultado hasta ahora es bueno, pero aún así los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén en la sombra del conjunto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con el conjunto, pasen muy cerca de él. En estos casos pondríamos los puntos en cuestión en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de ray-marching y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir una línea de código a \verb|light_is_visible|.
 
@@ -831,7 +932,7 @@ float light_is_visible(Directional_light light, vec3 p) {
 }
 \end{lstlisting}
 
-La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $16$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombras-final}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy suave y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
+La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $16$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombras-final}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy difuminado y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
 
 \begin{figure} [ht]
     \centering
@@ -861,11 +962,12 @@ Para apreciar de una forma más claro el efecto de la fuente de luz que ilumina 
     \label{fig:desde-abajo}
 \end{figure}
 
-Con el objetivo de añadir eficiencia e interactividad se ha añadido una variable \verb|uniform| de tipo \verb|bvec3|, es decir, una tripleta de booleanos, que sirve para especificar desde JavaScript qué luces queremos que proyecten sombras. Así podemos proyectar las sombras de la luz que queramos cuando busquemos realismo o desactivarlas cuando queramos mayor rapidez en la ejecución.
+Para terminar esta sección y con el objetivo de añadir eficiencia e interactividad se ha añadido una variable \verb|uniform| de tipo \verb|bvec3|, es decir, una tripleta de booleanos, que sirve para especificar desde JavaScript qué luces queremos que proyecten sombras. Así podemos proyectar las sombras de la luz que queramos cuando busquemos realismo o desactivarlas cuando queramos mayor rapidez en la ejecución.
 
 \begin{lstlisting}
 uniform bvec3 u_shadows;
 \end{lstlisting}
+
 
 \subsection{Antiliasing}
 
@@ -884,7 +986,7 @@ Para corregir este efecto, debemos tener en cuenta que al dividir el plano de pr
     \centering
     \begin{tabular}{cc}
         \includegraphics[scale=0.35]{img/C8/pixeles-sin-antiliasing.png} &
-      \includegraphics[scale=0.23]{img/C8/pixeles-con-antiliasing.png} \\    
+      \includegraphics[scale=0.243]{img/C8/pixeles-con-antiliasing.png} \\    
     (a) Sin antiliasing & (b) Con antiliasing  \\
     \end{tabular}
     \caption{Representación de los rayos que se lanzan a una pantalla}
@@ -1018,7 +1120,7 @@ Y con esta simple técnica podemos optimizar bastante las escenas en las que el 
 
 En ciertos píxeles hay que aplicar varias veces ray-marching, es el caso de los píxeles que corresponden a puntos del fractal o del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto donde se produce la intersección con el rayo, aplicar ray-marching en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena, asignando así a cada fuente un coeficiente de visibilidad. Aplicar varias veces ray-marching implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
 
-Sin embargo, al igual que con el ray-marching principal de ray-color, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante.Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
+Sin embargo, al igual que con el ray-marching principal de \verb|ray_color|, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante. Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
 
 \begin{lstlisting}
 float light_is_visible(Directional_light light, vec3 p) {
@@ -1037,3 +1139,4 @@ float light_is_visible(Directional_light light, vec3 p) {
 \end{lstlisting}
 
 El inconveniente es que esta mejora sólo puede aplicarse a ocasiones en las que el canvas visualice puntos lejanos al conjunto, por lo que cuando se esté graficando un detalle de un fractal puede ser poco útil. No obstante, en estos casos al haber menos puntos del plano directamente no tiene por qué ejecutarse en gran medida el código correspondiente a las sombras, por lo que hemos mejorado la eficiencia en los casos donde se ejecutaba dicho código más veces, es decir, en planos más abiertos y lejanos al conjunto.
+
