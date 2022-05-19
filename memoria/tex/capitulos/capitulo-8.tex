@@ -2,7 +2,7 @@
 % ─── CAPITULO 8: VISUALIZACION DE FRACTALES 3D ──────────────────────────────────
 %
 
-En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesario para poder visualizar conjuntos de Julia y conjuntos de Mandelbrot 2-dimensionales en un canvas utilizando WebGL, todo ello apoyado en la teoría explicada en el capítulo \ref{chap:Julia-Mandelbrot}. Sin embargo, el objetivo de éste y de los tres capítulos anteriores es aplicar técnicas avanzadas de renderizado para poder visualizar fractales en tres dimensiones. Recordamos que explicamos en la introducción del capítulo \ref{chap:ray-tracing} que la mejor forma de renderizar fractales 3D es utilizando la técnica de `Ray Tracing', que en dicho capítulo explicamos con detalle. A pesar de ello y de conseguir escenas con varios objetos, materiales y movimientos de cámara no visualizamos nada lejanamente parecido a un fractal. Será en este capítulo en el que aprovecharemos toda la infraestructura y todo el código implementado hasta el momento en el `ray-tracer' del capítulo \ref{chap:ray-tracing} para graficar fractales tridimensionales.
+En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesario para poder visualizar conjuntos de Julia y conjuntos de Mandelbrot 2-dimensionales en un canvas utilizando WebGL, todo ello apoyado en la teoría explicada en el capítulo \ref{chap:Julia-Mandelbrot}. Sin embargo, el objetivo de éste y de los tres capítulos anteriores es aplicar técnicas avanzadas de cálculo de imágenes para poder visualizar fractales en tres dimensiones. Recordamos que explicamos en la introducción del capítulo \ref{chap:ray-tracing} que la mejor forma de generar imágenes de fractales 3D es utilizando la técnica de `Ray Tracing', que en dicho capítulo explicamos con detalle. A pesar de ello y de conseguir escenas con varios objetos, materiales y movimientos de cámara no visualizamos nada lejanamente parecido a un fractal. Será en este capítulo en el que aprovecharemos toda la infraestructura y todo el código implementado hasta el momento en el `ray-tracer' del capítulo \ref{chap:ray-tracing} para graficar fractales tridimensionales.
 
 Para ello, antes aún debemos asentar una serie de conceptos que son los que nos ayudarán a cumplir nuestro objetivo: el algoritmo \textit{Ray-Marching} y las conocidas como \textit{Signed Distance Functions} (SDFs). Con estos dos elementos combinados conseguiremos ver hermosas figuras fractales.
 
@@ -229,7 +229,7 @@ Un aspecto a destacar de ray-marching es la dependencia de sus parámetros. Es i
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.3]{img/C8/epsilon-grande.png}
-    \caption{Escena renderizada utilizando $\varepsilon=0.1$}
+    \caption{Escena generada utilizando $\varepsilon=0.1$}
     \label{fig:epsilon-grande}
 \end{figure}
 
@@ -238,7 +238,7 @@ Una reflexión similar se puede aplicar al parámetro que define el número máx
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.3]{img/C8/pocas-iteraciones.png}
-    \caption{Escena renderizada utilizando MAX\_STEPS=100}
+    \caption{Escena generada utilizando MAX\_STEPS=100}
     \label{fig:pocas-iteraciones}
 \end{figure}
 
@@ -620,7 +620,7 @@ float get_dist_mandelbrot(vec3 p) {
 
 Por su parte, los métodos para aproximar la normal descritos en la sección \ref{subsection:normal-sdf} son igualmente válidos no sólo para este caso sino realmente para cualquier superficie, ya que son considerados métodos estándar de cálculo de normales. Por tanto podemos reutilizarlos sin más que cambiar las llamadas a \verb|get_dist_julia| por llamadas a \verb|get_dist_mandelbrot|. 
 
-Y una vez tenemos estas funciones, podemos modificar \verb|ray_color| para que en lugar de utilizar las funciones de Julia utilice las de Mandelbrot. Sin embargo, en lugar de cambiar la actual, añadiremos funcionalidad. De igual manera que en la sección \ref{subsection:alternando} explicamos que añadiendo una variable \verb|uniform| la cual en función de su valor se renderizaba un conjunto u otro, en este caso haremos exactamente lo mismo, añadir una variable \verb|uniform| llamada \verb|u_fractal| y en función de su valor invocaremos la SDF y el método para calcular normales de Julia o de Mandelbrot.
+Y una vez tenemos estas funciones, podemos modificar \verb|ray_color| para que en lugar de utilizar las funciones de Julia utilice las de Mandelbrot. Sin embargo, en lugar de cambiar la actual, añadiremos funcionalidad. De igual manera que en la sección \ref{subsection:alternando} explicamos que añadiendo una variable \verb|uniform| la cual en función de su valor se graficará un conjunto u otro, en este caso haremos exactamente lo mismo, añadir una variable \verb|uniform| llamada \verb|u_fractal| y en función de su valor invocaremos la SDF y el método para calcular normales de Julia o de Mandelbrot.
 
 \begin{lstlisting}
 uniform int u_fractal; // 1: Julia, 2: Mandelbrot 
@@ -724,7 +724,7 @@ float get_dist_mandelbub(vec3 p) {
 }
 \end{lstlisting}
 
-Con este nuevo código junto con el necesario para calcular las normales y las modificaciones necesarias para que se renderice el conjunto de Mandelbub según el valor de \verb|u_fractal|, ya podemos visualizar el conjunto de Mandelbub. 
+Con este nuevo código junto con el necesario para calcular las normales y las modificaciones necesarias para que se represente el conjunto de Mandelbub según el valor de \verb|u_fractal|, ya podemos visualizar el mismo. 
 
 \begin{figure}[ht]
     \centering
@@ -737,12 +737,12 @@ Con este nuevo código junto con el necesario para calcular las normales y las m
     \label{fig:mandelbub}
 \end{figure}
 
-Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el conjunto de Mandelbrot generalizado a cuaternios de las imágenes \ref{fig:mandelbrot-3D}. Sin embargo, recordamos que el álgebra y el rigor utilizado para visualizarlo está lejos de ser correcto, siendo aún así el resultado más llamativo hasta ahora. Este es el colofón a toda la teoría y todas las implementaciones que se han hecho desde que se inició con un cuadrado de colores en el capítulo \ref{chap:renderizacion}, pudiendo al fin observar fractales tridimensionales desde distintas perspectivas, con distintos materiales y por tanto diferentes apariencias.
+Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el conjunto de Mandelbrot generalizado a cuaternios de las imágenes \ref{fig:mandelbrot-3D}. Sin embargo, recordamos que el álgebra y el rigor utilizado para visualizarlo está lejos de ser correcto, siendo aún así el resultado más llamativo hasta ahora. Este es el colofón a toda la teoría y todas las implementaciones que se han hecho desde que se inició con un cuadrado de colores en el capítulo \ref{chap:visualizacion}, pudiendo al fin observar fractales tridimensionales desde distintas perspectivas, con distintos materiales y por tanto diferentes apariencias.
 
 
 \section{Comparación con los fractales 2D}
 
-En las secciones anteriores y a lo largo de todo el recorrido que hemos hecho desde el capítulo \ref{chap:renderizacion}, el objetivo era conseguir generalizar a tres dimensiones los fractales del capítulo \ref{chap:Julia-Mandelbrot} y que con ayuda de WebGL pudimos revisualizar en el \ref{chap:fractales-2D}: conjuntos de Julia y Mandelbrot. Es por tanto momento de comparar los resultados obtenidos en 2D con los resultados obtenidos en 3D.
+En las secciones anteriores y a lo largo de todo el recorrido que hemos hecho desde el capítulo \ref{chap:visualizacion}, el objetivo era conseguir generalizar a tres dimensiones los fractales del capítulo \ref{chap:Julia-Mandelbrot} y que con ayuda de WebGL pudimos revisualizar en el \ref{chap:fractales-2D}: conjuntos de Julia y Mandelbrot. Es por tanto momento de comparar los resultados obtenidos en 2D con los resultados obtenidos en 3D.
 
 \subsection{Comparación entre conjuntos de Julia 2D y 3D}
 

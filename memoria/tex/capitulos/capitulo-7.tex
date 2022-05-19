@@ -2,13 +2,13 @@
 % ─── CAPITULO 7: INTRODUCCION AL RAY TRACING ────────────────────────────────────
 %
 
-En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente renderizar fractales en tridimensionales.
+En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente generar fractales en tridimensionales.
 
 \section{Definición de Ray-Tracing}
 
-En el mundo de la informática gráfica existen dos formas fundamentales de proceder al renderizado de escenas. Supongamos que tenemos una escena 3D con varios objetos, como pueden ser por ejemplo un cubo y un par de esferas y queremos visualizar la misma en un canvas 2D.
+En el mundo de la informática gráfica existen dos formas fundamentales de proceder a la representación de escenas. Supongamos que tenemos una escena 3D con varios objetos, como pueden ser por ejemplo un cubo y un par de esferas y queremos visualizar la misma en un canvas 2D.
 \begin{itemize}
-    \item Una de las formas de renderizarlo es identificar para cada objeto (también llamado primitiva) qué píxeles ocupan y asignar color a cada píxel, aplicando posibles modelos de iluminación y texturas. Esta es la técnica conocida como \textbf{rasterización}.
+    \item Una de las formas de representarla es identificar para cada objeto (también llamado primitiva) qué píxeles ocupan y asignar color a cada píxel, aplicando posibles modelos de iluminación y texturas. Esta es la técnica conocida como \textbf{rasterización}.
     \item Otra forma es, para cada pixel, calcular qué primitivas ocupan posiciones del espacio asociadas a dicho píxel y colorearlo dependiendo de la primitiva más cercana al observador. Esta es la base del \textbf{Ray-Tracing}.
 \end{itemize}
 
@@ -21,7 +21,7 @@ Más en profundidad, la idea es situar al espectador en una cierta posición de 
     \label{fig:RT}
 \end{figure}
 
-La principal ventaja que tiene el Ray-Tracing (en adelante RT) sobre la rasterización es que este trazado de rayos nos permite facilitar el cálculo de los reflejos y sombras creados por las iluminaciones del entorno, consiguiendo así efectos mucho más realistas en las escenas. Además, recordemos que las figuras fractales que perseguimos no es posible dibujarlas mediante un conjunto de vértices o aristas al no ser objetos de la geometría euclídea, por lo que sería muy difícil expresarlos como primitivas rasterizables. Lo más natural es lanzar rayos y, en caso de detectar intersección con el fractal estimar la normal en dicho punto y aplicar un modelo de iluminación. Es por esta serie de razones por las que para nuestro objetivo necesitamos programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de renderizar fractales 3D.
+La principal ventaja que tiene el Ray-Tracing (en adelante RT) sobre la rasterización es que este trazado de rayos nos permite facilitar el cálculo de los reflejos y sombras creados por las iluminaciones del entorno, consiguiendo así efectos mucho más realistas en las escenas. Además, recordemos que las figuras fractales que perseguimos no es posible dibujarlas mediante un conjunto de vértices o aristas al no ser objetos de la geometría euclídea, por lo que sería muy difícil expresarlos como primitivas rasterizables. Lo más natural es lanzar rayos y, en caso de detectar intersección con el fractal estimar la normal en dicho punto y aplicar un modelo de iluminación. Es por esta serie de razones por las que para nuestro objetivo necesitamos programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de generar fractales 3D.
 
 Sin embargo, este algoritmo tiene una principal desventaja, y es que es un proceso muy costoso, y más aún cuanto más detalle queramos conseguir. Es por esto que ha sido muy difícil dar el salto al ray tracing en tiempo real. Por ejemplo, en el mundo de los videojuegos, NVIDIA, que es una famosa empresa desarrolladora de tarjetas gráficas, comenzó a desarrollar algoritmos para poder utilizar RT en sus tarjetas hace varios años, pero hasta finales de 2018 no salieron al mercado las primeras gráficas con estas características. Por su parte, los juegos también deben soportar el algoritmo, por lo que aún son una minoría de videojuegos los que en la actualidad soportan Ray Tracing. En un futuro no muy lejano es posible que haya una tendencia a un desarrollo masivo de juegos que utilicen RT, pero de momento solo tenemos algunos ejemplos como Battlefield V, Minecraft, Metro Exodus, Watch Dogs y Call of Duty: Modern Warfare (2019).
 
@@ -179,7 +179,7 @@ De esta forma, si el rayo apunta hacia arriba el color del píxel será más azu
     \label{fig:background}
 \end{figure}
 
-Y en la imagen \ref{fig:first-render} podemos ver el resultado de efectuar la llamada a \verb|ray_color| una vez creado el rayo. Esta es la primera escena 3D renderizada utilizando RT en WebGL. Nótese que en la imagen no aparecen todos los colores del gradiente de la imagen \ref{fig:background}, y esto se debe a que los rayos que se trazan en esta situación inicial no cubren todas las alturas posibles. Por ejemplo, no se traza un rayo totalmente vertical hacia arriba ni hacia abajo, solo se trazan las alturas necesarias para cubrir el plano de proyección. Esto nos da una manera de orientarnos en la altura una vez parametricemos la posición y orientación de la cámara (sección \ref{section:camara}), de tal manera que si vemos el fondo muy azul podemos asumir que se está mirando `al cielo' y si el color es blanco se estará mirando `al vacío'. 
+Y en la imagen \ref{fig:first-render} podemos ver el resultado de efectuar la llamada a \verb|ray_color| una vez creado el rayo. Esta es la primera escena 3D generada utilizando RT en WebGL. Nótese que en la imagen no aparecen todos los colores del gradiente de la imagen \ref{fig:background}, y esto se debe a que los rayos que se trazan en esta situación inicial no cubren todas las alturas posibles. Por ejemplo, no se traza un rayo totalmente vertical hacia arriba ni hacia abajo, solo se trazan las alturas necesarias para cubrir el plano de proyección. Esto nos da una manera de orientarnos en la altura una vez parametricemos la posición y orientación de la cámara (sección \ref{section:camara}), de tal manera que si vemos el fondo muy azul podemos asumir que se está mirando `al cielo' y si el color es blanco se estará mirando `al vacío'. 
 
 \begin{lstlisting}
 gl_FragColor = ray_color(R);
@@ -188,7 +188,7 @@ gl_FragColor = ray_color(R);
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.35]{img/C7/first-render.png}
-    \caption{Primera escena vacía renderizada}
+    \caption{Primera escena vacía visualizada}
     \label{fig:first-render}
 \end{figure}
 
@@ -197,7 +197,7 @@ gl_FragColor = ray_color(R);
 
 Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez.
 
-\subsection{Renderizando una esfera}
+\subsection{Visualizando una esfera}
 \label{subsection:esfera}
 
 Primero introduciremos código para visualizar una esfera. Por simple geometría euclídea sabemos que, fijado un centro $c=(c_x,c_y,c_z)\in\R^3$ y un radio $r\in\R^+$, una esfera $S$ se define como aquellos puntos de $\R^3$ tales que su distancia a $c$ es $r$, es decir:
@@ -325,7 +325,7 @@ El resultado que obtenemos es el que podemos observar en la imagen \ref{fig:una-
     \label{fig:una-esfera}
 \end{figure}
 
-\subsection{Renderizando varias esferas}
+\subsection{Visualizando varias esferas}
 
 Veamos ahora cómo poder visualizar varias esferas, aunque el procedimiento una vez se ha conseguido visualizar una es bastante natural. Podemos declarar en lugar de una un array de esferas, cada una con sus parámetros y crear una función que itere llamando a la función \verb|hit_sphere| con cada esfera. Sin embargo, un rayo puede intersecar varias esferas, pero consideramos que únicamente hemos golpeado la más cercana a efectos prácticos. Este problema se extiende en general a escenas con varios objetos, no sólo esferas, pero la solución es la misma, evaluar únicamente la más cercana de las intersecciones. Aquí es también donde ponemos en valor el parámetro \verb|t_max| de la función \verb|hit_sphere|, pues una vez hemos encontrado una intersección con una de las esferas no debemos considerar impactos más lejanos.
 
@@ -394,7 +394,7 @@ Y así obtenemos la imagen \ref{fig:varias-esferas}, en la que podemos ver varia
     \label{fig:varias-esferas}
 \end{figure}
 
-\subsection{Renderizando un plano con textura de ajedrez}
+\subsection{Visualizando un plano con textura de ajedrez}
 \label{subsection:plano}
 
 Para orientarnos en la escena cuando podamos modificar la posición de la cámara dinámicamente y hacernos también a la idea del movimiento que estamos haciendo y a qué velocidad es útil utilizar un plano con textura similar a la de un tablero de ajedrez a modo de suelo. Necesitamos por tanto ahora implementar la intersección rayo-plano y una vez encontrada la intersección discernir entre colorear el punto negro o blanco.

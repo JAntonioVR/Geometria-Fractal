@@ -2,7 +2,7 @@
 % ─── CAPITULO 6: VISUALIZACION DE FRACTALES 2D ──────────────────────────────────
 %
 
-En el capítulo \ref{chap:renderizacion} introdujimos el uso de WebGL como herramienta de renderizado de imágenes y estudiamos sus componentes, sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de renderizado se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
+En el capítulo \ref{chap:visualizacion} introdujimos el uso de WebGL como herramienta de visualización de imágenes y estudiamos sus componentes, sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de visualización se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
 
 A partir de estos cuatro vértices, en el canvas se visualizarán dos triángulos que completarán la superficie completa del mismo. El vertex shader a partir de ahora será totalmente trivial, pues solo devolverá en la variable \verb|gl_Position| la misma posición que obtiene del buffer de posición.
 
@@ -17,7 +17,7 @@ Mientras que, por su parte, el fragment shader podrá acceder a la posición (en
 
 \section{Objetivo}
 
-Procedemos a explicar el objetivo principal de este objetivo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se renderice el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme se cambia un parámetro el canvas modifica la imagen que está renderizando.
+Procedemos a explicar el objetivo principal de este objetivo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se grafique el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme se cambia un parámetro el canvas modifica la imagen que está visualizando.
 
 Queremos visualizar conjuntos de Julia $\mathcal{J}_c$ para distintos $c\in\C$, el conjunto de Mandelbrot, y las generalizaciones de los conjuntos de Julia y Mandelbrot ocasionadas si se itera la función $P_{c,N}(z)=z^N+c$ para distintos valores de $N\in\N$. Además, si revisitamos el algoritmo que utilizamos en la sección \ref{subsection:representacion-julia} para graficar en \textit{Mathematica} conjuntos de Julia y el que utilizamos en la sección \ref{subsection:representacion-mandelbrot} para visualizar el conjunto de Mandelbrot, podremos recordar que para aproximar qué puntos del plano complejo eran prisioneros o de escape fijábamos un número máximo de iteraciones $M$, tras las cuales se consideraba que un número $z_0\in\C$ era prisionero si la sucesión de los módulos de sus iteradas $\{P_{c,N}^n(z_0)\}$ no superaba el número de escape $e_c=\max\{2,|c|\}$ . Este valor $M$ también podría ser un parámetro modificable, para así poder ver dinámicamente cómo cambia la resolución cuando se cambia el número máximo de iteraciones.
 
@@ -27,11 +27,11 @@ Además, conviene añadir la posibilidad de desplazarse y hacer zoom en distinta
 \section{Estructurando el código}
 \label{section:codigo}
 
-Podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la renderización de fractales. Sin embargo, tiene una estructura muy procedural. Podemos mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL y siguiendo los \href{https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898}{principios SOLID}.
+Podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la visualización de fractales. Sin embargo, tiene una estructura muy procedural. Podemos mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL y siguiendo los \href{https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898}{principios SOLID}.
 
 En concreto, para el código de JavaScript hemos creado las siguientes clases:
 \begin{itemize}
-    \item \verb|Scene2D|: Inicializa y gestiona todos los componentes de WebGL necesarios para renderizar una escena: el contexto WebGL, los parámetros, el shader, las variables del shader y los buffers. Cuenta además con métodos getter y setters de cada uno de los parámetros de la escena y un método \verb|draw| que renderiza la escena a partir de los parámetros actuales.
+    \item \verb|Scene2D|: Inicializa y gestiona todos los componentes de WebGL necesarios para representar una escena: el contexto WebGL, los parámetros, el shader, las variables del shader y los buffers. Cuenta además con métodos getter y setters de cada uno de los parámetros de la escena y un método \verb|draw| que grafica la escena a partir de los parámetros actuales.
     \item \verb|ShaderType|: Es un enumerado que puede tomar los valores \verb|ShaderType.vertexShader| o \verb|ShaderType.fragmentShader|
     \item \verb|Shader|: Representa una abstracción de lo que sería un `vertex shader' o un `fragment shader'. A partir del código fuente y del tipo de shader, se compila y almacena el shader en un atributo.
     \item \verb|ShaderProgram|: A partir de dos objetos de la clase \verb|Shader|, que serían el vertex shader y el fragment shader, crea el programa shader final.
@@ -148,7 +148,7 @@ uniform int u_order;
 \subsection{Asignación de colores}
 \label{subsection:colores}
 
-Con la función $P_{c,N}$ ya programada, recordamos los algoritmos que utilizamos en \textit{Mathematica} para graficar conjuntos de Julia y Mandelbrot, reprogramándolos ahora en GLSL para poder renderizar dichos conjuntos. Estos consistían en iterar la función $P_{c,N}$, cada uno a su manera, fijando un número máximo de iteraciones $M$ tras las cuales se decidía qué puntos son prisioneros o de escape y almacenando en una variable cuántas iteraciones se han necesitado para tomar esta decisión. En función del valor de dicha variable asignamos un color. Por tanto, necesitamos una forma de, a partir de este valor, asignar un color.
+Con la función $P_{c,N}$ ya programada, recordamos los algoritmos que utilizamos en \textit{Mathematica} para graficar conjuntos de Julia y Mandelbrot, reprogramándolos ahora en GLSL para poder visualizar dichos conjuntos. Estos consistían en iterar la función $P_{c,N}$, cada uno a su manera, fijando un número máximo de iteraciones $M$ tras las cuales se decidía qué puntos son prisioneros o de escape y almacenando en una variable cuántas iteraciones se han necesitado para tomar esta decisión. En función del valor de dicha variable asignamos un color. Por tanto, necesitamos una forma de, a partir de este valor, asignar un color.
 
 Lo primero de todo, este número máximo de iteraciones $M$ es clave en esta asignación de colores. Queremos además que sea parametrizable, por lo que declaramos en el shader una variable \verb|uniform| cuyo valor le pasaremos al shader con JavaScript.
 
@@ -209,10 +209,10 @@ void assignColor(bool escaped, int iterations) {
 
 Como se puede observar, es una simple interpolación lineal entre los 4 colores que se acaban de presentar, que en GLSL deben codificarse como tripletas RGB donde cada componente está normalizada entre 0 y 1.
 
-\subsection{Renderizando conjuntos de Julia}
-\label{subsection:render-julia}
+\subsection{Visualizando conjuntos de Julia}
+\label{subsection:grafica-julia}
 
-Tenemos entonces todos los ingredientes para programar el renderizado, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,N}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,N}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero. Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
+Tenemos entonces todos los ingredientes para programar la visualización, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,N}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,N}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero. Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
 
 \begin{lstlisting}
 // A partir del valor de la constante c y el exponente n
@@ -249,11 +249,11 @@ Julia(u_juliaSetConstant, u_order);
       \includegraphics[scale=0.2]{img/C6/julia-1.png} &   \includegraphics[scale=0.2]{img/C6/julia-2.png} &   \includegraphics[scale=0.2]{img/C6/julia-3.png} \\
     (a) $z^2-0.38+0.62i$ & (b) $z^3+0.62+0.5i$ & (c) $z^4-0.24+0.5i$ \\[6pt]
     \end{tabular}
-    \caption{Renderizado de algunos conjuntos de Julia con WebGL}
+    \caption{Generación de algunos conjuntos de Julia con WebGL}
     \label{fig:julia-webgl}
 \end{figure}
 
-\subsection{Renderizando conjuntos de Mandelbrot}
+\subsection{Visualizando conjuntos de Mandelbrot}
 
 Ya hemos visto la metodología a utilizar si queremos visualizar conjuntos de Julia y, como es de esperar, la metodología para graficar conjuntos de Mandelbrot $\mathcal{M}_N$ no es muy distinta. Recordamos que, tal y como afirmamos en las secciones \ref{section:Mandelbrot} y \ref{subsection:julia-mandelbrot-generalizados} el conjunto de Mandelbrot $\mathcal{M}_N$ se componía de aquellos elementos $c\in\C$ tales que el conjunto de Julia $\mathcal{J}_c$ es conexo, o equivalentemente, de aquellos cuya sucesión $\{P_{c,N}^n(0)\}$ no diverge.
 
@@ -278,7 +278,7 @@ void Mandelbrot(int n) {
 }
 \end{lstlisting}
 
-Vemos que es muy parecida a la función \verb|Julia| presentada en la sección \ref{subsection:render-julia}. La diferencia fundamental se encuentra en que mientras en los conjuntos de Julia fijamos un $c\in\C$ y usamos el complejo asociado al píxel como semilla en el caso del conjunto de Mandelbrot usamos siempre $z_0=0$ como semilla y tomamos como $c$ el complejo que representa el píxel.
+Vemos que es muy parecida a la función \verb|Julia| presentada en la sección \ref{subsection:grafica-julia}. La diferencia fundamental se encuentra en que mientras en los conjuntos de Julia fijamos un $c\in\C$ y usamos el complejo asociado al píxel como semilla en el caso del conjunto de Mandelbrot usamos siempre $z_0=0$ como semilla y tomamos como $c$ el complejo que representa el píxel.
 
 Por tanto, ya solo falta llamar a esta función desde \verb|main| y podremos ver el conjunto de Mandelbrot en detalle. Presentamos algunas imágenes de detalles del mismo, a la vez que animamos a revisitar las imágenes \ref{fig:mandelbrot-intro}, las cuales también se han obtenido mediante WebGL.
 
@@ -292,7 +292,7 @@ Mandelbrot(u_order);
       \includegraphics[scale=0.23]{img/C6/mandelbrot-1.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-2.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-3.png} \\
     (a) Detalle de $\mathcal{M}_2$ & (b) Detalle de $\mathcal{M}_8$ & (c) $\mathcal{M}_3$ \\[6pt]
     \end{tabular}
-    \caption{Renderizado de algunos conjuntos de Mandelbrot con WebGL}
+    \caption{Representación de algunos conjuntos de Mandelbrot con WebGL}
     \label{fig:mandelbrot-webgl}
 \end{figure}
 
@@ -302,7 +302,7 @@ Mandelbrot(u_order);
 Finalmente, queremos dotar a nuestra web de la posibilidad de alternar qué fractal visualizar (Julia o Mandelbrot) y poder ajustar los parámetros a nuestro gusto. Para ello introducimos en el fragment Shader una variable \verb|uniform| entera que, en caso de valer 0 se visualizaría el conjunto de Mandelbrot y en caso de valer 1 se visualizaría el conjunto de Julia.
 
 \begin{lstlisting}
-// Renderizar conjunto de Julia o de Mandelbrot
+// Graficar conjunto de Julia o de Mandelbrot
 uniform int u_fractal;
 
 // ... 
