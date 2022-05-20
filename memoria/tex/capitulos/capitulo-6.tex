@@ -2,7 +2,21 @@
 % ─── CAPITULO 6: VISUALIZACION DE FRACTALES 2D ──────────────────────────────────
 %
 
-En el capítulo \ref{chap:visualizacion} introdujimos el uso de WebGL como herramienta de visualización de imágenes y estudiamos sus componentes, sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de visualización se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
+En el capítulo \ref{chap:visualizacion} introdujimos el uso de WebGL como herramienta de generación de imágenes y estudiamos sus componentes, sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Entonces, ¿cómo podemos usar WebGL para graficar imágenes fractales?
+
+A nivel conceptual, una imagen realmente es un conjunto de píxeles con un color asociado. Si identificamos cada píxel con la dupla de números naturales $(x,y)$ formada por el número de fila y de columna que ocupa el píxel, entonces a partir de una función $f$ que a cada pareja le asigne un color, esto es, una terna $(r,g,b)$, podemos obtener una imagen. Fíjese en el ejemplo de la imagen \ref{fig:sintesis-imagenes-f}, donde generamos una imagen de $4\times 2$ píxeles a partir de una función $f$. Si queremos implementar esta síntesis de imágenes mediante una función $f$, podemos programar esta función $f$ y ejecutarla en CPU píxel a píxel de manera secuencial, pero evidentemente sería más rápido y eficiente paralelizar el cálculo de $f$ aprovechando la GPU, de forma que en un mismo instante se pueden estar procesando miles de píxeles en lugar de uno. 
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C6/sintesis-imagenes-f.png}
+    \caption{Síntesis de una imagen vía una función}
+    \label{fig:sintesis-imagenes-f}
+\end{figure}
+
+
+Sin embargo, WebGL está orientado a rasterización, es decir, dadas unas primitivas colorea del color adecuado los píxeles que ocupen estas primitivas, dividiendo las mismas en triángulos. La forma que tenemos por tanto de ejecutar $f$ una vez por cada píxel es rasterizando dos triángulos que ocupen toda la superficie del canvas. Al existir dos primitivas que en conjunto cubren toda la imagen, el fragment shader se ejecutará una vez por cada píxel. Desde el fragment shader podemos acceder a las coordenadas del píxel, y utilizando estas coordenadas y los valores asignados a las variables \verb|varying| y \verb|uniform|, calcular el valor que devuelve la función $f$, asignando así un color a cada píxel, que es precisamente el cometido del fragment shader.
+
+Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de visualización se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
 
 A partir de estos cuatro vértices, en el canvas se visualizarán dos triángulos que completarán la superficie completa del mismo. El vertex shader a partir de ahora será totalmente trivial, pues solo devolverá en la variable \verb|gl_Position| la misma posición que obtiene del buffer de posición.
 
@@ -17,7 +31,7 @@ Mientras que, por su parte, el fragment shader podrá acceder a la posición (en
 
 \section{Objetivo}
 
-Procedemos a explicar el objetivo principal de este objetivo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se grafique el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme se cambia un parámetro el canvas modifica la imagen que está visualizando.
+Procedemos a explicar el objetivo principal de este capítulo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se grafique el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme se cambia un parámetro el canvas modifica la imagen que está visualizando.
 
 Queremos visualizar conjuntos de Julia $\mathcal{J}_c$ para distintos $c\in\C$, el conjunto de Mandelbrot, y las generalizaciones de los conjuntos de Julia y Mandelbrot ocasionadas si se itera la función $P_{c,N}(z)=z^N+c$ para distintos valores de $N\in\N$. Además, si revisitamos el algoritmo que utilizamos en la sección \ref{subsection:representacion-julia} para graficar en \textit{Mathematica} conjuntos de Julia y el que utilizamos en la sección \ref{subsection:representacion-mandelbrot} para visualizar el conjunto de Mandelbrot, podremos recordar que para aproximar qué puntos del plano complejo eran prisioneros o de escape fijábamos un número máximo de iteraciones $M$, tras las cuales se consideraba que un número $z_0\in\C$ era prisionero si la sucesión de los módulos de sus iteradas $\{P_{c,N}^n(z_0)\}$ no superaba el número de escape $e_c=\max\{2,|c|\}$ . Este valor $M$ también podría ser un parámetro modificable, para así poder ver dinámicamente cómo cambia la resolución cuando se cambia el número máximo de iteraciones.
 
