@@ -61,22 +61,24 @@ El código completo se puede encontrar en GitHub: \url{https://github.com/JAnton
 
 Como dijimos al inicio de este capítulo, nuestro vertex shader es trivial, simplemente asigna a \verb|gl_Position| las mismas coordenadas que se introducen desde JavaScript al buffer de posiciones. Es en el fragment shader donde se realiza el grueso de la programación necesaria para poder visualizar los distintos fractales.
 
-Recordemos que el fragment shader se ejecuta una vez por cada píxel, de manera que podemos identificar la superficie completa del canvas con una región $[x_1,x_2]\times [y_1,y_2]\subseteq\R^2\cong\C$ del plano complejo y en particular cada píxel con un número complejo. Para ello, necesitamos transformar las coordenadas de dispositivo que el shader encuentra en la variable \verb|gl_FragCoord|. Supongamos que queremos inicialmente visualizar la región $[-2,2]\times[-2,2]$ y que las coordenadas de dispositivo son $(x,y)\in[0,720]\times[0,720]$, las cuales están precisamente en la región $[0,720]\times[0,720]$ porque las dimensiones del canvas son $720\times 720$ píxeles. Entonces la transformación lineal que necesitamos es 
+Recordemos que el fragment shader se ejecuta una vez por cada píxel, de manera que podemos identificar la superficie completa del canvas con una región $[x_1,x_2]\times [y_1,y_2]\subseteq\R^2\cong\C$ del plano complejo y en particular cada píxel con un número complejo. Para ello, necesitamos transformar las coordenadas de dispositivo que el shader encuentra en la variable \verb|gl_FragCoord|. Supongamos que tenemos un canvas de $n_x\times n_y$ píxeles, y en el mismo queremos graficar una región del plano centrada en el origen de $w$ unidades de ancho y $h$ de alto, con $w,h$ fijos. es decir, la región $\left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right]$. Es muy recomendable que se guarde la proporción $\frac{n_x}{n_y}=\frac{w}{h}$ para así evitar posibles deformaciones.
+
+Las coordenadas de dispositivo son por tanto $(x,y)\in[0,n_x]\times[0,n_y]$, las cuales están precisamente en la región $[0,n_x]\times[0,n_y]$ porque las dimensiones del canvas son $n_x\times n_y$ píxeles. Entonces la transformación lineal que necesitamos es 
 \begin{equation}
 \label{eq:transformacion-lineal-1}
 \begin{split}
-    \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
-    (x,y) & \longmapsto \frac{4}{720}(x,y)-(2,2)
+    \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right] \\
+    (x,y) & \longmapsto \left(\frac{w}{n_x}x-\frac{w}{2},\frac{h}{n_y}y-\frac{h}{2}\right)
 \end{split}
 \end{equation}
 
-De esta forma, a partir de las coordenadas de dispositivo obtenemos un punto del plano complejo. Supongamos ahora que en lugar de querer visualizar la región $[-2,2]\times[-2,2]$ queremos representar cualquier otra, pero aún centrada en el origen $(0,0)$. Podemos generalizar la transformación $\phi$ para cualquier otro intervalo, pero en lugar de ello y para mantener las proporciones introduciremos una variable que represente el \textit{zoom} que se aplica a la imagen, de tal forma que tan solo habría que multiplicar el resultado de la transformación por una constante $\lambda$. Esta constante será menor que $1$ si se desea acercar la región o mayor que $1$ si se desea alejar. Por tanto la nueva transformación será
+De esta forma, a partir de las coordenadas de dispositivo obtenemos un punto del plano complejo. Supongamos ahora que en lugar de querer visualizar la región $\left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right]$ con $w,h$ fijos queremos representar cualquier otra, pero aún centrada en el origen $(0,0)$. Podemos variar los valores de $w$ y $h$ en la transformación (\ref{eq:transformacion-lineal-1}) y construir la transformación según queramos, pero en lugar de ello y para mantener las proporciones introduciremos una variable que represente el \textit{zoom} que se aplica a la imagen. De esta forma, tan solo habría que multiplicar el resultado de la transformación (\ref{eq:transformacion-lineal-1}) por una constante $\lambda$. Esta constante será menor que $1$ si se desea acercar la región o mayor que $1$ si se desea alejar. Por tanto la nueva transformación será
 
 \begin{equation}
     \label{eq:transformacion-lineal-2}
     \begin{split}
-        \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
-        (x,y) & \longmapsto \lambda\left(\frac{4}{720}(x,y)-(2,2)\right)
+        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right] \\
+        (x,y) & \longmapsto \lambda\left(\frac{w}{n_x}x-\frac{w}{2},\frac{h}{n_y}y-\frac{h}{2}\right)
     \end{split}
 \end{equation}
 
@@ -85,11 +87,14 @@ Y por último, procedemos a buscar la forma de representar cualquier parte del p
 \begin{equation}
     \label{eq:transformacion-lineal-3}
     \begin{split}
-        \phi:[0,720]\times[0,720] & \longrightarrow [-2,2]\times[-2,2] \\
-        (x,y) & \longmapsto (x_0,y_0) + \lambda\left(\frac{4}{720}(x,y)-(2,2)\right)
+        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[x_0-\frac{w}{2},x_0+\frac{w}{2}\right]\times\left[y_0-\frac{h}{2},y_0+\frac{h}{2}\right] \\
+        (x,y) & \longmapsto (x_0,y_0) + \lambda\left(\frac{w}{n_x}x-\frac{w}{2},\frac{h}{n_y}y-\frac{h}{2}\right)
     \end{split}
 \end{equation}
-donde las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso, de forma que queda el siguiente fragmento de código:
+
+En nuestro ejemplo concreto, usaremos un canvas de $720\times 720$ píxeles para representar inicialmente la región $[-2,2]\times[-2,2]$ del plano, y sobre esta aplicar zoom y desplazamientos. Aprovechando que la proporción es $1$, la transformación puede expresarse como $(x,y)\longmapsto(x_0,y_0)+\lambda\left(\frac{4}{720}(x,y) + (-2,-2)\right)$.
+
+Las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso, de forma que queda el siguiente fragmento de código:
 
 \begin{lstlisting}
 // Zoom: constante lambda que define el tamano de la region a representar
@@ -100,12 +105,16 @@ uniform vec2 u_zoomCenter;
 // ... 
 
 vec2 get_world_coordinates() {
+    int nx = 720, ny = 720; // Canvas size (pixels)
+    float w = 4.0, h = 4.0; // Image size (units) 
     // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
-    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
+    vec2 uv = gl_FragCoord.xy / vec2(float(nx), float(ny));
     // Punto del plano complejo al que corresponde el pixel
-    return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
+    return u_zoomCenter + vec2(uv.x*w - w/2.0, uv.y*h - h/2.0) * u_zoomSize;
 }
 \end{lstlisting}
+
+En muchos contxtos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)$ 
 
 Y ya tenemos en el shader una función que calcula el punto del plano al cual corresponde el píxel. A partir de esto, y al igual que en el capítulo \ref{chap:Julia-Mandelbrot}, tan solo tenemos que iterar la función $P_{c,m}$ y en función del número de iteraciones necesarias para diverger (o no), asignar un color.
 
