@@ -326,10 +326,10 @@ En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación d
 
 Hasta el momento todo lo explicado y todas las imágenes obtenidas se han basado en la familia de funciones $\{P_c(z)\}_{c\in\C}=\{z^2+c\}_{c\in\C}$. Sin embargo, y como cabe esperar, la definición de los conjuntos de Julia como conjuntos frontera entre el conjunto de puntos prisioneros y de escape es completamente válido para las iteradas de cualquier función, o mejor dicho, para cualquier familia de funciones. En esta sección trataremos de extender los conocimientos obtenidos hasta ahora a otras funciones.
 
-\subsection{Familia $\{z^N+c\}_{c\in\C}$}
+\subsection{Familia $\{z^m+c\}_{c\in\C}$}
 \label{subsection:julia-mandelbrot-generalizados}
 
-La extensión más natural y la que nos proporcionará resultados más llamativos consiste en cambiar el exponente de la función polinómica $P_c(z)$, a la cual ahora denotaremos como $P_{c,N}(z)=z^N+c$, con $N\geq 2$ natural para enfatizar el exponente. Es fácil comprobar que el teorema \ref{th:escape} es igual de válido con esta familia de funciones independientemente del exponente, por lo que el algoritmo sigue siendo el mismo, solo que en la función \verb|Julia| debemos cambiar el exponente. Además, la orden \verb|JuliaSetPlot| ya presentada en la sección \ref{subsection:representacion-julia} admite la posibilidad de indicarle una función arbitraria. Es esta la forma en la que hemos graficado las imágenes \ref{fig:julia-generalizados}.
+La extensión más natural y la que nos proporcionará resultados más llamativos consiste en cambiar el exponente de la función polinómica $P_c(z)$, a la cual ahora denotaremos como $P_{c,m}(z)=z^m+c$, con $m\geq 2$ natural para enfatizar el exponente. Es fácil comprobar que el teorema \ref{th:escape} es igual de válido con esta familia de funciones independientemente del exponente, por lo que el algoritmo sigue siendo el mismo, solo que en la función \verb|Julia| debemos cambiar el exponente. Además, la orden \verb|JuliaSetPlot| ya presentada en la sección \ref{subsection:representacion-julia} admite la posibilidad de indicarle una función arbitraria. Es esta la forma en la que hemos graficado las imágenes \ref{fig:julia-generalizados}.
 
 \begin{figure}[ht]
   \centering
@@ -339,7 +339,7 @@ La extensión más natural y la que nos proporcionará resultados más llamativo
   \includegraphics[scale=0.37]{./img/C3/julia-generalizado-4.png} &   \includegraphics[scale=0.37]{./img/C3/julia-generalizado-5.png} \\
   (c) $z^4-0.55+0.48i$ & (d) $z^5-0.55+0.48i$ \\[6pt]
   \end{tabular}
-  \caption{Conjuntos de Julia con $P_{-0.55+0.48i, N}$ para distintos valores de $N$.}
+  \caption{Conjuntos de Julia con $P_{-0.55+0.48i, m}$ para distintos valores de $m$.}
   \label{fig:julia-generalizados}
 \end{figure}
 
@@ -348,18 +348,18 @@ Fijémonos en que hemos fijado $c=-0.55+0.48i$ y hemos variado el exponente de l
 
 \newpage
 
-Como ya comentamos en la sección \ref{section:conexos-polvaredas}, el teorema \ref{th:fatou-julia} (teorema de la dicotomía de Fatou-Julia) es válido para cualquier polinomio de grado mayor o igual que 2, en particular es válido para la familia de funciones $\{P_{c,N}(z)\}_{c\in\C}$. Tenemos por tanto que de la misma forma es válido el corolario, por lo que la distinción entre conjuntos de Julia conexos y polvaredas se vuelve a basar en buscar la convergencia o divergencia de la sucesión $\{P_{c,N}^n(0)\}$.
+Como ya comentamos en la sección \ref{section:conexos-polvaredas}, el teorema \ref{th:fatou-julia} (teorema de la dicotomía de Fatou-Julia) es válido para cualquier polinomio de grado mayor o igual que 2, en particular es válido para la familia de funciones $\{P_{c,m}(z)\}_{c\in\C}$. Tenemos por tanto que de la misma forma es válido el corolario, por lo que la distinción entre conjuntos de Julia conexos y polvaredas se vuelve a basar en buscar la convergencia o divergencia de la sucesión $\{P_{c,m}^n(0)\}$.
 
-De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados como representación gráfica de qué puntos tienen un conjunto de Julia conexo o polvareda utilizando la función $P_{c,N}(z)$, el cual denotamos como $\mathcal{M}_N$. De la misma forma que el resultado \ref{th:escape} es válido en la generalización, la proposición \ref{prop:mandelbrot-escape} también lo es, por lo que podemos también reutilizar el código que empleamos para representar el conjunto de Mandelbrot con tan solo variar el exponente, ver imágenes \ref{fig:mandelbrot-generalizados}. Por su parte, la función de \textit{Mathematica} \verb|MandelbrotSetPlot| admite un argumento \verb|n| que representa el exponente de $P_{c,N}(z).$ a la hora de iterar.
+De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados como representación gráfica de qué puntos tienen un conjunto de Julia conexo o polvareda utilizando la función $P_{c,m}(z)$, el cual denotamos como $\mathcal{M}_m$. De la misma forma que el resultado \ref{th:escape} es válido en la generalización, la proposición \ref{prop:mandelbrot-escape} también lo es, por lo que podemos también reutilizar el código que empleamos para representar el conjunto de Mandelbrot con tan solo variar el exponente, ver imágenes \ref{fig:mandelbrot-generalizados}. Por su parte, la función de \textit{Mathematica} \verb|MandelbrotSetPlot| admite un argumento \verb|n| que representa el exponente de $P_{c,m}(z).$ a la hora de iterar.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.7]{./img/C3/mandelbrot-generalizado.png}
-  \caption{Conjuntos de Mandelbrot $\mathcal{M}_N$ para $N=3,4,8,10$}
+  \caption{Conjuntos de Mandelbrot $\mathcal{M}_m$ para $m=3,4,8,10$}
   \label{fig:mandelbrot-generalizados}
 \end{figure}
 
-Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos encontrar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_N$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
+Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos encontrar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
 
 Finalmente, invitamos al lector a visitar una web interactiva en la que poder visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee. La web forma parte del proyecto y su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
 
