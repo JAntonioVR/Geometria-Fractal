@@ -94,7 +94,7 @@ Y por último, procedemos a buscar la forma de representar cualquier parte del p
 
 En nuestro ejemplo concreto, usaremos un canvas de $720\times 720$ píxeles para representar inicialmente la región $[-2,2]\times[-2,2]$ del plano, y sobre esta aplicar zoom y desplazamientos. Aprovechando que la proporción es $1$, la transformación puede expresarse como $(x,y)\longmapsto(x_0,y_0)+\lambda\left(\frac{4}{720}(x,y) + (-2,-2)\right)$.
 
-Las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso, de forma que queda el siguiente fragmento de código:
+Las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso. Otro detalle a tener en cuenta es que, aunque en todo momento hemos hablado de coordenadas de dispositivo como valores enteros, lo estándar es tomar reales con parte fraccionaria igual a $\frac{1}{2}$, de forma que identificamos el píxel con el punto de $\R^2$ que se encuentra en el centro del píxel. En caso de mantener la coordenada entera estaríamos identificándolo con la esquina inferior izquierda. Queda por tanto el siguiente fragmento de código:
 
 \begin{lstlisting}
 // Zoom: constante lambda que define el tamano de la region a representar
@@ -108,13 +108,30 @@ vec2 get_world_coordinates() {
     int nx = 720, ny = 720; // Canvas size (pixels)
     float w = 4.0, h = 4.0; // Image size (units) 
     // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
-    vec2 uv = gl_FragCoord.xy / vec2(float(nx), float(ny));
+    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) 
+                / vec2(float(nx), float(ny));
     // Punto del plano complejo al que corresponde el pixel
     return u_zoomCenter + vec2(uv.x*w - w/2.0, uv.y*h - h/2.0) * u_zoomSize;
 }
 \end{lstlisting}
 
-En muchos contxtos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)$ 
+En muchos contextos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)$, de forma que:
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix}
+    \phi(x,y)=\left(\begin{array}{ccc|c}
+        \lambda\frac{w}{n_x} & 0 & 0 & -\frac{w}{2}+x_0 \\
+
+        0 & \lambda\frac{h}{n_y} & 0 & -\frac{h}{2}+y_0 \\
+        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+    \begin{array}{c}
+        x \\ y \\ 0 \\ \hline 1
+    \end{array}\right)
+\end{equation}
+
+Se denomina matriz de vista a aquella que transforma las coordenadas de mundo (WC) de los objetos que componen la escena a coordenadas de cámara, mientras que la matriz de proyección es la que calcula las coordenadas de dispositivo (DC) finales a partir de las coordenadas de cámara. La composición de estas dos matrices es la matriz de vista y proyección $M$, que convierte las coordenadas de mundo en coordenadas de dispositivo. La transformación $\phi$ convierte las coordenadas de dispositivo en coordenadas de mundo en el plano complejo, por lo que la matriz de la transformación (\ref{eq:transformacion-lineal-matrix}) es la inversa de la matriz de vista y proyección.
 
 Y ya tenemos en el shader una función que calcula el punto del plano al cual corresponde el píxel. A partir de esto, y al igual que en el capítulo \ref{chap:Julia-Mandelbrot}, tan solo tenemos que iterar la función $P_{c,m}$ y en función del número de iteraciones necesarias para diverger (o no), asignar un color.
 

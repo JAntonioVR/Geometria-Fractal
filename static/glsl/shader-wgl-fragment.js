@@ -70,7 +70,7 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 
 // Decide which point on the complex plane this fragment corresponds to.
 vec2 get_world_coordinates() {
-    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
+    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(720.0, 720.0);
     return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
 }
 
