@@ -7,15 +7,15 @@
 //
 // ─── BUFFER ─────────────────────────────────────────────────────────────────────
 // Clase que contiene un atributo del tipo WebGLBuffer y encapsula el
-// comportamiento relativo a la inizializacion de un buffer. 
+// comportamiento relativo a la inicializacion de un buffer. 
 class Buffer {
   
   // CONSTRUCTOR ──────────────────────────────────────────────────────────────────
   // A partir del contexto de WebGL y de un array de JavaScript, construye 
   // y almacena en un atributo un elemento de la clase WebGLBuffer.
   // Parametros: ───────────────────────────
-  // - gl: Contexto de WebGL
-  // - array: Array de JavaScript a partir del cual se crea el buffer
+  // - gl: WebGLContext. Contexto de WebGL
+  // - array: Array. Array de JavaScript a partir del cual se crea el buffer
   // Devuelve: ─────────────────────────────
   // - Un elemento de la clase Buffer inicializado.
   constructor(gl, array) {

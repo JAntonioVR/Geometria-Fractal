@@ -26,6 +26,7 @@ Por su parte, \textbf{WebGL} es una adaptación de OpenGL a JavaScript. Es decir
 Las aplicaciones web basadas en WebGL se utilizan para la visualización de imágenes en un elemento \verb|<canvas>| de HTML en los navegadores y sistemas que lo soporten\footnote{Esto se puede comprobar gracias a páginas dedicadas a ello como \href{https://get.webgl.org/}{esta página de testeo WebGL} o \href{http://webglreport.com/}{WebGL Report}} sin necesidad de plug-ins. El principal defecto tanto de WebGL como de otras APIs es la dificultad a la hora de querer comenzar a visualizar imágenes, pues tiene varios componentes complejos de enlazar en un principio. A continuación explicaremos el flujo de trabajo que utiliza WebGL y cómo podemos comenzar a utilizar la herramienta para visualizar fractales.
 
 \section{Componentes de WebGL}
+\label{section:componentes-wgl}
 
 A grandes rasgos, los programas que utilizan WebGL se componen de código de \verb|JavaScript| que interactúa con la propia biblioteca junto con código \verb|GLSL| que se ejecuta en la GPU. Para dar nuestros primeros pasos con WebGL debemos, en nuestro documento HTML, utilizar un elemento \verb|<canvas>| al cual especificamos sus dimensiones en píxeles. En el siguiente ejemplo, el canvas sería cuadrado de $720\times 720$ píxeles. Evidentemente, a mayor número de píxeles mayor resolución, pero también mayor tiempo de cómputo.
 

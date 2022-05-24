@@ -1,0 +1,140 @@
+En este apéndice documentaremos todas las clases, métodos y atributos que se han utilizado en el lenguaje JavaScript. Estas han sido utilizadas para gestionar desde un nivel más alto de abstracción los distintos componentes de WebGL explicados en la sección \ref{section:componentes-wgl}, modificar el DOM de los documentos HTML y darle valores a las variables \verb|attribute| y, de forma dinámica, también a las variables \verb|uniform| del fragment shader. Los ficheros que aquí documentamos pueden ser todos ellos encontrados en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/static/js}, donde además de encontrar las funciones aquí descritas con su código fuente, también encontraremos la misma cabecera descriptiva que incluimos en este apéndice.
+
+Presentamos también en (TODO insert referencia) un diagrama UML con las relaciones que tienen estas clases entre sí.
+
+\section{Componentes de WebGL comunes a 2D y 3D}
+
+Comenzaremos documentando las clases y métodos comunes a la visualización de fractales 2D y 3D. Por ejemplo, la estructura de los shaders es la misma, aunque cambia drásticamente el código fuente de un caso a otro. También se utiliza un mismo buffer de vértices inicial para el vertex shader y ciertas inicializaciones de la escena son exactamente las mismas.
+
+\subsection{Fichero `shader.js'}
+
+Fichero con el código relativo a una abstracción de un shader. Hay dos posibles tipos de Shader (\verb|ShaderType|): Vertex y Fragment (clase \verb|Shader|), que juntos forman lo que llamamos `Programa Shader' (clase \verb|ShaderProgram|).
+
+\subsubsection{ShaderType}
+
+Enumerado inmutable, de forma que un elemento de la clase Shader sólo puede tener un tipo: \verb|ShaderType.vertexShader| o \verb|ShaderType.fragmentShader|.
+
+\subsubsection{Class `Shader'}
+Clase que abstrae un shader de WebGL, entendiendo shader como el programa relativo a un vertex shader o a un fragment shader. 
+
+\paragraph*{Atributos}
+\begin{itemize}
+    \item \verb|program: WebGLShader|. Programa shader compilado.
+\end{itemize}
+
+\paragraph*{Métodos}
+\begin{itemize}
+    \item \verb|constructor|: A partir del contexto de WebGL, del código fuente y del tipo de Shader, este método crea y compila el vertex/fragment shader.
+    
+    \textbf{Parámetros}:
+    \begin{itemize}
+        \item \verb|gl: WebGLContext|. Contexto de WebGL.
+        \item \verb|source: string|. Código fuente del shader.
+        \item \verb|type: ShaderType|. Tipo de Shader, vertex o fragment.
+    \end{itemize}
+    \textbf{Devuelve}: Un elemento de la clase Shader inicializado.
+
+    \item \verb|getProgram|: Getter del atributo program, de tipo WebGLShader.
+\end{itemize}
+
+\subsubsection{Class `ShaderProgram'}
+Clase que representa una abstracción de un programa shader, formado por el enlazado de un vertex shader y un fragment shader.
+
+\paragraph*{Atributos}
+\begin{itemize}
+    \item \verb|vertexShader: Shader|. Objeto de la clase shader que corresponde a un vertex shader.
+    \item \verb|fragmentShader: Shader|. Objeto de la clase shader que corresponde a un fragment shader.
+    \item \verb|program: WebGLProgram|. Programa shader ya inicializado a partir de la conjunción de vertex y fragment shader.
+\end{itemize}
+
+\paragraph*{Métodos}
+\begin{itemize}
+    \item \verb|constructor|: Utiliza el contexto de WebGL y dos instancias de la clase Shader, uno de tipo vertex y otro de tipo fragment para inicializar el programa shader definitivo.
+    
+    \textbf{Parámetros}
+    \begin{itemize}
+        \item \verb|gl: WebGLContext|. Contexto de WebGL.
+        \item \verb|vs: Shader|. Vertex Shader.
+        \item \verb|fs: Shader|. Fragment Shader.
+    \end{itemize}
+    \textbf{Devuelve}: Un elemento de la clase ShaderProgram inicializado.
+    \item \verb|getShaderProgram|:Getter del atributo program, de la clase WebGLProgram.
+\end{itemize}
+
+\subsection{Fichero `buffer.js'}
+
+Fichero que contiene una abstraccion de un buffer de datos de WebGL.
+
+\subsubsection{Class `Buffer'}
+
+Clase que contiene un atributo del tipo WebGLBuffer y encapsula el comportamiento relativo a la inicialización de un buffer de WebGL. 
+
+\paragraph*{Atributos}
+\begin{itemize}
+    \item \verb|buffer: WebGLBuffer|. Buffer de WebGL que contendrá la información requerida.
+\end{itemize}
+
+\paragraph*{Métodos}
+\begin{itemize}
+    \item \verb|constructor|: A partir del contexto de WebGL y de un array de JavaScript, construye y almacena en un atributo un elemento de la clase WebGLBuffer.
+    \textbf{Parámetros}
+    \begin{itemize}
+        \item \verb|gl: WebGLContext|. Contexto de WebGL.
+        \item \verb|array: Array|. Array de JavaScript a partir del cual se crea el buffer.
+    \end{itemize}
+    \textbf{Devuelve}: Un elemento de la clase Buffer inicializado.
+    
+    \item \verb|getBuffer|: Getter del atributo buffer, de la clase WebGLBuffer.
+\end{itemize}
+
+\subsection{Fichero `scene.js'}
+
+Este fichero contiene los atributos y métodos de la clase 'Scene', una clase abstracta que representa una escena 2D o 3D.
+
+\subsubsection{Class `Scene'}
+Es una clase abstracta que contiene el codigo común de una escena 2D y una 3D. No podremos por tanto declarar una variable que sea de tipo \verb|Scene|, tan sólo podremos utilizar clases que hereden de esta.
+
+\paragraph*{Atributos}
+\begin{itemize}
+    \item \verb|context: WebGLContext|. Contexto de WebGL.
+    \item \verb|shaderProgram: WebGLProgram|. Programa Shader utilizado para graficar la escena en el canvas.
+    \item \verb|bufferInfo: Object|. Objeto tipo diccionario que almacena información sobre los buffer de datos.
+\end{itemize}
+\paragraph*{Métodos}
+\begin{itemize}
+    \item \verb|constructor|: A partir del código fuente del vertex shader y del fragment shader inicializa el contexto de WebGL, el programa Shader y el buffer de posiciones de los vertices que toma como entrada el vertex shader.
+    \textbf{Parámetros}
+    \begin{itemize}
+        \item \verb|vsSource: string|. Código fuente del vertex shader
+        \item \verb|fsSource: string|. Código fuente del fragment shader.
+    \end{itemize}
+    \textbf{Devuelve}: Nada, realmente este constructor no se puede llamar por si solo, únicamente tiene el código comun a escenas 2D y 3D.
+    
+    \item \verb|initShaderProgram|: Crea y compila el vertex shader y el fragment shader. A partir de estos dos shaders, se crea el programa shader.
+    \textbf{Parámetros}
+    \begin{itemize}
+        \item \verb|vsSource: string|. Código fuente del vertex shader
+        \item \verb|fsSource: string|. Código fuente del fragment shader.
+    \end{itemize}
+    \textbf{Devuelve}: El programa shader ya inicializado, de la clase \verb|WebGLProgram|.
+
+    \item \verb|initBuffers|: Inicializa los buffer necesarios, en nuestro caso tan solo se trata del buffer de posiciones de los vértices que recibe el vertex shader.
+    \textbf{Parámetros}: No acepta.
+    \textbf{Devuelve}: Un Objeto de JavaScript cuyos campos son:
+    \begin{itemize}
+        \item \verb|positionBuffer: WebGLBuffer|. Buffer de posiciones.
+        \item \verb|numFloatsPV: number|. Número de valores en coma flotante por cada vértice.
+        \item \verb|numVertexes: number|. Némero de vértices que se almacenan en el buffer.
+    \end{itemize}
+
+    \item \verb|drawScene|: Método abstracto que en las clases que hereden de Scene tomará el shader, los buffer y los parámetros de la escena para visualizarla en el canvas.
+    
+    \item  \verb|checkGLError|: Método que comprueba si hay algún error de OpenGL, en cuyo caso lanza una excepción.
+    \textbf{Parámetros}: No acepta.
+    \textbf{Devuelve}: Nada, tan solo lanza la excepcion cuando sea necesario.
+\end{itemize}
+
+
+\section{Visualización de fractales 2D}
+
+Comenzaremos documentando el código utilizado pa

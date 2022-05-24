@@ -98,7 +98,7 @@ class Scene {
   //
   // ─── DRAWSCENE ──────────────────────────────────────────────────────────────────
   // Metodo abstracto que en las clases que hereden de Scene tomara el shader, los
-  // buffer y los parametros de la escena para visualizar la escena en el canvas
+  // buffer y los parametros de la escena para visualizarla en el canvas
   drawScene() {
     throw new Error("Este método es abstracto, no tiene implementación en la clase Scene");
   }

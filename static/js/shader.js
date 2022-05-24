@@ -9,7 +9,7 @@
 //
 // ─── SHADERTYPE ─────────────────────────────────────────────────────────────────
 // Enumerado inmutable, de forma que un elemento de la clase Shader solo puede
-// un tipo: ShaderType.vertexShader o ShaderType.fragmentShader
+// tener un tipo: ShaderType.vertexShader o ShaderType.fragmentShader
 const ShaderType = Object.freeze({
   vertexShader: 0,
   fragmentShader: 1
@@ -65,7 +65,7 @@ class ShaderProgram {
 
   // ─── CONSTRUCTOR ────────────────────────────────────────────────────────────────
   // Utiliza el contexto de WebGL y dos instancias de la clase Shader, uno de tipo
-  // vertex y otro de tipo fragment para inicializar el programa shader definitivo
+  // vertex y otro de tipo fragment para inicializar el programa shader definitivo.
   // Parametros: ───────────────────────────
   // - gl: WebGLContext. Contexto de WebGL
   // - vs: Shader. Vertex Shader
@@ -90,7 +90,7 @@ class ShaderProgram {
   //
 
   // ─── GETSHADERPROGRAM ───────────────────────────────────────────────────────────
-  // Getter del atributo program, de la clase WebGLProgram
+  // Getter del atributo program, de la clase WebGLProgram.
   getShaderProgram(){
     return this.program;
   }
