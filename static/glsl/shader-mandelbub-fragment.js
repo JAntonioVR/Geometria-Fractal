@@ -21,16 +21,16 @@ uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
 
-uniform vec4 u_light_color_0;
-uniform vec4 u_light_color_1;
+uniform vec4 u_lightColor0;
+uniform vec4 u_lightColor1;
 uniform bvec3 u_shadows;
 
 uniform float u_epsilon;
 
 uniform int u_fractal;
-uniform vec4 u_julia_set_constant;
+uniform vec4 u_juliaSetConstant;
 uniform bool u_antiliasing;
-uniform int u_n_samples;
+uniform int u_nSamples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
@@ -398,7 +398,7 @@ float one_light_shadow(vec3 p, Directional_light light) {
         if(u_fractal == 1)
             h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 2)
-            h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+            h = get_dist_julia(ray_at(R, t), u_juliaSetConstant);
         if(u_fractal == 3)
             h = get_dist_mandelbrot(ray_at(R,t));
         
@@ -445,7 +445,7 @@ float light_is_visible(Directional_light light, vec3 p) {
         if(u_fractal == 1)
             h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 2)
-            h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+            h = get_dist_julia(ray_at(R, t), u_juliaSetConstant);
         if(u_fractal == 3)
             h = get_dist_mandelbrot(ray_at(R,t));
 
@@ -600,7 +600,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 dist = get_dist_mandelbub(p);
                 //dist = MAX_DIST;
             if(u_fractal == 2)      // Render Julia
-                dist = get_dist_julia(p , u_julia_set_constant);
+                dist = get_dist_julia(p , u_juliaSetConstant);
             if(u_fractal == 3)      // Render Mandelbrot
                 dist = get_dist_mandelbrot(p);
 
@@ -654,7 +654,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.normal = calculate_normal_mandelbub(hr.p);
 
             if(object_index == 2)     // r hits Julia
-                hr.normal = calculate_normal_julia(hr.p, u_julia_set_constant);
+                hr.normal = calculate_normal_julia(hr.p, u_juliaSetConstant);
 
             if(object_index == 3)     // r hits Mandelbrot
                 hr.normal = calculate_normal_mandelbrot(hr.p);
@@ -736,7 +736,7 @@ void main() {
     Directional_light lights[ARRAY_TAM];
     int num_lights = 3;
     Directional_light l0, l1, l2;
-    l0.color = u_light_color_0; l1.color = u_light_color_1;
+    l0.color = u_lightColor0; l1.color = u_lightColor1;
     l2.color = vec4(1.0, 1.0, 1.0, 1.0);
     l0.dir = vec3(-0.5, 0.5, 0.0);
     // l0.dir = vec3(0.0, 0.5, 0.5);
@@ -753,23 +753,23 @@ void main() {
 
     if(u_antiliasing) {
         // Antiliasing
-        int n_samples = u_n_samples;
-        float hw = 1.0 / (float(image_width * n_samples)),
-            hh = 1.0 / (float(image_height * n_samples));
+        int nSamples = u_nSamples;
+        float hw = 1.0 / (float(image_width * nSamples)),
+            hh = 1.0 / (float(image_height * nSamples));
         Ray r;
         vec4 colors[ARRAY_TAM]; 
 
         for(int i = 0; i < ARRAY_TAM; i++) {
-            if(i == n_samples*n_samples) break;
-            int x =  i/n_samples;
-            int y =  i - n_samples*x;
+            if(i == nSamples*nSamples) break;
+            int x =  i/nSamples;
+            int y =  i - nSamples*x;
             u = uv.x + float(x) * hw;
             v = uv.y + float(y) * hh;
             r = get_ray(cam, u, v);
             colors[i] = ray_color(r, world, 2, ground, lights, num_lights);
         }
 
-        gl_FragColor = color_array_average(colors, n_samples*n_samples);
+        gl_FragColor = color_array_average(colors, nSamples*nSamples);
     }
     else {
         // No antiliasing

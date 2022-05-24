@@ -512,7 +512,7 @@ Y ya únicamente resta sustituir en el ray-marching las SDFs y el método para c
 
 \begin{lstlisting}
 // Cuaternio c fijo. Visualizaremos el conjunto J_c
-uniform vec4 u_julia_set_constant;
+uniform vec4 u_juliaSetConstant;
 // Material que se asigna al fractal
 Material fractal_material
 // ...
@@ -533,7 +533,7 @@ vec4 ray_color(Ray r, Plane ground,
             object_index = 0;
         }
         // Distancia a Julia
-        dist = get_dist_julia(p , u_julia_set_constant);
+        dist = get_dist_julia(p , u_juliaSetConstant);
         if(dist < closest_dist){
             closest_dist = dist;
             object_index = 1;
@@ -548,7 +548,7 @@ vec4 ray_color(Ray r, Plane ground,
             else {      // r hits Julia
                 hr.mat = fractal_material;
                 hr.normal = calculate_normal_julia(
-                    hr.p, u_julia_set_constant);
+                    hr.p, u_juliaSetConstant);
             return evaluate_lighting_model(lights, num_lights, hr);
         }
         current_t += closest_dist;
@@ -1012,25 +1012,25 @@ El código por tanto sería el siguiente
 // Antiliasing
 vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
 float u,v;
-int n_samples = 3;  // O cualquier valor
-float hw = 1.0 / (float(image_width * n_samples)),
-      hh = 1.0 / (float(image_height * n_samples));
+int nSamples = 3;  // O cualquier valor
+float hw = 1.0 / (float(image_width * nSamples)),
+      hh = 1.0 / (float(image_height * nSamples));
 Ray r;
 vec4 colors[ARRAY_TAM]; 
 for(int i = 0; i < ARRAY_TAM; i++) {
-    if(i == n_samples*n_samples) break;
-    int x =  i/n_samples;
-    int y =  i - n_samples*x;
+    if(i == nSamples*nSamples) break;
+    int x =  i/nSamples;
+    int y =  i - nSamples*x;
     u = uv.x + float(x) * hw;
     v = uv.y + float(y) * hh;
     r = get_ray(cam, u, v);
     colors[i] = ray_color(r, ground, lights, num_lights);
 }
-gl_FragColor = color_array_average(colors, n_samples*n_samples);
+gl_FragColor = color_array_average(colors, nSamples*nSamples);
 \end{lstlisting}
 Donde la función \verb|color_array_average|, tal y como su nombre indica, calcula la media de un array de colores.
 
-Con esta modificación y fijando el valor que consideremos en \verb|n_samples| se consiguen resultados como el de la figura \ref{fig:antiliasing}. Como se puede ver, los bordes son más suaves y de mejor calidad
+Con esta modificación y fijando el valor que consideremos en \verb|nSamples| se consiguen resultados como el de la figura \ref{fig:antiliasing}. Como se puede ver, los bordes son más suaves y de mejor calidad
 
 \begin{figure} [ht]
     \centering
@@ -1052,13 +1052,13 @@ Precisamente por este costo, se incluye la posibilidad de decidir si se desea o 
 
 \begin{lstlisting}
     uniform bool u_antiliasing;
-    uniform int u_n_samples;
+    uniform int u_nSamples;
 // ...
 void main() {
     // ... 
     if(u_antiliasing) {
         // Antiliasing
-        int n_samples = u_n_samples;
+        int nSamples = u_nSamples;
         // ... 
     }
     else {

@@ -1,23 +1,65 @@
-import {ShaderType, Shader, ShaderProgram} from './shader.js'
-import {Buffer} from './buffer.js'
+//
+// ──────────────────────────────────────────────────────────── I ──────────
+//   :::::: scene3D.js : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────
+// Codigo respectivo a la clase Scene3D, que representa una escena
+// en la que podemos visualizar fractales en 3D.
+
+// ─── IMPORTS ────────────────────────────────────────────────────────────────────
 import { sphericToCartesian, cartesianToSpheric } from "./utils.js";
+import { Scene } from './scene.js';
 
-class Scene3D {
+//
+// ─── SCENE2D ────────────────────────────────────────────────────────────────────
+// Clase Scene3D, una clase que hereda de Scene y que contiene el codigo relativo
+// a la creacion, parametros, visualizado y gestion de una escena 3D en la cual
+// representaremos fractales 3D en un canvas de WebGL.
+class Scene3D extends Scene{
+
+  // ─── CONSTRUCTOR ────────────────────────────────────────────────────────────────
+  // A partir del codigo fuente del vertex shader y el fragment shader, llama al
+  // constructor de la clase 'Scene', el cual inicializa el programa shader y el
+  // buffer de posiciones de los vertices que maneja el vertex shader. Ademas,
+  // inicializa un objeto con los parametros que maneja la escena:
+  // - lookfrom: Array. Punto en el cual se situa el espectador en WC
+  // - lookfromSpheric: Array. Coordenadas esfericas del punto lookfrom.
+  // - lookat: Array. Punto hacia el que mira el espectador en WC
+  // - ka: Array. Tupla RGBA que representa la reflectividad ambiental de un material.
+  // - kd: Array. Tupla RGBA que representa la reflectividad difusa de un material.
+  // - ks: Array. Tupla RGBA que representa la reflectividad especular de un material.
+  // - sh: number. Exponente de brillo especular del material parametrizable.
+  // - lightColor0: Array. Tupla RGBA que será la intensidad de la luz derecha.
+  // - lightColor1: Array. Tupla RGBA que será la intensidad de la luz izquierda.
+  // - shadows: Array. Tripleta booleana tal que si shadows[i] es true la fuente de
+  //            luz i-esima arrojara sombras.
+  // - fractal: number. Si este parametro vale 1 se visualizara el conjunto de
+  //            Mandelbub. Si vale 2 se visualizara el conjunto de Julia asociado
+  //            al campo juliaSetConstant. Si vale 3 se visualizara el conjunto
+  //            de Mandelbrot 3D.
+  // - juliaSetConstant: Array. Cuaternio 'c' en la ecuacion P(q) = q^2 + c.
+  // - epsilon: number. Distancia minima utilizada en ray-marching para decidir
+  //            cuando un punto esta en la frontera del fractal.
+  // - antiliasing: boolean. Si es true se aplicara antiliasing a la escena. En
+  //                caso contrario se lanzara un único rayo por pixel.
+  // - nSamples: number. Valor entero que en caso de que antiliasing sea true se
+  //              lanzaran nSamples^2 rayos por pixel.
+  // - delta: number. Incremento que se suma o se resta a la hora de desplazarse por
+  //          la escena.
+  // Se crea un objeto que almacena informacion relativa al programa:
+  // - program: WebGLProgram. Programa Shader ya inicializado
+  // - attribLocations: Object. Localizacion en memoria de las variables 'attribute'
+  // - uniformLocations: Object. Localizacion en memoria de las variables 'uniform'
+  // Por ultimo, se almacenan en un atributo los parametros iniciales de la escena,
+  // para asi poder resetear los parametros de la escena a los parametros por defecto.
+  // Parametros: ───────────────────────────
+  // - vsSource: string. Codigo fuente del vertex shader
+  // - fsSource: string. Codigo fuente del fragment shader
+  // Devuelve: ─────────────────────────────
+  // Un objeto de la clase Scene2D con todos sus atributos inicializados.
   constructor(vsSource, fsSource) {
-    const canvas = document.querySelector("#glCanvas");
-    // Initialize the GL context
-    const gl = canvas.getContext("webgl2");
-
-    // Only continue if WebGL is available and working
-    if (gl === null) {
-    alert("Unable to initialize WebGL. Your browser or machine may not support it.");
-    return;
-    }
-    this.context = gl;
-
-    this.shaderProgram = this.initShaderProgram(vsSource, fsSource);
-    this.bufferInfo = this.initBuffers(gl)
+    super(vsSource, fsSource);
     var that = this;
+    var gl = this.context;
 
     this.programInfo = {
       program: that.shaderProgram,
@@ -31,14 +73,14 @@ class Scene3D {
         kd: gl.getUniformLocation(that.shaderProgram, 'u_kd'),
         ks: gl.getUniformLocation(that.shaderProgram, 'u_ks'),
         sh: gl.getUniformLocation(that.shaderProgram, 'u_sh'),
-        light_color_0: gl.getUniformLocation(that.shaderProgram, 'u_light_color_0'),
-        light_color_1: gl.getUniformLocation(that.shaderProgram, 'u_light_color_1'),
+        lightColor0: gl.getUniformLocation(that.shaderProgram, 'u_lightColor0'),
+        lightColor1: gl.getUniformLocation(that.shaderProgram, 'u_lightColor1'),
         shadows: gl.getUniformLocation(that.shaderProgram, 'u_shadows'),
         fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal'),
-        julia_set_constant: gl.getUniformLocation(that.shaderProgram, 'u_julia_set_constant'),
+        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
         epsilon: gl.getUniformLocation(that.shaderProgram, 'u_epsilon'),
         antiliasing: gl.getUniformLocation(that.shaderProgram, 'u_antiliasing'),
-        n_samples: gl.getUniformLocation(that.shaderProgram, 'u_n_samples')
+        nSamples: gl.getUniformLocation(that.shaderProgram, 'u_nSamples')
       }
     };
 
@@ -48,20 +90,20 @@ class Scene3D {
     this.parameters = {
       lookfrom: initialLookfrom,
       lookat: [0.0, 0.0, 0.0],
-      lookfrom_spheric: cartesianToSpheric(initialLookfrom),
+      lookfromSpheric: cartesianToSpheric(initialLookfrom),
       ke: [0.0, 0.0, 0.0, 1.0],
       ka: [0.0, 0.0, 0.0, 1.0],
       kd: [0.84, 0.25, 0.25, 1.0],
       ks: [0.37, 0.25, 0.57, 1.0],
       sh: 30.0,
-      light_color_0: [1.0, 1.0, 1.0, 1.0],
-      light_color_1: [1.0, 1.0, 1.0, 1.0],
+      lightColor0: [1.0, 1.0, 1.0, 1.0],
+      lightColor1: [1.0, 1.0, 1.0, 1.0],
       shadows: [false, false, false],
       epsilon: 0.001,
       fractal: 1,
-      julia_set_constant: [0.75, 0.0, 0.0, -0.12],
+      juliaSetConstant: [0.75, 0.0, 0.0, -0.12],
       antiliasing: false,
-      n_samples: 1,
+      nSamples: 1,
       delta: 0.1
     };
 
@@ -69,40 +111,13 @@ class Scene3D {
     this.initialParameters = initialParameters;
   }
 
-  initShaderProgram(vsSource, fsSource) {
-    let gl = this.context;
-    var vertexShader = new Shader(gl, vsSource, ShaderType.vertexShader),
-        fragmentShader = new Shader(gl, fsSource, ShaderType.fragmentShader);
-
-    var shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
-
-    return shaderProgram.getShaderProgram()
-  }
-
-  initBuffers() {
-    let gl = this.context;
-
-    let x0 = -1.0,
-        x1 =  1.0,
-        y0 = -1.0,
-        y1 =  1.0
-    const positions = [
-      x0, y0, x1, y0, x1, y1,
-      x0, y0, x1, y1, x0, y1
-    ];
-
-    let positions_nfpv = 2,   // Number of floats per vertex in 'positions' array
-        positions_nv   = positions.length / positions_nfpv    // Number of vertexes in 'positions' array
-
-    let positionBuffer = new Buffer(gl, positions)
-
-    return {
-      positionBuffer: positionBuffer.getBuffer(),
-      num_floats_pv: positions_nfpv,
-      num_vertexes: positions_nv
-    };
-  }
-
+  // ─── DRAWSCENE ──────────────────────────────────────────────────────────────────
+  // A partir de los parametros de la escena, las variables attribute y uniform, se
+  // envian estos valores al programa shader y se visualiza la escena.
+  // Parametros: ───────────────────────────
+  // No acepta, toda la informacion que necesita esta en los atributos.
+  // Devuelve: ─────────────────────────────
+  // No devuelve nada, visualiza la escena en el canvas.
   drawScene(){
     let gl = this.context;
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
@@ -120,18 +135,18 @@ class Scene3D {
         kd = this.parameters.kd,
         ks = this.parameters.ks,
         sh = this.parameters.sh,
-        light_color_0 = this.parameters.light_color_0,
-        light_color_1 = this.parameters.light_color_1,
+        lightColor0 = this.parameters.lightColor0,
+        lightColor1 = this.parameters.lightColor1,
         shadows = this.parameters.shadows,
         fractal = this.parameters.fractal,
-        julia_set_constant = this.parameters.julia_set_constant,
+        juliaSetConstant = this.parameters.juliaSetConstant,
         antiliasing = this.parameters.antiliasing,
-        n_samples = this.parameters.n_samples,
+        nSamples = this.parameters.nSamples,
         epsilon = this.parameters.epsilon;
         
     var that = this;
     {
-      const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
+      const numComponents = that.bufferInfo.numFloatsPV;  // pull out 2 values per iteration
       const type = gl.FLOAT;    // the data in the buffer is 32bit floats
       const normalize = false;  // don't normalize
       const stride = 0;         // how many bytes to get from one set of values to the next
@@ -173,11 +188,11 @@ class Scene3D {
       this.programInfo.uniformLocations.sh,
       sh);
     gl.uniform4f(
-      this.programInfo.uniformLocations.light_color_0,
-      light_color_0[0], light_color_0[1], light_color_0[2], light_color_0[3]);
+      this.programInfo.uniformLocations.lightColor0,
+      lightColor0[0], lightColor0[1], lightColor0[2], lightColor0[3]);
     gl.uniform4f(
-      this.programInfo.uniformLocations.light_color_1,
-      light_color_1[0], light_color_1[1], light_color_1[2], light_color_1[3]);
+      this.programInfo.uniformLocations.lightColor1,
+      lightColor1[0], lightColor1[1], lightColor1[2], lightColor1[3]);
     gl.uniform3i(
       this.programInfo.uniformLocations.shadows,
       shadows[0], shadows[1], shadows[2]
@@ -186,15 +201,15 @@ class Scene3D {
       this.programInfo.uniformLocations.fractal,
       fractal);
     gl.uniform4f(
-      this.programInfo.uniformLocations.julia_set_constant,
-      julia_set_constant[0], julia_set_constant[1], julia_set_constant[2], julia_set_constant[3]);
+      this.programInfo.uniformLocations.juliaSetConstant,
+      juliaSetConstant[0], juliaSetConstant[1], juliaSetConstant[2], juliaSetConstant[3]);
     gl.uniform1i(
       this.programInfo.uniformLocations.antiliasing,
       antiliasing
     );
     gl.uniform1i(
-      this.programInfo.uniformLocations.n_samples,
-      n_samples
+      this.programInfo.uniformLocations.nSamples,
+      nSamples
     );
     gl.uniform1f(
       this.programInfo.uniformLocations.epsilon,
@@ -204,7 +219,7 @@ class Scene3D {
 
     {
       const offset = 0;
-      const vertexCount = that.bufferInfo.num_vertexes;
+      const vertexCount = that.bufferInfo.numVertexes;
       gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
     }
 
@@ -212,196 +227,279 @@ class Scene3D {
 
   }
 
+  // ─── ZOOMIN ─────────────────────────────────────────────────────────────────────
+  // Se reduce el modulo del vector que une el origen con el punto lookfrom para
+  // acercar la escena
   zoomIn(){
-    this.parameters.lookfrom_spheric[0] *= 0.9;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[0] *= 0.9;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
+  // ─── ZOOMIN ─────────────────────────────────────────────────────────────────────
+  // Se aumenta el modulo del vector que une el origen con el punto lookfrom para
+  // alejar la escena
   zoomOut(){
-    this.parameters.lookfrom_spheric[0] *= 1.1;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[0] *= 1.1;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
+  // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
+  // Se aumenta el angulo phi de las coordenadas esfericas del punto lookfrom para 
+  // desplazar la escena a la izquierda
   moveLeft(){
-    this.parameters.lookfrom_spheric[2] += this.parameters.delta;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[2] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
+
+  // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
+  // Se reduce el angulo phi de las coordenadas esfericas del punto lookfrom para 
+  // desplazar la escena a la derecha
   moveRight(){
-    this.parameters.lookfrom_spheric[2] -= this.parameters.delta;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[2] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
+  // ─── MOVEX ──────────────────────────────────────────────────────────────────────
+  // Dada una cantidad 'desp', desplaza la escena a la derecha o a la izquierda
+  // desp unidades.
+  // Parametros: ───────────────────────────
+  // - desp: number. Numero entero (positivo o negativo) que indica el desplazamiento
   moveX(desp) {
-    this.parameters.lookfrom_spheric[2] += desp;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[2] += desp;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
+  // ─── MOVEUP ─────────────────────────────────────────────────────────────────────
+  // Se reduce el angulo theta de las coordenadas esfericas del punto lookfrom para 
+  // desplazar la escena hacia arriba.
   moveUp(){
-    this.parameters.lookfrom_spheric[1] -= this.parameters.delta;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
-    this.rescaleAngles()
+    this.parameters.lookfromSpheric[1] -= this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
+    this.#rescaleAngles()
   }
 
+  // ─── MOVEDOWN ───────────────────────────────────────────────────────────────────
+  // Se modifica el angulo theta de las coordenadas esfericas del punto lookfrom para 
+  // desplazar la escena hacia abajo.
   moveDown(){
-    this.parameters.lookfrom_spheric[1] += this.parameters.delta;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
-    this.rescaleAngles()
+    this.parameters.lookfromSpheric[1] += this.parameters.delta;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
+    this.#rescaleAngles()
   }
 
-
+  // ─── MOVEY ──────────────────────────────────────────────────────────────────────
+  // Dada una cantidad 'desp', desplaza la escena arriba o hacia abajo desp unidades.
+  // Parametros: ───────────────────────────
+  // - desp: number. Numero entero (positivo o negativo) que indica el desplazamiento
   moveY(desp) {
-    this.parameters.lookfrom_spheric[1] += desp;
-    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfrom_spheric);
+    this.parameters.lookfromSpheric[1] += desp;
+    this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
-
-  getPosition() {
-    return this.parameters.lookfrom; 
-  }
-
-  set_ke(new_ke) {
-    this.parameters.ke[0] = new_ke[0];
-    this.parameters.ke[1] = new_ke[1];
-    this.parameters.ke[2] = new_ke[2];
-  }
-
-  get_ke() {
-    return this.parameters.ke;
-  }
-
-  set_ka(new_ka) {
-    this.parameters.ka[0] = new_ka[0];
-    this.parameters.ka[1] = new_ka[1];
-    this.parameters.ka[2] = new_ka[2];
-  }
-
-  get_ka(){
-    return this.parameters.ka;
-  }
-
-  set_kd(new_kd) {
-    this.parameters.kd[0] = new_kd[0];
-    this.parameters.kd[1] = new_kd[1];
-    this.parameters.kd[2] = new_kd[2];
-    this.parameters.kd[3] = 1.0
-  }
-
-  get_kd(){
-    return this.parameters.kd;
-  }
-
-  set_ks(new_ks) {
-    this.parameters.ks[0] = new_ks[0];
-    this.parameters.ks[1] = new_ks[1];
-    this.parameters.ks[2] = new_ks[2];
-  }
-
-  get_ks(){
-    return this.parameters.ks;
-  }
-
-  set_sh(new_sh){
-    this.parameters.sh = new_sh;
-  }
-
-  get_sh(){
-    return this.parameters.sh;
-  }
-
-  set_light_color(i, new_light_color) { 
-    if(i==0){
-      this.parameters.light_color_0[0] = new_light_color[0];
-      this.parameters.light_color_0[1] = new_light_color[1];
-      this.parameters.light_color_0[2] = new_light_color[2];
-    } else {
-      this.parameters.light_color_1[0] = new_light_color[0];
-      this.parameters.light_color_1[1] = new_light_color[1];
-      this.parameters.light_color_1[2] = new_light_color[2];      
-    }
-  }
-
-  get_light_color(i){
-    return i == 0 ? this.parameters.light_color_0 : 
-                    this.parameters.light_color_1;
-  }
-
-  change_shadow(i) {
+  // ─── CHANGESHADOW ───────────────────────────────────────────────────────────────
+  // Si la componente i-esima del parametro shadow esta a false la pone a true
+  // y viceversa. Es una forma de activar o desactivar las sombras arrojadas
+  // provocadas por una fuente de luz concreta.
+  // Parametros: ───────────────────────────
+  // - i: number. índice de la luz cuyas sombras queremos activar o desactivar.
+  changeShadow(i) {
     this.parameters.shadows[i] = !this.parameters.shadows[i];
     console.log(this.parameters.shadows);
   }
 
-  getFractal() {
-    return this.parameters.fractal;
-  }
-
-  setFractal(index) {
-    this.parameters.fractal = index;
-  }
-
-  set_julia_constant(new_julia_constant) {
-    this.parameters.julia_set_constant = [
-      new_julia_constant[0], new_julia_constant[1],
-      new_julia_constant[2], new_julia_constant[3]
-    ];
-  }
-
-  get_julia_constant() {
-    return this.parameters.julia_set_constant;
-  }
-
-  get_antiliasing() {
-    return this.parameters.antiliasing
-  }
-
-  change_antiliasing() {
+  // ─── CHANGEANTILIASING ──────────────────────────────────────────────────────────
+  // Cambia el valor booleano del parametro 'antiliasing'. Es una forma de decirle al
+  // programa si queremos que se aplique o no antiliasing a los píxeles.
+  changeAntiliasing() {
     this.parameters.antiliasing = !this.parameters.antiliasing;
   }
 
-  get_n_samples() {
-    return this.parameters.n_samples;
-  }
-
-  set_n_samples(newNSamples) {
-    this.parameters.n_samples = newNSamples;
-  }
-
-  set_epsilon(new_epsilon) {
-    this.parameters.epsilon = new_epsilon;
-  }
-
-  get_epsilon() {
-    return this.parameters.epsilon;
-  }
-  
-  rescaleAngles(){
-    var theta = this.parameters.lookfrom_spheric[1],
-        phi   = this.parameters.lookfrom_spheric[2];
+  //
+  // ─── RESCALEANGLES ──────────────────────────────────────────────────────────────
+  // Cuando se modifican los angulos de las coordenadas esfericas es posible que se
+  // salgan del rango [0, 2Pi]. Esta funcion ajusta esos valores para que siempre se
+  // situen en el intervalo correcto.
+  // Parametros: ───────────────────────────
+  // No acepta.
+  // Devuelve: ─────────────────────────────
+  // Nada, tan solo modifica parametros
+  #rescaleAngles(){
+    var theta = this.parameters.lookfromSpheric[1],
+        phi   = this.parameters.lookfromSpheric[2];
     if(theta < 0.0 ) theta += 2.0 * Math.PI;
     if(theta > 2.0 * Math.PI) theta -= 2.0 * Math.PI;
     if(phi < 0.0 ) phi += 2.0 * Math.PI;
     if(phi > 2.0 * Math.PI) phi -= 2.0 * Math.PI;
 
-    this.parameters.lookfrom_spheric[1] = theta
-    this.parameters.lookfrom_spheric[2] = phi
+    this.parameters.lookfromSpheric[1] = theta
+    this.parameters.lookfromSpheric[2] = phi
   }
 
+  //
+  // ─── GETTERS ────────────────────────────────────────────────────────────────────
+  //
+
+  // ─── GETANTILIASING ─────────────────────────────────────────────────────────────
+  // Getter del parametro 'antiliasing', de tipo booleano.
+  getAntiliasing() {
+    return this.parameters.antiliasing
+  }
+
+  // ─── GETEPSILON ─────────────────────────────────────────────────────────────────
+  // Getter del parametro 'epsilon' de tipo number.
+  getEpsilon() {
+    return this.parameters.epsilon;
+  }
+
+  // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────
+  // Getter del parametro 'fractal' de tipo number.
+  getFractal() {
+    return this.parameters.fractal;
+  }
+
+  // ─── GETJULIACONSTANT ───────────────────────────────────────────────────────────
+  // Getter del parametro 'juliaSetConstant', de tipo Array (cuaternio).
+  getJuliaConstant() {
+    return this.parameters.juliaSetConstant;
+  }
+
+  // ─── GETKA ──────────────────────────────────────────────────────────────────────
+  // Getter del parametro 'ka', tipo array (terna RGBA).
+  getKa(){
+    return this.parameters.ka;
+  }
+
+  // ─── GETKD ──────────────────────────────────────────────────────────────────────
+  // Getter del parametro 'kd', tipo array (terna RGBA).
+  getKd(){
+    return this.parameters.kd;
+  }
+
+  // ─── GETKS ──────────────────────────────────────────────────────────────────────
+  // Getter del parametro 'ks', tipo array (terna RGBA).
+  getKs(){
+    return this.parameters.ks;
+  }
+
+  // ─── GETLIGHTCOLOR ──────────────────────────────────────────────────────────────
+  // Getter del parametro 'lightColorX' donde X puede ser 0 o 1 segun el valor del
+  // argumento.
+  // Parametros: ───────────────────────────
+  // - i: number. Si vale 0 se devuelve el parametro 'lightColor0', en cualquier
+  //      otro caso se devuelve 'lightColor1'.
+  getLightColor(i){
+    return i == 0 ? this.parameters.lightColor0 : 
+                    this.parameters.lightColor1;
+  }
+
+  // ─── GETNSAMPLES ────────────────────────────────────────────────────────────────
+  // Getter del parametro 'nSamples', de tipo number.
+  getNSamples() {
+    return this.parameters.nSamples;
+  }
+
+
+  // ─── GETPOSITION ────────────────────────────────────────────────────────────────
+  // Getter del parametro lookfrom, la posicion del observador
+  getPosition() {
+    return this.parameters.lookfrom; 
+  }
+
+  // ─── GETSH──────────────────────────────────────────────────────────────────────
+  // Getter del parametro 'sh', tipo array (terna RGBA).
+  getSh(){
+    return this.parameters.sh;
+  }
+
+  //
+  // ─── SETTERS ────────────────────────────────────────────────────────────────────
+  //
+
+  // ─── SETEPSILON ─────────────────────────────────────────────────────────────────
+  // Setter del parametro 'epsilon'.
+  setEpsilon(new_epsilon) {
+    this.parameters.epsilon = new_epsilon;
+  }
+
+  //
+  // ─── SETFRACTAL ─────────────────────────────────────────────────────────────────
+  // Setter del parametro 'fractal'. 
+  setFractal(index) {
+    this.parameters.fractal = index;
+  }
+
+  // ─── SETINITIALPARAMETERS ───────────────────────────────────────────────────────
+  // Metodo que restablece los parametros a los valores por defecto.
   setInitialParameters() {
     this.parameters = JSON.parse(JSON.stringify(this.initialParameters));
   }
 
-  checkGLError(){
-    let gl = this.context;
-    const err = gl.getError();
-    if (err == gl.NO_ERROR) {
-      return
-    }
-    else{
-      const msg = `Ha ocurrido un error de OpenGL: [${err}]`;
-      throw new Error(msg);
+  // ─── SETJULIACONSTANT ───────────────────────────────────────────────────────────
+  // Setter del parametro 'juliaSetConstant'.
+  setJuliaConstant(newJuliaConstant) {
+    this.parameters.juliaSetConstant = [
+      newJuliaConstant[0], newJuliaConstant[1],
+      newJuliaConstant[2], newJuliaConstant[3]
+    ];
+  }
+
+  // ─── SETKA ──────────────────────────────────────────────────────────────────────
+  // Setter del parametro 'ka' (reflectividad emisiva).
+  setKa(newKa) {
+    this.parameters.ka[0] = newKa[0];
+    this.parameters.ka[1] = newKa[1];
+    this.parameters.ka[2] = newKa[2];
+  }
+
+  // ─── SETKD ──────────────────────────────────────────────────────────────────────
+  // Setter del parametro 'kd' (reflectividad difusa).
+  setKd(newKd) {
+    this.parameters.kd[0] = newKd[0];
+    this.parameters.kd[1] = newKd[1];
+    this.parameters.kd[2] = newKd[2];
+    this.parameters.kd[3] = 1.0
+  }
+
+  // ─── SETKS ──────────────────────────────────────────────────────────────────────
+  // Setter del parametro 'ks' (reflectividad especular).
+  setKs(newKs) {
+    this.parameters.ks[0] = newKs[0];
+    this.parameters.ks[1] = newKs[1];
+    this.parameters.ks[2] = newKs[2];
+  }
+
+  // ─── SETLIGHTCOLOR ──────────────────────────────────────────────────────────────
+  // Setter del parametro 'lightColorX', donde X depende del valor del argumento i.
+  // Parametros: ───────────────────────────
+  // - i: number. Si vale 0, se modifica la terna RGB de la luz 0, en otro caso se
+  //      modifica la terna de la luz 1.
+  setLightColor(i, newLightColor) { 
+    if(i==0){
+      this.parameters.lightColor0[0] = newLightColor[0];
+      this.parameters.lightColor0[1] = newLightColor[1];
+      this.parameters.lightColor0[2] = newLightColor[2];
+    } else {
+      this.parameters.lightColor1[0] = newLightColor[0];
+      this.parameters.lightColor1[1] = newLightColor[1];
+      this.parameters.lightColor1[2] = newLightColor[2];      
     }
   }
 
+  // ─── SETNSAMPLES ────────────────────────────────────────────────────────────────
+  // Setter del parametro 'nSamples'.
+  setNSamples(newNSamples) {
+    this.parameters.nSamples = newNSamples;
+  }
+
+  // ─── SETSH ──────────────────────────────────────────────────────────────────────
+  // Setter del parametro 'sh' (exponente de brillo).
+  setSh(newSh){
+    this.parameters.sh = newSh;
+  }
+
 }
+
+// ────────────────────────────────────────────────────────────────────────────────
 
 export {Scene3D} 
