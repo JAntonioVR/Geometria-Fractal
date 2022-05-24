@@ -119,7 +119,32 @@ Para ello podemos fijarnos en que la operación de elevar $z_n$ al cuadrado prim
 
 Podemos aplicar este teorema para programar un algoritmo que grafique conjuntos de Julia. Para ello, fijamos un número $M\in\N$ que será el máximo de iteraciones que se aplicarán en cada punto antes de decidir si el punto es prisionero o de escape. Si pasadas esas $M$ iteraciones el módulo de $z_0$ no ha alcanzado el número de escape $e_c$ entonces consideramos que $z_0$ es un punto prisionero. En caso contrario, en el momento que se alcance el número de escape cesarán las iteraciones y se etiquetará el punto como prisionero. El valor de $M$ puede ser alto si queremos aumentar la precisión a cambio de mayor tiempo de cómputo, y viceversa. Es posible que algunos de los puntos sean de escape pero alcancen $e_c$ después de las $M$ iteraciones, pero tomando un valor suficientemente alto el resultado es prácticamente el mismo.
 
-Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos prisioneros y a los puntos de escape asignarle otro en función de las iteraciones necesarias antes de alcanzar el número de escape. Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathcal{J}_{-0.12+0.75i}$ utilizaríamos el siguiente código:
+Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos prisioneros y a los puntos de escape asignarle otro en función de las iteraciones necesarias antes de alcanzar el número de escape. El psudocódigo del algoritmo descrito para graficar conjuntos de Julia sería el que podemos ver en el algoritmo \ref{alg:Julia}.
+
+\begin{algorithm}[H]
+  \caption{Conjuntos de Julia} \label{alg:Julia}
+  \begin{algorithmic}
+  \State Para cada $z_0\in\C$:
+  \State $i\gets 0$
+  \State $p\gets z_0$
+  \While{$i < M$} 
+    \State $p \gets P_c(p)$
+    \If{$|p| > e_c=\max\{|c|,2\}$}
+      \State break;
+    \EndIf
+    \State $i++$
+  \EndWhile
+  \If{$i==M$}
+    \State $z_0$ es un punto prisionero
+    \State \textbf{return} color de puntos prisioneros
+  \Else
+    \State $z_0$ es un punto de escape
+    \State \textbf{return} color($i$)
+  \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathcal{J}_{-0.12+0.75i}$ utilizaríamos el siguiente código:
 
 \begin{mmaCell}{Code}
   M = 50;
@@ -228,7 +253,30 @@ $$
 $$
 donde $D(z,r)$ denota el disco abierto de centro $z$ y radio $r$ mientras que $\bar D(z,r)$ denota el cierre del disco abierto, es decir, el disco cerrado de centro $z$ y radio $r$.
 
-Además, en el momento que una iterada se sitúe fuera de $\bar D(0,2)$, podemos asegurar que esa sucesión va a diverger, por lo que podemos dejar de iterar. Para concluir que la sucesión no diverge, al igual que para graficar conjuntos de Julia, fijamos un número máximo de iteraciones $M\in\N$, de forma que si al calcular la $M$-ésima iterada el módulo del elemento $P_c^{M}(0)$ no ha excedido a $2$, podemos considerar que el número $c$ pertenece a $\mathcal{M}$. En conclusión, el algoritmo consiste en, para cada píxel identificado con un punto del plano complejo $c\in\C$, calcular sus iteradas hasta un máximo de $M$ iteraciones, en caso de exceder en módulo a $2$ guardamos el mínimo valor $m\in\N$ tal que $|P_c^m(0)|>2$ y asignamos un color en función; en caso de no exceder a $2$ asignar un color fijo.
+Además, en el momento que una iterada se sitúe fuera de $\bar D(0,2)$, podemos asegurar que esa sucesión va a diverger, por lo que podemos dejar de iterar. Para concluir que la sucesión no diverge, al igual que para graficar conjuntos de Julia, fijamos un número máximo de iteraciones $M\in\N$, de forma que si al calcular la $M$-ésima iterada el módulo del elemento $P_c^{M}(0)$ no ha excedido a $2$, podemos considerar que el número $c$ pertenece a $\mathcal{M}$. En conclusión, el algoritmo consiste en, para cada píxel identificado con un punto del plano complejo $c\in\C$, calcular sus iteradas hasta un máximo de $M$ iteraciones, en caso de exceder en módulo a $2$ guardamos el mínimo valor $m\in\N$ tal que $|P_c^m(0)|>2$ y asignamos un color en función; en caso de no exceder a $2$ asignar un color fijo. Presentamos por tanto en el algoritmo \ref{alg:Mandelbrot} el procedimiento para graficar el conjunto de Mandelbrot. 
+
+\begin{algorithm}[H]
+  \caption{Conjunto de Mandelbrot} \label{alg:Mandelbrot}
+  \begin{algorithmic}
+  \State Para cada $c\in\C$:
+  \State $i\gets 0$
+  \State $p\gets c$
+  \While{$i < M$} 
+    \State $p \gets P_c(p)$
+    \If{$|p| > 2$}
+      \State break;
+    \EndIf
+    \State $i++$
+  \EndWhile
+  \If{$i==M$}
+    \State $c\in\mathcal{M}$
+    \State \textbf{return} color de puntos de $\mathcal{M}$
+  \Else
+    \State $c\not\in\mathcal{M}$
+    \State \textbf{return} color($i$)
+  \EndIf
+  \end{algorithmic}
+\end{algorithm}
 
 El código en \textit{Mathematica} utilizado es por tanto el siguiente, muy similar al utilizado para graficar conjuntos de Julia:
 
