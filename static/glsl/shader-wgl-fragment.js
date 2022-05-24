@@ -74,9 +74,9 @@ vec2 get_world_coordinates() {
     return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
 }
 
-void assignColor(bool escaped, int iterations) {
-    gl_FragColor = escaped ? vec4(palette(
-      3.0*float(iterations)/ float(u_maxIterations),
+vec4 computePixelColor(bool escaped, int iterations) {
+    return escaped ? vec4(palette(
+      float(iterations)/ float(u_maxIterations),
       vec3(0.109,0.109,0.647), 
       vec3(0.823, 0.411, 0.0), 
       vec3(0.769, 0.659, 0.0), 
@@ -85,7 +85,7 @@ void assignColor(bool escaped, int iterations) {
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
-void Julia(vec2 c, int n) {
+vec4 Julia(vec2 c, int n) {
     vec2 z0 = get_world_coordinates();
     int iterations;
     vec2 z = z0;
@@ -101,10 +101,10 @@ void Julia(vec2 c, int n) {
         }
     }
 
-    assignColor(escaped, iterations);
+    return computePixelColor(escaped, iterations);
 }
 
-void Mandelbrot(int n) {
+vec4 Mandelbrot(int n) {
 
   vec2 c = get_world_coordinates();
   
@@ -124,17 +124,19 @@ void Mandelbrot(int n) {
     }
   }
 
-  assignColor(escaped, iterations);
+  return computePixelColor(escaped, iterations);
   
 }
 
 void main() {
+  vec4 color;
   if(u_fractal == 0){
-    Mandelbrot(u_order);
+    color = Mandelbrot(u_order);
   }
   else{
-    Julia(u_juliaSetConstant, u_order);
+    color = Julia(u_juliaSetConstant, u_order);
   }
+  gl_FragColor = color;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────

@@ -141,7 +141,6 @@ Necesitamos código para la función $P_{c,m}$, pero esta requiere a su vez la p
 $$
 z^2 = (\Re z+i\cdot \Im z)(\Re z+i\cdot \Im z) = ((\Re z)^2-(\Im z)^2) + 2\cdot\Re z\cdot\Im z\cdot i
 $$
-
 y como $z^n = z^{n-1}\cdot z$, entonces
 
 \begin{equation}
@@ -233,15 +232,15 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 
 // Asignacion de colores, a partir de una variable que define
 // si el punto es prisionero o de escape y el numero de 
-// iteraciones antes de escapar se asigna a la variable 
-// gl_FragColor el color que le corresponde.
-void assignColor(bool escaped, int iterations) {
-    gl_FragColor = escaped ? vec4(palette(
-      3.0*float(iterations)/ float(u_maxIterations),
-      vec3(0.109, 0.109, 0.647), // #1C1CA5
-      vec3(0.823, 0.411,   0.0), // #D26900
-      vec3(0.769, 0.659,   0.0), // #C4A800
-      vec3(0.627, 0.878, 0.043)  // #A0E00B
+// iteraciones antes de escapar se calcula y devuelve un color 
+// que proximamente se asignara finalmente a gl_FragColor
+vec4 computePixelColor(bool escaped, int iterations) {
+    return escaped ? vec4(palette(
+      float(iterations)/ float(u_maxIterations),
+      vec3(0.109,0.109,0.647), 
+      vec3(0.823, 0.411, 0.0), 
+      vec3(0.769, 0.659, 0.0), 
+      vec3(0.627,0.878,0.043)
       ), 
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
@@ -252,12 +251,12 @@ Como se puede observar, es una simple interpolación lineal entre los 4 colores 
 \subsection{Visualizando conjuntos de Julia}
 \label{subsection:grafica-julia}
 
-Tenemos entonces todos los ingredientes para programar la visualización, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,m}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,m}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero. Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
+Tenemos entonces todos los ingredientes para programar la visualización, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,m}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,m}$ almacenando el número de iteraciones dadas. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero (recordemos el psudocódigo del algoritmo \ref{alg:Julia}). Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{subsection:colores}. El código GLSL sería el siguiente:
 
 \begin{lstlisting}
 // A partir del valor de la constante c y el exponente n
 // iteramos la funcion P_{c,m} y asignamos el color.
-void Julia(vec2 c, int n) {
+vec4 Julia(vec2 c, int n) {
     vec2 z0 = get_world_coordinates();
     int iterations;
     vec2 z = z0;
@@ -272,15 +271,14 @@ void Julia(vec2 c, int n) {
             break;
         }
     }
-
-    assignColor(escaped, iterations);
+    return computePixelColor(escaped, iterations);
 }
 \end{lstlisting}
 
-Ya desde la función \verb|main|, llamamos a esta función recién presentada y obtenemos los resultados que se presentan en las imágenes \ref{fig:julia-webgl}.  
+Ya desde la función \verb|main|, llamamos a esta función recién presentada, le asignamos el color que devuelve a \verb|gl_FragColor| y obtenemos los resultados que se presentan en las imágenes \ref{fig:julia-webgl}.  
 
 \begin{lstlisting}
-Julia(u_juliaSetConstant, u_order);
+gl_FragColor = Julia(u_juliaSetConstant, u_order);
 \end{lstlisting}
 
 \begin{figure}[ht]
@@ -297,10 +295,10 @@ Julia(u_juliaSetConstant, u_order);
 
 Ya hemos visto la metodología a utilizar si queremos visualizar conjuntos de Julia y, como es de esperar, la metodología para graficar conjuntos de Mandelbrot $\mathcal{M}_m$ no es muy distinta. Recordamos que, tal y como afirmamos en las secciones \ref{section:Mandelbrot} y \ref{subsection:julia-mandelbrot-generalizados} el conjunto de Mandelbrot $\mathcal{M}_m$ se componía de aquellos elementos $c\in\C$ tales que el conjunto de Julia $\mathcal{J}_c$ es conexo, o equivalentemente, de aquellos cuya sucesión $\{P_{c,m}^n(0)\}$ no diverge.
 
-La metodología consiste por tanto en obtener las coordenadas de mundo del píxel, iterar la función $P_{c,m}$ tomando $z_0=0$ como semilla y observar qué sucede. Por la proposición \ref{prop:mandelbrot-escape} afirmamos que en el momento que una iterada supere en módulo a 2, entonces la sucesión de iteradas es divergente. Por tanto, almacenamos en una variable el número de iteradas que se han calculado antes de que el módulo de la sucesión supere a 2 en caso de que lo haga. Si esto no ocurre, se etiqueta al punto como prisionero y por tanto el punto pertenece a $\mathcal{M}_m$. De nuevo, la forma de asignar un color al píxel depende de si la sucesión diverge o no y del número de iteraciones hasta decidir que diverge en dicho caso. El código GLSL por tanto es el siguiente:
+La metodología consiste por tanto en obtener las coordenadas de mundo del píxel, iterar la función $P_{c,m}$ tomando $z_0=0$ como semilla y observar qué sucede, recordemos el algoritmo \ref{alg:Mandelbrot}. Por la proposición \ref{prop:mandelbrot-escape} afirmamos que en el momento que una iterada supere en módulo a 2, entonces la sucesión de iteradas es divergente. Por tanto, almacenamos en una variable el número de iteradas que se han calculado antes de que el módulo de la sucesión supere a 2 en caso de que lo haga. Si esto no ocurre, se etiqueta al punto como prisionero y por tanto el punto pertenece a $\mathcal{M}_m$. De nuevo, la forma de asignar un color al píxel depende de si la sucesión diverge o no y del número de iteraciones hasta decidir que diverge en dicho caso. El código GLSL por tanto es el siguiente:
 
 \begin{lstlisting}
-void Mandelbrot(int n) {
+vec4 Mandelbrot(int n) {
     vec2 c = get_world_coordinates();
     int iterations;
     vec2 z = vec2(0.0);
@@ -310,20 +308,20 @@ void Mandelbrot(int n) {
         iterations = i;
         z = P(z, c, n);
         if (length(z) > 2.0) {
-            escaped = true;
-            break;
+        escaped = true;
+        break;
         }
     }
-    assignColor(escaped, iterations);    
+    return computePixelColor(escaped, iterations);
 }
 \end{lstlisting}
 
 Vemos que es muy parecida a la función \verb|Julia| presentada en la sección \ref{subsection:grafica-julia}. La diferencia fundamental se encuentra en que mientras en los conjuntos de Julia fijamos un $c\in\C$ y usamos el complejo asociado al píxel como semilla en el caso del conjunto de Mandelbrot usamos siempre $z_0=0$ como semilla y tomamos como $c$ el complejo que representa el píxel.
 
-Por tanto, ya solo falta llamar a esta función desde \verb|main| y podremos ver el conjunto de Mandelbrot en detalle. Presentamos algunas imágenes de detalles del mismo, a la vez que animamos a revisitar las imágenes \ref{fig:mandelbrot-intro}, las cuales también se han obtenido mediante WebGL.
+Por tanto, ya solo falta llamar a esta función desde \verb|main|, asignarle el valor que devuelve a \verb|gl_FragColor| y podremos ver el conjunto de Mandelbrot en detalle. Presentamos algunas imágenes de detalles del mismo, a la vez que animamos a revisitar las imágenes \ref{fig:mandelbrot-intro}, las cuales también se han obtenido mediante WebGL.
 
 \begin{lstlisting}
-Mandelbrot(u_order);
+gl_FragColor = Mandelbrot(u_order);
 \end{lstlisting}
 
 \begin{figure}[ht]
@@ -348,9 +346,13 @@ uniform int u_fractal;
 // ... 
 
 void main() {
-    if(u_fractal == 0)
-        Mandelbrot(u_order);
-    else
-        Julia(u_juliaSetConstant, u_order);
+  vec4 color;
+  if(u_fractal == 0){
+    color = Mandelbrot(u_order);
+  }
+  else{
+    color = Julia(u_juliaSetConstant, u_order);
+  }
+  gl_FragColor = color;
 }
 \end{lstlisting}
