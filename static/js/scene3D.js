@@ -55,7 +55,7 @@ class Scene3D extends Scene{
   // - vsSource: string. Codigo fuente del vertex shader
   // - fsSource: string. Codigo fuente del fragment shader
   // Devuelve: ─────────────────────────────
-  // Un objeto de la clase Scene2D con todos sus atributos inicializados.
+  // Un objeto de la clase Scene3D con todos sus atributos inicializados.
   constructor(vsSource, fsSource) {
     super(vsSource, fsSource);
     var that = this;
@@ -235,7 +235,7 @@ class Scene3D extends Scene{
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
-  // ─── ZOOMIN ─────────────────────────────────────────────────────────────────────
+  // ─── ZOOMOUT ────────────────────────────────────────────────────────────────────
   // Se aumenta el modulo del vector que une el origen con el punto lookfrom para
   // alejar la escena
   zoomOut(){
@@ -244,7 +244,7 @@ class Scene3D extends Scene{
   }
 
   // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
-  // Se aumenta el angulo phi de las coordenadas esfericas del punto lookfrom para 
+  // Se modifica el angulo phi de las coordenadas esfericas del punto lookfrom para 
   // desplazar la escena a la izquierda
   moveLeft(){
     this.parameters.lookfromSpheric[2] += this.parameters.delta;
@@ -253,7 +253,7 @@ class Scene3D extends Scene{
 
 
   // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
-  // Se reduce el angulo phi de las coordenadas esfericas del punto lookfrom para 
+  // Se modifica el angulo phi de las coordenadas esfericas del punto lookfrom para 
   // desplazar la escena a la derecha
   moveRight(){
     this.parameters.lookfromSpheric[2] -= this.parameters.delta;
@@ -261,7 +261,7 @@ class Scene3D extends Scene{
   }
 
   // ─── MOVEX ──────────────────────────────────────────────────────────────────────
-  // Dada una cantidad 'desp', desplaza la escena a la derecha o a la izquierda
+  // Dada una cantidad 'desp', desplaza la camara a la derecha o a la izquierda
   // desp unidades.
   // Parametros: ───────────────────────────
   // - desp: number. Numero entero (positivo o negativo) que indica el desplazamiento
@@ -289,7 +289,7 @@ class Scene3D extends Scene{
   }
 
   // ─── MOVEY ──────────────────────────────────────────────────────────────────────
-  // Dada una cantidad 'desp', desplaza la escena arriba o hacia abajo desp unidades.
+  // Dada una cantidad 'desp', desplaza la camara arriba o hacia abajo desp unidades.
   // Parametros: ───────────────────────────
   // - desp: number. Numero entero (positivo o negativo) que indica el desplazamiento
   moveY(desp) {
@@ -445,7 +445,7 @@ class Scene3D extends Scene{
   }
 
   // ─── SETKA ──────────────────────────────────────────────────────────────────────
-  // Setter del parametro 'ka' (reflectividad emisiva).
+  // Setter del parametro 'ka' (reflectividad ambiental).
   setKa(newKa) {
     this.parameters.ka[0] = newKa[0];
     this.parameters.ka[1] = newKa[1];

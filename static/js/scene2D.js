@@ -33,9 +33,9 @@ class Scene2D extends Scene {
   //            Mandelbrot. Si vale 1 se visualizara el conjunto de Julia asociado
   //            al campo juliaSetConstant.
   // Se crea un objeto que almacena informacion relativa al programa:
-  // - program: WebGLProgram. Programa Shader ya inicializado
-  // - attribLocations: Object. Localizacion en memoria de las variables 'attribute'
-  // - uniformLocations: Object. Localizacion en memoria de las variables 'uniform'
+  // - program: WebGLProgram. Programa Shader ya inicializado.
+  // - attribLocations: Object. Localizacion en memoria de las variables 'attribute'.
+  // - uniformLocations: Object. Localizacion en memoria de las variables 'uniform'.
   // Por ultimo, se almacenan en un atributo los parametros iniciales de la escena,
   // para asi poder resetear los parametros de la escena a los parametros por defecto.
   // Parametros: ───────────────────────────
@@ -200,7 +200,7 @@ class Scene2D extends Scene {
   //
 
   // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────
-  // Getter del parametro fractal, de tipo number
+  // Getter del parametro fractal, de tipo number.
   getFractal() {
     return this.parameters.fractal;
   }
@@ -219,13 +219,13 @@ class Scene2D extends Scene {
   }
 
   // ─── GETMAXITERATIONS ───────────────────────────────────────────────────────────
-  // Getter del parametro maxIterations, de tipo number
+  // Getter del parametro maxIterations, de tipo number.
   getMaxIterations(){
     return this.parameters.maxIterations;
   }
 
   // ─── GETORDER ───────────────────────────────────────────────────────────────────
-  // Getter del parametro order, de tipo number
+  // Getter del parametro order, de tipo number.
   getOrder() {
     return this.parameters.order;
   }
@@ -233,30 +233,6 @@ class Scene2D extends Scene {
   //
   // ─── SETTERS ────────────────────────────────────────────────────────────────────
   //
-
-  // ─── SETMAXITERATIONS ───────────────────────────────────────────────────────────
-  // Setter del parametro maxIterations
-  setMaxIterations(newValue){
-    this.parameters.maxIterations = newValue;
-  }
-
-  // ─── SETJULIACONSTANTX ──────────────────────────────────────────────────────────
-  // Setter de la primera componente del parametro juliaSetConstant
-  setJuliaConstantX(newX) {
-    this.parameters.juliaSetConstant[0] = newX;
-  }
-
-  // ─── SETJULIACONSTANTY ──────────────────────────────────────────────────────────
-  // Setter de la segunda componente del parametro juliaSetConstant
-  setJuliaConstantY(newY) {
-    this.parameters.juliaSetConstant[1] = newY;
-  }
-
-  // ─── SETORDER ───────────────────────────────────────────────────────────────────
-  // Setter del parametro order
-  setOrder(newOrder) {
-    this.parameters.order = newOrder;
-  }
 
   // ─── SETFRACTAL ─────────────────────────────────────────────────────────────────
   // Setter del parametro fractal
@@ -272,6 +248,30 @@ class Scene2D extends Scene {
   // Metodo que restablece los parametros a los valores por defecto.
   setInitialParameters() {
     this.parameters = JSON.parse(JSON.stringify(this.initialParameters));
+  }
+
+  // ─── SETJULIACONSTANTX ──────────────────────────────────────────────────────────
+  // Setter de la primera componente del parametro juliaSetConstant
+  setJuliaConstantX(newX) {
+    this.parameters.juliaSetConstant[0] = newX;
+  }
+
+  // ─── SETJULIACONSTANTY ──────────────────────────────────────────────────────────
+  // Setter de la segunda componente del parametro juliaSetConstant
+  setJuliaConstantY(newY) {
+    this.parameters.juliaSetConstant[1] = newY;
+  }
+
+  // ─── SETMAXITERATIONS ───────────────────────────────────────────────────────────
+  // Setter del parametro maxIterations
+  setMaxIterations(newValue){
+    this.parameters.maxIterations = newValue;
+  }
+
+  // ─── SETORDER ───────────────────────────────────────────────────────────────────
+  // Setter del parametro order
+  setOrder(newOrder) {
+    this.parameters.order = newOrder;
   }
 
   // ────────────────────────────────────────────────────────────────────────────────
