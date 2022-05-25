@@ -513,7 +513,11 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
 
 Y ahora desde \verb|ray_color| debemos considerar la posibilidad de intersecar con el plano o con las esferas, pero solo debemos darle color a la intersección más próxima. Por eso debemos mantener una variable \verb|t_closest| que represente el valor de $t$ más pequeño en el que hemos detectado una intersección. Puede ocurrir que el rayo impacte primero con una esfera y después con el plano o al revés, primero el plano y después una esfera; en estos casos se daría color atendiendo la intersección con la esfera y con el plano respectivamente. 
 
-Como es natural, utilizaremos como suelo un plano horizontal, como puede ser el plano $P=\{(x,y,z)\in\R^3:y=-2\}$, en cuyo caso $\vec N=(0,1,0)$, $D=-2$. Los puntos de $P$ son de la forma $(x,-2,z)$, con $ x,z\in\R$, y a partir de los pares $(x,z)$ definiremos qué puntos colorear de negro y cuáles de blanco. Lo primero es quedarnos con la parte entera de ambos valores, de forma que dividimos el plano en cuadrados. Si la suma de las partes enteras es un número par, colorearemos el píxel de blanco, y si es impar de negro. En la imagen \ref{fig:ajedrez} podemos ver cómo identificando cada punto con las partes enteras de cada componente y coloreando de negro las partes enteras cuya suma sea impar se obtiene una textura de ajedrez.
+Como es natural, utilizaremos como suelo un plano horizontal, como puede ser el plano $P=\{(x,y,z)\in\R^3:y=-2\}$, en cuyo caso $\vec N=(0,1,0)$, $D=-2$. Véamos entonces cómo aplicarle una textura a este plano. Normalmente las texturas se suelen almacenar en imágenes, pero por sencillez en este caso la generaremos proceduralmente desde el fragment shader. Es decir, se evalúa el color de la textura en función del punto en la superficie del objeto, de forma que a cada punto del plano le asignamos un color (blanco o negro). 
+
+Por tanto, se trata de un algoritmo que a partir de una coordenada 2D de un punto en el suelo $(u,v)$ se calcula una terna RGB de color, que es el que se asigna finalmente al píxel. Los puntos de $P$ son de la forma $(x,-2,z)$, con $ x,z\in\R$, y utilizaremos como coordenadas $(u,v)$ a los pares $(x,z)$ extraídos de las coordenadas de mundo $(x,y,z)$ de los puntos que forman el plano. Muchas veces, sobre todo en superficies que no son planas o que son irregulares, el mapeo $(x,y,z)\longrightarrow(u,v)$ es mucho más complejo, pero en este caso es bastante sencillo.
+
+Lo primero es quedarnos con la parte entera de ambos valores, de forma que dividimos el plano en cuadrados. Si la suma de las partes enteras es un número par, colorearemos el píxel de blanco, y si es impar de negro. En la imagen \ref{fig:ajedrez} podemos ver cómo identificando cada punto con las partes enteras de cada componente y coloreando de negro las partes enteras cuya suma sea impar se obtiene una textura de ajedrez.
 
 \begin{figure} [ht]
     \centering
@@ -858,9 +862,9 @@ Lo siguiente es fijarnos en que el material del objeto desempeña una labor fund
 
 \begin{lstlisting}
 struct Material {
-    vec4 ka;    // Reflecitividad ambiental
-    vec4 kd;    // Reflecitividad difusa
-    vec4 ks;    // Reflecitividad especular
+    vec4 ka;    // Reflectividad ambiental
+    vec4 kd;    // Reflectividad difusa
+    vec4 ks;    // Reflectividad especular
     float sh;   // Exponente de brillo
 };
 \end{lstlisting}
@@ -915,7 +919,7 @@ vec4 evaluate_lighting_model(
 
 Lo siguiente es editar, aunque muy brevemente, las funciones \verb|hit_sphere| y \verb|hit_plane| para que en caso de existir intersección asignen a \verb|result.mat| el material de la esfera \verb|S.mat| y el del plano \verb|P.mat| respectivamente. Por último debemos, una vez más, editar \verb|ray_color| para que acepte como argumento el array de luces y hacer las llamadas correspondientes a la función \verb|evaluate_lighting_model|.
 
-Sin embargo, recordemos que el suelo tenía textura de tablero de ajedrez, por lo que no podemos asignar de manera uniforme un material al plano. Lo que sí podemos es editar la reflectancia especular de ese material, asignándole blanco o negro según corresponda, aunque a partir de este momento y por pura estética se utilizará un color gris claro \verb|rgb(178,178,178)| en lugar del blanco.
+Sin embargo, recordemos que el suelo tenía textura de tablero de ajedrez, por lo que no podemos asignar de manera uniforme un material al plano. Lo que sí podemos es editar los parámetros del material utilizado para el suelo asignando a sus componentes blanco o negro según corresponda, aunque a partir de este momento y por pura estética se utilizará un color gris claro \verb|rgb(178,178,178)| en lugar del blanco.
 
 \begin{lstlisting}
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, 
@@ -934,10 +938,13 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size,
     // ...
     if(hr.hit){
         // ... 
-        if(modulus == 0)
-            hr.mat.ks = vec4(0.7, 0.7, 0.7, 1.0);
+        if(modulus == 0){
+            hr.mat.kd = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.ks = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.sh = 10.0;
+        }
         else
-            hr.mat.ks = vec4(0.0, 0.0, 0.0, 1.0);
+            hr.mat.kd = vec4(0.0,0.0,0.0, 1.0);
         tmp_color = evaluate_lighting_model(lights, 
             num_lights, hr);
     }

@@ -747,7 +747,7 @@ void main() {
     
     
     // COLOR
-    vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
+    vec2 uv = (gl_FragCoord.xy +vec2(0.5)) / vec2(image_width, image_height);
     float u = uv.x;
     float v = uv.y;
 

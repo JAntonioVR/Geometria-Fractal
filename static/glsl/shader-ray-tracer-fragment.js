@@ -270,10 +270,13 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
         vec3 p = hr.p;
         int x_int = int(floor(p.x)), z_int = int(floor(p.z)), sum = x_int + z_int;
         int modulus = sum - (2*int(sum/2));
-        if(modulus == 0)
-            hr.mat.ks = vec4(0.7, 0.7, 0.7, 1.0);
+        if(modulus == 0){
+            hr.mat.kd = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.ks = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.sh = 10.0;
+        }
         else
-            hr.mat.ks = vec4(0.0,0.0,0.0, 1.0);
+            hr.mat.kd = vec4(0.0,0.0,0.0, 1.0);
         tmp_color = evaluate_lighting_model(lights, num_lights, hr);
     }
     // If r hits any surface
@@ -338,7 +341,7 @@ void main() {
     lights[0] = l1; lights[1] = l2;
     
     // COLOR
-    vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
+    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
     float u = uv.x;
     float v = uv.y;
     Ray r = get_ray(cam, u, v);
