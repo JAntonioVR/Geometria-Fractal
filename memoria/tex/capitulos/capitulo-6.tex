@@ -16,7 +16,7 @@ A nivel conceptual, una imagen realmente es un conjunto de píxeles con un color
 
 Sin embargo, WebGL está orientado a rasterización, es decir, dadas unas primitivas colorea del color adecuado los píxeles que ocupen estas primitivas, dividiendo las mismas en triángulos. La forma que tenemos por tanto de ejecutar $f$ una vez por cada píxel es rasterizando dos triángulos que ocupen toda la superficie del canvas. Al existir dos primitivas que en conjunto cubren toda la imagen, el fragment shader se ejecutará una vez por cada píxel. Desde el fragment shader podemos acceder a las coordenadas del píxel, y utilizando estas coordenadas y los valores asignados a las variables \verb|varying| y \verb|uniform|, calcular el valor que devuelve la función $f$, asignando así un color a cada píxel, que es precisamente el cometido del fragment shader.
 
-Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de visualización se utiliza el convenio de utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
+Por tanto, a efectos prácticos, nuestro vertex shader tomará como entrada los vértices $(-1,-1)$, $(1,-1)$, $(1,1)$ y $(-1,1)$ y no aplicará ninguna transformación, pues ya están normalizados en el clip space (teniendo en cuenta que estaríamos visualizando un fragmento del plano $z=0$). Cabe en este momento aclarar que en el ámbito de herramientas de visualización por convenio se suele utilizar la coordenada $Y$ para la altura y la coordenada $Z$ para la profundidad. 
 
 A partir de estos cuatro vértices, en el canvas se visualizarán dos triángulos que completarán la superficie completa del mismo. El vertex shader a partir de ahora será totalmente trivial, pues solo devolverá en la variable \verb|gl_Position| la misma posición que obtiene del buffer de posición.
 
@@ -31,9 +31,9 @@ Mientras que, por su parte, el fragment shader podrá acceder a la posición (en
 
 \section{Objetivo}
 
-Procedemos a explicar el objetivo principal de este capítulo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se grafique el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme se cambia un parámetro el canvas modifica la imagen que está visualizando.
+Procedemos a explicar el objetivo principal de este capítulo y para el cual programaremos cada línea de código: Queremos desarrollar una página web interactiva, que cuente con un canvas donde se grafique el fractal que deseemos y, además, haya una serie de parámetros que se puedan controlar dinámicamente, de forma que conforme si cambia un parámetro el canvas modifica la imagen que está visualizando.
 
-Queremos visualizar conjuntos de Julia $\mathcal{J}_c$ para distintos $c\in\C$, el conjunto de Mandelbrot, y las generalizaciones de los conjuntos de Julia y Mandelbrot ocasionadas si se itera la función $P_{c,m}(z)=z^m+c$ para distintos valores de $m\in\N$. Además, si revisitamos el algoritmo que utilizamos en la sección \ref{subsection:representacion-julia} para graficar en \textit{Mathematica} conjuntos de Julia y el que utilizamos en la sección \ref{subsection:representacion-mandelbrot} para visualizar el conjunto de Mandelbrot, podremos recordar que para aproximar qué puntos del plano complejo eran prisioneros o de escape fijábamos un número máximo de iteraciones $M$, tras las cuales se consideraba que un número $z_0\in\C$ era prisionero si la sucesión de los módulos de sus iteradas $\{P_{c,m}^n(z_0)\}$ no superaba el número de escape $e_c=\max\{2,|c|\}$ . Este valor $M$ también podría ser un parámetro modificable, para así poder ver dinámicamente cómo cambia la resolución cuando se cambia el número máximo de iteraciones.
+Queremos visualizar conjuntos de Julia $\mathcal{J}_c$ para distintos $c\in\C$, el conjunto de Mandelbrot, y las generalizaciones de los conjuntos de Julia y Mandelbrot ocasionadas si se itera la función $P_{c,m}(z)=z^m+c$ para distintos valores de $m\in\N$. Además, si revisitamos el algoritmo \ref{alg:Julia} para graficar conjuntos de Julia y el algoritmo \ref{alg:Mandelbrot} para visualizar el conjunto de Mandelbrot, podremos recordar que para aproximar qué puntos del plano complejo eran prisioneros o de escape fijábamos un número máximo de iteraciones $M$, tras las cuales se consideraba que un número $z\in\C$ era prisionero si la sucesión de los módulos de sus iteradas $\{P_{c,m}^n(z)\}$ no divergía. Este valor $M$ también podría ser un parámetro modificable, para así poder ver dinámicamente cómo cambia la resolución cuando se cambia el número máximo de iteraciones.
 
 Además, conviene añadir la posibilidad de desplazarse y hacer zoom en distintas regiones del plano, para así poder explorar en detalle las regiones del fractal, permitiendo observar en detalle las autosimilaridades que nos ofrecen, como ya vimos en la sección \ref{section:autosimilaridad-julia-mandelbrot}. 
 
@@ -41,18 +41,18 @@ Además, conviene añadir la posibilidad de desplazarse y hacer zoom en distinta
 \section{Estructurando el código}
 \label{section:codigo}
 
-Podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la visualización de fractales. Sin embargo, tiene una estructura muy procedural. Podemos mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL y siguiendo los \href{https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898}{principios SOLID}.
+Podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la visualización de fractales. Sin embargo, esta estructura es muy procedural. Es posible mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL.
 
 En concreto, para el código de JavaScript hemos creado las siguientes clases:
 \begin{itemize}
-    \item \verb|Scene2D|: Inicializa y gestiona todos los componentes de WebGL necesarios para representar una escena: el contexto WebGL, los parámetros, el shader, las variables del shader y los buffers. Cuenta además con métodos getter y setters de cada uno de los parámetros de la escena y un método \verb|draw| que grafica la escena a partir de los parámetros actuales.
-    \item \verb|ShaderType|: Es un enumerado que puede tomar los valores \verb|ShaderType.vertexShader| o \verb|ShaderType.fragmentShader|
-    \item \verb|Shader|: Representa una abstracción de lo que sería un `vertex shader' o un `fragment shader'. A partir del código fuente y del tipo de shader, se compila y almacena el shader en un atributo.
+    \item \verb|Scene2D|: Inicializa y gestiona todos los componentes de WebGL necesarios para representar una escena: el contexto WebGL, los parámetros, el shader, las variables del shader y los buffers. Cuenta además con métodos getter y setters de cada uno de los parámetros de la escena y un método \verb|drawScene| que grafica la escena a partir de los parámetros actuales.
+    \item \texttt{ShaderType}: Es un enumerado que puede tomar los valores \texttt{ShaderType.vertexShader} o \texttt{ShaderType.fragmentShader}
+    \item \verb|Shader|: Representa una abstracción de lo que sería un `vertex shader' o un `fragment shader'. A partir del código fuente y del tipo de shader, se compila y almacena el shader de WebGL en un atributo.
     \item \verb|ShaderProgram|: A partir de dos objetos de la clase \verb|Shader|, que serían el vertex shader y el fragment shader, crea el programa shader final.
     \item \verb|Buffer|: Construye un buffer de WebGL a partir de un array de JavaScript que se le pasa como parámetro.
 \end{itemize}
 
-Además, el fichero \verb|fractals-2D.js| utiliza un objeto de la clase \verb|Scene2D| para interactuar con el DOM, gestionar los eventos y así poder modificar dinámicamente los parámetros, de tal forma que cada vez que se interactúa con la página se registra un evento con una función manejadora asociada. Esta función manejadora utiliza los setters correspondientes del objeto \verb|Scene2D| y hace las modificaciones correspondientes para finalmente llamar a \verb|draw| y así modificar dinámicamente la visualización.
+Además, el fichero \verb|fractals-2D.js| utiliza un objeto de la clase \verb|Scene2D| para interactuar con el DOM, gestionar los eventos y así poder modificar dinámicamente los parámetros, de tal forma que cada vez que se interactúa con la página se registra un evento con una función manejadora asociada. Esta función manejadora utiliza los setters correspondientes del objeto \verb|Scene2D| y hace las modificaciones correspondientes para finalmente llamar a \verb|drawScene| y así cambiar dinámicamente la visualización.
 
 El código completo se puede encontrar en GitHub: \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/static}. La funcionalidad completa y detallada de cada clase puede consultarse en el apéndice \ref{appendix:javascript}.
 
@@ -94,6 +94,25 @@ Y por último, procedemos a buscar la forma de representar cualquier parte del p
 
 En nuestro ejemplo concreto, usaremos un canvas de $720\times 720$ píxeles para representar inicialmente la región $[-2,2]\times[-2,2]$ del plano, y sobre esta aplicar zoom y desplazamientos. Aprovechando que la proporción es $1$, la transformación puede expresarse como $(x,y)\longmapsto(x_0,y_0)+\lambda\left(\frac{4}{720}(x,y) + (-2,-2)\right)$.
 
+En muchos contextos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)^t$ y cada punto $p=(p_1,p_2)\in\R^2$ con el vector $(p_1, p_2, 0 ,1)^t$, de forma que:
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix}
+    \phi(x,y)=\left(\begin{array}{ccc|c}
+        \lambda\frac{w}{n_x} & 0 & 0 & -\frac{w}{2}+x_0 \\
+
+        0 & \lambda\frac{h}{n_y} & 0 & -\frac{h}{2}+y_0 \\
+        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+    \begin{array}{c}
+        x \\ y \\ 0 \\ \hline 1
+    \end{array}\right)
+\end{equation}
+
+Se denomina matriz de vista a aquella que transforma las coordenadas de mundo (WC) de los objetos que componen la escena a coordenadas de cámara, mientras que la matriz de proyección es la que calcula las coordenadas de dispositivo (DC) finales a partir de las coordenadas de cámara. La composición de estas dos matrices es la matriz de vista y proyección $M$, que convierte las coordenadas de mundo en coordenadas de dispositivo. La transformación $\phi$ convierte las coordenadas de dispositivo en coordenadas de mundo en el plano complejo, por lo que la matriz de la transformación (\ref{eq:transformacion-lineal-matrix}) es la inversa de la matriz de vista y proyección.
+
+
 Las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso. Otro detalle a tener en cuenta es que, aunque en todo momento hemos hablado de coordenadas de dispositivo como valores enteros, lo estándar es tomar reales con parte fraccionaria igual a $\frac{1}{2}$, de forma que identificamos el píxel con el punto de $\R^2$ que se encuentra en el centro del píxel. En caso de mantener la coordenada entera estaríamos identificándolo con la esquina inferior izquierda. Queda por tanto el siguiente fragmento de código:
 
 \begin{lstlisting}
@@ -115,23 +134,6 @@ vec2 get_world_coordinates() {
 }
 \end{lstlisting}
 
-En muchos contextos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)$, de forma que:
-
-\begin{equation}
-    \label{eq:transformacion-lineal-matrix}
-    \phi(x,y)=\left(\begin{array}{ccc|c}
-        \lambda\frac{w}{n_x} & 0 & 0 & -\frac{w}{2}+x_0 \\
-
-        0 & \lambda\frac{h}{n_y} & 0 & -\frac{h}{2}+y_0 \\
-        0 & 0 & 0 & 0 \\ \hline
-        0 & 0 & 0 & 1
-    \end{array}\right)\left(
-    \begin{array}{c}
-        x \\ y \\ 0 \\ \hline 1
-    \end{array}\right)
-\end{equation}
-
-Se denomina matriz de vista a aquella que transforma las coordenadas de mundo (WC) de los objetos que componen la escena a coordenadas de cámara, mientras que la matriz de proyección es la que calcula las coordenadas de dispositivo (DC) finales a partir de las coordenadas de cámara. La composición de estas dos matrices es la matriz de vista y proyección $M$, que convierte las coordenadas de mundo en coordenadas de dispositivo. La transformación $\phi$ convierte las coordenadas de dispositivo en coordenadas de mundo en el plano complejo, por lo que la matriz de la transformación (\ref{eq:transformacion-lineal-matrix}) es la inversa de la matriz de vista y proyección.
 
 Y ya tenemos en el shader una función que calcula el punto del plano al cual corresponde el píxel. A partir de esto, y al igual que en el capítulo \ref{chap:Julia-Mandelbrot}, tan solo tenemos que iterar la función $P_{c,m}$ y en función del número de iteraciones necesarias para diverger (o no), asignar un color.
 
