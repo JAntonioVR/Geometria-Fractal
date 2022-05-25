@@ -29,20 +29,71 @@ Por tanto, es mucho más sencillo usar RT, el cual, si bien también es algo apr
 
 Otra gran ventaja del ray-tracing sobre la rasterización es la dificultad de elegir una conversión a modelos de fronteras con una resolución adecuada. Si la discretización es demasiado fina el tiempo de computación crece mientras que se consigue una mayor resolución, y si no es lo suficientemente fina se pierde mucha resolución.
 
-En resumen, y por todas las ventajas que hemos descrito de RT sobre la rasterización y los modelos de fronteras en nuestro problema concreto, tomamos la decisión de programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de generar fractales 3D. La idea por tanto es lanzar rayos a cada píxel y en caso de encontrar intersección con el objeto evaluar un modelo de iluminación para asignar un color concreto.
-
 Sin embargo, este algoritmo tiene una principal desventaja, y es que es un proceso muy costoso, y más aún cuanto más detalle queramos conseguir. Es por esto que ha sido muy difícil dar el salto al ray tracing en tiempo real. Por ejemplo, en el mundo de los videojuegos, NVIDIA, que es una famosa empresa desarrolladora de tarjetas gráficas, comenzó a desarrollar algoritmos para poder utilizar RT en sus tarjetas hace varios años, pero hasta finales de 2018 no salieron al mercado las primeras gráficas con estas características. Por su parte, los juegos también deben soportar el algoritmo, por lo que aún son una minoría de videojuegos los que en la actualidad soportan Ray Tracing. En un futuro no muy lejano es posible que haya una tendencia a un desarrollo masivo de juegos que utilicen RT, pero de momento solo tenemos algunos ejemplos como Battlefield V, Minecraft, Metro Exodus, Watch Dogs y Call of Duty: Modern Warfare (2019).
 
-En este caso, y de manera similar a la efectuada con los fractales 2D, el vertex shader utilizado es trivial, de hecho es exactamente el mismo que se puede encontrar al inicio del capítulo \ref{chap:fractales-2D}. Por tanto el grueso de la programación se hará de nuevo en el fragment shader, que es el que se ejecuta una vez por píxel. Por su parte, usaremos JavaScript para pasarle variables uniform al shader y para añadir interactividad a la escena. Usaremos de nuevo las clases \verb|Shader| y \verb|Buffer|, pero por las diferencias que existen entre los parámetros de una escena en 2D y una escena en 3D se ha implementado una nueva clase \verb|Scene3D|, que realmente hace lo mismo que \verb|Scene2D| pero utilizando parámetros que requiere una escena 3D. También para gestionar la interacción usuario-escena se ha utilizado un nuevo fichero de JavaScript: \verb|fractals-3D.js|, llamado así porque es el mismo fichero que en el futuro utilizaremos para interactuar con fractales. Recomendamos revisitar la sección \ref{section:codigo} para recordar el papel que realiza la escena y el fichero que gestiona la interacción y los eventos. Puede consultar la documentación del código de JavaScript en el apéndice \ref{appendix:javascript}.
+En resumen, y por todas las ventajas y a pesar de las desventajas que hemos descrito de RT sobre la rasterización y los modelos de fronteras en nuestro problema concreto, tomamos la decisión de programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de generar fractales 3D. La idea por tanto es lanzar rayos a cada píxel y en caso de encontrar intersección con el objeto evaluar un modelo de iluminación para asignar un color concreto.
+
+\section{Elementos y estructura de un Ray-Tracer}
+\label{section:elementos-RT}
+
+Hasta ahora hemos visto y explicado en qué consiste el algoritmo RT desde un punto de vista básico. Veamos ahora qué componentes tiene un programa que emplee ray-tracing y conceptos generales, pero más concretos, acerca del cálculo de intersecciones entre semirrectas y objetos 3D. Tres de los componentes más esenciales en un \textit{ray-tracer} son:
+
+\begin{itemize}
+    \item \textbf{Generación de rayos primarios}: Por cada píxel se crea un rayo (llamado \textit{rayo primario} o \textit{rayo de cámara}).
+    \item \textbf{Cálculo de intersecciones}: Dado un punto $o\in\R^3$ y un vector $\vec v\in\R^3$, se trata de encontrar el mínimo valor positivo de $t$ tal que el punto $p(t)=o+\vec v t$ se encuentra en la superficie o frontera de algún objeto de la escena.
+    \item \textbf{Modelo de Iluminación Local}: Abreviado como MIL, calcula el color que se asigna a cada píxel cuyo rayo asociado ha intersecado un objeto en función del material asignado, las fuentes de luz y el punto de intersección rayo-objeto. RT además en este caso nos proporciona una poderosa ventaja, pues trazando un rayo desde cualquier punto de la escena en dirección a una fuente de luz podemos evaluar si dicho punto está o no en la sombra arrojada de algún objeto sin más que evaluar si el rayo encuentra alguna intersección en su camino hacia la fuente de luz.
+\end{itemize}
+
+Con estos tres elementos, una primera descripción en pseudocódigo del algoritmo fundamental de Ray-Tracing sería el del algoritmo \ref{alg:Ray-Tracing}.
+
+\begin{algorithm}[H]
+    \caption{Ray Tracing} \label{alg:Ray-Tracing}
+    \begin{algorithmic}
+        \State $o\gets$ posición del observador en WC.
+        \For{cada píxel $(i,j)$ del canvas}
+            \State $q\gets$punto central del píxel $(i,j)$ en WC
+            \State $\vec v\gets$ vector desde $o$ hasta $q$
+            \State $O\gets$ primer objeto visible desde $o$ en la dirección $\vec v$
+            \If{no existe objeto visible}
+                \State $rad\gets$ color de fondo para $\vec v$ 
+            \Else
+                \State $p\gets$ punto de intersección en $O$
+                \State $rad\gets$ evaluarMIL($O,p$).
+            \EndIf
+            \State Asignar el color $rad$ al píxel $(i,j)$
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+Sobre el cálculo de intersecciones, en caso de que se utilicen modelos de fronteras es necesario a su vez utilizar indexación espacial. Esto es, dividir jerárquicamente el espacio en zonas de forma que sea más sencillo localizar un objeto. Esto se debe a que, en caso de encontrarse una intersección con un objeto, para saber de cual se trata podemos hacer una búsqueda secuencial, pero sería muy ineficiente en escenas muy complejas. Por ello, se divide en regiones el espacio y se busca en orden de complejidad logarítmica.
+
+Por su parte, para intersecciones de rayos con objetos no definidos mediante modelos de fronteras debemos calcular el primer cero de determinado campo escalar a lo largo del rayo. Para ello hay dos posibilidades:
+\begin{itemize}
+    \item \textbf{Usando expresiones analíticas}. Por ejemplo, una esfera de centro $c\in\R^3$ y radio $r>0$ encuentra una intersección con el rayo $o+\vec v t$ en el punto que se verifica la ecuación
+    $$
+    \|o+\vec v t - c\| - r = 0
+    $$
+    Este tema se aborda con detalle en la sección \ref{subsection:esfera}.
+    \item \textbf{Con un método iterativo}. En ocasiones la resolución de estas ecuaciones es demasiado compleja, por lo que se abordan soluciones iterativas, como pueden ser técnicas estándar de resolución de ecuaciones como el método de Newton. Dentro de esta posibilidad, podemos también contar con una función que estima la distancia a la superficie del objeto y aplicar el algoritmo conocido como `ray marching' o `sphere tracing', el cual explicaremos detenidamente en la sección \ref{section:ray-marching}, pero adelantamos que fue introducido por Hart en \cite{Hart-1995}.
+\end{itemize}
+
+A partir de ahora, veremos como implementar un \textit{ray-tracer} básico utilizando WebGL. Utilizaremos objetos sencillos como planos y esferas, cuyas intersecciones con rayos se pueden calcular fácilmente de forma analítica sin recurrir a métodos iterativos ni a modelos de fronteras.
+
+En nuestro caso, y de manera similar a la efectuada con los fractales 2D, el vertex shader utilizado es trivial, de hecho es exactamente el mismo que se puede encontrar al inicio del capítulo \ref{chap:fractales-2D}. Por tanto el grueso de la programación se hará de nuevo en el fragment shader, que es el que se ejecuta una vez por píxel. Por su parte, usaremos JavaScript para pasarle variables uniform al shader y para añadir interactividad a la escena. Usaremos de nuevo las clases \verb|Shader| y \verb|Buffer|, pero por las diferencias que existen entre los parámetros de una escena en 2D y una escena en 3D se ha implementado una nueva clase \verb|Scene3D|, que realmente hace lo mismo que \verb|Scene2D| pero utilizando parámetros que requiere una escena 3D. También para gestionar la interacción usuario-escena se ha utilizado un nuevo fichero de JavaScript: \verb|fractals-3D.js|, llamado así porque es el mismo fichero que en el futuro utilizaremos para interactuar con fractales. Recomendamos revisitar la sección \ref{section:codigo} para recordar el papel que realiza la escena y el fichero que gestiona la interacción y los eventos. Puede consultar la documentación del código de JavaScript en el apéndice \ref{appendix:javascript}.
 
 Las siguientes secciones irán dedicadas a explicar la programación del fragment shader, ya que es el elemento que mayor complejidad y lógica contiene.
 
-\section{Creación del rayo}
+\section{Creación de rayos primarios}
 \label{section:rayo}
 
-Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección}, que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. En este caso utilizamos un canvas de $1280\times 720$ píxeles, que guarda una proporción de $16:9$, que es de hecho la más habitual.
+Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección}, que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
+
+Para cada píxel debemos calcular su posición central en coordenadas de mundo a partir de las coordenadas de dispositivo, que son dos valores enteros $(x',y')$, aunque para identificar cada píxel con su centro tomaremos como coordenadas de dispositivo $(x,y)=(x',y')+\left(\frac 1 2, \frac 1 2\right)$. Este proceso es justamente el contrario al que se utiliza en rasterización, donde se necesita convertir las coordenadas de mundo de las primitivas en coordenadas de dispositivo. Para ello, se utiliza una matriz $M$ que es la composición de la matriz de vista 3D, la cual transforma coordenadas de mundo (WC) a coordenadas de cámara junto con la matriz de proyección, que calcula las coordenadas de dispositivo (DC) a partir de las coordenadas de cámara (véase la analogía con los párrafos que describen la transformación \ref{eq:transformacion-lineal-matrix}). Por tanto, en cierto sentido lo que buscamos es buscar una transformación lineal asociada a la inversa de la matriz $M$.
+
+En nuestro caso concreto utilizaremos un canvas de $1280\times 720$ píxeles, que guarda una proporción de $16:9$, que es de hecho la más habitual.
+
 \begin{lstlisting}
-<canvas id="glCanvas"  width="1280" height="720"></canvas>
+<canvas id="glCanvas" width="1280" height="720"></canvas>
 \end{lstlisting}
 
 Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. 
@@ -165,7 +216,7 @@ Y de esta forma el fragment shader obtiene un rayo por cada píxel que tiene com
 
 Una vez tenemos creado el rayo asignado a un píxel debemos asignar un color. La función que dado un rayo $R$ devuelve el color del cual colorearemos el píxel la llamaremos \verb|ray_color|. Esta función se verá sometida a muchos cambios, sobre todo en sus argumentos dependiendo de los elementos que compongan la escena, pero de momento asumimos una escena vacía. Que la escena esté vacía supone que ningún rayo interseca ninguna superficie, pero independientemente de ello hay que asignar un color al píxel. Esta asignación de color a un rayo que no interseca ninguna superficie determina el fondo (\textit{background}) de la escena, y esta decisión que tomaremos ahora sobre cómo colorear el fondo nos acompañará durante el resto del proyecto. 
 
-En concreto, hemos decidido simular algo parecido al cielo mediante un degradado vertical de un \textcolor{background-blue}{azul} \verb|rgb(127, 178, 255)| a blanco \verb|rgb(255, 255, 255)|, definiendo el color a partir de la componente $y$ del vector director normalizado. Mostramos el código correspondiente también para clarificar esta descripción.
+En concreto, hemos decidido simular algo parecido al cielo mediante un degradado vertical de un \textcolor{background-blue}{azul} \texttt{rgb(127, 178, 255)} a blanco \texttt{rgb(255, 255, 255)}, definiendo el color a partir de la componente $y$ del vector director normalizado. Mostramos el código correspondiente también para clarificar esta descripción.
 
 \begin{lstlisting}
 vec4 ray_color(Ray R) {
@@ -201,7 +252,11 @@ gl_FragColor = ray_color(R);
 \section{Visualizando una escena sencilla}
 \label{section:escena}
 
-Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez.
+Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez. 
+
+Para ello, y debido a la simplicidad que requiere el cálculo de intersecciones rayo-esfera y rayo-plano, calcularemos analíticamente las intersecciones, explicando detalladamente cómo hallarlas en las secciones \ref{subsection:esfera} y \ref{subsection:plano} respectivamente. En el capítulo \ref{chap:fractales-3D} sustituimos este cálculo analítico por un cálculo iterativo utilizando el algoritmo ray-marching, pero a modo introductorio es más sencillo de momento calcular directamente las intersecciones.
+
+Tras esta visualización sencilla, en la sección \ref{section:Phong} emplearemos además un modelo de iluminación local sencillo pero muy utilizado: el modelo de Phong, el cual se describe con detalle a nivel teórico y a nivel de código. Con esto completaríamos los tres ítems esenciales que mencionamos al inicio de la sección \ref{section:elementos-RT}: rayos primarios, intersecciones y MIL.
 
 \subsection{Visualizando una esfera}
 \label{subsection:esfera}
