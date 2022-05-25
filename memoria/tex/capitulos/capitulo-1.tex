@@ -69,7 +69,7 @@ Observemos ahora que en la primera iteración eliminamos $1$ intervalo de longit
     \sum_{n=1}^\infty 2^{n-1}\left(\frac 1 3\right)^n  &= \frac 1 3  \sum_{n=0}^\infty 2^n\left(\frac 1 3\right)^n \\
     &=  \frac 1 3  \sum_{n=0}^\infty \left(\frac 2 3\right)^n \\
     &= \frac{1}{3} \left(\frac{1}{1-\frac{2}{3}}\right) \\
-    &= 1
+    &= 1,
   \end{split}
 \end{equation*}
 donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $$\sum_{n=0}^\infty q^n = \frac{1}{1-q}.$$
@@ -100,12 +100,17 @@ La figura a la que converge este proceso infinito se conoce como triángulo \tex
  \label{fig:triangulo-Sierpinski}
 \end{figure}
 
-Si llamamos $A$ al área del triángulo inicial, sabemos que en la primera iteración eliminamos un área de $\frac 1 4 A$, en el segundo eliminamos $3 \left(\frac 1 4\right)^2 A$ y en el $n$-ésimo $3^{n-1}\left(\frac 1 4\right)^n A$, de forma que si sumamos todo el área que eliminamos en cada paso obtenemos:
-$$
-A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  = \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n =  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n = \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) = A,
-$$
+Si llamamos $A$ al área del triángulo inicial, que es de hecho su medida usual de Lebesgue, sabemos que en la primera iteración eliminamos un área de $\frac 1 4 A$, en el segundo eliminamos $3 \left(\frac 1 4\right)^2 A$ y en el $n$-ésimo $3^{n-1}\left(\frac 1 4\right)^n A$, de forma que si sumamos todo el área que eliminamos en cada paso obtenemos:
+\begin{equation*}
+  \begin{split}
+    A \sum_{n=1}^\infty 3^{n-1}\left(\frac 1 4\right)^n  &= \frac A 4  \sum_{n=0}^\infty 3^n\left(\frac 1 4\right)^n \\
+    &=  \frac A 4  \sum_{n=0}^\infty \left(\frac 3 4\right)^n\\
+    &= \frac{A}{4} \left(\frac{1}{1-\frac{3}{4}}\right) \\
+    &= A.
+  \end{split}
+\end{equation*}
 
-En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área es 0 y seguimos tenemos puntos (por ejemplo los vértices de los triángulos originados en cada iteración). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
+En este caso ocurre algo parecido a lo que vimos que sucedía con el conjunto de Cantor en la sección \ref{subsection:Cantor}. El área eliminada es igual al área total, es decir, su área, su medida usual de Lebesgue, es 0 y seguimos teniendo infinitos puntos (por ejemplo los vértices de los triángulos originados en cada iteración). Es decir, los puntos que forman \textbf{S} no están agrupados formando un área.
 
 \subsection{La alfombra de Sierpinski y la esponja de Menger}
 \label{subsection:alfombra-esponja}
