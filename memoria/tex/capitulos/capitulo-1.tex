@@ -226,53 +226,9 @@ d=\dfrac{\log(N(k))}{\log(k)}.
 $$
 De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser recubierto por otros conjuntos de $\R^n$ más pequeños.
 
-\begin{comment}
-
-\begin{definicion}[Congruencia]
-Dos subconjuntos $A,B$ de $\R^n$ son \textbf{congruentes} si existe un movimiento rígido $f$ tal que $B = f(A)$.
-\end{definicion}
-
-De manera análoga al segmento, el cuadrado y el cubo podemos tomar cualquier figura o subconjunto $X\subseteq \R^n$ que pueda ser subdividido en un número finito $N(k)$ de subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$. Esto es, en lenguaje formal, un conjunto autosimilar.
-
-\begin{definicion}[Dimensión autosimilar]
-Dado un subconjunto $X$ de $\R^n$ que se puede dividir en $N(k)$ subconjuntos congruentes entre sí y cada uno de ellos imagen por una homotecia de razón $r=\frac 1 k$ de $X$, definimos su \textbf{dimensión autosimilar} como el único valor de $d$ que satisface la identidad $\frac{N(k)}{k^d}=1$, es decir: 
-$$
-d=\frac{\log N(k)}{\log(k)}
-$$
-\end{definicion}
-
-También se puede ver definida como \textit{dimensión de homotecia}. Sin embargo, antes de utilizar este concepto debemos comprobar que la definición es coherente con cualquier partición y cualquier factor de escala. Es decir, que independientemente de la división del objeto que se tome la dimensión va a ser la misma.
-
-\begin{proposicion}
-En un subconjunto $X$ de $\R^n$ autosimilar el valor de la dimension fractal autosimilar es el mismo independientemente de la partición que se le aplique.
-\end{proposicion}
-\begin{proof}
-TODO
-\end{proof}
-
-
-\begin{observacion}
-La dimensión $d$ ya no tiene por qué ser necesariamente un número entero. A esta posibilidad de tener dimensiones no enteras es a lo que llamamos \textbf{dimensión fractal autosimilar}, y lo denotamos con $\dim_A$.
-\end{observacion}
-
-Retomando ahora el triángulo de Sierpinski, sabemos que este está compuesto por 3 copias de sí mismo a escala $\frac 1 2$ (véase sección \ref{subsection:triangulo-Sierpinski}), por lo que entonces su dimensión fractal autosimilar es $\dim_A(\mathbf{S})=\frac{\log 3}{\log 2} \approx 1.58496$. Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
-
-En cuanto al conjunto de Cantor, este está formado por 2 copias de sí mismo a escala $\frac 1 3$ (sección \ref{subsection:Cantor}), por lo que su dimensión fractal autosimilar sería $\dim_A(\mathbf{C})=\frac{\log 2}{\log 3} \approx 0.63093$, que es un valor situado entre 0 y 1.
-
-Por su parte, la curva de Koch se compone de 4 copias de sí misma, cada una a escala $\frac 1 3$ de la curva original (sección \ref{subsection:curva-Koch}). Por tanto, su dimensión fractal autosimilar es $\dim_A(\mathbf{K})=\frac{\log 4}{\log 3} \approx 1.26186$.
-
-
-
-%\subsection{Dimensión por cajas}
-%\label{subsection:dim-cajas}
-
-El concepto de dimensión fractal autosimilar tiene el defecto de que está limitado únicamente a objetos totalmente autosimilares, pero la mayoría de objetos no cumple esta propiedad. Para solucionar este problema, introduciremos un nuevo concepto de dimensión. Previamente definimos un término necesario en las futuras definiciones.
-
-\end{comment}
-
 \begin{definicion}
   \label{def:diametro}
-Dado un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
+Para un subconjunto $U$ de $\R^n$, definimos su \textbf{diámetro} como:
 $$
 \diam(U)=\sup \left\lbrace d(x,y): x,y\in U\right\rbrace .
 $$
@@ -296,12 +252,11 @@ En caso de coincidir, se denomina \textit{dimensión por cajas} de $A$ al valor
 
 También es conocida en literatura como \textit{dimensión por conteo de cajas} o \textit{dimensión de Minkowski-Bouligand}.
 
-Hay varias definiciones equivalentes, generalmente más sencillas de utilizar. Por ejemplo, si tomamos en $\R^n$ una cuadrícula de lado $\delta$, \textit{i.e.}, de la forma
+Hay varias definiciones equivalentes, generalmente más sencillas de utilizar. Por ejemplo, si tomamos en $\R^n$ una cuadrícula de lado $\delta$, \textit{i.e.}, con conjuntos de la forma
 $$
 [m_1 \delta, (m_1+1)\delta]\times\cdots\times[m_n \delta, (m_n+1)\delta]
 $$
-donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
-
+donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en rectángulos de $\R^n$, comúnmente conocidos como `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
 
 \begin{figure}[ht]
 \begin{tabular}{cc}
@@ -316,23 +271,23 @@ donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en `cajas', de di
 \end{wrapfigure}
 Un ejemplo clarificador podría ser el de un triángulo equilátero $T$ de lado 1, el cual podemos recubrir con 4 triángulos equiláteros de lado $\frac 1 2$. A su vez podríamos recubrir estos 4 triángulos con otros 4 triángulos de lado $\frac{1}{4}$, obteniendo así un recubrimiento de $T$ con $16=2^{2\cdot 2}$ triángulos de lado $\frac{1}{4}=\frac{1}{2^2}$. Si repetimos este proceso y teniendo en cuenta que el diámetro de un triángulo equilátero es la longitud de sus lados, podemos tomar $\delta=\frac{1}{2^n}$ y recubrir $T$ con $N_\delta(T)=2^{2n}$ triángulos equiláteros. Aplicando (\ref{eq:dim-cajas}), tenemos por tanto que
 $$
-\dim_B(T)=\lim_{n\rightarrow\infty}\dfrac{\log(2^{2n})}{\log(2^n)} = \dfrac{2n\log(2)}{n\log(2)}=2.
+\lim_{n\rightarrow\infty}\dfrac{\log(2^{2n})}{\log(2^n)} = \lim_{n\rightarrow\infty}\dfrac{2n\log(2)}{n\log(2)}=2.
 $$
 
-Concluimos entonces que la dimensión por cajas de un triángulo es 2, lo cual tampoco nos sorprende.
+Pero esto no nos asegura que esta sea la dimensión por cajas del triángulo, pues en ningún momento hemos probado que $\diminf(T)=\dimsup(T)$, en cuyo caso podríamos utilizar la ecuación (\ref{eq:dim-cajas}). Este cálculo únicamente nos dice que en caso de existir $\dim_B(T)$, ésta vale $2$. En la sección \ref{section:sfi-conjuntos-autosimilares} del capítulo \ref{chap:SFI} comprobaremos mediante una serie de resultados que efectivamente $\dim_B(T)=2$.
 
-De manera similar podemos ya calcular la dimensión por cajas de algunos fractales clásicos. Retomemos ahora el triángulo \textbf{S} de Sierpinski, que por su génesis (véase sección \ref{subsection:triangulo-Sierpinski}) puede ser inicialmente cubierto por un triángulo equilátero de lado 1, el cual si lo dividimos en 4 triángulos equiláteros y sustraemos el central sigue recubriendo a \textbf{S}, de forma que tenemos un recubrimiento de 3 triángulos de lado $\frac{1}{2}$. Si repetimos esta operación con cada uno de los tres triángulos podríamos recubrir el triángulo de Sierpinski con $9$ triángulos equiláteros de lado $\frac 1 4$, y así sucesivamente. Por tanto, tomando $\delta=\frac{1}{2^n}$ obtenemos un recubrimiento de $N_\delta(\mathbf{S})=3^n$ triángulos. Por tanto, la dimensión por cajas del triángulo de Sierpinski es 
+De manera similar podemos intuir qué valor tendría la dimensión por cajas de algunos fractales clásicos. Retomemos ahora el triángulo \textbf{S} de Sierpinski, que por su génesis (véase sección \ref{subsection:triangulo-Sierpinski}) puede ser inicialmente cubierto por un triángulo equilátero de lado 1, el cual si lo dividimos en 4 triángulos equiláteros y sustraemos el central sigue recubriendo a \textbf{S}, de forma que tenemos un recubrimiento de 3 triángulos de lado $\frac{1}{2}$. Si repetimos esta operación con cada uno de los tres triángulos podríamos recubrir el triángulo de Sierpinski con $9$ triángulos equiláteros de lado $\frac 1 4$, y así sucesivamente. Por tanto, tomando $\delta=\frac{1}{2^n}$ obtenemos un recubrimiento de $N_\delta(\mathbf{S})=3^n$ triángulos, y podemos hacer el cálculo:
 $$
-\dim_B(\mathbf{S})=\lim_{n\rightarrow\infty}\dfrac{\log(3^{n})}{\log(2^n)} = \dfrac{n\log(3)}{n\log(2)}=\dfrac{\log(3)}{\log(2)}\approx 1.58496.
+\lim_{n\rightarrow\infty}\dfrac{\log(3^{n})}{\log(2^n)} = \lim_{n\rightarrow\infty}\dfrac{n\log(3)}{n\log(2)}=\dfrac{\log(3)}{\log(2)}\approx 1.58496.
 $$
 
-Efectivamente y tal y como discutimos en el inicio de esta sección, es un valor situado entre 1 y 2.
+Por lo que, de existir, la dimensión por cajas del triángulo de Sierpinski es $\frac{\log(3)}{\log(2)}$. Efectivamente y tal y como discutimos en el inicio de esta sección, sería un valor situado entre 1 y 2. En el capítulo \ref{chap:SFI} confirmaremos que $\dim_B(\mathbf{S})=\frac{\log(3)}{\log(2)}$. 
 
-Por su parte, el conjunto de Cantor \textbf{C} puede ser recubierto utilizando segmentos de recta, cuyo diámetro es precisamente la longitud de dicho segmento. Tomando $\delta=\dfrac{1}{3^n}$ podemos recubir a \textbf{C} con $N_\delta(\mathbf{C})=2^n$ segmentos de recta (véase sección \ref{subsection:Cantor}). Por lo que podemos calcular la dimensión por cajas del conjunto de Cantor como
+Por su parte, el conjunto de Cantor \textbf{C} puede ser recubierto utilizando segmentos de recta, cuyo diámetro es precisamente la longitud de dicho segmento. Tomando $\delta=\dfrac{1}{3^n}$ podemos recubir a \textbf{C} con $N_\delta(\mathbf{C})=2^n$ segmentos de recta (véase sección \ref{subsection:Cantor}). Por lo que, de existir, la dimensión por cajas del conjunto de Cantor sería
 $$
-\dim_B(\mathbf{C})=\lim_{n\rightarrow\infty}\dfrac{\log(2^{n})}{\log(3^n)} = \dfrac{n\log(2)}{n\log(3)}=\dfrac{\log(2)}{\log(3)}\approx 0.63093,
+\lim_{n\rightarrow\infty}\dfrac{\log(2^{n})}{\log(3^n)} =\lim_{n\rightarrow\infty} \dfrac{n\log(2)}{n\log(3)}=\dfrac{\log(2)}{\log(3)}\approx 0.63093,
 $$
-que es un valor situado entre 0 y 1.
+que es un valor situado entre 0 y 1. También comprobaremos que $\dim_B(\mathbf{C})=\frac{\log(2)}{\log(3)}$.
 
 \subsection{Medida y dimensión de Hausdorff}
 \label{subsection:dim-Hausdorff}
@@ -344,14 +299,13 @@ Si ahora tomamos un conjunto $A$ de $\R^n$, un valor $\varepsilon>0$ y una famil
 $$
 A\subseteq\bigcup_{i\in\N} U_i, \ \ \ \ \ 0\leq\diam(U_i)\leq\varepsilon \ \ \forall i\in \N
 $$
-
 se dice que la familia $\left\lbrace U_i\right\rbrace_{i\in\N}$ es un $\varepsilon$-recubrimiento de $A$. Si ahora consideramos un valor $s>0$, definimos
 
 $$
 \mathcal{H}_\varepsilon^s(A):=\inf\left\lbrace\sum_{n\in\N} \diam(U_i)^s: \left\lbrace U_i\right\rbrace_{i\in\N} \text{ es un }\varepsilon\text{-recubrimiento de }A\right\rbrace
 $$
 
-Si reducimos el valor de $\varepsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando posiblemente el infinito como posible valor del límite. Definimos así 
+Si reducimos el valor de $\varepsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando el infinito como posible valor del límite. Definimos así 
 $$
 \mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A)
 $$
