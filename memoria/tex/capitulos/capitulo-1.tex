@@ -40,17 +40,19 @@ En adelante, y salvo que se indique lo contrario, cuando hablemos en términos t
 \subsection{El conjunto de Cantor}
 \label{subsection:Cantor}
 
-Creado por el célebre matemático \textit{George Cantor}, este fractal se construye a partir de un segmento de línea recta aplicando el siguiente proceso iterativo:
+Creado por el célebre matemático \textit{George Cantor}, este fractal se construye a partir de un intervalo aplicando el siguiente proceso iterativo:
 
 \begin{enumerate}
-\item Partimos del segmento de recta compuesto por el intervalo cerrado $[0,1]$, aunque realmente es indiferente qué intervalo se escoja, pues el resultado final será el mismo salvo homotecia. Dividimos dicho segmento en tres segmentos iguales y extraemos el intervalo central, manteniendo los extremos. Es decir, extraemos el intervalo abierto $\left(\frac 1 3, \frac 2 3\right)$ y mantenemos el segmento $\left[0,\frac 1 3\right]$ y el $\left[\frac 2 3, 1\right]$.. Nótese que obtenemos $2=2^1$ segmentos, cada uno a escala $\frac 1 3=\left(\frac 1 3\right)^1$ del original.
+\item Partimos del intervalo cerrado $[0,1]$, aunque realmente es indiferente qué intervalo se escoja, pues el resultado final será el mismo salvo una homotecia. Dividimos dicho intervalo en tres intervalos iguales y extraemos el intervalo central, manteniendo los extremos. Es decir, extraemos el intervalo abierto $\left(\frac 1 3, \frac 2 3\right)$ y mantenemos $\left[0,\frac 1 3\right]$ y $\left[\frac 2 3, 1\right]$. Nótese que obtenemos $2=2^1$ intervalos, cada uno a escala $\frac 1 3=\left(\frac 1 3\right)^1$ del original.
 
-\item Aplicamos el mismo proceso a los segmentos $\left[0,\frac 1 3\right]$ y $\left[\frac 2 3, 1\right]$. Esto es, se dividen ambos en tres partes iguales y se extrae el intervalo abierto central de cada uno de ellos, manteniendo los extremos. En este caso obtendríamos $4=2^2$ segmentos iguales, cada uno de ellos a escala $\frac 1 3$ de los dos obtenidos en el primer paso y a escala $\frac 1 9=\left(\frac 1 3\right)^2$ del original.
+\item Aplicamos el mismo proceso a los intervalos $\left[0,\frac 1 3\right]$ y $\left[\frac 2 3, 1\right]$. Esto es, se dividen ambos en tres partes iguales y se extrae el intervalo abierto central de cada uno de ellos, manteniendo los extremos. En este caso obtendríamos $4=2^2$ intervalos iguales, cada uno de ellos a escala $\frac 1 3$ de los dos obtenidos en el primer paso y a escala $\frac 1 9=\left(\frac 1 3\right)^2$ del original.
 
-\item Repetimos este proceso de manera indefinida, de manera que en el $n$-ésimo paso se obtendrían $2^n$ segmentos de recta a escala $\left(\frac 1 3\right)^n$. Denotemos como $C_n$ al conjunto unión de los $2^n$ segmentos de recta que se generan en el paso $n$ del proceso.
+\item Repetimos este proceso de manera indefinida, de manera que en el $n$-ésimo paso se obtendrían $2^n$ intervalos a escala $\left(\frac 1 3\right)^n$. Denotemos como $C_n$ al conjunto unión de los $2^n$ intervalos de recta que se generan en el paso $n$ del proceso.
 \end{enumerate} 
 
-Los puntos del intervalo inicial $[0,1]$ que restan tras las infinitas iteraciones son los que conforman el \textit{conjunto de Cantor}, que denotamos con $\mathbf{C}$, de forma que $\mathbf{C}=\bigcap_{n\in\N}C_n$.
+Los puntos del intervalo inicial $[0,1]$ que restan tras las infinitas iteraciones son los que conforman el \textit{conjunto de Cantor}, que denotamos con $\mathbf{C}$, de forma que 
+
+$$\mathbf{C}=\bigcap_{n\in\N}C_n.$$
 
 \begin{figure} [ht]
 \centering
@@ -61,11 +63,16 @@ Los puntos del intervalo inicial $[0,1]$ que restan tras las infinitas iteracion
 
 El conjunto de Cantor es además un conjunto compacto, pues cada $C_n$ es una unión finita de intervalos cerrados y acotados de $\R$, y por tanto compactos, como sabemos gracias al \textit{teorema de Heine-Borel}. Sabiendo que la intersección arbitraria de conjuntos cerrados es cerrada, y que cada $C_n$ está acotado, tenemos pues que $\mathbf{C}$ es un conjunto compacto.
 
-Observemos ahora que en la primera iteración eliminamos $1$ segmento de longitud $\frac 1 3$, en la segunda iteración se eliminan $2$ segmentos de longitud $\left(\frac{1}{3}\right)^2$ y en la $n$-ésima iteración extraemos $2^{n-1}$ segmentos de longitud $\left(\frac{1}{3}\right)^n$. Si sumamos las longitudes de todos los segmentos que son eliminados en cada paso se obtiene:
-$$
-\sum_{n=1}^\infty 2^{n-1}\left(\frac 1 3\right)^n  = \frac 1 3  \sum_{n=0}^\infty 2^n\left(\frac 1 3\right)^n =  \frac 1 3  \sum_{n=0}^\infty \left(\frac 2 3\right)^n = \frac{1}{3} \left(\frac{1}{1-\frac{2}{3}}\right) = 1,
-$$
-donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $\sum_{n=0}^\infty q^n = \frac{1}{1-q}$.
+Observemos ahora que en la primera iteración eliminamos $1$ intervalo de longitud $\frac 1 3$, en la segunda iteración se eliminan $2$ intervalos de longitud $\left(\frac{1}{3}\right)^2$ y en la $n$-ésima iteración extraemos $2^{n-1}$ intervalos de longitud $\left(\frac{1}{3}\right)^n$. Si sumamos las longitudes de todos los intervalos que son eliminados en cada paso se obtiene:
+\begin{equation*}
+  \begin{split}
+    \sum_{n=1}^\infty 2^{n-1}\left(\frac 1 3\right)^n  &= \frac 1 3  \sum_{n=0}^\infty 2^n\left(\frac 1 3\right)^n \\
+    &=  \frac 1 3  \sum_{n=0}^\infty \left(\frac 2 3\right)^n \\
+    &= \frac{1}{3} \left(\frac{1}{1-\frac{2}{3}}\right) \\
+    &= 1
+  \end{split}
+\end{equation*}
+donde hemos usado que la suma de una serie geométrica de razón $|q|<1$ es $$\sum_{n=0}^\infty q^n = \frac{1}{1-q}.$$
 
 Esto nos lleva a concluir que la longitud eliminada es igual a la longitud original, es decir, la longitud de $\mathbf C$ es nula y aún así tenemos puntos, por ejemplo los extremos de los intervalos que se van generando. Es decir, los puntos de $\mathbf{C}$ no están agrupados, sino que forman una especie de \textit{polvareda}.
 
