@@ -86,7 +86,7 @@ Las siguientes secciones irán dedicadas a explicar la programación del fragmen
 \section{Creación de rayos primarios}
 \label{section:rayo}
 
-Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección}, que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
+Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección} ($P$), que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
 
 Para cada píxel debemos calcular su posición central en coordenadas de mundo a partir de las coordenadas de dispositivo, que son dos valores enteros $(x',y')$, aunque para identificar cada píxel con su centro tomaremos como coordenadas de dispositivo $(x,y)=(x',y')+\left(\frac 1 2, \frac 1 2\right)$. Este proceso es justamente el contrario al que se utiliza en rasterización, donde se necesita convertir las coordenadas de mundo de las primitivas en coordenadas de dispositivo. Para ello, se utiliza una matriz $M$ que es la composición de la matriz de vista 3D, la cual transforma coordenadas de mundo (WC) a coordenadas de cámara junto con la matriz de proyección, que calcula las coordenadas de dispositivo (DC) a partir de las coordenadas de cámara (véase la analogía con los párrafos que describen la transformación \ref{eq:transformacion-lineal-matrix}). Por tanto, en cierto sentido lo que buscamos es buscar una transformación lineal asociada a la inversa de la matriz $M$.
 
@@ -96,7 +96,7 @@ En nuestro caso concreto utilizaremos un canvas de $1280\times 720$ píxeles, qu
 <canvas id="glCanvas" width="1280" height="720"></canvas>
 \end{lstlisting}
 
-Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. 
+Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} u origen y denotamos como $o_c$ al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} o punto de atención $a_t$ al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. 
 
 Como convención asumimos que a la derecha se sitúa el eje positivo $X$, hacia arriba el eje positivo $Y$ y el `interior de la pantalla' es el eje negativo $Z$. Asumimos ahora también que el plano de proyección tiene 2 unidades de alto, lo cual implica que si el ratio ancho/alto es $16/9$ entonces el ancho es de $3.55$ unidades, aunque ese es un valor que calcularemos y almacenaremos en una variable y no importará realmente cual sea.
 
@@ -130,39 +130,58 @@ Esta función nos será útil a la hora de calcular el punto exacto en el que se
     Realmente se pueden utilizar valores de $t\in\R$ positivos o negativos, pero pensemos que los valores negativos corresponden a puntos del rayo situados detrás del observador, que no se pueden ver, por lo que es preferible restringirnos a valores no negativos.
 \end{observacion}
 
-Una vez tenemos determinada una forma de representar un rayo, es momento de crear un rayo cuyo origen sea la posición del observador y su dirección sea el vector que tiene como origen el observador y como destino el punto del plano de proyección que identificamos con el píxel. En la situación hipotética que hemos planteado antes en la cual $lookfrom=(0,0,0)$, llamamos $df$ a la distancia focal, $PP_{height}=2$ a la altura del plano de proyección, $PP_{width}$ a la anchura del plano de proyección, $AR = 16/9$ (\textit{aspect ratio}) a la proporción $AR = \frac{PP_{width}}{PP_{height}}$, de forma que se verifica $PP_{width}=AR\cdot PP_{height}$. Con estas variables, llamemos $LLC$ (\textit{Lower Left Corner}) al punto situado en la esquina inferior izquierda del plano de proyección, entonces:
+Una vez tenemos determinada una forma de representar un rayo, es momento de crear un rayo cuyo origen sea la posición del observador y su dirección sea el vector que tiene como origen el observador y como destino el punto del plano de proyección que identificamos con el píxel. En la situación hipotética que hemos planteado antes en la cual $o_c=(0,0,0)$, llamamos $d_f$ a la distancia focal, $P_h=2$ a la altura del plano de proyección, $P_w$ a la anchura del plano de proyección, $r = 16/9$ (\textit{aspect ratio}) a la proporción $r = \frac{P_w}{P_h}$, de forma que se verifica $P_w=r\cdot P_h$. Con estas variables, llamemos $\mathrm{LLC}$ (\textit{Lower Left Corner}) al punto situado en la esquina inferior izquierda del plano de proyección, entonces:
 \begin{equation}
     \label{eq:LLC-inicial}
-    LLC = lookfrom - \frac{PP_{width}}{2}\cdot(1,0,0) - \frac{PP_{height}}{2}\cdot(0,1,0) - df \cdot (0,0,1)
+    \mathrm{LLC} = o_c - \frac{P_w}{2}\cdot(1,0,0) - \frac{P_h}{2}\cdot(0,1,0) - d_f \cdot (0,0,1)
 \end{equation}
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3    ]{img/C7/elementos-PP.png}
+    \includegraphics[scale = 0.25]{img/C7/elementos-PP.png}
     \caption{Elementos que participan el RT}
     \label{fig:elementos}
 \end{figure}
 
-Una vez conocemos las coordenadas de mundo de la esquina superior izquierda, la cual identificamos con el píxel inferior izquierdo del canvas, debemos recuperar la transformación \ref{eq:transformacion-lineal-3}, pero en este caso nos debemos llevar la región $[0,1280]\times[0,720]$ a $[0,PP_{width}]\times[0,PP_{height}]$. La transformación por tanto en este caso es
+Una vez conocemos las coordenadas de mundo de la esquina superior izquierda, la cual identificamos con el píxel inferior izquierdo del canvas, debemos recuperar la transformación \ref{eq:transformacion-lineal-3}, pero en este caso nos debemos llevar la región $[0,n_x]\times[0,n_y]$ a $[0,P_w]\times[0,P_h]\times\{-1\}$ (recordemos que estamos situando el plano de proyección en el plano $z=-1$). La transformación por tanto en este caso es
 
 \begin{equation}
     \label{eq:transformacion-lineal-4}
     \begin{split}
-        \phi : [0,1280]\times [0,720] & \longrightarrow [0,PP_{width}]\times[0,PP_{height}] \\
-        (x,y) & \longmapsto \left(\frac{PP_{width}\cdot x}{1280},\frac{PP_{height}\cdot y}{720}\right)
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow [0,P_w]\times[0,P_h]\times \{-1\} \\
+        (x,y) & \longmapsto \left(\frac{P_w\cdot x}{n_x},\frac{P_h\cdot y}{n_y},-1\right)
     \end{split}
 \end{equation}
-donde $(x,y)$ son las coordenadas de dispositivo en términos de píxeles a las que puede acceder el fragment shader a traves de \verb|gl_FragCoor|. Y así identificamos el alto y ancho del canvas con el alto y ancho del plano de proyección, de manera que a partir de estos valores y conociendo qué punto se sitúa en la esquina inferior izquierda podemos definitivamente calcular con qué punto del plano de proyección identificamos el píxel:
-$$
-destiny := LLC + \phi(x,y)
-$$
+donde $(x,y)$ son las coordenadas de dispositivo en términos de píxeles a las que puede acceder el fragment shader a traves de \verb|gl_FragCoor|. Y así identificamos el alto y ancho del canvas con el alto y ancho del plano de proyección, de manera que a partir de estos valores y conociendo qué punto se sitúa en la esquina inferior izquierda podemos definitivamente calcular con qué punto del plano de proyección ($P$) identificamos el píxel:
+\begin{equation}
+    \label{eq:transformacion-lineal-5}
+    \begin{split}
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow P \\
+        (x,y) & \longmapsto LLC + \left(\frac{P_w}{n_x}x,\frac{P_h}{n_y}y,-1\right)
+    \end{split}
+\end{equation}
 Y por tanto, la dirección del rayo sería
 $$
-\vec v = LLC + \phi(x,y) - lookfrom
+\vec v = \phi(x,y) - o_c
 $$
-y el origen sería obviamente el punto $lookfrom$.
+y el origen sería obviamente el punto $o_c$.
 
-El código GLSL que hemos utilizado hasta este punto sería el siguiente:
+La transformación $\phi$ es la que corresponde a la inversa de la matriz $M$ de vista y proyección, pues transforma las coordenadas de dispositivo en coordenadas de mundo del plano de proyección. Suponiendo que identificamos las coordenadas de dispositivo $(x,y)$ con el vector $(x,y,0,1)^t$ y un punto $p=(p_1,p_2,p_3)\in\R^3$ con el vector $(p_1,p_2,p_3,1)^t$, la transformación (\ref{eq:transformacion-lineal-5}) puede expresarse matricialmente como:
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix-3D-base}
+    \phi(x,y) = \left(\begin{array}{ccc|c}
+        \frac{P_w}{n_x} & 0 & 0 & 0 \\
+        0 & \frac{P_h}{n_y} & 0 & 0 \\
+        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+        \begin{array}{c}
+            x \\ y \\ 0 \\ \hline 1
+        \end{array}\right)
+\end{equation}
+
+El código GLSL que hemos utilizado hasta este punto, en el que hemos calculado $\mathrm{LLC}$ e implementado la transformación (\ref{eq:transformacion-lineal-5}), sería el siguiente:
 
 \begin{lstlisting}
 
@@ -591,9 +610,9 @@ gl_FragColor = ray_color(r, world, num_spheres, P);
 
 Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos al principio de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que el observador se mantiene fijo carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
 
-Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa, es decir, el punto de vista; y \textit{lookat} al punto sobre el cual se fija la mirada. Nótese que realmente el punto $lookat$ puede ser cualquiera situado en la semirrecta que une al observador y el centro del plano, no tiene por qué estar incluido como tal en el plano de proyección; pensemos en alguna vez que hemos pensado que alguien nos saludaba y realmente saludaba a alguien que está detrás nuestra.
+Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa ($o_c$), es decir, el punto de vista; y \textit{lookat} al punto sobre el cual se fija la mirada ($a_t$). Nótese que realmente el punto $a_t$ puede ser cualquiera situado en la semirrecta que une al observador y el centro del plano, no tiene por qué estar incluido como tal en el plano de proyección; pensemos en alguna vez que hemos pensado que alguien nos saludaba y realmente saludaba a alguien que está detrás nuestra.
 
-Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 \rad$, sea $h=\tan\left(\frac \theta 2\right)=1$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica, asumiendo una distancia focal de $1$, que la altura del plano de proyección (\verb|viewport_height|) es $PP_{height}=2h$, por lo que la anchura es $PP_{width}=AR\cdot PP_{height}$. 
+Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ ($r=16/9$) se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 \rad$, sea $h=\tan\left(\frac \theta 2\right)=1$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica, asumiendo una distancia focal de $1$, que la altura del plano de proyección (\verb|viewport_height|) es $P_h=2h$, por lo que la anchura es $P_w=r\cdot P_h$. 
 
 \begin{figure} [ht]
     \centering
@@ -602,28 +621,28 @@ Se denomina \textit{field of view (FOV)} al ángulo total observable, que corres
     \label{fig:fov}
 \end{figure}
 
-Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}, el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $vup=(0,1,0)$. Mediante el vector $VD=lookat-lookfrom$ (\textit{view direction}) y el vector $vup$ podemos crear un sistema de referencia ortonormal del plano ortogonal a $VD$ que pasa por el punto $lookfrom$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente son iguales, y son por tanto paralelos desde el punto de vista afín, son planos distintos. Precisamente de este hecho nos aprovecharemos más tarde. Presentamos entones los siguientes vectores
+Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}, el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $\overrightarrow{\mathrm{vup}}=(0,1,0)$. Mediante el vector $\vec{v}_d=a_t-o_c$ (\textit{view direction}) y el vector $\overrightarrow{\mathrm{vup}}$ podemos crear un sistema de referencia ortonormal del plano ortogonal a $\vec{v}_d$ que pasa por el punto $o_c$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente son iguales, y son por tanto paralelos desde el punto de vista afín, son planos distintos. Precisamente de este hecho nos aprovecharemos más tarde. Presentamos entones los siguientes vectores
 \begin{eqnarray*}
-    w = \dfrac{lookat-lookfrom}{\|lookat-lookfrom\|}, \\
-    u = \dfrac{vup\times w}{vup \times w}, \\
-    v = w\times u,
+    \vec w = \dfrac{a_t-o_c}{\|a_t-o_c\|}, \\
+    \vec u = \dfrac{\overrightarrow{\mathrm{vup}}\times \vec w}{\overrightarrow{\mathrm{vup}} \times \vec w}, \\
+    \vec v = \vec w\times \vec u,
 \end{eqnarray*}
-de forma que los vectores $u,v$ son, por su propia definición ortogonales a $VD$ y ortogonales entre sí. Además están normalizados, constituyendo así una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}, mientras que $w$ por su parte toma el relevo del vector $-(0,0,1)$. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}.
+de forma que los vectores $\vec u,\vec v$ son, por su propia definición ortogonales a $\vec{v}_d$ y ortogonales entre sí. Además están normalizados, constituyendo así una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}, mientras que $\vec w$ por su parte toma el relevo del vector $-(0,0,1)$. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}. El conjunto $\{o_c; \vec u, \vec v,\vec w\}$ es por tanto un sistema de referencia del plano afín paralelo al plano de proyección que pasa por el punto $o_c$, al cual se le suele denominar \textit{marco de coordenadas de vista}.
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/plano.png}
+    \includegraphics[scale = 0.25]{img/C7/plano.png}
     \caption{Vectores que forman una base del plano de proyección}
     \label{fig:vectores}
 \end{figure}
 
-Ahora recordamos que para crear el rayo en la seccion \ref{section:rayo} calculamos la esquina inferior izquierda, transformamos las coordenadas de dispositivo en coordenadas de mundo del plano de proyección en $[0,PP_{width}]\times[0,PP_{height}]$ y con ello calculamos el punto destino. En el caso generalizado la metodología es la misma, pero necesitamos aclarar, a partir de los datos de entrada como son el punto $lookfrom$, el punto $lookat$, el vector $vup$ (usualmente (0,1,0)), el ángulo $fov$ y el el ratio ancho/alto (16/9 en nuestro caso), cuáles son las dimensiones del plano de proyección y la esquina inferior izquierda. Para ello introducimos una estructura que representará una cámara, que almacena los siguientes campos:
+Ahora recordamos que para crear el rayo en la seccion \ref{section:rayo} calculamos la esquina inferior izquierda, transformamos las coordenadas de dispositivo en coordenadas de mundo del plano de proyección en $[0,P_w]\times[0,P_h]\times\{-1\}$ y con ello calculamos el punto destino. En el caso generalizado la metodología es la misma, pero necesitamos aclarar, a partir de los datos de entrada como son el punto $o_c$, el punto $a_t$, el vector $\overrightarrow{\mathrm{vup}}$ (usualmente (0,1,0)), el ángulo $\widehat{\mathrm{fov}}$ y el el ratio $r$ ancho/alto (16/9 en nuestro caso), cuáles son las dimensiones del plano de proyección y la esquina inferior izquierda. Para ello introducimos una estructura que representará una cámara, que almacena los siguientes campos:
 
 \begin{lstlisting}
 struct Camera{
-    vec3 origin;            // Punto desde el que se observa
-    vec3 horizontal;        // Vector horizontal de modulo PP_width
-    vec3 vertical;          // Vector vertical de modulo PP_height
+    vec3 origin;        // Punto desde el que se observa
+    vec3 horizontal;    // Vector horizontal de modulo PP_width
+    vec3 vertical;      // Vector vertical de modulo PP_height
     vec3 lower_left_corner; // Punto situado en la esquina
 };
 \end{lstlisting}
@@ -637,10 +656,41 @@ donde \verb|origin| son las coordenadas de mundo del punto en el que se sitúa l
 \end{figure}
 
 
-Es claro que el origen es el punto \textit{lookfrom}, el vector horizontal es $PP_{width}\cdot u$ y el vector vertical es $PP_{height}\cdot v$. Por tanto, la esquina inferior izquierda sería
+Es claro que el origen es el punto \textit{lookfrom} ($o_c$), el vector horizontal es $P_w\cdot \vec u$ y el vector vertical es $P_h\cdot \vec v$. Por tanto, la esquina inferior izquierda sería
 $$
-LLC = lookfrom - \frac{PP_{width}}{2}\cdot u - \frac{PP_{height}}{2}\cdot v - w.
+\mathrm{LLC} = o_c - \frac{P_w}{2}\cdot \vec u - \frac{P_h}{2}\cdot \vec v - \vec w.
 $$
+
+En base a estos elementos, volvemos a redefinir la transformación $\phi$, de forma que ahora el plano de proyección $P$ puede tener cualquier posición y orientación. A partir de los puntos $o_c$ y $a_c$ y el vector $\overrightarrow{\mathrm{vup}}$ podríamos calcular los vectores $\vec u, \vec v, \vec w$, y como $P$ es paralelo al plano de la imagen \ref{fig:vectores}, tenemos que $\mathcal{R}=\{LLC; \vec u, \vec v, \vec w \}$ es un marco de referencia del plano de proyección, de forma que podemos obtener un punto del plano de proyección $P$ a partir de las coordenadas de dispositivo aplicando la siguiente transformación.
+
+\begin{equation}
+    \label{eq:transformacion-lineal-6}
+    \begin{split}
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow P \\
+        (x,y) & \longmapsto LLC + \frac{P_w}{n_x}x\cdot \vec u + \frac{P_h}{n_y}y\cdot\vec v.
+    \end{split}
+\end{equation}
+
+También podemos expresar esta transformación matricialmente. En este caso, la inversa de la matriz $M$ de vista y proyección se obtiene mediante el producto de la matriz de cambio de marco de referencia entre el marco usual y el marco $\mathcal{R}$ y la matriz de la transformación (\ref{eq:transformacion-lineal-matrix-3D-base}). Realmente esto es intuitivo, pues no es más que un cambio de posición y orientación respecto al caso base.
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix-3D-camara}
+    \phi(x,y) = \left(\begin{array}{ccc|c}
+        &  &  &  \\
+        \vec u & \vec v & \vec w & \mathrm{LLC} \\
+        &  &  &  \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(\begin{array}{ccc|c}
+        \frac{P_w}{n_x} & 0 & 0 & 0 \\
+        0 & \frac{P_h}{n_y} & 0 & 0 \\
+        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+        \begin{array}{c}
+            x \\ y \\ 0 \\ \hline 1
+        \end{array}\right)
+\end{equation}
+
 Reflejamos estos cálculos y asignaciones en el siguiente código, que corresponde a una función que dados los parámetros de una escena, crea, inicializa y devuelve un objeto \verb|Camera|.
 \begin{lstlisting}
 Camera init_camera (vec3 lookfrom, vec3 lookat, 
@@ -683,9 +733,11 @@ Ray get_ray(Camera cam, float u, float v){
 }
 \end{lstlisting}
 
-Vemos que ahora son los vectores \verb|cam.horizontal| y \verb|cam.vertical| los que hacen la función que en la primera implementación hacián los vectores \verb|vec3(viewport_width, 0.0, 0.0)| y \verb|vec3(0.0, viewport_height, 0.0)|.
+Vemos que ahora son los vectores \verb|cam.horizontal| y \verb|cam.vertical| los que hacen la función que en la primera implementación hacian los vectores \verb|vec3(viewport_width, 0.0, 0.0)| y \verb|vec3(0.0, viewport_height, 0.0)|.
 
-Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_camera| y observar cómo cambia el punto de vista aunque la escena sea la misma. En principio vamos a mantener constantes el $fov=90^\circ$, el vector $vup=(0,1,0)$ y el ratio 16:9, pero como nos gustaría poder movernos con libertad por la escena, declararemos dos variables \verb|uniform| que representen el punto $lookfrom$ y el punto $lookat$, a las cuales podremos asignarle variables dinámicamente desde JavaScript y dar la sensación de movimiento.
+De nuevo, estas transformaciones no son más que aplicaciones afines, por lo que, al igual que en el caso base de la sección \ref{section:rayo} y en el caso 2D la transformación \ref{eq:transformacion-lineal-matrix} es posible representar esta transformación como la aplicación de la inversa de la matriz $M$ de vista y modelado, que en este caso debe de utilizar los parámetros de la cámara y el marco de referencia de vista. 
+
+Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_camera| y observar cómo cambia el punto de vista aunque la escena sea la misma. En principio vamos a mantener constantes el $\widehat{\mathrm{fov}}=90^\circ$, el vector $\overrightarrow{\mathrm{vup}}=(0,1,0)$ y el ratio 16:9, pero como nos gustaría poder movernos con libertad por la escena, declararemos dos variables \verb|uniform| que representen el punto $o_c$ y el punto $a_t$, a las cuales podremos asignarle variables dinámicamente desde JavaScript y dar la sensación de movimiento.
 
 \begin{lstlisting}
 
@@ -711,7 +763,7 @@ float v = uv.y;
 Ray r = get_ray(cam, u, v);
 \end{lstlisting}
 
-Por ejemplo, si fijamos $lookfrom = (1,1,1)$ y $lookat = (0,0,0)$ obtenemos la imagen \ref{fig:escena-camara} (a), y con $lookfrom=(5, 5, -5)$, $lookat=(1,2,-5)$ la imagen \ref{fig:escena-camara} (b). En este último caso podemos de hecho ver la escena desde el lado negativo del eje $Z$, lo que antes de parametrizar la cámara llamábamos `el interior de la pantalla'.
+Por ejemplo, si fijamos $o_c = (1,1,1)$ y $a_t = (0,0,0)$ obtenemos la imagen \ref{fig:escena-camara} (a), y con $o_c=(5, 5, -5)$, $a_t=(1,2,-5)$ la imagen \ref{fig:escena-camara} (b). En este último caso podemos de hecho ver la escena desde el lado negativo del eje $Z$, lo que antes de parametrizar la cámara llamábamos `el interior de la pantalla'.
 
 \begin{figure}[ht]
     \centering
@@ -778,7 +830,7 @@ La componente difusa final es la suma de las componentes difusas calculadas para
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/difusa.png}
+    \includegraphics[scale = 0.25]{img/C7/difusa.png}
     \caption{Esquema de los vectores utilizados en la componente difusa}
     \label{fig:difusa}
 \end{figure}
@@ -791,7 +843,7 @@ Esta componente representa a las reflexiones directas de la fuente de luz sobre 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/especular.png}
+    \includegraphics[scale = 0.35]{img/C7/especular.png}
     \caption{Esquema de los vectores utilizados en la componente especular}
     \label{fig:especular}
 \end{figure}
@@ -822,7 +874,7 @@ Sin embargo, hay algunas situaciones en las que las que no se aplica iluminació
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/excepcion.png}
+    \includegraphics[scale = 0.25]{img/C7/excepcion.png}
     \caption{Punto donde no se aplica componente difusa ni especular}
     \label{fig:excepcion}
 \end{figure}

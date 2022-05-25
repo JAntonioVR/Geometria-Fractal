@@ -11,8 +11,8 @@ import { Scene3D } from "./scene3D.js";
 // Vertex shader
 import { vsSource } from "../glsl/shader-wgl-vertex.js";
 // Fragment shader
-import { fsSource } from "../glsl/shader-mandelbub-fragment.js";
-//import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
+//import { fsSource } from "../glsl/shader-mandelbub-fragment.js";
+import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
 // Utils
 import { hexToRgb, rgbToHex } from "./utils.js";
 
