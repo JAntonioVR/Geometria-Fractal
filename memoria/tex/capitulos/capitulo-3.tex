@@ -30,7 +30,7 @@ En este capítulo aprenderemos qué elementos componen estos conjuntos, y cómo 
 
 \section{Iteración convergente y no convergente}
 
-Recordamos que en el capítulo \ref{chap:iteracion}, a partir de una función analítica $f:\C\longrightarrow\C$, se le aplicaba una transformación $N_f(z)$ de forma que en muchos casos la iteración de dicha función era convergente independientemente del término $z_0\in\C$ inicial. Sin embargo recordemos que la iteración de una función cualquiera $f$ no siempre es convergente, como pudimos comprobar en el ejemplo situado al comienzo de la sección \ref{subsection:convergencia-punto-fijo}, en el que comprobamos que las iteradas de la función $f(z)=z^2$ divergen siempre que $|z_0|>1$, convergen a $0$ si $|z_0|<1$ y quedan encerradas en $S^1$ en caso de que $|z_0|=1$. Otro posible comportamiento es el cíclico, como el que tienen las iteradas de la función $g(z)=z\cdot i$ en $z_0=1$, que si nos fijamos, $O_g(1)=\{1,i,-1,-i,1,\dots\}$. 
+Recordamos que en el capítulo \ref{chap:iteracion}, a partir de una función analítica $f:\C\longrightarrow\C$, se le aplicaba una transformación $N_f(z)$ de forma que en muchos casos la iteración de dicha función era convergente independientemente del término $z_0\in\C$ inicial. Sin embargo recordemos que la iteración de una función cualquiera $f$ no siempre es convergente, como pudimos comprobar en el ejemplo situado al comienzo de la sección \ref{subsection:convergencia-punto-fijo}, en el que recordamos que las iteradas de la función $f(z)=z^2$ divergen siempre que $|z_0|>1$, convergen a $0$ si $|z_0|<1$ y quedan encerradas en $S^1$ en caso de que $|z_0|=1$. Otro posible comportamiento es el cíclico, como el que tienen las iteradas de la función $g(z)=z\cdot i$ en $z_0=1$, que si nos fijamos, son $O_g(1)=\{1,i,-1,-i,1,\dots\}$. 
 
 Un último caso de posible comportamiento de una órbita son las órbitas caóticas, en las cuales no se percibe ningún patrón y además es muy sensible a las condiciones iniciales, fijémonos en lo que ocurre en el caso de la función $h(z)=z^2-1.9$ si miramos sus órbitas en $z_0=0,0.1$:
 
@@ -54,9 +54,9 @@ Un último caso de posible comportamiento de una órbita son las órbitas caóti
 
 No se observa ningún patrón de convergencia y además, a pesar de ser semillas muy cercanas, las órbitas son muy diferentes.
 
-La dicotomía existente entre qué $z_0$ iniciales hacen que las iteradas de una función coverga o no, restringida a cierta familia de funciones es la que define a los distintos conjuntos de Julia. Presentamos por tanto, para cada $c\in\C$, la familia de funciones
+La dicotomía existente entre qué $z_0$ iniciales hacen que las iteradas de una función coverja, o no, restringida a cierta familia de funciones, es la que define a los distintos conjuntos de Julia. Presentamos por tanto, para cada $c\in\C$, la familia de funciones
 \begin{equation}
-  P_c(z) = z^2 +c \ \ \forall z\in\C
+  P_c(z) = z^2 +c \ \ \forall z\in\C.
 \end{equation}
 
 Nuestro objetivo es entonces clasificar para qué $z_0\in\C$, las iteradas $\{P_c^n(z_0)\}$ convergen, divergen, ciclan, o tienen posiblemente un comportamiento caótico.
