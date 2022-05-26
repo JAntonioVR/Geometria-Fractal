@@ -454,14 +454,18 @@ Para probar el teorema del collage primero establecemos el siguiente lema, que n
     \label{lema:collage}
 \end{lema}
 \begin{proof}
-    Fijado $x\in X$, la función distancia $d(x,\cdot)$ es continua, por tanto:
-    \begin{eqnarray*}
-        d(x,x^*) & = & d(x,\lim_{n\rightarrow\infty} f^n(x)) = \lim_{n\rightarrow\infty} d(x,f^n(x)) \\
-        & \leq & \lim_{n\rightarrow\infty} \sum_{i=1}^n d(f^{i-1}(x),f^{i}(x)) \ \ \text{(desigualdad triangular)}\\ 
-        & \leq & \lim_{n\rightarrow\infty} d(x,f(x))\sum_{i=1}^n s^{i-1} \\
-        & = & (1-s)^{-1} d(x,f(x))
-    \end{eqnarray*}
-    donde en la última igualdad hemos utilizado que la suma de los elementos de una serie geométrica de razón $0\leq\alpha<1$ es $(1-\alpha)^{-1}$.
+    Fijado cualquier $x\in X$, veamos primeramente la siguiente cadena de desigualdades
+    \begin{equation*}
+        \begin{split}
+            d(x,x^*) & \leq d(x,f(x)) + d(f(x),x^*) \text{ (por la desigualdad triangular)} \\
+            & = d(x,f(x)) + d(f(x),f(x^*)) \ \ \ (f(x^*)=x^*) \\
+            & \leq d(x,f(x)) + s \cdot d(x,x^*). \ \ \ (f \text{ es contractiva})
+        \end{split}
+    \end{equation*}
+    Por lo que agrupando, tenemos que $d(x,x^*)(1-s)\leq d(x,f(x))$, lo cual equivale a
+    $$
+    d(x,x^*)\leq (1-s)^{-1} d(x,f(x)).
+    $$
 \end{proof}
 
 Aplicando el lema \ref{lema:collage} al espacio métrico $(\mathcal{H}(X), h(d))$ y a la aplicación contractiva $W$ generada por $\{w_i:i=1,\dots,N\}$ como en (\ref{eqn:W}) tenemos probado el teorema del collage.
@@ -488,7 +492,7 @@ Intuitivamente, este teorema nos dice que para encontrar un SFI cuyo atractor es
         \item Por último, la copia \textcolor{green}{verde} debemos fijarnos que además de escalada y desplazada, está girada. Por lo que es el resultado de aplicar una similitud de razón de homotecia $0.5$ y ángulo de rotación $\frac \pi 2$, para posteriormente colocar este resultado encima de la copia \textcolor{blue}{azul}. Es decir, usamos la transformación $\textcolor{green}{w_3=(0.5,0.5,\frac{\pi}{2},\frac{\pi}{2},1,0.5)}$.
     \end{itemize}
 
-    Por tanto, $L$ es el atractor del siguiente SFI:
+    Por tanto, $L$ es el atractor del SFI que representamos en la tabla \ref{tabla:ejemplo-collage}.
 
     \begin{table}[ht]
         \centering
@@ -504,6 +508,8 @@ Intuitivamente, este teorema nos dice que para encontrar un SFI cuyo atractor es
 \end{ejemplo}
 
 Para una mayor cantidad y variedad de ejemplos invitamos al lector a consultar \cite[Sección 3.10]{Barnsley}, donde puede encontrar gran cantidad de ejercicios y explicaciones prácticas y más complejas.
+
+Como comentario final, decir que el teorema del collage es de hecho una potente herramienta que trasciende al ámbito fractal. Por ejemplo, se ha probado su utilidad en problemas integrales o diferenciales. Véase \cite{LaTorre} para tener una visión de ello.
 
 En conclusión, los SFI en $\R^2$ a pesar de ser herramientas muy simples como lo son las transformaciones afines, nos permiten originar complejas y bellas imágenes basadas en la iteración. Además, gracias al teorema del collage podemos aproximar una imagen simplemente a partir de las transformaciones afines que definen un SFI que converge a dicha aproximación. Toda esta teoría está además basada en una densa teoría que gira en torno al teorema del punto fijo de Banach.
 
