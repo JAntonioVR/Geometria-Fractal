@@ -69,7 +69,7 @@ Sin dejar de tener en cuenta la familia de funciones $\{P_c(z)\}_{c\in\C}$ intro
 \begin{definicion}
   Dado un número complejo $c\in\C$ fijo consideramos $P_c(z)=z^2+c$. Entonces:
   \begin{itemize}
-    \item Se denomina \textbf{conjunto de puntos de escape}, y denotamos como $\mathsf{E}_c$ al conjunto de puntos cuyas iteradas divergen, es decir:
+    \item Se denomina \textbf{conjunto de puntos de escape}, y denotamos como $\mathsf{E}_c$, al conjunto de puntos cuyas iteradas divergen, es decir:
     $$
     \mathsf{E}_c = \{z_0\in\C: \{|P_c^n(z_0)|\}\rightarrow \infty \}
     $$
@@ -77,13 +77,13 @@ Sin dejar de tener en cuenta la familia de funciones $\{P_c(z)\}_{c\in\C}$ intro
   \end{itemize}
 \end{definicion}
 
-A partir de estas dos definiciones, que insisten en clasificar los puntos del plano complejo entre de escape o prisioneros según su órbita, podemos introducir la definición que esperábamos.
+A partir de estas dos definiciones, que insisten en clasificar exhaustivamente los puntos del plano complejo entre de escape o prisioneros según su órbita, podemos introducir la definición que esperábamos.
 
 \begin{definicion}[Conjunto de Julia]
-Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota como $\mathcal{J}_c$ a la frontera de $\mathsf{E}_c$. Es en este conjunto donde las iteradas tienen un comportamiento caótico. Se denomina \textbf{conjunto de Fatou} al complemento del conjunto de Julia.
+Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota como $\mathcal{J}_c$, a la frontera de $\mathsf{E}_c$. Se denomina \textbf{conjunto de Fatou} al complemento del conjunto de Julia.
 \end{definicion}
 
-
+Es precisamente en los complejos que pertenecen al conjunto de Julia donde las iteradas tienen un comportamiento caótico.
 
 \begin{ejemplo}
   En el caso $c=0$, es decir, $P_0(z)=z^2$, sabemos ya que $\mathcal{J}_c=S^1$, pues precisamente es $S^1$ la frontera entre los puntos cuyas iteradas divergen o convergen a $0$.
@@ -96,7 +96,7 @@ Dado un número $c\in\C$, se define su \textbf{conjunto de Julia}, y se denota c
 \subsection{Representación gráfica de los conjuntos de Julia}
 \label{subsection:representacion-julia}
 
-Tenemos entonces una definición de los conjuntos de Julia, pero aparentemente está muy alejada de las imágenes \ref{fig:julia-intro} que presentamos en la introducción. La forma de llegar a ellas es similar a la que utilizamos para graficar las imágenes que utilizaban la velocidad de convergencia en el capítulo \ref{chap:iteracion}. Sin embargo, y al contrario que al utilizar el método de Newton, ahora no tenemos ningún tipo de convergencia asegurada, por lo que el método de aplicar iteradas hasta encontrar un patrón no es el más correcto. Debemos por tanto encontrar una manera eficiente de clasificar cada punto del plano como prisionero o de escape. 
+Tenemos entonces una definición de los conjuntos de Julia, pero aparentemente está muy alejada de las imágenes \ref{fig:julia-intro} que presentamos en la introducción. La forma de llegar a ellas es similar a la que utilizamos para graficar las imágenes que emplean la velocidad de convergencia en el capítulo \ref{chap:iteracion}. Sin embargo, y al contrario que al utilizar el método de Newton, ahora no tenemos ningún tipo de convergencia asegurada, por lo que el método de aplicar iteradas hasta encontrar un patrón no es el más correcto. Debemos por tanto encontrar una manera eficiente de clasificar cada punto del plano como prisionero o de escape. 
 
 Para ello podemos fijarnos en que la operación de elevar $z_n$ al cuadrado prima sobre la de sumar una constante $c$ siempre que el módulo $|z_n|$ sea `suficientemente grande'. Procedemos entonces a enunciar el siguiente resultado:
 
@@ -107,11 +107,11 @@ Para ello podemos fijarnos en que la operación de elevar $z_n$ al cuadrado prim
 \begin{proof}
   Supongamos que $|z_0|>e_c=\max\{|c|,2\}$, por tanto necesariamente debe existir un número $\varepsilon>0$ tal que $|z_0| = 2 + \varepsilon$. Aplicamos entonces la cadena de desigualdades siguiente:
   \begin{eqnarray*}
-    |P_c(z_0)| = |z_0^2 + c| & \geq & |z_0^2| - |c|\text{  (Propiedades del módulo)} \\
+    |P_c(z_0)| = |z_0^2 + c| & \geq & |z_0^2| - |c|\text{  (propiedades del módulo)} \\
     & = & |z_0|^2 - |c| \\
-    & \geq & |z_0|^2 - |z_0|\text{  (Porque } |z_0|>|c| \text{)} \\
+    & \geq & |z_0|^2 - |z_0|\text{  (porque } |z_0|>|c| \text{)} \\
     & = & (|z_0|-1)|z_0| \\
-    & = & (1 + \varepsilon)|z_0|
+    & = & (1 + \varepsilon)|z_0|.
   \end{eqnarray*}
 
   Por tanto tenemos que $|P_c(z_0)|\geq(1 + \varepsilon)|z_0|$, por lo que en cada iteración el módulo aumenta al menos $1+\varepsilon$ unidades, que es mayor que uno, es decir, $|P_c^k(z_0)|\geq(1+\varepsilon)^k|z_0|$, por lo que la sucesión diverge y $z_0$ es un punto de escape. 
@@ -169,7 +169,7 @@ Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar 
   \label{fig:julia-explicados}
 \end{figure}
 
-Por sí solo Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathcal{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta\footnote{Más información en la documentación oficial: \url{https://reference.wolfram.com/language/ref/JuliaSetPlot.html?q=JuliaSetPlot}}, véanse las imágenes \ref{fig:julia-set-plot}.
+Por sí solo, Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathcal{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta\footnote{Más información en la documentación oficial: \url{https://reference.wolfram.com/language/ref/JuliaSetPlot.html?q=JuliaSetPlot}}, véanse las imágenes \ref{fig:julia-set-plot}.
 
 \begin{figure}[ht]
   \centering
