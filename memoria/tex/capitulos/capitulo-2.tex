@@ -8,7 +8,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
 \begin{definicion}
     Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.} $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textbf{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textbf{órbita} $O_f(z)$ de $f$ en $z$.
     $$
-    O_f(z):=\left\lbrace z, f(z), f^2(z), \dots, f^n(z), \dots\right\rbrace.
+    O_f(z):=\left\lbrace z, f(z), f^2(z), \dots, f^n(z), \dots\right\rbrace,
     $$
     donde $f^n$ denota a $f\circ f^{n-1}$.
 \end{definicion}
@@ -27,7 +27,7 @@ Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, 
   1.39421*10^-47\}
 \end{mmaCell}
 
-Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo cual denotamos con $\{f^n(0.9)\}\rightarrow 0$. En este caso todos los valores eran reales, pero aprovechando la correspondencia de $\C$ con $\R^2$, de forma que un número complejo $z=x+y\cdot i\in\C$ se corresponde con el par $(x,y)\in\R^2$ podemos representar en el plano y de forma visual la tendencia de dichas sucesiones. Observemos los ejemplos de las imágenes \ref{fig:orbitas-C}.
+Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo que parece indicar que $\{f^n(0.9)\}\rightarrow 0$. En este caso todos los valores eran reales, pero aprovechando la correspondencia de $\C$ con $\R^2$, de forma que un número complejo $z=x+y\cdot i\in\C$ se identifica con el par $(x,y)\in\R^2$, podemos representar en el plano, de forma visual, la tendencia de dichas sucesiones, uniendo con un segmento cada punto con su consecutivo. Observemos los ejemplos de las imágenes \ref{fig:orbitas-C}.
 
 \begin{figure}[ht]
     \centering
@@ -57,19 +57,27 @@ Nos interesa particularmente saber qué sucesiones de iteradas convergen y a qu�
 
     Sea $x_0\in X$ y sea la sucesión de iteradas $\{x_n\}=\{f^n(x_0)\}$. Por ser $f$ contractiva, llamamos $K<1$ a su constante de Lipschitz. Probaremos por inducción que $d(x_n,x_{n+1})\leq K^n d(x_0,x_1) \ \ \forall n\in\N$.
     El caso base es cierto pues $d(x_1,x_2)=d(f(x_0),f(x_1))\leq K d(x_0,x_1)$. Si suponemos que la hipótesis es cierta para cierto $n$, tenemos que
-    $$
-    d(x_{n+1},x_{n+2})=d(f(x_n),f(x_{n+1}))\leq K d(x_n,x_{n+1})\leq K^{n+1}d(x_0,x_1).
-    $$
+    \begin{equation*}
+      \begin{split}
+        d(x_{n+1},x_{n+2})&=d(f(x_n),f(x_{n+1})) \\
+        &\leq K d(x_n,x_{n+1}) \\
+        &\leq K^{n+1}d(x_0,x_1).
+      \end{split}
+    \end{equation*}
     Ahora, para $n,r\in\N$:
-    \begin{eqnarray*}
-        d(x_n,x_{n+r}) & \leq & \sum_{j=0}^{r-1}d(x_{n+j},x_{n+j+1}) \leq d(x_1,x_0)\sum_{j=0}^{r-1}K^{n+j} \leq K^n d(x_0,x_1)\sum_{j=0}^{\infty} K^j \\
-        & = & \frac{d(x_0,x_1)K^n}{1-K}.
-    \end{eqnarray*}
+    \begin{equation*}
+      \begin{split}
+        d(x_n,x_{n+r}) & \leq \sum_{j=0}^{r-1}d(x_{n+j},x_{n+j+1}) \\
+        &\leq d(x_1,x_0)\sum_{j=0}^{r-1}K^{n+j} \\
+        &\leq K^n d(x_0,x_1)\sum_{j=0}^{\infty} K^j \\
+        &= \frac{d(x_0,x_1)K^n}{1-K}.
+      \end{split}
+    \end{equation*}
     Dado $\varepsilon>0$, como $\{K^n\}\rightarrow 0$, existe un $m\in\N$ tal que para $n>m$ se tiene que $d(x_0,x_1)K^n<\varepsilon(1-K)$. Si ahora tomamos dos naturales $p,q\geq m$ con $p<q$, aplicando la desigualdad anterior tomando $n=p$ y $r=q-p$ obtenemos que:
     $$
-    d(x_p,x_q) = d(x_n, x_{n+r}) \leq \frac{d(x_0,x_1)K^n}{1-K} < \varepsilon
+    d(x_p,x_q) = d(x_n, x_{n+r}) \leq \frac{d(x_0,x_1)K^n}{1-K} < \varepsilon,
     $$
-    de donde deducimos que $\{x_n\}$ es una sucesión de Cauchy, y como $X$ es completo, tenemos que $\{x_{n+1}\}=\{f(x_n)\}=\{f^n(x_0)\}\rightarrow x\in X$. Pero $f$ es continua, por lo que si $\{x_n\}\rightarrow x$, necesariamente $\{f(x_n)\}\rightarrow f(x)$, por lo que $f(x)=x$.
+    de donde deducimos que $\{x_n\}$ es una sucesión de Cauchy, y como $X$ es completo, tenemos que existe $x\in X$ tal que $\{x_{n+1}\}=\{f(x_n)\}=\{f^n(x_0)\}\rightarrow x$. Pero $f$ es continua, por lo que si $\{x_n\}\rightarrow x$, necesariamente $\{f(x_n)\}\rightarrow f(x)$, por lo que $f(x)=x$.
 
     Para probar la unicidad, suponemos que $y\in X$ es otro punto fijo de $f$, por lo que $d(x,y) = d(f(x),f(y))\leq K d(x,y)$. Tomando el primero y el tercer miembro de la desigualdad deducimos que $(1-K)d(x,y)\leq 0$, luego $d(x,y)=0$.
 \end{proof}
@@ -78,15 +86,17 @@ Este teorema unido a que sabemos que $\C$, y por tanto todos sus subconjuntos ce
 
 \subsection{Velocidad de convergencia}
 
-Si recordamos el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}), que nos decía que las funciones contractivas en un espacio métrico completo admiten un único punto fijo, el cual se puede hallar iterando la función. Recordemos que dada una función $f:\C\longrightarrow\C$ contractiva, esta cumple que $|f(z_1)-f(z_2)|\leq K|z_1-z_2|\ \ \forall z_1,z_2\in\C$, siendo $0<K<1$ la constante de Lipschitz de $f$, nombrada en este caso la constante de contractividad. Fijémonos que, si iteramos $n$ veces la función $f$
-\begin{eqnarray*}
-    |f^n(z_0)-f^{n-1}(z_0)| & \leq & K|f^{n-1}(z_0)-f^{n-2}(z_0)| \\
-    & \leq & K^2 |f^{n-2}(z_0)-f^{n-3}(z_0)| \\
-    & \leq\cdots\leq&K^{n-1}|f(z_0)-z_0|
-\end{eqnarray*}
+Así pues, el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}), dice que las funciones contractivas en un espacio métrico completo admiten un único punto fijo, el cual se puede hallar iterando la función. Recordemos que dada una función $f:\C\longrightarrow\C$ contractiva, esta cumple que $|f(z_1)-f(z_2)|\leq K|z_1-z_2|\ \ \forall z_1,z_2\in\C$, siendo $0<K<1$ la constante de Lipschitz de $f$, nombrada en este caso la constante de contractividad. Fijémonos que, si iteramos $n$ veces la función $f$
+\begin{equation*}
+  \begin{split}
+    |f^n(z_0)-f^{n-1}(z_0)| & \leq K|f^{n-1}(z_0)-f^{n-2}(z_0)| \\
+    & \leq K^2 |f^{n-2}(z_0)-f^{n-3}(z_0)| \\
+    & \leq\cdots\leq K^{n-1}|f(z_0)-z_0|,
+  \end{split}
+\end{equation*}
 por lo que en realidad la constante $K$ define de forma genérica la velocidad de convergencia en términos de la función. Cuanto más cercana a $0$, más rápida será la convergencia al punto fijo. Sin embargo, vemos que realmente también depende de la condición inicial fijada, y es este el aspecto que explotaremos para obtener imágenes fractales. 
 
-En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este alcance se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
+En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este número de aproximaciones se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
     \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/FixedPointList.html}}.
@@ -113,12 +123,12 @@ Y a partir de la longitud de la lista que nos devuelve \verb|FixedPointList|, es
 
 \section{El método de Newton y cuencas de atracción}
 
-Gracias a la iteración y al estudio de la convergencia de las sucesiones que definen las órbitas, podemos definir muchos métodos numéricos que nos ayuden a resolver numéricamente problemas que de forma teórica o analítica serían difíciles de abordar. Entre estos está el conocido \textbf{método de Newton}. Este es un procedimiento iterativo que nos permite adivinar con cierta precisión donde se anula una función derivable (al menos en un entorno de la raíz), pudiendo así utilizarlo como herramienta para la resolución de ecuaciones. Existen varias y distintas versiones del método de Newton, siendo la más sencilla la que busca las raíces de una función real de variable real $f:\R\longrightarrow\R$, conociéndose también en este caso como \textit{método de Newton-Raphson}. Además, hay una generalización para aplicaciones $f:\R^n\longrightarrow\R^n$, la cual se apoya en la inversa del operador diferencial. Sin embargo, nosotros estamos trabajando con funciones complejas $f:\C\longrightarrow\C$, que aunque $\C$ y $\R^2$ sean isomorfos, la dinámica es distinta, pues si la función compleja es suficientemente buena, podemos usar su derivada $f'(z)$ y no el operador diferencial (véase \cite{Dubeau-Gnang}). 
+Gracias a la iteración y al estudio de la convergencia de las sucesiones que definen las órbitas, podemos definir muchos algoritmos que nos ayuden a resolver numéricamente problemas que de forma teórica o analítica serían difíciles de abordar. Entre estos está el conocido \textbf{método de Newton}. Este es un procedimiento iterativo que nos permite aproximar con cierta precisión donde se anula una función derivable, pudiendo así utilizarlo como herramienta para la resolución de ecuaciones. Existen varias y distintas versiones del método de Newton, siendo la más sencilla la que busca las raíces de una función real de variable real $f:\R\longrightarrow\R$, conociéndose también en este caso como \textit{método de Newton-Raphson}. Además, hay una generalización para aplicaciones $f:\R^n\longrightarrow\R^n$, la cual se apoya en la inversa del operador diferencial. Sin embargo, nosotros estamos trabajando con funciones complejas $f:\C\longrightarrow\C$, que aunque $\C$ y $\R^2$ sean isomorfos, la dinámica es distinta, pues si la función compleja es suficientemente buena, podemos usar su derivada $f'(z)$ y no el operador diferencial (véase \cite{Dubeau-Gnang}). 
 
 Recordemos que dada una ecuación $f(z)=0$ para cierta función compleja y analítica $f:\C\longrightarrow\C$, el método de Newton itera la función
 \begin{equation}
     \label{eq:metodo-Newton}
-    N_f(z)=z-\frac{f(z)}{f'(z)}
+    N_f(z)=z-\frac{f(z)}{f'(z)},
 \end{equation} 
 comenzando por un punto $z_0$ cercano a la raíz. Es decir, calcula la sucesión $\{z_n\}$ definida como $z_{n+1}=N_f(z_n) \ \forall n\in\N$, la cual aplicando el teorema \ref{th:punto-fijo} podemos deducir que converge a un punto $a\in\C$ que verifica $f(a)=0$ siempre que $f'(a)\not= 0$. Para mayor detalle acerca de la convergencia local ver \cite[Capítulo 7]{Ostrowski} y \cite[Sección 5.4]{Atkinson}.
 
@@ -150,7 +160,7 @@ Produciendo como resultado la imagen \ref{fig:cuencas-1}. La forma de deducir a 
 
 
 \begin{definicion}[Cuenca de atracción]
-    Definimos como \textbf{cuenca de atracción} de una raíz $a\in\C$ de una función compleja $f:\C\longrightarrow\C$ (\textit{i.e.} $f(a)=0$), y denotamos como $A(a)$ al conjunto de puntos $z_0\in\C$ tales que la sucesión $\{z_n\}$ dada por $z_{n+1}=N_f(z_n)$ converge a $a$ utilizando a $z_0$ como primer valor de la sucesión. 
+    Definimos como \textbf{cuenca de atracción} de una raíz $a\in\C$ de una función compleja $f:\C\longrightarrow\C$ (\textit{i.e.} $f(a)=0$), y denotamos como $A(a)$, al conjunto de puntos $z_0\in\C$ tales que la sucesión $\{z_n\}$ dada por $z_{n+1}=N_f(z_n)$ converge a $a$ utilizando a $z_0$ como primer término de la sucesión. 
 \end{definicion}
 
 En muchas de las funciones que trataremos ocurre que existen distintas cuencas de atracción y la distinción sobre a cuál de ellas pertenece cada punto del plano complejo es la que nos permitirá graficar imágenes fractales. Si aplicamos el mismo procedimiento antes descrito en el ejemplo \ref{ejemplo:cuencas-1} con otras funciones encontramos las imágenes \ref{fig:cuencas-raiz}.
@@ -165,7 +175,7 @@ En muchas de las funciones que trataremos ocurre que existen distintas cuencas d
     \label{fig:cuencas-raiz}
 \end{figure}
 
-En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fractales producidos por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes. Además, en lugar de colorear el plano según la raíz a la que converja la sucesión también podemos fijarnos en la velocidad de convergencia. Esto es, asociar a cada punto del plano un color dependiendo del número de iteraciones necesarias para converger a la raíz. En este sentido, podemos revisitar las imágenes \ref{fig:cuencas-raiz} y en función de la velocidad de convergencia de las sucesiones utilizar un color distinto. El código necesario es el siguiente y los resultados se pueden observar en las imágenes \ref{fig:cuencas-velocidad}:
+En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fractales producidos por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de inestabilidad o \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes. Además, en lugar de colorear el plano según la raíz a la que converja la sucesión también podemos fijarnos en la velocidad de convergencia. Esto es, asociar a cada punto del plano un color dependiendo del número de iteraciones necesarias para situarse a menos de cierta distancia de la raíz. En este sentido, podemos revisitar las imágenes \ref{fig:cuencas-raiz} y en función de la velocidad de convergencia de las sucesiones utilizar un color distinto. El código necesario es el siguiente y los resultados se pueden observar en las imágenes \ref{fig:cuencas-velocidad}:
 
 \begin{mmaCell}{Code}
   newtonVelocidad = Compile[{{z, _Complex}}, 
@@ -174,7 +184,6 @@ En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fr
   DensityPlot[newtonVelocidad[x + I*y], {x, -2, 2}, {y, -2, 2}, 
     PlotPoints -> 200, Mesh -> False, ColorFunction -> GrayLevel]
 \end{mmaCell}
-
 donde se puede cambiar el valor de \verb|f|, la región del plano \verb|{x, -2, 2}, {y, -2, 2}| o el valor del argumento \verb|ColorFunction| para obtener distintas imágenes.
 
 \begin{figure}[ht]
@@ -187,12 +196,10 @@ donde se puede cambiar el valor de \verb|f|, la región del plano \verb|{x, -2, 
     \label{fig:cuencas-velocidad}
 \end{figure}
 
-Podemos jugar con estos parámetros como son la función a representar \verb|f|, la región del plano que queremos visualizar \verb|{x, -2, 2}, {y, -2, 2}| o el valor del argumento \verb|ColorFunction| para obtener distintas imágenes de diferentes colores.
-
 \subsection{Autosimilaridad}
 \label{subsection:autosimilaridad}
 
-Consideramos ahora la representación de las cuencas de atracción de la función compleja $f(z)=z^3-1$, que podemos ver en la imagen \ref{fig:cuencas-autosimilaridad}
+Consideramos ahora la representación de las cuencas de atracción de la función compleja $f(z)=z^3-1$, que podemos ver en la imagen \ref{fig:cuencas-autosimilaridad}.
 
 \begin{figure} [ht]
 \centering
@@ -203,7 +210,7 @@ Consideramos ahora la representación de las cuencas de atracción de la funció
 
 \newpage
 
-Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, es decir, representamos una región más pequeña, encontramos estructuras que son iguales independientemente del zoom que se aplique. En la figura \ref{fig:detalles} podemos ver distintos detalles de la figura \ref{fig:cuencas-autosimilaridad}, cada una es una ampliación de la anterior, y podemos ver como esa estructura se repite en todas las escalas.
+Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, es decir, representamos una región más pequeña, encontramos estructuras que son iguales independientemente del zoom que se aplique. En la figura \ref{fig:detalles} podemos ver distintos detalles de la figura \ref{fig:cuencas-autosimilaridad}, cada una es una ampliación de la anterior, y podemos observar como esa estructura se repite en todas las escalas.
 
 
 \begin{figure}[ht]
