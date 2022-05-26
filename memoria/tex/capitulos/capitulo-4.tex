@@ -4,7 +4,7 @@
 
 Como venimos viendo ya en los dos últimos capítulos, la iteración es una poderosa herramienta en la generación de imágenes fractales. Sin embargo, hasta ahora siempre nos estamos basando en buscar convergencia y velocidad de convergencia de sucesiones de iteradas de funciones complejas, las cuales evalúan un número complejo $z\in\C$ para devolver otro número complejo $f(z)\in\C$. Si recuperamos la identificación $z=x+y\cdot i\simeq (x,y)\in\R^2$ podemos ver las funciones complejas como campos vectoriales de $\R^2$, y si en lugar de aplicar una función a un único punto la aplicamos a un conjunto de puntos llegamos a la base de los \textit{Sistemas de Funciones Iteradas}, en adelante SFI. 
 
-La matemática que explica los SFI se puede encontrar en el clásico libro \textit{Fractals Everywhere} \cite{Barnsley} de \textit{Michael Barnsley}. Por su parte, la geometría fractal nació en 1977 con la publicación de \textit{The fractal geometry of nature} \cite{alma991007242979704990} por parte de \textit{Benoit Mandelbrot}. En general, gracias a la geometría fractal y ayudándonos de los SFI podemos recrear resultados de imágenes y objetos con un nivel de detalle que la geometría euclídea no puede conseguir. Sin embargo, el problema inverso también es interesante: ¿es posible, a partir de un objeto, describirlo matemáticamente mediante SFI? Este es un área de la matemática aún abierta y en la que a día de hoy se continua trabajando. Uno de los resultados más conocidos en este ámbito es el \textit{teorema del collage}, del cual hablaremos más adelante. %TODO referenciar teorema y sección
+La matemática que explica los SFI se puede encontrar en el clásico libro \textit{Fractals Everywhere} \cite{Barnsley} de \textit{Michael Barnsley}. Por su parte, la geometría fractal nació en 1977 con la publicación de \textit{The fractal geometry of nature} \cite{alma991007242979704990} por parte de \textit{Benoit Mandelbrot}. En general, gracias a la geometría fractal y ayudándonos de los SFI podemos recrear resultados de imágenes y objetos con un nivel de detalle que la geometría euclídea no puede conseguir. Sin embargo, el problema inverso también es interesante: ¿es posible, a partir de un objeto, describirlo matemáticamente mediante SFI? Este es un área de la matemática aún abierta y en la que a día de hoy se continua trabajando. Uno de los resultados más conocidos en este ámbito es el \textit{teorema del collage}, del cual hablaremos en la sección \ref{section:problema-inverso}.
 
 \section{Transformaciones afines en el plano euclídeo y SFI}
 
@@ -46,7 +46,7 @@ Una forma equivalente de denotar $w$ matricialmente es tomando la matriz $A=\beg
     \end{pmatrix}\in\R^2.
 \end{equation}
 
-La matriz $A$ también puede ser expresada de la siguiente forma:
+Hasta aquí, se trata de un concepto geométrico que además es bien conocido. Sin embargo, podemos visualizarlo de una forma equivalente, dando un sentido geométrico a la matriz $A$, pudiendo expresarla de la siguiente forma:
 \begin{equation}
     A = \begin{pmatrix}
         a & b \\
@@ -66,7 +66,7 @@ donde el par $(r,\alpha)$ son las coordenadas polares de $(a,c)$ y $(s,\beta+\fr
 Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{homotecia} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$. A continuación definimos un caso concreto de transformación afín más familiar.
 
 \begin{definicion}
-    Una transformación afín de $\R^2$ $w(x)=Ax+b$, para cualquier $b\in\R^2$ se denomina \textbf{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
+    Una transformación afín de $\R^2$ $w(x)=Ax+b$, con $b\in\R^2$, se denomina \textbf{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
     \begin{eqnarray}
         A = \begin{pmatrix}
             r\cos\alpha & -r\sin\alpha \\
@@ -158,18 +158,18 @@ Este es sólo un ejemplo, pero a lo largo de esta sección veremos que todo SFI 
 
 \subsection{El Espacio de Fractales y la Métrica de Hausdorff}
 
-Consideramos un espacio métrico completo $(X,d)$ y sea $\mathcal{H}(X)\subset\mathcal P (X)$ el conjunto de todos los subconjuntos compactos de $X$, el cual también se denomina \textit{espacio de fractales} de $X$. El objetivo ahora es dotar a $\mathcal{H}(X)$ de una distancia, la cual nos permita cuantificar la similaridad entre conjuntos compactos. 
+Consideramos un espacio métrico completo $(X,d)$ y sea $\mathcal{H}(X)\subset 2^X$ el conjunto de todos los subconjuntos compactos de $X$, el cual también se denomina \textit{espacio de fractales} de $X$. El objetivo ahora es dotar a $\mathcal{H}(X)$ de una distancia, la cual nos permita cuantificar la similaridad entre conjuntos compactos. 
 
 Dado un punto $x\in X$ y un subconjunto $A\in\mathcal H(X)$ la distancia de un punto a un conjunto es definida como
 $$
 d(x,A) := \inf\{d(x,a):a\in A\}=\min\{d(x,a):a\in A\},
 $$
-donde el ínfimo es un mínimo porque $A$ es compacto. Si tomamos dos compactos $A,B\in\mathcal H(X)$, entonces la distancia de $A$ a $B$ se define como:
+donde el ínfimo es un mínimo porque $A$ es compacto y la función $d(x,\cdot)$ es continua. Si tomamos dos compactos $A,B\in\mathcal H(X)$, entonces la distancia de $A$ a $B$ se define como:
 $$
 d(A,B)=\max\{d(a,B):a\in A\}
 $$
 
-El problema es que esta definición no nos basta para definir una distancia entre conjuntos, pues si $A\subset B$ tenemos que $d(A,B)=0$, pero si $b\in B\backslash A$, entonces $d(b,A)>0$, por lo que necesariamente $d(B,A)>0$. Y como sabemos, una auténtica distancia es conmutativa. Véase el contraejemplo de la figura \ref{fig:contraejemplo-distancia}. 
+El problema es que esta definición no nos basta para definir una distancia entre conjuntos, pues si $A\subset B$ tenemos que $d(A,B)=0$, pero si $b\in B\backslash A$, entonces $d(b,A)>0$, por lo que necesariamente $d(B,A)>0$. Y como sabemos, una auténtica distancia es simétrica. Véase el contraejemplo de la figura \ref{fig:contraejemplo-distancia}. 
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.4]{img/C4/no-distancia-hausdorff.png}
@@ -180,7 +180,7 @@ El problema es que esta definición no nos basta para definir una distancia entr
 Por suerte, a partir de estas definiciones no es difícil encontrar una definición que cumpla las propiedades de una distancia.
 
 \begin{definicion}
-    Dado un espacio métrico completo $(X,d)$, en el espacio de fractales $\mathcal{H}(X)$ Se define la \textbf{distancia de Hausdorff} o \textbf{métrica de Hausdorff} como:
+    Dado un espacio métrico completo $(X,d)$, en el espacio de fractales $\mathcal{H}(X)$ se define la \textbf{distancia de Hausdorff} o \textbf{métrica de Hausdorff} como:
     $$
     h(d)(A,B)=\max\{d(A,B),d(B,A)\} \ \ \forall A,B\in\mathcal H(X).
     $$
@@ -378,7 +378,27 @@ Podemos encontrar la prueba de este teorema en \cite{Moran}.
     En $\R^2$, a partir de un conjunto autosimilar según la definición \ref{def:autosimilaridad} podemos construir un SFI cuyo atractor sea el propio conjunto autosimilar.
 \end{observacion}
 
-Mediante el teorema de Moran y viendo ciertos fractales como atractores de SFI podemos rápidamente calcular su dimensión por cajas. Por ejemplo, el triángulo de Sierpinski es el atractor del SFI presentado en el ejemplo \ref{ejemplo:sfi}. El SFI cumple la condición de conjunto abierto tomando como $U$ el interior del propio triángulo equilátero inicial y viendo, como podemos observar en la imagen \ref{fig:ejemplo-sfi} que las imágenes por cada una de las aplicaciones no salen del triángulo y además son disjuntas.  En este caso tenemos tres similitudes, en todas ellas la constante de contractividad es $\frac{1}{2}$, por lo que aplicando el corolario su dimensión por cajas es $\dim_B(\mathbf{S})=\frac{\log(3)}{\log(2)}$, como ya calculamos en la sección \ref{subsection:dim-cajas}.
+Mediante el teorema de Moran y viendo ciertos fractales como atractores de SFI podemos rápidamente calcular su dimensión por cajas. Por ejemplo, el triángulo de Sierpinski es el atractor del SFI presentado en el ejemplo \ref{ejemplo:sfi}. El SFI cumple la condición de conjunto abierto tomando como $U$ el interior del propio triángulo equilátero inicial y viendo, como podemos observar en la imagen \ref{fig:ejemplo-sfi} que las imágenes por cada una de las aplicaciones no salen del triángulo y además son disjuntas.  En este caso tenemos tres similitudes, en todas ellas la constante de contractividad es $\frac{1}{2}$, por lo que aplicando el corolario su dimensión por cajas es 
+$$\dim_B(\mathbf{S})=\frac{\log(3)}{\log(2)}\approx 1.585,$$
+confirmando la suposición que hicimos en la sección \ref{subsection:dim-cajas}.
+
+Por su parte, el conjunto de Cantor es el atractor del SFI de la tabla \ref{tabla:Cantor}, que cumple la condición de conjunto abierto tomando el intervalo $U=(0,1)$. La constante de contractividad es $\frac{1}{3}$, luego podemos asegurar que 
+$$\dim_B(\mathbf C)=\frac{\log(2)}{\log(3)}\approx 0.6309.$$
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c|cccccc} \hline
+        $w$ & $r$ & $s$ & $\alpha$ & $\beta$ & $e$ & $f$ \\ \hline\hline
+    1 & $1/3$ & $1/3$ & 0 & 0 & 0 & 0 \\ \hline
+    2 & $1/3$ & $1/3$ & $0$ & $0$ & $1/3$ & 0 \\ \hline
+    \end{tabular}
+    \caption{SFI para el conjunto de Cantor}
+    \label{tabla:Cantor}
+\end{table}
+
+Para calcular la dimensión por cajas del triángulo equilátero $T$ de la sección \ref{subsection:dim-cajas} podemos tomar el mismo SFI que hemos utilizado para el triángulo de Sierpinski en el ejemplo \ref{ejemplo:sfi} pero añadiéndole además la transformación afín $w_4 = \left(0.5, 0.5, \pi/3, \pi/3, 0.5, 0\right)$, en cuyo caso $n=4$ y la constante de contractividad es $c=1/2$, por lo que 
+$$\dim_B(T)=\frac{\log(4)}{\log(2)}=2,$$ 
+pudiendo finalmente confirmar que la dimensión por cajas de un triángulo equilátero es $2$.
 
 Es por tanto el momento de calcular la dimensión por cajas de la curva de Koch \textbf{K}, la cual no hemos calculado aún. La curva de Koch es el atractor del SFI definido por las transformaciones especificadas en la tabla \ref{tabla:curva-koch}. Fijémonos que son $4$ transformaciones afines, todas ellas similitudes cuya homotecia tiene la misma razón: $\frac{1}{3}$. Por tanto, aplicando el corolario, vemos que
 $$
@@ -399,9 +419,11 @@ que es un valor situado entre 1 y 2.
     \label{tabla:curva-koch}
 \end{table}
 
+Para comprobar que los atractores de los SFIs que presentamos son los que realmente afirmamos que son puede ejecutarse el código \textit{Mathematica} que se ha utilizado para graficar muchas de las imágenes de este capítulo. Puede encontrarse, junto con los códigos de los demás capítulos, en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Mathematica}.
 
 
 \section{El problema inverso}
+\label{section:problema-inverso}
 
 Como ya hemos podido ver, los SFI nos abren un mundo de posibilidades para crear imágenes fractales, ya que todos convergen a un atractor. Sin embargo, podemos también plantearnos el problema inverso. A partir de una imagen, ¿es posible determinar un SFI tal que su atractor sea la imagen inicial? Este es el punto clave de la teoría de la compresión por imágenes fractales. Pensemos que es mucho más ligero almacenar en memoria un conjunto finito de números en coma flotante que una imagen (viéndose esta como una colección de píxeles).
 
@@ -422,7 +444,7 @@ En este contexto, la mejor herramienta que tenemos es el conocido como \textit{t
     $$
 \end{teorema}
 
-Para probar el teorema del collage primero probamos el siguiente lema, que nos deja la mayor parte del trabajo hecho.
+Para probar el teorema del collage primero establecemos el siguiente lema, que nos deja la mayor parte del trabajo hecho.
 
 \begin{lema}
     Sea $(X,d)$ un espacio métrico completo. Sea $f:X\longrightarrow X$ una aplicación contractiva con constante de contractividad $0\leq s < 1$ y consideramos $x^*\in X$ el punto fijo de $f$. Entonces
