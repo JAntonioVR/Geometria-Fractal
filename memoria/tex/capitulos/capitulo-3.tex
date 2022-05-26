@@ -190,10 +190,10 @@ Para saber qué conjuntos de Julia son conexos y cuales no \textit{Gaston Julia}
 
 \begin{teorema}[Teorema de Fatou-Julia]
   \label{th:fatou-julia}
-  Si $\mathsf{P}_c$ contiene todos los puntos críticos de $P_c(z)$, entonces $\mathcal{J}_c=\partial \mathsf{P}_c$ es conexo. Si al menos un punto crítico de $P_c(z)$ pertenece a $\mathsf{E}_c$, entonces $\mathcal{J}_c$ es isomorfo al conjunto de Cantor, es decir, tiene un conjunto no numerable de componentes conexas. En este último caso se conoce como <<polvo de Fatou>>.
+  Si $\mathsf{P}_c$ contiene todos los puntos críticos de $P_c(z)$, entonces $\mathcal{J}_c=\partial \mathsf{P}_c$ es conexo. Si al menos un punto crítico de $P_c(z)$ pertenece a $\mathsf{E}_c$, entonces $\mathcal{J}_c$ es isomorfo al conjunto de Cantor, es decir, tiene un conjunto no numerable de componentes conexas. 
 \end{teorema}
 
-En realidad el teorema en su versión original está enunciado para polinomios de grado mayor o igual que $2$, entendiendo las extensiones naturales del conjunto de puntos de escape y prisioneros. Si nos restringimos entonces a la familia $\{P_c(z)\}_{c\in\C}$, es muy sencillo caracterizar qué conjuntos de Julia son conexos y cuales son polvaredas.
+En este último caso el conjunto de Julia se conoce como <<polvo de Fatou>>. En realidad el teorema en su versión original está enunciado para polinomios de grado mayor o igual que $2$, entendiendo las extensiones naturales del conjunto de puntos de escape y prisioneros. Si nos restringimos entonces a la familia $\{P_c(z)\}_{c\in\C}$, es muy sencillo caracterizar qué conjuntos de Julia son conexos y cuales son polvaredas.
 
 \begin{corolario}
   \label{th:conexo-polvareda}
@@ -313,7 +313,7 @@ Ya en el comienzo de este capítulo mencionamos, y en las propias imágenes pres
 
 \subsection{Autosimilaridad en conjuntos de Julia}
 
-Recordemos el conjunto de Julia $\mathcal{J}_{-0.23+0.65}$, que podemos ver en la imagen \ref{fig:julia-explicados} (b). En las imágenes \ref{fig:detalles-julia} podemos ver distintos detalles, de forma que la primera es una ampliación de la original y las siguientes son cada una un `zoom' de la anterior.
+Recordemos el conjunto de Julia $\mathcal{J}_{-0.23+0.65}$, que podemos ver en la imagen \ref{fig:julia-explicados} (b). En las imágenes \ref{fig:detalles-julia} observamos distintos detalles, de forma que la primera es una ampliación de la original y las siguientes son cada una un `zoom' de la anterior.
 
 Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente iguales, pudiendo ver así una de las regiones autosimilares de $\mathcal{J}_{-0.23+0.65}$. En las imágenes \ref{fig:mas-detalles-julia} podemos ver algunas regiones ampliadas de ciertos conjuntos de Julia, pudiendo observar regiones autosimilares.
 
@@ -407,9 +407,9 @@ De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados
   \label{fig:mandelbrot-generalizados}
 \end{figure}
 
-Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos encontrar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
+Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos determinar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
 
-Finalmente, invitamos al lector a visitar una web interactiva en la que poder visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee. La web forma parte del proyecto y su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
+Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del proyecto, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
 
 \subsection{Conjuntos de Julia con funciones no polinómicas}
 
