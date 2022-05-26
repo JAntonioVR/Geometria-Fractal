@@ -6,20 +6,24 @@ En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesar
 
 Para ello, antes aún debemos asentar una serie de conceptos que son los que nos ayudarán a cumplir nuestro objetivo: el algoritmo \textit{Ray-Marching} y las conocidas como \textit{Signed Distance Functions} (SDFs). Con estos dos elementos combinados conseguiremos ver hermosas figuras fractales.
 
-\section{El algoritmo Ray-Marching}
-\label{section:ray-marching}
+\section{El algoritmo Sphere-Tracing}
+\label{section:sphere-tracing}
 
-Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Aunque no tengamos una forma de calcular analíticamente la intersección, sí contamos con funciones que nos estiman, fijado un punto, a qué distancia se halla este punto del fractal mediante una cota, las conocidas como SDFs (sección \ref{section:SDFs}). Empezando por abajo, si fijamos un punto $p\in\R^3$, podemos calcular a qué distancia se encuentra dicho punto de una esfera o de un plano. 
+Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Recordemos entonces que en la sección \ref{section:elementos-RT} hablamos de que además de las expresiones analíticas las intersecciones se pueden calcular mediante métodos iterativos. 
 
-El algoritmo \textit{Ray-Marching}, también conocido como \textit{Sphere-Tracing}, es una técnica utilizada en Ray-Tracing y que se basa en estimar la distancia a la que se encuentra un punto de cada una de las superficies que componen la escena y avanzar en el rayo una distancia correspondiente a la mínima de estas distancias, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia es lo suficientemente pequeña como para considerar que el punto forma parte de la superficie. Los fundamentos matemáticos de este método y las propiedades que deben cumplir las funciones estimadoras se pueden encontrar en \cite{Hart-1995}. 
+En literatura, se denomina \textit{Ray-Marching} a cualquier método numérico iterativo utilizado para encontrar intersecciones mediante movimientos a lo largo de un rayo. Sobre este tema hay mucha literatura y es un tema de interés vigente. El método más sencillo es la búsqueda de raíces de una función mediante el método de Newton generalizado a $\R^3$, pero existen técnicas más avanzadas. 
 
-Pongamos un ejemplo. Supongamos que tenemos una escena con una esfera tangente al plano horizontal $y=0$, un rayo $R$ fijo y queremos aplicar Ray-Marching para encontrar la intersección.
+El algoritmo \textit{Sphere-Tracing} es una de estas técnicas de ray-marching descrita por \textit{John C. Hart} en \cite{Hart-1995}. Se basa estimar la distancia más corta de un punto en el rayo a cada una de las superficies que componen la escena, identificar la mínima de estas y avanzar en el rayo dicha distancia, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia mínima es lo suficientemente pequeña como para considerar que el punto forma parte de una superficie.
+
+Aclaramos que \textit{Ray-Marching} y \textit{Sphere-Tracing} no son sinónimos, aunque en ocasiones se abusa del lenguaje y se utilizan indistintamente. Sphere-Tracing es un tipo de técnica de Ray-Marching, siendo este último un concepto que engloba no solo a sphere-tracing, sino a toda técnica iterativa que busque intersecciones recorriendo el rayo.
+
+Pongamos un ejemplo. Supongamos que tenemos una escena con una esfera tangente al plano horizontal $y=0$, un rayo $R$ fijo y queremos aplicar Sphere-Tracing para encontrar la intersección.
 
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.2]{img/C8/situacion-inicial.png}
-    \caption{Situación a la que aplicar Ray-Marching}
-    \label{fig:RM-inicial}
+    \caption{Situación a la que aplicar Sphere-Tracing}
+    \label{fig:ST-inicial}
 \end{figure}
 
 La distancia de un punto $p$ a una esfera $S$ de centro $c$ y radio $r$ es 
@@ -27,16 +31,16 @@ La distancia de un punto $p$ a una esfera $S$ de centro $c$ y radio $r$ es
     \label{eq:distancia-punto-esfera}
     d(p,S) = \|p-c\| - r 
 \end{equation}
-y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por tanto, partiendo del origen, calculamos la distancia a la esfera y la distancia al plano, vemos que es menor la del plano, por lo que avanzamos en el rayo una distancia igual a la calculada para el plano (imagen \ref{fig:iteraciones-RM} (a)). Seguidamente repetimos la operación: volvemos a calcular la distancia a la esfera y al plano. De nuevo el plano es el objeto más cercano, por lo que avanzamos en el rayo la misma distancia que había hasta el plano (imagen \ref{fig:iteraciones-RM} (b)).
+y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por tanto, partiendo del origen, calculamos la distancia a la esfera y la distancia al plano, vemos que es menor la del plano, por lo que avanzamos en el rayo una distancia igual a la calculada para el plano (imagen \ref{fig:iteraciones-ST} (a)). Seguidamente repetimos la operación: volvemos a calcular la distancia a la esfera y al plano. De nuevo el plano es el objeto más cercano, por lo que avanzamos en el rayo la misma distancia que había hasta el plano (imagen \ref{fig:iteraciones-ST} (b)).
 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.17]{img/C8/ray-marching-1.png} &     \includegraphics[scale=0.17]{img/C8/ray-marching-2.png} \\
+      \includegraphics[scale=0.16]{img/C8/sphere-tracing-1.png} &     \includegraphics[scale=0.196]{img/C8/sphere-tracing-2.png} \\
     (a) Primera iteración & (b) Segunda iteración \\[6pt]
     \end{tabular}
-    \caption{Dos primeras iteraciones de Ray Marching}
-    \label{fig:iteraciones-RM}
+    \caption{Dos primeras iteraciones de Sphere-Tracing}
+    \label{fig:iteraciones-ST}
 \end{figure}
 
 Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto está en la esfera y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no encontrar nunca una distancia suficientemente pequeña se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida y/o un número máximo de iteraciones como parámetro del algoritmo.
@@ -44,28 +48,33 @@ Si repetimos este proceso indefinidamente, llegará el momento en el que la dist
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.2]{img/C8/ray-marching-final.png} &     \includegraphics[scale=0.2]{img/C8/ray-marching-miss.png} \\
+      \includegraphics[scale=0.2]{img/C8/sphere-tracing-final.png} &     \includegraphics[scale=0.197]{img/C8/sphere-tracing-miss.png} \\
     (a) Encuentra intersección & (b) El rayo se pierde \\[6pt]
     \end{tabular}
-    \caption{Posibles estados finales del algoritmo Ray-Marching}
+    \caption{Posibles estados finales del algoritmo Sphere-Tracing}
     \label{fig:finales}
 \end{figure}
 
-Por tanto, el algoritmo, si consideramos un conjunto de $objetos$, un rayo $R(t)=p_0 + \vec v t$ y un número máximo de avances en el rayo antes de decidir que no existe intersección $MAX\_STEPS$, se describiría como indica el algoritmo \ref{alg:Ray-Marching}.
+Previo a describir en pseudocódigo el algoritmo, necesitamos fijar algunas constantes que sirven como parámetro al algoritmo. Estas constantes son:
+\begin{itemize}
+    \item $\mathtt{MAX\_STEPS}$: Número máximo de iteraciones o avances en el rayo que se procesarán antes de decidir que el rayo no impacta con ninguna superficie. Es decir, alcanzado dicho número de iteraciones, el algoritmo concluye que el rayo se pierde en el infinito.
+    \item \texttt{MAX\_DIST}: Distancia máxima considerada. A distancia del origen del rayo mayor que ésta suponemos que no existe ningún objeto en la escena.
+    \item $\varepsilon$: Mínima distancia tal que si en una iteración la distancia mínima calculada es menor que $\varepsilon$ se considera que el punto evaluado pertenece a la superficie del objeto. Claramente un valor pequeño de $\varepsilon$ supone una resolución mayor a cambio de un mayor tiempo de cálculo.
+\end{itemize}
+Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ y un rayo $R(t)=p_0 + \vec v t$, se describiría como indica el algoritmo \ref{alg:Sphere-Tracing}.
 
 \begin{algorithm}[H]
-\caption{Ray-Marching} \label{alg:Ray-Marching}
-%\KwData{Objects: Array de objetos, $\epsilon$: Distancia por debajo de la cual se considera intersección, R: Rayo $R(t)=p_0+\vec v t$}
+\caption{Sphere-Tracing} \label{alg:Sphere-Tracing}
 \begin{algorithmic}
-\State $p\gets lookfrom$
+\Procedure{Sphere-Tracing}{$objects[num\_objects], R(t)= p_0 + \vec v t$}
+\State $p\gets p_0$
 \State $steps \gets 0$
 
-\While{$steps < MAX\_STEPS$} \Comment{También se puede fijar una distancia máxima}
-    \State $min\_dist \gets MAX\_DIST$
+\While{$steps < \mathtt{MAX\_STEPS}$} \Comment{También se puede fijar una distancia máxima}
+    \State $min\_dist \gets \mathtt{MAX\_DIST}$
     \State $i\gets 0$
-
     
-    \While{$i < num\_objects$}\Comment{Cálculo de la mínima distancia}
+    \While{$i < num\_objects$}\Comment{Cálculo de la mínima distancia de cada iteración}
         \State $dist \gets distancia(p, objects[i])$
         \If{$dist < min\_dist$}
             \State $min\_dist \gets dist$
@@ -80,7 +89,9 @@ Por tanto, el algoritmo, si consideramos un conjunto de $objetos$, un rayo $R(t)
     \EndIf
     \State $steps++$
 \EndWhile
+
 \State \textbf{No existe intersección}
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -199,7 +210,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
 }
 \end{lstlisting}
 
-Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Ray-Marching}. Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-RM}. Tal y como adelantamos, el resultado es igual que cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
+Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-RM}. Tal y como adelantamos, el resultado es igual que cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
 
 \begin{figure} [ht]
     \centering
@@ -238,7 +249,7 @@ Una reflexión similar se puede aplicar al parámetro que define el número máx
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.3]{img/C8/pocas-iteraciones.png}
-    \caption{Escena generada utilizando MAX\_STEPS=100}
+    \caption{Escena generada utilizando $\mathtt{MAX\_STEPS}$=100}
     \label{fig:pocas-iteraciones}
 \end{figure}
 

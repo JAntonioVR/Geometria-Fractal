@@ -74,7 +74,7 @@ Por su parte, para intersecciones de rayos con objetos no definidos mediante mod
     \|o+\vec v t - c\| - r = 0
     $$
     Este tema se aborda con detalle en la sección \ref{subsection:esfera}.
-    \item \textbf{Con un método iterativo}. En ocasiones la resolución de estas ecuaciones es demasiado compleja, por lo que se abordan soluciones iterativas, como pueden ser técnicas estándar de resolución de ecuaciones como el método de Newton. Dentro de esta posibilidad, podemos también contar con una función que estima la distancia a la superficie del objeto y aplicar el algoritmo conocido como `ray marching' o `sphere tracing', el cual explicaremos detenidamente en la sección \ref{section:ray-marching}, pero adelantamos que fue introducido por Hart en \cite{Hart-1995}.
+    \item \textbf{Con un método iterativo}. En ocasiones la resolución de estas ecuaciones es demasiado compleja, por lo que se abordan soluciones iterativas, como pueden ser técnicas estándar de resolución de ecuaciones como el método de Newton. Dentro de esta posibilidad, podemos también contar con una función que estima la distancia a la superficie del objeto y aplicar el algoritmo conocido como `ray marching' o `sphere tracing', el cual explicaremos detenidamente en la sección \ref{section:sphere-tracing}, pero adelantamos que fue introducido por Hart en \cite{Hart-1995}.
 \end{itemize}
 
 A partir de ahora, veremos como implementar un \textit{ray-tracer} básico utilizando WebGL. Utilizaremos objetos sencillos como planos y esferas, cuyas intersecciones con rayos se pueden calcular fácilmente de forma analítica sin recurrir a métodos iterativos ni a modelos de fronteras.
