@@ -347,7 +347,7 @@ Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathc
 \end{equation}
 \end{teorema} 
 \begin{proof}
-  Si tomamos $0<\varepsilon<1$ y $t>s$ dos valores reales, por la proposicion \ref{prop:desigualdad} tenemos que $\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$. Por tanto, al hacer a $\varepsilon$ tender a $0$, siempre que $\mathcal{H}^s(A)$ sea finito necesariamente $\mathcal{H}^t(A)=0$. Si aplicamos el contrarrecíproco ocurre que si $\mathcal{H}^t(A)>0$ entonces $\mathcal{H}^s(A)=\infty$.
+  Si tomamos $0<\varepsilon<1$ y $t>s$ dos valores reales, por la proposicion \ref{prop:desigualdad} tenemos que $\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$. Por tanto, al hacer a $\varepsilon$ tender a $0$, siempre que $\mathcal{H}^s(A)$ sea finito necesariamente $\mathcal{H}^t(A)=0$ para todo $t>s$. Si aplicamos el contrarrecíproco ocurre que si $\mathcal{H}^t(A)>0$ entonces $\mathcal{H}^s(A)=\infty$.
 
   Por lo que necesariamente debe de existir un valor $s_0\in[0,\infty]$ tal que $\mathcal{H}^s(A)=0 \ \forall s<s_0$ y $\mathcal{H}^s(A)=\infty \ \forall s>s_0$.
 \end{proof}
@@ -407,13 +407,13 @@ $$
 
 Este resultado fue originalmente probado por \textit{Edward Szpilrajn}, véase \cite[Capítulo VII]{Hurewicz-Wallman}.
 
-Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para conjuntos totalmente autosimilares: el teorema de Moran (véase teorema \ref{th:Moran}). Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden. 
+Por otro lado, si nos restringimos a conjuntos totalmente autosimilares, existe un resultado que relaciona la dimensión de Hausdorff y la dimensión por cajas para tales conjuntos: el teorema de Moran (véase teorema \ref{th:Moran}). Este resultado nos asegura que en estos casos la dimensión por cajas y la dimensión de Hausdorff coinciden. 
 
 En conclusión, para un conjunto no vacío y acotado $A\subseteq\R^n$, se tiene que:
 
 \begin{equation}
   \label{eq:desigualdades-dimensiones}
-  \dim_T(A)\leq\dim_H(A)\leq\dim_B(A)\leq n
+  \dim_T(A)\leq\dim_H(A)\leq\dim_B(A)\leq n.
 \end{equation}
 
 A partir de esta cadena de desigualdades, en la que notamos que la dimensión fractal, entendiendo por esta la dimensión de Hausdorff que es la más general, y que siempre excede o iguala a la dimensión topológica, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot} en \cite{alma991007242979704990}.
