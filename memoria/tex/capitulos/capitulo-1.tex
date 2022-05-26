@@ -302,12 +302,12 @@ $$
 se dice que la familia $\left\lbrace U_i\right\rbrace_{i\in\N}$ es un $\varepsilon$-recubrimiento de $A$. Si ahora consideramos un valor $s>0$, definimos
 
 $$
-\mathcal{H}_\varepsilon^s(A):=\inf\left\lbrace\sum_{n\in\N} \diam(U_i)^s: \left\lbrace U_i\right\rbrace_{i\in\N} \text{ es un }\varepsilon\text{-recubrimiento de }A\right\rbrace
+\mathcal{H}_\varepsilon^s(A):=\inf\left\lbrace\sum_{n\in\N} \diam(U_i)^s: \left\lbrace U_i\right\rbrace_{i\in\N} \text{ es un }\varepsilon\text{-recubrimiento de }A\right\rbrace.
 $$
 
 Si reducimos el valor de $\varepsilon$ el número de posibles recubrimientos disminuye, por lo que $\mathcal{H}_\varepsilon^s(A)$ aumenta. Por esto nos planteamos cuál será el límite cuando $\varepsilon$ tienda a cero, aceptando el infinito como posible valor del límite. Definimos así 
 $$
-\mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A)
+\mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A).
 $$
 
 En \cite[Secciones 5.2 y 5.4]{alma991007022459704990} se comprueba que $\mathcal{H}^s(A)$ es una medida definida en la $\sigma$-álgebra de Borel que llamamos \textit{medida $s$-dimensional de Hausdorff} del conjunto $A$.
@@ -328,8 +328,8 @@ Veamos el comportamiento de $\mathcal{H}^s(A)$ como función de $s$. Es claro qu
   $$
   \mathcal{H}_\varepsilon^t(A)\leq\sum_{i\in\N}\diam(U_i)^t\leq\varepsilon^{t-s}\sum_{i\in\N}\diam(U_i)^{s},
   $$
-  por lo que
-  $$\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A)$$
+  por lo que, tomando el ínfimo en el segundo miembro,
+  $$\mathcal{H}_\varepsilon^t(A)\leq \varepsilon^{t-s}\mathcal{H}_\varepsilon^s(A).$$
 
 \end{proof}
 
@@ -337,11 +337,11 @@ Esta desigualdad nos será muy útil para probar el siguiente teorema que nos da
 
 \begin{teorema}
 \label{th:Hausdorff}
-Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathcal{H}^s(A)$ no es ni $0$ ni $\infty$. Este valor $s=\dim_H(A)$ satisface que:
+Sea $A\subset \R^n$. Entonces existe un único valor de $s$ para el cual $\mathcal{H}^s(A)$ no es ni $0$ ni $\infty$. Este valor $s_0=\dim_H(A)$ satisface que:
 \begin{equation}
 \mathcal H^s(A)= \left\{ \begin{array}{lcc}
-             \infty &   si  & s < D_H(A) \\
-             \\ 0 &  si & s > D_H(A) 
+             \infty &   si  & s < \dim_H(A) \\
+             \\ 0 &  si & s > \dim_H(A) 
              \end{array}
    \right.
 \end{equation}
@@ -365,7 +365,7 @@ Por último estudiaremos un concepto de dimensión aplicable a espacios topológ
 
 \item Un espacio topológico $X$ tiene dimensión menor o igual que $n$ ($\dim_T(X)\leq n$) si para cualquier $x\in X$ y cualquier $V$ abierto que contiene a $x$ existe un abierto $U$ tal que $\dim_T(\partial(U))\leq n-1$ y se verifica que $x\in U\subseteq V$. 
 
-\item $X$ tiene dimensión $n$ ($\dim_T(X)=n$) si se verifica que $\dim_T(X)\leq n$ pero es falso que $\dim_T(X)\leq n-1$
+\item $X$ tiene dimensión $n$ ($\dim_T(X)=n$) si se verifica que $\dim_T(X)\leq n$ pero es falso que $\dim_T(X)\leq n-1$.
 \end{enumerate}
 
 \begin{figure}[ht]
