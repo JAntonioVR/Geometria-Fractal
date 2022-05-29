@@ -55,13 +55,67 @@ Si repetimos este proceso indefinidamente, llegará el momento en el que la dist
     \label{fig:finales}
 \end{figure}
 
-Previo a describir en pseudocódigo el algoritmo, necesitamos fijar algunas constantes que sirven como parámetro al algoritmo. Estas constantes son:
+\subsection{Signed Distance Functions (SDFs)}
+\label{subsection:SDFs}
+
+Como hemos visto, es indispensable para poder aplicar este algoritmo disponer para cada objeto que componga la escena de una función que estime la distancia de un punto cualquiera de $\R^3$ a su superficie. A grandes rasgos, son las conocidas como `Signed Distance Function' (SDFs) las que para una superficie concreta calculan para cualquier punto la distancia estimada a dicha superficie.
+
+Primero explicaremos brevemente el fundamento matemático. Sea $f:\R^n\longrightarrow\R$ una función continua que define implícitamente el conjunto 
+$$
+A = \{x\in\R^n: f(x)\leq 0\}.
+$$
+Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\partial A$ define la \textit{superficie implícita} de $f$. De hecho, $f$ es negativa en el interior de $A$ ($f(x)<0 \ \ \forall x\in\mathring A$), por lo que podemos decir que dicha superficie implícita $\partial A$ coincide precisamente con el conjunto $f^{-1}(0)$. A partir de una función real y continua podemos entonces definir una superficie en $\R^n$.
+
+\begin{definicion}[SDF]
+    Una función continua $f:\R^3\longrightarrow\R$ se conoce como una \textbf{`Signed Distance Bound'} (cota de la distancia con signo) de su superficie implícita $f^{-1}(0)$ si, y solo si
+    \begin{equation}
+        \label{eq:SDB}
+        |f(x)|\leq d(x,f^{-1}(0)) \ \ \forall x\in\R^3
+    \end{equation}
+    
+    Si se tiene la igualdad en (\ref{eq:SDB}), entonces $f$ es una \textbf{`Signed Distance Function'} (función distancia con signo).
+\end{definicion}
+
+Una forma sencilla de entender este concepto es concibiendo una superficie como los puntos en los que se anula la función distancia. Es decir, si un punto se sitúa a distancia 0 es porque pertenece a dicha superficie. En caso de que la distancia sea positiva en módulo el punto se sitúa fuera, tan lejos como diga dicho módulo.
+
+Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos de la ecuación (\ref{eq:distancia-punto-esfera}) que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera (ver imagen \ref{fig:SDF-esfera}).
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.5]{img/C8/SDF-esfera.png}
+    \caption{Ejemplos de puntos con distintos valores de la SDF de una esfera}
+    \label{fig:SDF-esfera}
+\end{figure}
+
+Otro ejemplo sencillo es el caso de la SDF de un plano. Sea entonces un plano arbitrario $P$ definido por la ecuación $Ax+By+Cz = D$, siendo $\vec N=(A,B,C)$ el vector normal al plano. El punto $p_0$ perteneciente a un plano más cercano a otro punto $p$ dado es aquel que interseca con la recta cuyo vector director es el normal al plano y que pasa por $p$. Es decir, el punto de la recta $S(t)=p+\vec Nt$ que satisface la ecuación $(A,B,C)\cdot (x,y,z) = D$. Veámos para qué $t$ se satisfacen las ecuaciones.
+\begin{equation}
+    \label{eq:t-mas-cercano}
+    \begin{split}
+        \vec N\cdot S(t) &= D \\
+        \vec N\cdot (p+\vec N t) &= D \\
+        t &= \dfrac{D-\vec N \cdot p}{|\vec N|^2}
+    \end{split}
+\end{equation}
+Por tanto la distancia entre punto y plano es la longitud del vector que une a $p$ con $p_0$, véase en la imagen \ref{fig:SDF-plano}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C8/SDF-plano.png}
+    \caption{Cálculo de la distancia de un punto a un plano}
+    \label{fig:SDF-plano}
+\end{figure}
+
+En \cite[Table 1]{Hart-1995} podemos encontrar una lista de primitivas con referencias a sus correspondientes SDFs.
+
+\subsection{Implementación de Sphere-Tracing en pseudocódigo}
+
+Una vez conocemos el funcionamiento intuitivo del algoritmo y la necesidad de SDFs para cada objeto, podemos empezar a pensar en una primera implementación en pseudocódigo del algoritmo. Previamente, necesitamos fijar algunas constantes que sirven como parámetro al algoritmo. Estas constantes son:
 \begin{itemize}
     \item $\mathtt{MAX\_STEPS}$: Número máximo de iteraciones o avances en el rayo que se procesarán antes de decidir que el rayo no impacta con ninguna superficie. Es decir, alcanzado dicho número de iteraciones, el algoritmo concluye que el rayo se pierde en el infinito.
     \item \texttt{MAX\_DIST}: Distancia máxima considerada. A distancia del origen del rayo mayor que ésta suponemos que no existe ningún objeto en la escena.
     \item $\varepsilon$: Mínima distancia tal que si en una iteración la distancia mínima calculada es menor que $\varepsilon$ se considera que el punto evaluado pertenece a la superficie del objeto. Claramente un valor pequeño de $\varepsilon$ supone una resolución mayor a cambio de un mayor tiempo de cálculo.
 \end{itemize}
-Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ y un rayo $R(t)=p_0 + \vec v t$, se describiría como indica el algoritmo \ref{alg:Sphere-Tracing}.
+Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ (cada uno identificado por un entero $i$, empezando en $0$) y un rayo $R(t)=p_0 + \vec v t$, se describiría como indica el algoritmo \ref{alg:Sphere-Tracing}.
 
 \begin{algorithm}[H]
 \caption{Sphere-Tracing} \label{alg:Sphere-Tracing}
@@ -75,7 +129,7 @@ Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ y un rayo $R(t
     \State $i\gets 0$
     
     \While{$i < num\_objects$}\Comment{Cálculo de la mínima distancia de cada iteración}
-        \State $dist \gets distancia(p, objects[i])$
+        \State $dist \gets SDF_{objects[i]}(p)$
         \If{$dist < min\_dist$}
             \State $min\_dist \gets dist$
             \State $index\gets i$
@@ -100,11 +154,13 @@ Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ y un rayo $R(t
     Cabe destacar un importante detalle, y es que a partir de este momento es indispensable que en la creación del rayo el vector dirección esté normalizado, pues si queremos avanzar $min\_dist$ unidades en la dirección $\vec v$ y $|v| \not= 1$ se avanzaría una distancia distinta y el algoritmo no funcionaría correctamente, véase imagen \ref{fig:vectores-no-normalizados}.
 \end{observacion}
 
-\subsection{Implementación de Ray-Marching en GLSL}
+Nótese cómo para el cálculo de la distancia utilizamos funciones distintas que dependen de cada objeto, de ahí el subíndice.
 
-Veámos ahora cómo podemos llevarnos todos estos nuevos conocimientos a la GPU con GLSL. El objetivo ahora es modificar el fragment shader eliminando la dependencia de \verb|Hit_Sphere| y de \verb|Hit_Plane| para utilizar Ray-Marching en el momento de calcular las intersecciones. Realmente el resultado de estas modificaciones debería ser el mismo que en el final del capítulo anterior, pero ahora encontraremos las intersecciones del rayo de forma distinta. 
+\subsection{Implementación de Shere-Tracing en GLSL}
 
-Lo primero que necesitaremos es una función que calcule la distancia de un punto a una esfera $S$. Esto es tan sencillo como implementar una función que calcule la fórmula \ref{eq:distancia-punto-esfera}.
+Veámos ahora cómo podemos llevarnos todos estos nuevos conocimientos a la GPU con GLSL. El objetivo ahora es modificar el fragment shader eliminando la dependencia de \verb|Hit_Sphere| y de \verb|Hit_Plane| para utilizar Sphere-Tracing en el momento de calcular las intersecciones. Realmente el resultado de estas modificaciones debería ser el mismo que en el final del capítulo anterior, pero ahora encontraremos las intersecciones del rayo de forma distinta. 
+
+Lo primero que necesitaremos es una función que calcule la distancia de un punto a una esfera $S$ y otra que calcule la distancia a un plano $P$. Respecto a la esfera, es tan sencillo como implementar una función que calcule la fórmula \ref{eq:distancia-punto-esfera}.
 
 \begin{lstlisting}
 // Dada una esfera S y un punto p, calcula la distancia
@@ -114,15 +170,8 @@ float get_dist_sphere(vec3 p, Sphere S){
 }
 \end{lstlisting}
 
-Por parte del plano, podríamos aprovechar que nuestro plano es el $y=-2$ y simplemente devolver la componente $y$ del punto más dos. Sin embargo, no cuesta tanto calcular la distancia de un punto a un plano arbitrario $Ax+By+Cz = D$, siendo $\vec N=(A,B,C)$ el vector normal al plano. El punto perteneciente a un plano más cercano a otro punto $p$ dado es aquel que interseca con la recta cuyo vector director es el normal al plano y que pasa por $p$. Es decir, el punto de la recta $S(t)=p+\vec Nt$ que satisface la ecuación $(A,B,C)\cdot (x,y,z) = D$. Veámos para qué $t$ se satisfacen las ecuaciones.
-\begin{equation}
-    \begin{split}
-        \vec N\cdot S(t) &= D \\
-        \vec N\cdot (p+\vec N t) &= D \\
-        t &= \dfrac{D-\vec N \cdot p}{|\vec N|^2}
-    \end{split}
-\end{equation}
-Por tanto la distancia entre punto y plano es la longitud del vector que une a $p$ con $S(t)$, siendo este $t$ el recién calculado. El código entonces sería:
+Por parte del plano, ya vimos en la sección \ref{subsection:SDFs} cómo calcular la distancia de un punto $p$ a un plano dado por la ecuación $Ax+By+Cz=D$. Primero calculamos el valor de $t$ dado por la ecuación \ref{eq:t-mas-cercano} para así obtener el punto del plano más cercano a $P$, y a partir de ahí obtener la distancia. El código entonces sería:
+
 \begin{lstlisting}
 // Dado un plano P y un punto p, calcula la distancia del 
 // punto p a la superficie del plano.
@@ -133,7 +182,9 @@ float get_dist_plane (vec3 p, Plane P) {
 }
 \end{lstlisting}
 
-Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones que se darán en el algoritmo y $\varepsilon$, la distancia mínima por debajo de la misma se considera que un punto pertenece a la superficie. La primera de ellas la podemos tomar como una macro, al igual que hicimos con el tamaño de los arrays, pero la segunda interesa que sea parametrizable, para así poder observar los niveles de detalle y qué variaciones experimenta la escena al modificar este valor. Por ello, usamos una variable \verb|uniform| a la que pasaremos valor vía JavaScript.
+En realidad podríamos aprovechar que utilizamos como suelo el plano horizontal $y=-2$ y la SDF sería simplemente la componente $y$ del punto $p$ más dos, pero estaríamos limitando la función a este único plano.
+
+Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones que se darán en el algoritmo (\texttt{MAX\_STEPS}) y $\varepsilon$, la distancia mínima por debajo de la misma se considera que un punto pertenece a la superficie. La primera de ellas la podemos tomar como una macro, al igual que hicimos con el tamaño de los arrays, pero la segunda interesa que sea parametrizable, para así poder observar los niveles de detalle y qué variaciones experimenta la escena al modificar este valor. Por ello, usamos una variable \verb|uniform| a la que pasaremos valor vía JavaScript, que llamaremos \texttt{u\_epsilon}.
 
 \begin{lstlisting}
     uniform float u_epsilon;
@@ -210,13 +261,13 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
 }
 \end{lstlisting}
 
-Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-RM}. Tal y como adelantamos, el resultado es igual que cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
+Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-ST}. Tal y como adelantamos, el resultado es igual que cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
 
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.37]{img/C8/esferas-ray-marching.png}
-    \caption{Escena tras implementar Ray-Marching}
-    \label{fig:esferas-RM}
+    \caption{Escena tras implementar Sphere Tracing}
+    \label{fig:esferas-ST}
 \end{figure}
 
 Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser un vector normalizado, es decir, unitario. De otro modo los avances en el rayo no estarán controlados, obsérvese en la imagen \ref{fig:vectores-no-normalizados} los resultados obtenidos al no normalizar el vector director al crear el rayo.
@@ -228,14 +279,36 @@ Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser
     \label{fig:vectores-no-normalizados}
 \end{figure}
 
-\subsection{Comentarios sobre Ray-Marching}
+\subsection{Comentarios sobre Sphere-Tracing}
 \label{subsection:comentarios}
 
-Una vez hemos introducido e implementado el algoritmo Ray-Marching, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos, cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular, aplicar ray-marching ralentiza el procesado. Sin embargo, muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
+Una vez hemos introducido e implementado el algoritmo Sphere-Tracing, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos, cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular, aplicar sphere-tracing ralentiza el procesado. Sin embargo, muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
 
-Sin embargo, ray-marching sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto y esta cota disminuya conforme el rayo se acerca al conjunto (condición de Lipschitz). A partir de un rayo y dichas funciones se puede aplicar ray-marching, de forma que se converge finalmente al punto de intersección. Por contra, si buscamos intersecciones analíticas hay que resolver ecuaciones, en ocasiones para acabar aproximando las soluciones, y retener la más pequeña.
+Sin embargo, sphere-tracing sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto, o al menos una cota inferior, y esta cota disminuya conforme el rayo se acerca al conjunto. Sería suficiente una cota inferior porque esta nos aseguraría que al avanzar en el rayo no nos pasamos de largo al avanzar en el rayo. Lo único que debemos garantizar es que la cota inferior debe tener exactamente los mismos ceros que la original (es decir, nunca es cero donde la original no lo es). De hecho, se puede usar esto en casos donde la función distancia exacta sea muy difícil o imposible de calcular.
 
-Un aspecto a destacar de ray-marching es la dependencia de sus parámetros. Es importante fijar un valor $\varepsilon$ adecuado, ya que si es demasiado grande puede brindarnos resultados muy pobres. En la imagen \ref{fig:esferas-RM} se ha utilizado $\varepsilon=0.001$ y nos da un resultado muy bueno, pero obsérvese en la imagen \ref{fig:epsilon-grande} qué ocurre si se fija $\varepsilon=0.1$. Los límites de los cuadrados del suelo se distorsionan y las apariencias de las esferas también se ven muy resentidas. No obstante, es cierto que a mayor valor de $\varepsilon$ menos iteraciones y por tanto más velocidad, pero los resultados son peores. Es por tanto necesario utilizar valores de $\varepsilon$ adecuados a la situación, siendo suficientemente pequeños como para obtener un buen resultado pero suficientemente grandes como para que sea computacionalmente viable.
+En concreto, podemos usar cualquier función $f$ que tenga exactamente los mismos ceros que la función distancia exacta y que sea lipschitziana, es decir, que existe una constante positiva $K$ tal que
+
+$$
+|f(p)-f(q)|\leq K \|p-q\| \ \ \forall p,q\in\R^3 
+$$
+de tal forma que si llamamos $p_0$ al punto de la superficie más cercano a $p$, por hipótesis $f(p_0)=0$, por lo que
+
+$$
+|f(p)|\leq K \| p-p_0\|
+$$
+
+Si tomamos la función $g=f/K$, directamente se tendría 
+
+$$
+|g(p)|\leq\|p-p_0\|
+$$
+Convirtiendo a $g$ en una cota inferior de la distancia a $p_0$, por lo que podemos utilizar a $g$ para aplicar sphere tracing.
+
+Sin embargo, si tomamos una cota inferior en lugar de la exacta, al dar pasos más pequeños, se tiene menos eficiencia. Dicho esto, queda claro que la función distancia exacta de un punto a la superficie es la mejor opción, pues es lipschitziana por definición y su constante es de Lipschtiz es $1$, pero por dificultad en su cálculo se suelen usar cotas inferiores.
+
+Por tanto, a partir de un rayo y dichas funciones se puede aplicar sphere-tracing, de forma que se converge finalmente al punto de intersección. Por contra, si buscamos intersecciones analíticas hay que resolver ecuaciones, en ocasiones para acabar aproximando las soluciones, y retener la más pequeña. 
+
+Un aspecto a destacar de sphere-tracing es la dependencia de sus parámetros. Es importante fijar un valor $\varepsilon$ adecuado, ya que si es demasiado grande puede brindarnos resultados muy pobres. En la imagen \ref{fig:esferas-ST} se ha utilizado $\varepsilon=0.001$ y nos da un resultado muy bueno, pero obsérvese en la imagen \ref{fig:epsilon-grande} qué ocurre si se fija $\varepsilon=0.1$. Los límites de los cuadrados del suelo se distorsionan y las apariencias de las esferas también se ven muy resentidas. No obstante, es cierto que a mayor valor de $\varepsilon$ menos iteraciones y por tanto más velocidad, pero los resultados son peores. Es por tanto necesario utilizar valores de $\varepsilon$ adecuados a la situación, siendo suficientemente pequeños como para obtener un buen resultado pero suficientemente grandes como para que sea computacionalmente viable.
 
 \begin{figure} [ht]
     \centering
@@ -254,38 +327,6 @@ Una reflexión similar se puede aplicar al parámetro que define el número máx
 \end{figure}
 
 De igual forma, menos iteraciones implica más rapidez, pero peores resultados, por lo que es necesario fijar un valor correcto.
-
-\section{Signed Distance Functions (SDFs)}
-\label{section:SDFs}
-
-Durante toda la sección anterior hemos hablado de que para aplicar ray-marching es necesario que cada objeto que componga la escena cuente con una función que estime la distancia de un punto cualquiera de $\R^3$ a su superficie. En esta sección introduciremos el concepto de SDF y pondremos un ejemplo sencillo con una esfera.
-
-Primero explicaremos brevemente el fundamento matemático. Sea $f:\R^n\longrightarrow\R$ una función continua que define implícitamente el conjunto 
-$$
-A = \{x\in\R^n: f(x)\leq 0\}.
-$$
-Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\partial A$ define la \textit{superficie implícita} de $f$. De hecho, $f$ es negativa en el interior de $A$ ($f(x)<0 \ \ \forall x\in\mathring A$), por lo que podemos decir que dicha superficie implícita $\partial A$ coincide precisamente con el conjunto $f^{-1}(0)$. A partir de una función real y continua podemos entonces definir una superficie en $\R^n$.
-
-\begin{definicion}[SDF]
-    Una función continua $f:\R^3\longrightarrow\R$ se conoce como una \textbf{`Signed Distance Bound'} (cota de la distancia con signo) de su superficie implícita $f^{-1}(0)$ si, y solo si
-    \begin{equation}
-        \label{eq:SDB}
-        |f(x)|\leq d(x,f^{-1}(0)) \ \ \forall x\in\R^3
-    \end{equation}
-    
-    Si se tiene la igualdad en (\ref{eq:SDB}), entonces $f$ es una \textbf{`Signed Distance Function'} (función distancia con signo).
-\end{definicion}
-
-Una forma sencilla de entender este concepto es concibiendo una superficie como los puntos en los que se anula la función distancia. Es decir, si un punto se sitúa a distancia 0 es porque pertenece a dicha superficie. En caso de que la distancia sea positiva en módulo el punto se sitúa fuera, tan lejos como diga dicho módulo.
-
-Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera (ver imagen \ref{fig:SDF-esfera}). En \cite[Table 1]{Hart-1995} podemos encontrar una lista de primitivas con referencias a sus correspondientes SDFs.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.5]{img/C8/SDF-esfera.png}
-    \caption{Ejemplos de puntos con distintos valores de la SDF de una esfera}
-    \label{fig:SDF-esfera}
-\end{figure}
 
 \section{Visualización tridimensional de conjuntos de Julia}
 
