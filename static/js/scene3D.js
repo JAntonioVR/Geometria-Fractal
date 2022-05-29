@@ -60,27 +60,28 @@ class Scene3D extends Scene{
     super(vsSource, fsSource);
     var that = this;
     var gl = this.context;
+    var WGLShader = this.shaderProgram.getShaderProgram();
 
     this.programInfo = {
-      program: that.shaderProgram,
+      program: WGLShader,
       attribLocations: {
-        vertexPosition: gl.getAttribLocation(that.shaderProgram, 'a_Position')
+        vertexPosition: gl.getAttribLocation(WGLShader, 'a_Position')
       },
       uniformLocations: {
-        lookfrom: gl.getUniformLocation(that.shaderProgram, 'u_lookfrom'),
-        lookat: gl.getUniformLocation(that.shaderProgram, 'u_lookat'),
-        ka: gl.getUniformLocation(that.shaderProgram, 'u_ka'),
-        kd: gl.getUniformLocation(that.shaderProgram, 'u_kd'),
-        ks: gl.getUniformLocation(that.shaderProgram, 'u_ks'),
-        sh: gl.getUniformLocation(that.shaderProgram, 'u_sh'),
-        lightColor0: gl.getUniformLocation(that.shaderProgram, 'u_lightColor0'),
-        lightColor1: gl.getUniformLocation(that.shaderProgram, 'u_lightColor1'),
-        shadows: gl.getUniformLocation(that.shaderProgram, 'u_shadows'),
-        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal'),
-        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
-        epsilon: gl.getUniformLocation(that.shaderProgram, 'u_epsilon'),
-        antiliasing: gl.getUniformLocation(that.shaderProgram, 'u_antiliasing'),
-        nSamples: gl.getUniformLocation(that.shaderProgram, 'u_nSamples')
+        lookfrom: gl.getUniformLocation(WGLShader, 'u_lookfrom'),
+        lookat: gl.getUniformLocation(WGLShader, 'u_lookat'),
+        ka: gl.getUniformLocation(WGLShader, 'u_ka'),
+        kd: gl.getUniformLocation(WGLShader, 'u_kd'),
+        ks: gl.getUniformLocation(WGLShader, 'u_ks'),
+        sh: gl.getUniformLocation(WGLShader, 'u_sh'),
+        lightColor0: gl.getUniformLocation(WGLShader, 'u_lightColor0'),
+        lightColor1: gl.getUniformLocation(WGLShader, 'u_lightColor1'),
+        shadows: gl.getUniformLocation(WGLShader, 'u_shadows'),
+        fractal: gl.getUniformLocation(WGLShader, 'u_fractal'),
+        juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
+        epsilon: gl.getUniformLocation(WGLShader, 'u_epsilon'),
+        antiliasing: gl.getUniformLocation(WGLShader, 'u_antiliasing'),
+        nSamples: gl.getUniformLocation(WGLShader, 'u_nSamples')
       }
     };
 

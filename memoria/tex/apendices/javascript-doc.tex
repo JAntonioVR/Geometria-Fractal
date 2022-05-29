@@ -20,6 +20,8 @@ Clase que abstrae un shader de WebGL, entendiendo shader como el programa relati
 \paragraph*{Atributos}
 \begin{itemize}
     \item \verb|program: WebGLShader|. Programa shader compilado.
+    \item \verb|source: string|. Código fuente.
+    \item \verb|type: ShaderType|. Tipo de shader. Vertex o fragment.
 \end{itemize}
 
 \paragraph*{Métodos}
@@ -97,29 +99,35 @@ Es una clase abstracta que contiene el código común de una escena 2D y una 3D.
 \paragraph*{Atributos}
 \begin{itemize}
     \item \verb|context: WebGLContext|. Contexto de WebGL.
-    \item \verb|shaderProgram: WebGLProgram|. Programa Shader utilizado para graficar la escena en el canvas.
+    \item \verb|shaderProgram: ShaderProgram|. Programa Shader utilizado para graficar la escena en el canvas.
     \item \verb|bufferInfo: Object|. Objeto tipo diccionario que almacena información sobre los buffer de datos.
 \end{itemize}
 \paragraph*{Métodos}
 \begin{itemize}
     \item \verb|constructor|: A partir del código fuente del vertex shader y del fragment shader inicializa el contexto de WebGL, el programa Shader y el buffer de posiciones de los vertices que toma como entrada el vertex shader.
+    
     \textbf{Parámetros}
     \begin{itemize}
         \item \verb|vsSource: string|. Código fuente del vertex shader
         \item \verb|fsSource: string|. Código fuente del fragment shader.
     \end{itemize}
+    
     \textbf{Devuelve}: Nada, realmente este constructor no se puede llamar por si solo, únicamente tiene el código comun a escenas 2D y 3D.
     
     \item \verb|initShaderProgram|: Crea y compila el vertex shader y el fragment shader. A partir de estos dos shaders, se crea el programa shader.
+    
     \textbf{Parámetros}
     \begin{itemize}
         \item \verb|vsSource: string|. Código fuente del vertex shader
         \item \verb|fsSource: string|. Código fuente del fragment shader.
     \end{itemize}
-    \textbf{Devuelve}: El programa shader ya inicializado, de la clase \verb|WebGLProgram|.
+    
+    \textbf{Devuelve}: El programa shader ya inicializado, de la clase \verb|ShaderProgram|.
 
     \item \verb|initBuffers|: Inicializa los buffer necesarios, en nuestro caso tan solo se trata del buffer de posiciones de los vértices que recibe el vertex shader.
+    
     \textbf{Argumentos}: No acepta.
+    
     \textbf{Devuelve}: Un Objeto de JavaScript cuyos campos son:
     \begin{itemize}
         \item \verb|positionBuffer: WebGLBuffer|. Buffer de posiciones.
@@ -130,7 +138,9 @@ Es una clase abstracta que contiene el código común de una escena 2D y una 3D.
     \item \verb|drawScene|: Método abstracto que en las clases que hereden de Scene tomará el shader, los buffer y los parámetros de la escena para visualizarla en el canvas.
     
     \item  \verb|checkGLError|: Método que comprueba si hay algún error de OpenGL, en cuyo caso lanza una excepción.
+    
     \textbf{Argumentos}: No acepta.
+    
     \textbf{Devuelve}: Nada, tan solo lanza la excepcion cuando sea necesario.
 \end{itemize}
 
@@ -189,10 +199,13 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
         \item \verb|vsSource: string|. Código fuente del vertex shader.
         \item \verb|fsSource: string|. Código fuente del fragment shader.
     \end{itemize}
+    
     \textbf{Devuelve}: Un objeto de la clase Scene2D con todos sus atributos inicializados.
     
     \item \verb|drawScene|: A partir de los parámetros actuales que se encuentren en el atributo \verb|parameters|, las variables \verb|attribute| y \verb|uniform|, se envían estos valores a WebGL y se visualiza la escena.
+    
     \textbf{Argumentos}: No acepta, toda la información que necesita está en los atributos de la clase.
+    
     \textbf{Devuelve}: No devuelve nada, visualiza la escena en el canvas.
     \item \verb|zoomIn|: Se reduce el parámetro zoomSize para ampliar la escena. También se reduce \verb|delta| para que los desplazamientos sean menos bruscos.
     \item \verb|zoomOut|: Se aumenta el parámetro zoomSize para alejar la escena. También se aumenta \verb|delta| para que los desplazamientos sean más notables.
@@ -347,6 +360,10 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
         \item \verb|desp: number|. Número entero (positivo o negativo) que indica el desplazamiento.
     \end{itemize}
     \item \verb|changeShadow|: Si la componente $i$-ésima del parámetro shadow esta a false la pone a true y viceversa. Es una forma de activar o desactivar las sombras arrojadas provocadas por una fuente de luz concreta.
+    \textbf{Argumentos:}
+    \begin{itemize}
+        \item \verb|i: number|: Índice de la luz cuyas sombras queremos activar o desactivar.
+    \end{itemize}
     \item \verb|changeAntiliasing|: Cambia el valor booleano del parámetro \verb|antiliasing|. Es una forma de decirle al programa si queremos que se aplique o no antiliasing a los píxeles.
     \item \verb|#rescaleAngles|: Cuando se modifican los ángulos de las coordenadas esféricas es posible que se salgan del rango $[0, 2\pi]$. Esta función ajusta esos valores para que siempre se sitúen en el intervalo correcto.
 \end{itemize}
@@ -367,7 +384,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \end{itemize}
     \item \verb|getNSamples|: Getter del parámetro \verb|nSamples|, de tipo number.
     \item \verb|getPosition|: Getter del parámetro \verb|lookfrom|, la posición del observador.
-    \item \verb|getSh|: Getter del parámetro \verb|sh|, tipo array (terna RGBA).
+    \item \verb|getSh|: Getter del parámetro \verb|sh|, tipo number.
 \end{itemize}
 \textbf{Setters}
 \begin{itemize}

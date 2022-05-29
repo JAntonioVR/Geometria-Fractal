@@ -58,7 +58,7 @@ class Scene {
   
     var shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
   
-    return shaderProgram.getShaderProgram()
+    return shaderProgram
   }
   
   // ─── INITBUFFERS ────────────────────────────────────────────────────────────────

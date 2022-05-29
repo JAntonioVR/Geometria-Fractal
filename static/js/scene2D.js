@@ -49,18 +49,20 @@ class Scene2D extends Scene {
     var that = this;
     var gl = this.context;
 
+    var WGLShader = this.shaderProgram.getShaderProgram();
+
     this.programInfo = {
-      program: that.shaderProgram,
+      program: WGLShader,
       attribLocations: {
-        vertexPosition: gl.getAttribLocation(that.shaderProgram, 'a_Position')
+        vertexPosition: gl.getAttribLocation(WGLShader, 'a_Position')
       },
       uniformLocations: {
-        zoomCenter: gl.getUniformLocation(that.shaderProgram, 'u_zoomCenter'),
-        zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
-        maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
-        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
-        order: gl.getUniformLocation(that.shaderProgram, 'u_order'),
-        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal')
+        zoomCenter: gl.getUniformLocation(WGLShader, 'u_zoomCenter'),
+        zoomSize: gl.getUniformLocation(WGLShader, 'u_zoomSize'),
+        maxIterations: gl.getUniformLocation(WGLShader, 'u_maxIterations'),
+        juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
+        order: gl.getUniformLocation(WGLShader, 'u_order'),
+        fractal: gl.getUniformLocation(WGLShader, 'u_fractal')
       }
     };
 
