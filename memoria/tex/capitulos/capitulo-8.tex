@@ -76,6 +76,8 @@ Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\p
     Si se tiene la igualdad en (\ref{eq:SDB}), entonces $f$ es una \textbf{`Signed Distance Function'} (función distancia con signo).
 \end{definicion}
 
+El caso de las `signed distance bound' también suele ser llamado `BDF' (Bounding Distance Function).
+
 Una forma sencilla de entender este concepto es concibiendo una superficie como los puntos en los que se anula la función distancia. Es decir, si un punto se sitúa a distancia 0 es porque pertenece a dicha superficie. En caso de que la distancia sea positiva en módulo el punto se sitúa fuera, tan lejos como diga dicho módulo.
 
 Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos de la ecuación (\ref{eq:distancia-punto-esfera}) que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera (ver imagen \ref{fig:SDF-esfera}).
@@ -302,7 +304,7 @@ Si tomamos la función $g=f/K$, directamente se tendría
 $$
 |g(p)|\leq\|p-p_0\|
 $$
-Convirtiendo a $g$ en una cota inferior de la distancia a $p_0$, por lo que podemos utilizar a $g$ para aplicar sphere tracing.
+Convirtiendo a $g$ en una cota inferior de la distancia a $p_0$ (una BDF), por lo que podemos utilizar a $g$ para aplicar sphere tracing.
 
 Sin embargo, si tomamos una cota inferior en lugar de la exacta, al dar pasos más pequeños, se tiene menos eficiencia. Dicho esto, queda claro que la función distancia exacta de un punto a la superficie es la mejor opción, pues es lipschitziana por definición y su constante es de Lipschtiz es $1$, pero por dificultad en su cálculo se suelen usar cotas inferiores.
 
@@ -341,7 +343,7 @@ Queda por tanto a la vista una clara dependencia de los números complejos en es
 
 Podemos encontrar información sobre los cuaternios en \cite{quaternions}, pero introduciremos brevemente su aritmética. De igual forma que para los números complejos se utiliza la unidad imaginaria $i$, en los cuaternios se tienen tres unidades imaginarias: $i,j,k$, de tal manera que un cuaternio se compone de una parte real y tres imaginarias, pudiendo expresarlo como:
 \begin{equation}
-    q = x\cdot i + y\cdot j + z \cdot k + w \cong (x,y,z,w)\in \R^4.
+    q = a i + b j + c k + d \cong (a,b,c,d)\in \R^4.
 \end{equation}
 
 Nótese que estamos denotando como componente real a $w$, la última de la terna $(x,y,z,w)$. Las unidades imaginarias se multiplican entre ellas siguiendo las siguien reglas:
@@ -402,10 +404,13 @@ Sin embargo, es claro que no podemos visualizar conjuntos en 4D de forma tan dir
 
 En nuestro contexto, podemos fijar una dimensión y visualizar el conjunto de Julia para las otras tres. 
 
-Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La manera más natural es identificar $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias, fijando a $0$ la tercera componente imaginaria ($k$). Es decir,
+Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La forma que escogeremos será identificando $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias, fijando a $0$ la tercera componente imaginaria ($k$). Es decir,
 \begin{equation}
     p=(x,y,z)\cong q = x + yi + zj \cong (y,z,0,x)
 \end{equation}
+
+Es posible que parezca antinatural identificar $(x,y,z)$ con $(y,z,0,x)$, pero si utilizamos la relación $(x,y,z)\cong xi+yj+zk$ anulando la parte imaginaria, los conjuntos de Julia que se calculen serían todos esferas concéntricas, lo cual carece de interés \cite{Hart-1989}.
+
 Tengamos en cuenta que en principio los rayos van a partir de un punto que está fuera del conjunto de Julia, es decir, al iterar la función $P_c$ la sucesión va a ser divergente, por lo que la SDF nos debe de dar una distancia positiva. La idea es que cada vez nos dé un valor menor conforme nos acerquemos a $\mathcal{J}_c$ hasta prácticamente anularse en caso de que el rayo interseque con el conjunto. 
 
 Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta distancia al conjunto, de forma que si tras cierto número $M$ de iteraciones el módulo de la iterada $|P_c^M(q)|$ no es suficientemente grande consideraremos que el punto es convergente, aunque esto probablemente ocurra únicamente si se evalúa en un punto muy cercano a la superficie del conjunto. Es decir, iteramos el punto con una amplia posibilidad de que antes o después la $n$-ésima iterada tenga un módulo grande, y en caso contrario la iterada convergerá a algún valor tras las $M$ iteraciones. Denotamos como $q_n=P_c^n(q)$ a esta $n$-ésima iterada. A partir de este cuaternio, definimos la SDF del conjunto de Julia como 
@@ -417,11 +422,19 @@ Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta dista
     \end{split}
 \end{equation}
 
-donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$\footnote{El módulo de un cuaternio es $|xi+yj+zk+w|=\sqrt{x^2+y^2+z^2+w^2}$}. Intuitivamente, fíjese que realmente es una forma iterativa de aplicar la derivada de (\ref{eq:f-julia-cuaternios})
+donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$\footnote{El módulo de un cuaternio es $|xi+yj+zk+w|=\sqrt{x^2+y^2+z^2+w^2}$}. Esta sucesión $q'_n$ es la derivada de $q_i$ respecto de $q_0$, calculada iterativamente según la regla de la cadena, es decir
+\begin{equation}
+    \begin{split}
+        q'_{i+1}&=\frac{\partial P^{i+1}_c(q_0)}{\partial q_0}\\
+        &= \frac{\partial}{\partial q_0}\left((P_c^i(q_0))^2+c\right)\\
+        &= 2 P_c^i(q_0)(P_c^i)'(q_0)\\
+        &= 2 q_i q'_i
+    \end{split}
+\end{equation}
 
-Es difícil explicar y entender la génesis de esta fórmula, aunque los detalles matemáticos concretos pueden encontrarse en \cite[Capítulo 8]{Hubbard-Douady}. 
+La función \ref{eq:SDF-Julia} es una aproximación de la distancia real, concretamente una cota inferior, la cual se basa en el potencial de Hubbard-Douady, tal y como se describe en \cite{Hubbard-Douady}[Capítulo 8]. Para ello se usa la posibilidad de usar BDFs que se mencionó en el apartado \ref{subsection:comentarios}.
 
-Sabemos hasta ahora que iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$.
+Sabemos hasta ahora que iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$. 
 
 \subsection{Aproximando la normal}
 \label{subsection:normal-sdf}
