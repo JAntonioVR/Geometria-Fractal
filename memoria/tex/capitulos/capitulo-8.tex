@@ -194,7 +194,9 @@ Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones
     #define MAX_STEPS 1000
 \end{lstlisting}
 
-Y ya tenemos todo preparado para implementar el Ray-Marching. La función que dado un rayo calcula posibles intersecciones con los cuerpos y asigna un color es \verb|ray_color|, por lo que lo más natural es editar el código de esta función. En lugar de llamar a \verb|hit_sphere_list| y \verb|hit_plane| como hicimos en la sección \ref{subsection:plano} aplicaremos Ray-Marching. Como GLSL no nos permite mantener un array heterogéneo en el que almacenar todos los objetos independientemente de su tipo, tenemos que hacerlo de forma secuencial. Y como tampoco permite acceder a elementos de un array a partir de índices no constantes, utilizaremos una variable donde almacenar la esfera más cercana, para recuperarla en caso de intersección, véase el código.
+
+
+Y ya tenemos todo preparado para implementar el sphere-tracing. La función que dado un rayo calcula posibles intersecciones con los cuerpos y asigna un color es \verb|ray_color|, por lo que lo más natural es editar el código de esta función. En lugar de llamar a \verb|hit_sphere_list| y \verb|hit_plane| como hicimos en la sección \ref{subsection:plano} aplicaremos sphere-tracing. Como GLSL no nos permite mantener un array heterogéneo en el que almacenar todos los objetos independientemente de su tipo, tenemos que hacerlo de forma secuencial. Y como tampoco permite acceder a elementos de un array a partir de índices no constantes, utilizaremos una variable donde almacenar la esfera más cercana, para recuperarla en caso de intersección, véase el código.
 
 \begin{lstlisting}
 vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, 
@@ -263,11 +265,40 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
 }
 \end{lstlisting}
 
-Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-ST}. Tal y como adelantamos, el resultado es igual que cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
+Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. 
+
+Una modificación muy necesaria para que el código funcione es la de la función \verb|light_is_visible|, que también utilizaba trazado de rayos para saber qué puntos se situaban a la sombra. La idea es la misma que la aplicada en \verb|ray_color|: sustituir la llamada a \verb|hit_sphere_list| por un bucle que implemente sphere-tracing hasta encontrar una intersección.
+
+\begin{lstlisting}
+float light_is_visible(Directional_light light, vec3 p, 
+    Sphere world[ARRAY_TAM], int num_spheres) {
+    Ray R;
+    R.dir = normalize(light.dir);
+    R.orig = p;
+    float t = 2.0*u_epsilon; // Comenzamos a una pequena distancia
+    float dist;
+    float h = MAX_DIST;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        h = MAX_DIST;
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == num_spheres) break;
+            dist = get_dist_sphere(ray_at(R,t), world[i]);
+            h = min(h, dist);
+        }
+        if(h < u_epsilon)
+            return 0.0;
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return 1.0;
+}
+\end{lstlisting}
+
+Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-ST}. Tal y como adelantamos, el resultado es muy similar al obtenido cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.37]{img/C8/esferas-ray-marching.png}
+    \includegraphics[scale = 0.35]{img/C8/esferas-sphere-tracing.png}
     \caption{Escena tras implementar Sphere Tracing}
     \label{fig:esferas-ST}
 \end{figure}
@@ -276,10 +307,63 @@ Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C8/vectores-no-normalizados.png}
+    \includegraphics[scale = 0.35]{img/C8/vectores-no-normalizados.png}
     \caption{Escena utilizando vectores no unitarios en los rayos}
     \label{fig:vectores-no-normalizados}
 \end{figure}
+
+Aprovechando que el algoritmo sphere-tracing calcula en cada iteración la mínima distancia a objetos de la escena, podemos hacer una mejora en las sombras. Como se puede observar en las imágenes \ref{fig:componentes-aisladas}, \ref{fig:esferas-ST} y en todas las que presentan sombras hasta ahora, los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén en la sombra de un objeto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con ningún objeto, pasen muy cerca de él. En estos casos pondríamos los puntos en cuestión en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de sphere-tracing y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir algunas líneas de código a \verb|light_is_visible|.
+
+\begin{lstlisting}
+float light_is_visible(Directional_light light, vec3 p, Sphere world[ARRAY_TAM], int num_spheres) {
+    Ray R;
+    R.dir = normalize(light.dir);
+    R.orig = p;
+    float res = 1.0;
+    float t = 2.0*u_epsilon;
+    float dist;
+    float h = MAX_DIST;
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        h = MAX_DIST;
+        dist = MAX_DIST;
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == num_spheres) break;
+            dist = get_dist_sphere(ray_at(R, t), world[i]);
+            if(dist < h)
+                h = dist;
+        }
+        if(h < u_epsilon)
+            return 0.0;
+        res = min(res, 16.0*h/t);
+        t += h;
+        if(t >= MAX_DIST) break;
+    }
+    return res;
+}
+\end{lstlisting}
+
+La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $16$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombras-final}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy difuminado y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C8/sombras-final.png}
+    \caption{Resultado final de la modificación}
+    \label{fig:sombras-final}
+\end{figure}
+
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.25]{img/C8/sombras-k-2.png} &
+      \includegraphics[scale=0.25]{img/C8/sombras-k-32.png} \\    
+    (a) $k=2$ & (b) $k=32$  \\
+    \end{tabular}
+    \caption{Sombras con el parámetro $k=2,32$}
+    \label{fig:sombras-k}
+\end{figure}
+
+La manera más óptima y correcta que hemos conseguido de iluminar la escena es mediante dos luces direccionales blancas cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$, es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los objetos siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
 
 \subsection{Comentarios sobre Sphere-Tracing}
 \label{subsection:comentarios}
@@ -539,7 +623,7 @@ float get_dist_julia(vec3 p, vec4 c) {
 }
 \end{lstlisting}
 
-Y ya tenemos implementada la SDF de Julia. únicamente resta un método para calcular normales. Como hemos presentado dos, implementaremos los dos, utilizando ahora compilación condicional mediante macros para decidir cuál emplear. Tan solo tenemos que implementar los algoritmos \ref{alg:normal-gradiente-sdf} y \ref{alg:normal-tetraedro}. % TODO Seguimos con esto?
+Y ya tenemos implementada la SDF de Julia. Únicamente resta un método para calcular normales. Como hemos presentado dos, implementaremos los dos, utilizando ahora compilación condicional mediante macros para decidir cuál emplear. Tan solo tenemos que implementar los algoritmos \ref{alg:normal-gradiente-sdf} y \ref{alg:normal-tetraedro}. % TODO Seguimos con esto?
 
 \begin{lstlisting}
 #define NORMAL 0 // O 1
@@ -577,7 +661,7 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
 }
 \end{lstlisting}
 
-Y ya únicamente resta sustituir en el ray-marching las SDFs y el método para calcular normales de las esferas por el código que corresponde a los conjuntos de Julia. Para poder dinamizar el cuaternio $c\in\H$ que se considera fijo en los cálculos declaramos una variable \verb|uniform| al igual que se hizo a la hora de los conjuntos de Julia 2D. También creamos una variable global que es \verb|Material fractal_material;| que como su propio nombre indica es el material que se le asignará al objeto fractal.
+Y ya únicamente resta sustituir en el sphere-tracing las SDFs y el método para calcular normales de las esferas por el código que corresponde a los conjuntos de Julia, tanto en \verb|ray_color| como en \verb|light_is_visible|. Para poder dinamizar el cuaternio $c\in\H$ que se considera fijo en los cálculos declaramos una variable \verb|uniform| al igual que se hizo a la hora de los conjuntos de Julia 2D. También creamos una variable global que es \verb|Material fractal_material;| que como su propio nombre indica es el material que se le asignará al objeto fractal.
 
 \begin{lstlisting}
 // Cuaternio c fijo. Visualizaremos el conjunto J_c
@@ -629,7 +713,7 @@ vec4 ray_color(Ray r, Plane ground,
 }
 \end{lstlisting}
 
-Y con esta modificación de \verb|ray_color| podemos ya visualizar conjuntos de Julia tridimensionales. Podemos también cambiar los parámetros del material para observar distintas apariencias. 
+Y con esta modificación de \verb|ray_color| y la análoga en \verb|light_is_visible| podemos ya visualizar conjuntos de Julia tridimensionales. Podemos también cambiar los parámetros del material para observar distintas apariencias. 
 
 En las imágenes \ref{fig:julia-3D} podemos ver algunos de los resultados que, después de este largo camino, hemos podido obtener modificando los parámetros.
 
@@ -906,138 +990,6 @@ La parte de Mandelbub que más recuerda a $\mathcal{M}_8$ es la parte inferior (
     \label{fig:mandelbubbrot}
 \end{figure}
 
-
-
-\section{Efectos realistas en la escena}
-
-Una vez hemos conseguido visualizar objetos de naturaleza fractal en una escena 3D, debemos cuidar el realismo y las apariencias de la escena. Esto lo conseguiremos modificando el modelo de iluminación para que el fractal proyecte sombras arrojadas en el suelo y sobre sí mismo y mediante la técnica conocida como antiliasing.
-
-\subsection{Sombras arrojadas}
-\label{subsection:sombras}
-
-En la sección \ref{section:Phong} dotamos a nuestra escena de un modelo de iluminación y de dos fuentes de luz que alumbran los objetos que componen la escena, pero no nos preocupamos de la posible sombra que causen estas fuentes de luz en el plano que consideramos como suelo o las sombras que pueda provocar un fractal sobre sí mismo. Es momento por tanto de graficar estas posibles sombras.
-
-En las ecuaciones del modelo de Phong tuvimos en cuenta que si la luz no incide sobre el punto, no se calcularían posibles efectos de iluminación difusa y especular. Esto se hizo pensando que si el coseno del ángulo que forman la dirección de la luz y la normal al objeto en el punto es cuestión es positivo entonces la fuente incide sobre el punto, en caso contrario la fuente de luz no alcanza el punto (imagen \ref{fig:excepcion}). Sin embargo, si lo pensamos, esta condición es suficiente únicamente en objetos convexos, ya que no pueden estar en la sombra de sí mismos en ningún caso. Pensemos por ejemplo en el tubo de la imagen \ref{fig:objeto-no-convexo}. Aunque el coseno de $\theta$ sea positivo, el punto señalado quedaría tapado por la sombra del propio tubo, por lo que ahí el modelo de iluminación debería evaluar únicamente la componente ambiental, estableciendo que el punto está en la sombra.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.3]{img/C8/no-convexo.png}
-    \caption{Sombra en un objeto no convexo}
-    \label{fig:objeto-no-convexo}
-\end{figure}
-
-La forma por tanto de saber si el punto está o no a la sombra es lanzar un rayo en la misma dirección que la luz y averiguar si existe alguna intersección con el fractal. En caso de que la haya multiplicamos por $0$ el valor de la componente difusa y la especular (el punto está a la sombra). Si no existe impacto se establece que la luz incide directamente sobre el punto y se multiplicarían por $1$ las componentes difusa y especular. Este proceso debe repetirse con cada una de las fuentes de luz que se utilicen.
-
-Y para calcular si un rayo impacta o no con el fractal utilizamos ray-marching, por este motivo no ha sido posible hacer esta mejora antes. 
-
-Necesitamos entonces una función que, dado un punto, trace un rayo en dirección de una fuente de luz dada y devuelva 0 si hay intersección con el fractal y 1 si no la hay. Fijémonos que las iteraciones de ray-marching deben comenzar a una pequeña distancia (mayor que $\varepsilon$) del punto que queremos evaluar, porque en caso de que este punto esté en el propio fractal y se comience a distancia $0$ el proceso finalizaría en la primera iteración y consideraría que todos los puntos del fractal están a la sombra, cosa que no tiene sentido. 
-
-Para abreviar el código, llamamos en el siguiente código \verb|get_dist| a la SDF del objeto que se esté visualizando, la cual depende de la variable \verb|u_fractal|.
-\begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p) {
-    Ray R;
-    R.orig = p; R.dir = normalize(light.dir);
-    float t = 2.0*u_epsilon;
-    float h;
-    // Ray Marching 
-    for(int i = 0; i < 50; i++ ) {
-        h=get_dist(ray_at(R,t));
-        if(h < u_epsilon)
-            return 0.0;
-        t += h;
-        if(t >= MAX_DIST) break;
-    }
-    return 1.0;
-}
-\end{lstlisting}
-
-Y ahora debemos modificar la función que evalúa el modelo de iluminación, de forma que para cada luz direccional hace una llamada a \verb|light_is_visible| y multiplica el resultado por la componente difusa y la especular, de forma que si el punto está completamente a la sombra únicamente se sumaría la componente ambiental. En caso de que el punto esté en la sombra de una luz pero iluminado por otra se sumaría únicamente la componente ambiental de una pero también la difusa y especular de la otra. Por último, si está iluminado por las dos se evaluarían las tres componentes: ambiental, difusa y especular. 
-
-\begin{lstlisting}
-vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], 
-    int num_lights, Hit_record hr ) {
-    // ... 
-    float visibility;
-    vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
-    for(int i = 0; i < ARRAY_TAM; i++){
-        if(i == num_lights) break;
-        // ... 
-        visibility = light_is_visible(light, hr.p);
-        // ... 
-        L_in += visibility * light.color 
-                * (diffuse + specular);
-    }
-    L_in += ambient;
-    return vec4(L_in.xyz, 1.0);
-}
-\end{lstlisting}
-
-El resultado es el que se puede observar en la imagen \ref{fig:sombra-sin-suavizado}, donde podemos ver la sombra que provoca el conjunto de Julia $\mathcal{J}_{-0.12+0.75i}$ (que por cierto es la generalización 3D de la imagen \ref{fig:julia-explicados} (a)) sobre puntos de sí mismo y en puntos del plano.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.45]{img/C8/sombra-1.png}
-    \caption{Sombras arrojadas}
-    \label{fig:sombra-sin-suavizado}
-\end{figure}
-
-Así conseguimos sombras arrojadas por todas las luces que tengamos. La manera más óptima y correcta que hemos conseguido de iluminar la escena es mediante dos luces direccionales blancas cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$, es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los fractales siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
-
-El resultado hasta ahora es bueno, pero aún así los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén en la sombra del conjunto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con el conjunto, pasen muy cerca de él. En estos casos pondríamos los puntos en cuestión en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de ray-marching y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir una línea de código a \verb|light_is_visible|.
-
-\begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p) {
-    // ... 
-    float res = 1.0; // Inicialmente 1
-    float k = 16.0; // Constante de suavizado
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        h = get_dist(ray_at(R, t));
-        if(h < u_epsilon)
-            return 0.0;
-        // Calculamos el nuevo factor de penumbra
-        res = min(res, k*h/t); 
-        t += h;
-        if(t >= MAX_DIST) break;
-    }
-    return res;
-}
-\end{lstlisting}
-
-La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $16$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombras-final}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy difuminado y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.45]{img/C8/sombras-final.png}
-    \caption{Resultado final de la modificación}
-    \label{fig:sombras-final}
-\end{figure}
-
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.4]{img/C8/sombras-k-2.png} &
-      \includegraphics[scale=0.42]{img/C8/sombras-k-32.png} \\    
-    (a) $k=2$ & (b) $k=32$  \\
-    \end{tabular}
-    \caption{Sombras con el parámetro $k=2,32$}
-    \label{fig:sombras-k}
-\end{figure}
-
-Para apreciar de una forma más claro el efecto de la fuente de luz que ilumina la parte baja del fractal, presentamos en la imagen \ref{fig:desde-abajo} el conjunto de ejemplo que estamos utilizando en todas las imágenes de esta sección visto desde abajo, que gracias a la luz direccional cuya dirección es $(0,-1,0)$ se ve alumbrado.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.45]{img/C8/desde-abajo.png}
-    \caption{Conjunto de Julia visto desde abajo}
-    \label{fig:desde-abajo}
-\end{figure}
-
-Para terminar esta sección y con el objetivo de añadir eficiencia e interactividad se ha añadido una variable \verb|uniform| de tipo \verb|bvec3|, es decir, una tripleta de booleanos, que sirve para especificar desde JavaScript qué luces queremos que proyecten sombras. Así podemos proyectar las sombras de la luz que queramos cuando busquemos realismo o desactivarlas cuando queramos mayor rapidez en la ejecución.
-
-\begin{lstlisting}
-uniform bvec3 u_shadows;
-\end{lstlisting}
 
 
 \subsection{Antiliasing}
