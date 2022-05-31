@@ -1,35 +1,68 @@
-import {ShaderType, Shader, ShaderProgram} from './shader.js'
-import {Buffer} from './buffer.js'
+//
+// ──────────────────────────────────────────────────────────── I ──────────
+//   :::::: scene2D.js : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────
+// Codigo respectivo a la clase Scene2D, que representa una escena
+// en la que podemos visualizar fractales en 2D.
 
-class Scene2D {
+// ─── IMPORTS ────────────────────────────────────────────────────────────────────
+import {Scene} from './scene.js'
+
+//
+// ─── SCENE2D ────────────────────────────────────────────────────────────────────
+// Clase Scene2D, una clase que hereda de Scene y que contiene el codigo relativo
+// a la creacion, parametros, visualizado y gestion de una escena 2D en la cual
+// representaremos fractales 2D en un canvas de WebGL.
+class Scene2D extends Scene {
+
+  // ─── CONSTRUCTOR ────────────────────────────────────────────────────────────────
+  // A partir del codigo fuente del vertex shader y el fragment shader, llama al
+  // constructor de la clase 'Scene', el cual inicializa el programa shader y el
+  // buffer de posiciones de los vertices que maneja el vertex shader. Ademas,
+  // inicializa un objeto con los parametros que maneja la escena:
+  // - zoomCenter: Array. Punto en WC que se encuentra en el centro del canvas
+  //               (x_0,y_0)
+  // - zoomSize: number. Valor que representa cuanto zoom hacemos en la escena (lambda)
+  // - maxIterations: number. Numero maximo de iteraciones que se fijan en los
+  //                  algoritmos para graficar conjuntos de Julia y Mandelbrot.
+  // - delta: number. Incremento que se suma o resta a la hora de desplazarse por la
+  //          escena.
+  // - juliaSetConstant: Array. Valor complejo 'c' en la ecuacion P(z)=z^m + c
+  // - order: number. Exponente 'm' en la ecuacion P(z) = z^m + c
+  // - fractal: number. Si este parametro vale 0 se visualizara el conjunto de
+  //            Mandelbrot. Si vale 1 se visualizara el conjunto de Julia asociado
+  //            al campo juliaSetConstant.
+  // Se crea un objeto que almacena informacion relativa al programa:
+  // - program: WebGLProgram. Programa Shader ya inicializado.
+  // - attribLocations: Object. Localizacion en memoria de las variables 'attribute'.
+  // - uniformLocations: Object. Localizacion en memoria de las variables 'uniform'.
+  // Por ultimo, se almacenan en un atributo los parametros iniciales de la escena,
+  // para asi poder resetear los parametros de la escena a los parametros por defecto.
+  // Parametros: ───────────────────────────
+  // - vsSource: string. Codigo fuente del vertex shader
+  // - fsSource: string. Codigo fuente del fragment shader
+  // Devuelve: ─────────────────────────────
+  // Un objeto de la clase Scene2D con todos sus atributos inicializados.
   constructor(vsSource, fsSource) {
-    const canvas = document.querySelector("#glCanvas");
-    // Initialize the GL context
-    const gl = canvas.getContext("webgl2");
 
-    // Only continue if WebGL is available and working
-    if (gl === null) {
-    alert("Unable to initialize WebGL. Your browser or machine may not support it.");
-    return;
-    }
-    this.context = gl;
-    
-    this.shaderProgram = this.initShaderProgram(vsSource, fsSource);
-    this.bufferInfo = this.initBuffers(gl)
+    super(vsSource, fsSource);
     var that = this;
+    var gl = this.context;
+
+    var WGLShader = this.shaderProgram.getShaderProgram();
 
     this.programInfo = {
-      program: that.shaderProgram,
+      program: WGLShader,
       attribLocations: {
-        vertexPosition: gl.getAttribLocation(that.shaderProgram, 'a_Position')
+        vertexPosition: gl.getAttribLocation(WGLShader, 'a_Position')
       },
       uniformLocations: {
-        zoomCenter: gl.getUniformLocation(that.shaderProgram, 'u_zoomCenter'),
-        zoomSize: gl.getUniformLocation(that.shaderProgram, 'u_zoomSize'),
-        maxIterations: gl.getUniformLocation(that.shaderProgram, 'u_maxIterations'),
-        juliaSetConstant: gl.getUniformLocation(that.shaderProgram, 'u_juliaSetConstant'),
-        order: gl.getUniformLocation(that.shaderProgram, 'u_order'),
-        fractal: gl.getUniformLocation(that.shaderProgram, 'u_fractal')
+        zoomCenter: gl.getUniformLocation(WGLShader, 'u_zoomCenter'),
+        zoomSize: gl.getUniformLocation(WGLShader, 'u_zoomSize'),
+        maxIterations: gl.getUniformLocation(WGLShader, 'u_maxIterations'),
+        juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
+        order: gl.getUniformLocation(WGLShader, 'u_order'),
+        fractal: gl.getUniformLocation(WGLShader, 'u_fractal')
       }
     };
 
@@ -44,52 +77,16 @@ class Scene2D {
     };
 
     const initialParameters = JSON.parse(JSON.stringify(this.parameters));
-
-    /*const initialParameters = Object.assign({}, this.parameters);
-
-    initialParameters.zoomCenter[0] = this.parameters.zoomCenter[0];
-    initialParameters.zoomCenter[1] = this.parameters.zoomCenter[1];
-    initialParameters.juliaSetConstant[0] = -0.12;
-    initialParameters.juliaSetConstant[1] = 0.75;*/
     this.initialParameters = initialParameters;
-
-    /*console.log(initialParameters)*/
   }
 
-  initShaderProgram(vsSource, fsSource) {
-    let gl = this.context;
-    var vertexShader = new Shader(gl, vsSource, ShaderType.vertexShader),
-        fragmentShader = new Shader(gl, fsSource, ShaderType.fragmentShader);
-  
-    var shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
-  
-    return shaderProgram.getShaderProgram()
-  }
-
-  initBuffers() {
-    let gl = this.context;
-
-    let x0 = -1.0,
-        x1 =  1.0,
-        y0 = -1.0,
-        y1 =  1.0
-    const positions = [
-      x0, y0, x1, y0, x1, y1,
-      x0, y0, x1, y1, x0, y1
-    ];
-  
-    let positions_nfpv = 2,   // Number of floats per vertex in 'positions' array
-        positions_nv   = positions.length / positions_nfpv    // Number of vertexes in 'positions' array
-  
-    let positionBuffer = new Buffer(gl, positions)
-  
-    return {
-      positionBuffer: positionBuffer.getBuffer(),
-      num_floats_pv: positions_nfpv,
-      num_vertexes: positions_nv
-    };
-  }
-
+  // ─── DRAWSCENE ──────────────────────────────────────────────────────────────────
+  // A partir de los parametros de la escena, las variables attribute y uniform, se
+  // envian estos valores al programa shader y se visualiza la escena.
+  // Parametros: ───────────────────────────
+  // No acepta, toda la informacion que necesita esta en los atributos.
+  // Devuelve: ─────────────────────────────
+  // No devuelve nada, visualiza la escena en el canvas.
   drawScene(){
     let gl = this.context;
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
@@ -108,7 +105,7 @@ class Scene2D {
         fractal = this.parameters.fractal;
     var that = this;
     {
-      const numComponents = that.bufferInfo.num_floats_pv;  // pull out 2 values per iteration
+      const numComponents = that.bufferInfo.numFloatsPV;  // pull out 2 values per iteration
       const type = gl.FLOAT;    // the data in the buffer is 32bit floats
       const normalize = false;  // don't normalize
       const stride = 0;         // how many bytes to get from one set of values to the next
@@ -146,10 +143,9 @@ class Scene2D {
       this.programInfo.uniformLocations.fractal,
       fractal);
 
-
     {
       const offset = 0;
-      const vertexCount = that.bufferInfo.num_vertexes;
+      const vertexCount = that.bufferInfo.numVertexes;
       gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
     }
 
@@ -157,64 +153,91 @@ class Scene2D {
 
   }
 
+  // ─── ZOOMIN ─────────────────────────────────────────────────────────────────────
+  // Se reduce el parametro zoomSize para ampliar la escena. Tambien se reduce delta
+  // para que los desplazamientos sean menos bruscos.
   zoomIn(){
     this.parameters.zoomSize *= 0.9;
     this.parameters.delta *= 0.9;
   }
 
+  // ─── ZOOMOUT ────────────────────────────────────────────────────────────────────
+  // Se aumenta el parametro zoomSize para alejar la escena. Tambien se aumenta delta
+  // para que los desplazamientos sean mas notables.
   zoomOut(){
     this.parameters.zoomSize *= 1.1;
     this.parameters.delta *= 1.1
   }
 
+  // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
+  // Se reduce la primera coordenada de zoomCenter para desplazar la escena a la
+  // izquierda
   moveLeft(){
     this.parameters.zoomCenter[0] -= this.parameters.delta;
   }
 
+  // ─── MOVERIGHT ──────────────────────────────────────────────────────────────────
+  // Se aumenta la primera coordenada de zoomCenter para desplazar la escena a la
+  // derecha
   moveRight(){
     this.parameters.zoomCenter[0] += this.parameters.delta;
   }
 
+  // ─── MOVEUP ─────────────────────────────────────────────────────────────────────
+  // Se aumenta la segunda coordenada de zoomCenter para desplazar la escena hacia
+  // arriba
   moveUp(){
     this.parameters.zoomCenter[1] += this.parameters.delta;
   }
 
+  // ─── MOVEDOWN ───────────────────────────────────────────────────────────────────
+  // Se reduce la segunda coordenada de zoomCenter para desplazar la escena hacia
+  // abajo
   moveDown(){
     this.parameters.zoomCenter[1] -= this.parameters.delta;
   }
 
-  setMaxIterations(newValue){
-    this.parameters.maxIterations = newValue;
+  //
+  // ─── GETTERS ────────────────────────────────────────────────────────────────────
+  //
+
+  // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────
+  // Getter del parametro fractal, de tipo number.
+  getFractal() {
+    return this.parameters.fractal;
   }
 
-  getMaxIterations(){
-    return this.parameters.maxIterations;
-  }
-
-  setJuliaConstantX(newX) {
-    this.parameters.juliaSetConstant[0] = newX;
-  }
-
+  // ─── GETJULIACONSTANTX ──────────────────────────────────────────────────────────
+  // Getter de la primera componente del parametro juliaSetConstant, de tipo number
   getJuliaConstantX(){
     return this.parameters.juliaSetConstant[0];
   }
 
-  setJuliaConstantY(newY) {
-    this.parameters.juliaSetConstant[1] = newY;
-  }
 
+  // ─── GETJULIACONSTANTY ──────────────────────────────────────────────────────────
+  // Getter de la segunda componente del parametro juliaSetConstant, de tipo number
   getJuliaConstantY(){
     return this.parameters.juliaSetConstant[1];
   }
 
-  setOrder(newOrder) {
-    this.parameters.order = newOrder;
+  // ─── GETMAXITERATIONS ───────────────────────────────────────────────────────────
+  // Getter del parametro maxIterations, de tipo number.
+  getMaxIterations(){
+    return this.parameters.maxIterations;
   }
 
+  // ─── GETORDER ───────────────────────────────────────────────────────────────────
+  // Getter del parametro order, de tipo number.
   getOrder() {
     return this.parameters.order;
   }
+  
+  //
+  // ─── SETTERS ────────────────────────────────────────────────────────────────────
+  //
 
+  // ─── SETFRACTAL ─────────────────────────────────────────────────────────────────
+  // Setter del parametro fractal
   setFractal(newFractal) {
     if (newFractal == 0) {
       this.parameters.fractal = newFractal;
@@ -223,26 +246,40 @@ class Scene2D {
     }
   }
 
-  getFractal() {
-    return this.parameters.fractal;
-  }
-
+  // ─── SETINITIALPARAMETERS ───────────────────────────────────────────────────────
+  // Metodo que restablece los parametros a los valores por defecto.
   setInitialParameters() {
     this.parameters = JSON.parse(JSON.stringify(this.initialParameters));
   }
 
-  checkGLError(){
-    let gl = this.context;
-    const err = gl.getError();
-    if (err == gl.NO_ERROR) {
-      return
-    }
-    else{
-      const msg = `Ha ocurrido un error de OpenGL: [${err}]`;
-      throw new Error(msg);
-    }
+  // ─── SETJULIACONSTANTX ──────────────────────────────────────────────────────────
+  // Setter de la primera componente del parametro juliaSetConstant
+  setJuliaConstantX(newX) {
+    this.parameters.juliaSetConstant[0] = newX;
   }
 
+  // ─── SETJULIACONSTANTY ──────────────────────────────────────────────────────────
+  // Setter de la segunda componente del parametro juliaSetConstant
+  setJuliaConstantY(newY) {
+    this.parameters.juliaSetConstant[1] = newY;
+  }
+
+  // ─── SETMAXITERATIONS ───────────────────────────────────────────────────────────
+  // Setter del parametro maxIterations
+  setMaxIterations(newValue){
+    this.parameters.maxIterations = newValue;
+  }
+
+  // ─── SETORDER ───────────────────────────────────────────────────────────────────
+  // Setter del parametro order
+  setOrder(newOrder) {
+    this.parameters.order = newOrder;
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────────
+
 }
+
+// ────────────────────────────────────────────────────────────────────────────────
 
 export {Scene2D}

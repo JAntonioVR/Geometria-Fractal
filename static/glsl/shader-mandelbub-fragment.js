@@ -21,21 +21,21 @@ uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
 
-uniform vec4 u_light_color_0;
-uniform vec4 u_light_color_1;
+uniform vec4 u_lightColor0;
+uniform vec4 u_lightColor1;
 uniform bvec3 u_shadows;
 
 uniform float u_epsilon;
 
 uniform int u_fractal;
-uniform vec4 u_julia_set_constant;
+uniform vec4 u_juliaSetConstant;
 uniform bool u_antiliasing;
-uniform int u_n_samples;
+uniform int u_nSamples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
-#define MAX_STEPS 1000
+#define MAX_STEPS 300
 #define MAX_DIST 100.0
 #define PI 3.14159265359
 
@@ -48,18 +48,6 @@ uniform int u_n_samples;
 
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
-}
-
-//
-// ─── COLOR ARRAY AVERAGE ────────────────────────────────────────────────────────
-// Calculates the average color of a array of colors
-vec4 color_array_average(vec4 colors[ARRAY_TAM], int size) {
-    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
-    for(int i = 0; i < ARRAY_TAM; i++) {
-        if(i == size) break;
-        sum += colors[i];
-    }
-    return sum / float(size);
 }
 
 //
@@ -301,9 +289,9 @@ vec3 calculate_normal_mandelbrot(vec3 p) {
 vec3 f_Mandelbub(vec3 w, vec3 c) {
 
     // extract polar coordinates
-    float wr = sqrt(dot(w,w));
-    float wo = acos(w.y/wr);
-    float wi = atan(w.x,w.z);
+    float wr = sqrt(dot(w,w));      // r
+    float wo = acos(w.y/wr);        // phi
+    float wi = atan(w.x,w.z);       // theta
 
     // scale and rotate the point
     wr = pow( wr, 8.0 );
@@ -381,76 +369,45 @@ Sphere bounding_sphere;
 // ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
 // 
 
-//
-// ─── SHADOW ─────────────────────────────────────────────────────────────────────
-// Defines (using ray-marching and SDFs) if the point p is in the Julia/Mandelbub
-// set shadow. If it's in the shadow it returns 1.0, and if it's near the shadow
-// returns a [0,1] normaliced value where 0 means it's so far of the shadow
-/*
-float one_light_shadow(vec3 p, Directional_light light) {
-    Ray R;
-    R.orig = p; R.dir = light.dir;
-    float res = 1.0;
-    float t = 0.0;
-    float h;
-    
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        if(u_fractal == 1)
-            h = get_dist_mandelbub(ray_at(R, t));
-        if(u_fractal == 2)
-            h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
-        if(u_fractal == 3)
-            h = get_dist_mandelbrot(ray_at(R,t));
-        
-        if(i == 0 && h > 10.0)  // The ground points too far of the set are not in the shadow 
-            return 1.0;
-        if(h < u_epsilon)
-            return 0.0;
-        res = min(res, 8.0*h/t);
-        t += h;
-        if(t >= MAX_DIST) break;
-    }
-    return res;
+bool point_in_sphere(vec3 p, Sphere S) {
+    return abs(dot(p-S.center, p-S.center) - S.radius*S.radius) < u_epsilon;
 }
-
-float multi_light_shadow(vec3 p, Directional_light[ARRAY_TAM] lights, int num_lights) {
-    float shadow = 0.0,
-          current_shadow;
-    int lights_shading = 0;
-    for(int i = 0; i < ARRAY_TAM; i++) {
-        if(i == num_lights) break;
-        shadow += one_light_shadow(p, lights[i]);
-    }
-    shadow /= 2.0; //float(lights_shading);
-    float alpha = 0.0;      // Smooth constant
-    shadow = shadow/(1.0 - alpha) + alpha;
-
-    return shadow;
-}
-*/
 
 float light_is_visible(Directional_light light, vec3 p) {
     Ray R;
     R.dir = normalize(light.dir);
     R.orig = p;
     float res = 1.0;
-    float t = 2.0*u_epsilon;
-    float h;
+    float t = u_epsilon * 2.0;
+    float dist;
+    float h = MAX_DIST;
+
     
     if(!hit_sphere_limits(bounding_sphere, R))
         return 1.0;
-    
 
-    for(int i = 0; i < 50; i++ ) {
+    for(int i = 0; i < MAX_STEPS; i++ ) {
+        h = MAX_DIST;
+        dist = MAX_DIST;
         if(u_fractal == 1)
             h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 2)
-            h = get_dist_julia(ray_at(R, t), u_julia_set_constant);
+            h = get_dist_julia(ray_at(R, t), u_juliaSetConstant);
         if(u_fractal == 3)
             h = get_dist_mandelbrot(ray_at(R,t));
 
+        /*
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == num_spheres) break;
+            dist = get_dist_sphere(ray_at(R, t), world[i]);
+            if(dist < h) {
+                h = dist;
+            }
+        }*/
+
         if(h < u_epsilon)
             return 0.0;
+
         res = min(res, 16.0*h/t);
         t += h;
         if(t >= MAX_DIST) break;
@@ -483,7 +440,7 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
             float cos_theta = max(0.0, dot(normal, light_dir));
             
             // Only if light is visible from surface point
-            if(cos_theta > 0.0) {
+            if(cos_theta > 0.0 && visibility > 0.0) {
                 // Reflection direction
                 vec3 reflection_dir = reflect(-light_dir, normal);
                 diffuse = mat.kd * cos_theta;
@@ -556,7 +513,7 @@ Ray get_ray(Camera cam, float s, float t){
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
 // Given a ray and the full scene, calculates pixel's color.
 
-vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
 
     Hit_record hr; hr.hit = false;
     float dist = MAX_DIST;
@@ -567,27 +524,23 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
     Sphere S_hit;
     int object_index; // 0: Ground, 1: Julia, 2: Mandelbub, 3: Mandelbrot
 
-
-   
     bool hits_bounding_sphere = hit_sphere_limits(bounding_sphere, r);
     
-    // Ray Marching
+    // Sphere Tracing
     for(int i = 0; i < MAX_STEPS; i++) {
-
-        // Distancia al plano
 
         closest_dist = MAX_DIST;
 /*
         for(int i = 0; i < ARRAY_TAM; i++) {
             if(i == num_spheres) break;
-            dist = get_dist_sphere(p, S[i]);
+            dist = get_dist_sphere(p, world[i]);
             if(dist < closest_dist) {
                 closest_dist = dist;
-                object_index = i;
-                S_hit = S[i];
+                object_index = i+1;
+                S_hit = world[i];
             }
-        }*/
-
+        }
+*/
         dist = get_dist_plane(p, ground);
         if(dist < closest_dist) {
             closest_dist = dist;
@@ -600,7 +553,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 dist = get_dist_mandelbub(p);
                 //dist = MAX_DIST;
             if(u_fractal == 2)      // Render Julia
-                dist = get_dist_julia(p , u_julia_set_constant);
+                dist = get_dist_julia(p , u_juliaSetConstant);
             if(u_fractal == 3)      // Render Mandelbrot
                 dist = get_dist_mandelbrot(p);
 
@@ -637,15 +590,12 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
 
                 return evaluate_lighting_model(lights, num_lights, hr);
 
-                // Is it in any set shadow?
-                //float shadow = multi_light_shadow(hr.p, lights, num_lights);
-                //return vec4((shadow*evaluate_lighting_model(lights, num_lights, hr)).xyz, 1.0);
             }
 /*
             else {      // r hits a sphere
                 hr.normal = calculate_normal_sphere(hr.p, S_hit);
                 hr.mat = fractal_material;
-                return evaluate_lighting_model(lights, num_lights, hr);
+                return evaluate_lighting_model(lights, num_lights, hr, world, num_spheres);
             }*/
 
            hr.mat = fractal_material; // TODO Crear un material
@@ -654,7 +604,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, Plane ground, Direct
                 hr.normal = calculate_normal_mandelbub(hr.p);
 
             if(object_index == 2)     // r hits Julia
-                hr.normal = calculate_normal_julia(hr.p, u_julia_set_constant);
+                hr.normal = calculate_normal_julia(hr.p, u_juliaSetConstant);
 
             if(object_index == 3)     // r hits Mandelbrot
                 hr.normal = calculate_normal_mandelbrot(hr.p);
@@ -713,6 +663,8 @@ void main() {
     S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0; S2.mat = fractal_material;
     S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5; S3.mat = fractal_material;
     S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0; S4.mat = fractal_material;
+
+
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
 
     // Bounding Sphere
@@ -729,50 +681,54 @@ void main() {
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
-    //vec3 lookfrom = vec3(0.0,0.0, 2.0);
+    vec3 lookfrom = vec3(0.0,0.0, 2.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
 
     Directional_light lights[ARRAY_TAM];
     int num_lights = 3;
     Directional_light l0, l1, l2;
-    l0.color = u_light_color_0; l1.color = u_light_color_1;
+    l0.color = u_lightColor0; l1.color = u_lightColor1;
     l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l0.dir = vec3(-0.5, 0.5, 0.0);
-    // l0.dir = vec3(0.0, 0.5, 0.5);
 
+    l0.dir = vec3(-0.5, 0.5, 0.0);
     l1.dir = vec3(0.5, 0.5, 0.0);
     l2.dir = vec3(0.0, -1.0, 0.0);
+
     lights[0] = l0; lights[1] = l1; lights[2] = l2;
     
-    
     // COLOR
-    vec2 uv = gl_FragCoord.xy / vec2(image_width, image_height);
-    float u = uv.x;
-    float v = uv.y;
-
+    
     if(u_antiliasing) {
         // Antiliasing
-        int n_samples = u_n_samples;
-        float hw = 1.0 / (float(image_width * n_samples)),
-            hh = 1.0 / (float(image_height * n_samples));
+
+        vec2 uv = (gl_FragCoord.xy) / vec2(image_width, image_height);
+        float u = uv.x;
+        float v = uv.y;
+
+        int nSamples = u_nSamples;
+        float hw = 1.0 / (float(image_width * nSamples)),
+            hh = 1.0 / (float(image_height * nSamples));
         Ray r;
-        vec4 colors[ARRAY_TAM]; 
+        vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
 
         for(int i = 0; i < ARRAY_TAM; i++) {
-            if(i == n_samples*n_samples) break;
-            int x =  i/n_samples;
-            int y =  i - n_samples*x;
-            u = uv.x + float(x) * hw;
-            v = uv.y + float(y) * hh;
+            if(i == nSamples*nSamples) break;
+            int x =  i/nSamples;
+            int y =  i - nSamples*x;
+            u = uv.x + float(x) * hw + 0.5 * hw;
+            v = uv.y + float(y) * hh + 0.5 * hh;
             r = get_ray(cam, u, v);
-            colors[i] = ray_color(r, world, 2, ground, lights, num_lights);
+            sum_colors += ray_color(r, world, num_spheres, ground, lights, num_lights);
         }
 
-        gl_FragColor = color_array_average(colors, n_samples*n_samples);
+        gl_FragColor = sum_colors / float(nSamples*nSamples);
     }
     else {
         // No antiliasing
+        vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
+        float u = uv.x;
+        float v = uv.y;
         Ray r = get_ray(cam, u, v);
         gl_FragColor = ray_color(r, world, num_spheres, ground, lights, num_lights);
     }

@@ -1,16 +1,32 @@
 %
-% ─── CAPITULO 5: INTRODUCCION A LAS HERRAMIENTAS DE RENDERIZACION ───────────────
+% ─── CAPITULO 5: INTRODUCCION A LAS HERRAMIENTAS DE VISUALIZACIÓN ───────────────
 %
 
 Durante los capítulos anteriores hemos tratado los fractales desde un punto de vista teórico y matemático, ayudándonos del software \textit{Mathematica} para visualizar imágenes de naturaleza fractal, desde los primeros ejemplos clásicos como el triángulo de Sierpinski o el copo de Koch (imágenes \ref{fig:triangulo-Sierpinski} y \ref{fig:copo-Koch}), representaciones de cuencas de atracción en el capítulo \ref{chap:iteracion}, conjuntos de Julia y Mandelbrot en el capítulo \ref{chap:Julia-Mandelbrot} y atractores de sistemas de funciones iteradas en el capítulo \ref{chap:SFI}.
 
-Queda claro que \textit{Mathematica} es un software de cálculo muy útil, pero también es lento, ya que realmente no está orientado a el renderizado de imágenes. En este sentido, obsérvese que sólo hemos utilizado \textit{Mathematica} para visualizar fractales 2D, que se presentan como subconjuntos del plano euclídeo $\R^2$ o coloreando el plano complejo $\C$. Esto se debe no solo a la simplicidad algoritmica que nos proporciona limitar los razonamientos a 2 dimensiones, sino a que el software es realmente lento en 3 dimensiones.
+Queda claro que \textit{Mathematica} es un software de cálculo muy útil, pero también es lento, ya que realmente no está orientado a la síntesis de imágenes. En este sentido, obsérvese que sólo hemos utilizado \textit{Mathematica} para visualizar fractales 2D, que se presentan como subconjuntos del plano euclídeo $\R^2$ o coloreando el plano complejo $\C$. Esto se debe no solo a la simplicidad algorítmica que nos proporciona limitar los razonamientos a 2 dimensiones, sino a que el software es realmente lento en cálculos complejos 3D.
 
-Sin embargo, y como cabría esperar, existen herramientas que nos ayudan a visualizar las directivas geométricas que nosotros mismos queramos, y además podremos hacerlo a tiempo real. En nuestro caso, utilizaremos la librería \textbf{WebGL}, que es una API de JavaScript para el renderizado de gráficos 2D y 3D dentro de cualquier navegador web. Precisamente este último aspecto es el que nos permitirá desplegar nuestro proyecto en una página web interactiva y accesible desde cualquier dispositivo cuya GPU se lo permita\footnote{Esto se puede comprobar gracias a páginas dedicadas a ello como \href{https://get.webgl.org/}{esta página de testeo WebGL} o \href{http://webglreport.com/}{WebGL Report}}.
+\section{Síntesis de imágenes en GPUs. WebGL}
 
-WebGL permite que las aplicaciones web utilicen una API basada en \href{https://www.khronos.org/opengles/}{OpenGL ES 2.0} para renderizar imágenes 3D en un elemento \verb|<canvas>| de HTML en los navegadores y sistemas que lo soporten sin necesidad de plug-ins. El principal defecto de herramientas como WebGL es la dificultad a la hora de querer comenzar a visualizar imágenes, pues tiene varios componentes complejos de enlazar en un principio. A continuación explicaremos el flujo de trabajo que utiliza WebGL y cómo podemos comenzar a utilizar la herramienta para visualizar fractales.
+Afortunadamente, contamos con herramientas que están dedicadas a la producción de imágenes por ordenador. Éste es el objetivo principal de la \textit{informática gráfica}. De forma genérica, la informática gráfica, en ocasiones también llamada \textit{computación gráfica}, es la rama de las ciencias de la computación que aprovecha los recursos hardware y software de un computador para sintetizar y manipular digitalmente contenido visual. Concretamente, un computador puede utilizar durante el procesado tanto su CPU (unidad central de procesamiento, el procesador) como opcionalmente la GPU (unidad de procesamiento gráfico, la gráfica). La GPU es un microprocesador cuya función es realizar tareas gráficas y operaciones en coma flotante para así aligerar la carga del procesador central en aplicaciones gráficas, por ejemplo videojuegos. Así, mientras lo relacionado con gráficos e imágenes se ejecuta en la gráfica, el procesador puede dedicarse a otras cosas.
+
+En lo que a arquitectura hardware se refiere, la CPU y la GPU presentan varias diferencias. La CPU está formada por pocos núcleos de procesamiento pero muy potentes, por lo que está principalmente orientada a la ejecución secuencial de las tareas. Por contra, la GPU está formada por cientos, y a veces incluso miles de ALUs (unidad aritmético-lógica) especializadas en operaciones en coma flotante, por lo que está muy preparada para la ejecución paralela de tareas. Esto nos lleva a la principal ventaja del uso de la GPU. Gracias a esa gran cantidad de unidades de procesamiento es posible en cada instante procesar miles de píxeles, vértices o colores a la vez, provocando una destacable mejora de las prestaciones en lo que a tiempos se refiere.
+
+La idea general de la computación gráfica consiste en llevar una escena, que puede ser en 2D o en 3D, compuesta por un conjunto de objetos, a una pantalla formada por un número alto pero finito de píxeles. La manera más común de hacer esto es dividir cada elemento de la escena en un conjunto de caras planas llamadas \textit{primitivas}, generalmente triángulos, y una vez divididos calcular qué píxeles de la pantalla ocupa cada primitiva. Este procedimiento se denomina \textit{rasterización}. La complejidad en el proceso de rasterización puede aumentar muy rápidamente, por lo que merece la pena separar qué partes de una aplicación querremos cambiar de una aplicación gráfica a otra (p. ej. vértices, objetos o colores) y cuáles es preferible encapsular y optimizar en una interfaz (p. ej. motor gráfico o código de bajo nivel). Así es como surgen las llamadas APIs de rasterización, entre las que destacan \textcolor{blue}{\href{https://www.opengl.org/}{OpenGL}}, \textcolor{blue}{\href{https://www.microsoft.com/es-es/download/details.aspx?id=35}{DirectX}}, \textcolor{blue}{\href{https://developer.apple.com/metal/}{Metal}} o \textcolor{blue}{\href{https://www.vulkan.org/}{Vulkan}}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C5/APis.png}
+\end{figure}
+
+Para usar la GPU, debemos especificarle a la API un fragmento de código programado para ejecutarse específicamente en la misma. Se suelen denominar \textit{shaders} a estos trozos de código fuente que están escritos para ser ejecutados exclusivamente en la GPU. El resto de código necesario para que la API funcione se suele escribir en C/C++, pero también en Python o en JavaScript y está destinado a ejecutarse en la CPU. Estos shaders en general están escritos en su propio lenguaje: GLSL (GL Shading Language) en el caso de OpenGL y Vulkan, HLSL (High-Level Shading Language) de Microsoft para DirectX y MSL (Metal Shading Language) para Metal. 
+
+Por su parte, \textbf{WebGL} es una adaptación de OpenGL a JavaScript. Es decir, en lugar de C/C++ se emplea JavaScript como lenguaje cuyo código se ejecuta en CPU. Al igual que el propio OpenGL, utiliza GLSL para la programación de shaders. El rasgo más característico de WebGL es que, al utilizar JavaScript, es posible ejecutarlo en cualquier navegador web. Esta es la base de la gran ventaja de WebGL: su portabilidad. Una aplicación web programada en WebGL puede ser usada desde cualquier navegador con soporte, sin que el usuario tenga que instalar ningún tipo de dependencia y de forma totalmente independiente al sistema operativo que utilice el dispositivo o del fabricante de la GPU. Además, el propio JavaScript cuenta con soporte para manipular dinámicamente el DOM de un documento HTML y para la gestión de eventos. Esto, unido a la portabilidad, hace que WebGL sea la mejor opción que podemos elegir para este proyecto.
+
+Las aplicaciones web basadas en WebGL se utilizan para la visualización de imágenes en un elemento \verb|<canvas>| de HTML en los navegadores y sistemas que lo soporten\footnote{Esto se puede comprobar gracias a páginas dedicadas a ello como \href{https://get.webgl.org/}{esta página de testeo WebGL} o \href{http://webglreport.com/}{WebGL Report}} sin necesidad de plug-ins. El principal defecto tanto de WebGL como de otras APIs es la dificultad a la hora de querer comenzar a visualizar imágenes, pues tiene varios componentes complejos de enlazar en un principio. A continuación explicaremos el flujo de trabajo que utiliza WebGL y cómo podemos comenzar a utilizar la herramienta para visualizar fractales.
 
 \section{Componentes de WebGL}
+\label{section:componentes-wgl}
 
 A grandes rasgos, los programas que utilizan WebGL se componen de código de \verb|JavaScript| que interactúa con la propia biblioteca junto con código \verb|GLSL| que se ejecuta en la GPU. Para dar nuestros primeros pasos con WebGL debemos, en nuestro documento HTML, utilizar un elemento \verb|<canvas>| al cual especificamos sus dimensiones en píxeles. En el siguiente ejemplo, el canvas sería cuadrado de $720\times 720$ píxeles. Evidentemente, a mayor número de píxeles mayor resolución, pero también mayor tiempo de cómputo.
 
@@ -36,18 +52,18 @@ if (gl === null) {
 }
 \end{lstlisting}
 
-En caso de éxito, que se tiene en la mayoría de las ocasiones, debemos conservar este objeto, pues será necesario para utilizar la gran mayoría de directivas que implementa WebGL. Los siguientes elementos son los auténticos encargados de los objetos que se renderizan en el canvas.
+En caso de éxito, que se tiene en la mayoría de las ocasiones, debemos conservar este objeto, pues será necesario para utilizar la gran mayoría de directivas que implementa WebGL. Los siguientes elementos son los auténticos encargados de los objetos que se representan en el canvas.
 
 \subsection{El programa \textit{Shader}}
 
-El `\textbf{shader}' es un programa escrito en el llamado \href{https://www.khronos.org/registry/OpenGL/specs/es/3.2/GLSL_ES_Specification_3.20.pdf}{OpenGL ES Shading Language}, más comúnmente conocido como \textbf{GLSL}, que a partir de la información sobre los vértices que forman una figura genera un color para cada píxel, para así dibujar dicha figura en el canvas. Hay dos tipos de \textit{shader}: el \textbf{vertex shader} y el \textbf{fragment shader}. Ambos se escriben en GLSL, de forma que se le especifica el código GLSL a WebGL y este se ejecuta en la GPU. A continuación se explicarán las principales diferencias entre estos dos componentes.
+El `\textbf{shader}' es un programa escrito en el llamado \href{https://www.khronos.org/registry/OpenGL/specs/es/3.2/GLSL_ES_Specification_3.20.pdf}{\textcolor{blue}{OpenGL ES Shading Language}}, más comúnmente conocido como \textbf{GLSL}, que a partir de la información sobre los vértices que forman una figura genera un color para cada píxel, para así dibujar dicha figura en el canvas. Hay dos tipos de \textit{shader}: el \textbf{vertex shader} y el \textbf{fragment shader}. Ambos se escriben en GLSL, de forma que se le especifica el código GLSL a WebGL y este se ejecuta en la GPU. A continuación se explicarán las principales diferencias entre estos dos componentes.
 
-El \textit{vertex shader} se ejecuta una vez por cada vértice de la figura, su misión es transformar la coordenada de mundo de dicho vértice en coordenadas normalizadas en el intervalo $[-1,1]$, rango utilizado por WebGL en su \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space}{clip space}. Tras realizar estos calculos y ajustes, se almacena el valor de salida en la variable \verb|gl_Position|. También podemos utilizar el vertex shader para otros cometidos como calcular la coordenada de textura de un objeto, calcular la normal a un objeto en dicho vértice para posteriormente aplicar algún modelo de iluminación, o cualquier otro procesado que podamos hacer en un vértice con la idea de posteriormente pasarle dicho valor al \textit{fragment shader}.
+El \textit{vertex shader} se ejecuta una vez por cada vértice de la figura, su misión es transformar la coordenada de mundo de dicho vértice en coordenadas normalizadas en el intervalo $[-1,1]$, rango utilizado por WebGL en su \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space}{\textcolor{blue}{clip space}} (imagen \ref{fig:clipspace}). Tras realizar estos calculos y ajustes, se almacena el valor de salida en la variable \verb|gl_Position|. También podemos utilizar el vertex shader para otros cometidos como calcular la coordenada de textura de un objeto, calcular la normal a un objeto en dicho vértice para posteriormente aplicar algún modelo de iluminación, o cualquier otro procesado que podamos hacer en un vértice con la idea de posteriormente pasarle dicho valor al \textit{fragment shader}.
 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C5/clip-space-graph.png}
+    \includegraphics[scale = 0.45]{img/C5/clip-space-graph.png}
     \caption{\textit{Clip space de WebGL}}
     \label{fig:clipspace}
 \end{figure}
@@ -103,7 +119,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 \end{lstlisting}
 
-Y una vez creados los buffers y el \textit{shader} por separado, debemos especificarle al buffer que transfiera la información que contiene a las posiciones de memoria que tiene el \textit{shader} reservadas para las variables que espera. Supongamos que hemos creado en un \textit{vertex shader} una variable \verb|attribute vec4 aVertexColor;| de forma que queremos asociar los colores del código anterior a esta variable por cada uno de los 4 vértices. Mostramos a continuación la forma de hacerlo, pudiendo encontrar más información clarificadora en la documentación de la clase \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext}{WebGLRenderingContext}.
+Y una vez creados los buffers y el \textit{shader} por separado, debemos especificarle al buffer que transfiera la información que contiene a las posiciones de memoria que tiene el \textit{shader} reservadas para las variables que espera. Supongamos que hemos creado en un \textit{vertex shader} una variable \verb|attribute vec4 aVertexColor;| de forma que queremos asociar los colores del código anterior a esta variable por cada uno de los 4 vértices. Mostramos a continuación la forma de hacerlo, pudiendo encontrar más información clarificadora en la documentación de la clase \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext}{\textcolor{blue}{WebGLRenderingContext}}.
 
 \begin{lstlisting}
 const location = gl.getAttribLocation(
@@ -128,7 +144,7 @@ gl.enableVertexAttribArray(location);
 
 De forma muy similar, pero con las funciones correspondientes, se procede desde JavaScript para darle valor a las variables tipo \verb|uniform|.
 
-Tras crear y compilar el programa \textit{shader} y dotarlo de valores para sus variables \verb|attribute| y \verb|uniform|, procedemos a renderizar la escena completa con la función \verb|drawArrays|.
+Tras crear y compilar el programa \textit{shader} y dotarlo de valores para sus variables \verb|attribute| y \verb|uniform|, procedemos a graficar la escena completa con la función \verb|drawArrays|.
 
 \begin{lstlisting}
 const offset = 0;
@@ -136,7 +152,7 @@ const vertexCount = 4;
 gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 \end{lstlisting}
 
-\section{Primera imagen renderizada}
+\section{Primera imagen generada}
 
 Una vez conocemos los componentes principales de WebGL, es momento de utilizarlos para crear alguna imagen.
 
@@ -153,7 +169,7 @@ Crearemos un buffer para almacenar las posiciones de los cuatro vértices y otro
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.4]{img/C5/ejemplo-shaders.png}
-    \caption{Cuadrado de colores renderizado con WebGL}
+    \caption{Cuadrado de colores graficado con WebGL}
     \label{fig:ejemplo-wgl}
 \end{figure}
 

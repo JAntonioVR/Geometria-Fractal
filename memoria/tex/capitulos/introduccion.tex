@@ -1,2 +1,79 @@
-%% TODO
-TODO
+
+Desde la antiguedad, el ser humano siempre ha seguido procesos iterativos. Aunque normalmente la iteración en el sentido moderno se asocia a algoritmos, bucles o recursión, en realidad es un concepto ancestral. Las recetas de cocina, la recolección del cultivo, construcción de edificios, todas ellas son procesos que se basan en repetir operaciones sucesivamente una y otra vez. La iteración, y el tan ambiguo concepto del infinito matemático que ha atormentado las mentes de los pensadores desde los tiempos de Zenón hasta hace 120 años gracias a los trabajos del célebre matemático \textit{George Cantor} son los precursores de toda la teoría fractal que disponemos a día de hoy. La primera aproximación a lo que hoy llamamos fractales llegó con el descubrimiento de funciones que a pesar de ser continuas no admiten derivada, esto en los trabajos de \textit{Bernhard Riemann} y \textit{Karl Weierstrass} en la década de 1870, dando a luz a lo que en aquellos tiempos se conocían como ``monstruos matemáticos''.
+
+Unos 50 años después, allá por 1917, \textit{Gaston Julia} y \textit{Pierre Fatou}, con el objetivo del \textit{Grand Prix des Sciences mathematiques} que anunció la Academia Francesa de Ciencias publicaron independientemente trabajos sobre iteración de funciones racionales complejas. En 1918 Julia publicó un tratado extenso sobre el tema, al cual se le unió el año siguiente una trilogía de trabajos por parte de Fatou. Por su parte, el conocido matemático alemán \textit{Felix Hausdorff} publica en este mismo año un artículo sobre la dimensión posiblemente no entera de conjuntos \cite{Hausdorff1919}. 
+
+Fueron estos avances los que sirvieron de inspiración a \textit{Benoit Mandelbrot}, quien a partir de 1975 con sus trabajos, y en especial su libro \textit{The fractal geometry of nature} \cite{alma991007242979704990} creó lo que hoy conocemos como `Geometría Fractal'. A partir de este momento los científicos con ayuda de los primeros computadores consiguieron visualizar lo que los pioneros ya intuyen.
+
+Desde entonces, científicos como \textit{Michael Barnsley} o \textit{Kenneth Falconer} desarrollan teorías como los sistemas de funciones iteradas, los cuales con ayuda del ordenador suponen una revolución en la geometría fractal, con aportes como el \textit{teorema del collage}, que tiene aplicaciones en ámbitos de la matemática más allá de los fractales. 
+
+Más tarde aparecerían las primeras gráficas modernas y la informática gráfica. No fue hasta la década de 1980 cuando apareció el concepto de `emisión de rayos' en la computación gráfica. Esta sería la semilla de la costosa, pero productiva técnica de generación de imágenes que conocemos como `Ray-Tracing'. Gracias a ella, la visualización por ordenador de fractales incluso en tres dimensiones llega a su auge, gracias a trabajos como los de \textit{John Hart}, \textit{Keenan Crane} o \textit{Íñigo Quilez} en las décadas de 1990 y 2000.
+
+A día de hoy, con la revolución tecnológica en la que nos vemos sumidos en la actualidad, toda la teoría fractal está en explotación, tanto en el ámbito informático como en el puramente matemático.
+
+Existen revistas, catalogadas como `JCR' (Journal Citation Reports), que tienen un alto prestigio entre las revistas dedicadas al mundo de la investigación. Por ejemplo, en el ámbito meramente fractal, la revista \href{https://www.worldscientific.com/worldscinet/fractals}{\textcolor{blue}{\textit{Fractals}}}. Por su parte, en el ámbito de problemas inversos encontramos la revista \href{https://iopscience.iop.org/journal/0266-5611}{\textcolor{blue}{\textit{Inverse Problems}}}.
+
+La geometría fractal tiene también aplicación vigente en la teoría de identificación de parámetros, ejemplo de ello es el artículo titulado \textit{Solving Parameter Identification Problems using the Collage Distance and Entropy} \cite{LaTorre}, con fecha de 2021. Con respecto a desarrollo de herramientas, podemos encontrar en la revista `Fractals' el artículo de 2019 \textit{Self-similarity of solutions to integral and differential equations with respect to a fractal measure} \cite{LaTorre2019}.
+
+Por su parte, la revolución informática afecta en particular a las tarjetas gráficas.  En 2020 NVIDIA lanzó al mercado la serie `GeForce RTX 30'. Por ejemplo, la NVIDIA GeForce RTX 3050, que es de los últimos modelos, ofrece núcleos de Ray Tracing dedicados y emplea tecnologías de inteligencia artificial.
+
+Sobre esto, la última tendencia en computación gráfica, y particularmente en ray-tracing, es aplicar `Deep Learning' en la síntesis de imágenes por ordenador. En contraste con la tradicional forma de programar potentes algoritmos para graficar imágenes lo más realistas posibles, el uso de redes neuronales en muchas situaciones ofrece resultados incluso mejores. Es por esto que este es un campo abierto a día de hoy en informática gráfica. Una explicación más detallada a la par que dinámica se puede encontrar en \cite{RT-AI}.
+
+Vemos que el ray tracing está muy a la orden del día, pero sólo hace unos 3 años que existen herramientas propiamente dedicadas al ray-tracing, entre las que destacan \href{https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/}{\textcolor{blue}{Vulkan con su extensión KHR}}. El principal defecto que tienen es que solo pueden ser ejecutadas en GPUs muy caras y además sólo trabajan con mallas de polígonos. La alternativa a ellas es simular el ray-tracing en herramientas de visualización estándar.
+
+Debemos también mencionar el evento \href{https://s2022.siggraph.org/}{\textcolor{blue}{Siggraph}}, que es un evento anual en el que se exponen nuevas técnicas y avances en el mundo de la computación gráfica. En su web podemos encontrar muchos papers y artículos relacionados con la generación de imágenes. Por ejemplo en la siguiente encontramos muchos textos con fecha de 2021: \url{https://kesen.realtimerendering.com/sig2021.html}.
+
+Como hemos podido comprobar, la teoría de la geometría fractal es una disciplina muy estudiada e investigada incluso en la actualidad. No obstante, es muy desconocida en general, tanto para estudiantes como para profesionales de las matemáticas y la informática, a pesar de tener una muy estrecha relación con ambas ciencias. Por ello, queremos aportar a esta disciplina nuestro granito de arena para que se dé a conocer a todo el público que lo desee. 
+
+Para ello, en este documento se presenta desde el punto de vista matemático los conceptos y resultados principales de la geometría fractal, utilizando no sólo desarrollos teóricos y texto, sino combinándolos también con ejemplos, imágenes y códigos para graficarlas. De esta forma se ofrece un contenido fácil de seguir y atractivo para el lector. 
+
+Aprovechando también el hardware y software moderno junto con conocimientos en informática gráfica, se crea como producto software una web interactiva en la que visualizar fractales, tanto 2D como 3D. Esta web ofrece la posibilidad de modificar dinámicamente parámetros tanto de los propios fractales como de los algoritmos utilizados para graficarlos. Se permite también movimiento por la escena, pudiendo observar detalles de los fractales incluso a escalas pequeñas. Con esta web se desarrolla un producto que es accesible para cualquier persona que tenga acceso a internet, acercándola al mundo de los fractales.
+
+Esta visualización se ha implementado utilizando técnicas avanzadas en informática gráfica, las cuales están minuciosamente introducidas y explicadas en esta memoria. Así además introducimos al lector varios conceptos y métodos de la informática gráfica, particularizando su uso a la síntesis de imágenes fractales.
+
+En conclusión, con el objetivo de familiarizar al lector con la disciplina fractal se redacta una introducción teórica a la misma acompañada de imágenes, códigos y una web interactiva en la que poder ver desde cerca por uno mismo los fractales.
+
+Recomendamos que el lector cuente con ciertos conocimientos básicos en algunas áreas de la informática y las matemáticas. Con respecto a las matemáticas, aunque la mayor parte de la materia está explicada, es deseable que el lector tenga nociones de las materias que describimos a continuación:
+
+\begin{itemize}
+    \item Análisis matemático básico: En la mayoría de los desarrollos matemáticos más elaborados se parte del concepto de `espacio métrico', haciendo uso exhaustivo de la distancia. También se emplea mucho el concepto de sucesión y convergencia (o divergencia) de sucesiones. Es igualmente necesario conocer los conceptos de continuidad de aplicaciones.
+    \item Teoría de la medida: Aunque no se entre en detalle en estos aspectos, viene bien tener claro la medida usual de Lebesgue en $\R^n$ y las bases de teoría de la medida en general.
+    \item Variable compleja: Es prácticamente indispensable que el lector maneje bien los números complejos, propiedades del módulo y potencias enteras de números complejos. Esto, junto con alguna pincelada sobre funciones complejas sería suficiente para abordar el texto desde este punto de vista.
+    \item Geometría afín euclídea: Muy basada en el álgebra lineal, se utilizan conceptos como transformaciones afines, tanto en 2D como en 3D, sistemas de referencia, movimientos rígidos, vectores, etc.
+    \item Matemática aplicada: Utilizamos la iteración y el ordenador para programar los algoritmos de visualización de fractales, aplicando al mundo computacional los procedimientos explicados teóricamente para obtener algo tan tangible como son las imágenes.
+    \item Topología: Aunque en realidad en ningún momento se utiliza una topología distinta de la usual en $\R^n$, es conveniente controlar conceptos como el de conjunto abierto, conjunto cerrado, entorno, compacidad o conexión.
+\end{itemize}
+
+Por su parte, para el desarrollo del producto software se han empleado intensamente técnicas de informática gráfica. A modo de base, es recomendable que el lector conozca aproximadamente la arquitectura hardware de un ordenador, aunque bastaría con saber diferenciar entre la unidad central de procesamiento (CPU, el procesador) y la unidad de procesamiento gráfico (GPU, la gráfica). También sería útil el conocimiento de conceptos estándar de informática gráfica como `rasterización', `ray-tracing', los distintos tipos de coordenadas (de mundo, de cámara y de dispositivo), las transformaciones entre estas coordenadas mediante matrices de vista y proyección, modelos de iluminación, texturas, etc. Todos estos conceptos además suponen un complemento a la geometría euclídea anteriormente descrita. 
+
+Otro aspecto deseable es el conocimiento o uso previo de alguna herramienta de rasterización y sus componentes, y en concreto OpenGL/WebGL. Específicamente, sería útil conocer el concepto de shader y su programación en un lenguaje específico para la GPU (`shading language'). Aunque estos detalles no son indispensables pues se explican estas utilidades y su uso en la propia memoria. 
+
+Para el desarrollo de la web intectativa se ha utilizado naturalmente HTML5 y CSS3 (ayudado también por el framework Bootstrap). Pero la mayor parte del código del software está escrito en JavaScript, ya que es utilizado para la gestión del DOM y de los eventos en el documento HTML. Además, como herramienta de visualización se ha utilizado WebGL, que precisamente utiliza JavaScript para su gestión, de manera que lo usamos como intermediario entre el documento HTML y la gestión dinámica de eventos, pero a su vez también lo utilizamos como lenguaje para interactuar con las herramientas de WebGL.
+
+Se utiliza el lenguaje GLSL (GL Shader Language) para programar el shader de WebGL. El uso de este lenguaje es intensivo, pero tiene una sintaxis muy similar a la de C, por lo que el lector no debe preocuparse si no ha tratado nunca con GLSL, ya que entre la propia documentación oficial y lo descrito aquí será sencillo entender todo el código shader.
+
+Para graficar escenas 3D hemos utilizado la técnica conocida como `ray-tracing', identificando cada objeto con una función distancia (SDF) y aplicando el algoritmo `sphere-tracing'. Con estos elementos se ha implementado en GLSL el shader necesario para graficar las escenas en las que se pueden observar fractales 3D.
+
+Partiendo de estas bases, comenzaremos esta memoria explicando de forma genérica e intuitiva el concepto de fractal, para posteriormente introducir importantes conceptos como autosimilaridad y distintos tipos de relación fractal. Seguidamente introduciremos la iteración de funciones complejas como herramienta para la generación de imágenes fractales mediante la coloración del plano complejo utilizando el método de Newton.
+
+A continuación, y sin alejarnos de la iteración de funciones complejas, presentaremos la familia de funciones $P_c(z)=z^2+c$, con la cual aprenderemos a visualizar y a interpretar el significado de los conjuntos de Julia y Mandelbrot, muy conocidos en el ámbito de los fractales. También presentaremos algunas generalizaciones de estos conjuntos mediante el cambio en el exponente de $P_c$, iterando por tanto la función $P_{c,m}=z^m+c$, y mediante la iteración de funciones no polinómicas.
+
+Continuaremos nuestro camino introduciéndonos en la teoría de los sistemas de funciones iteradas, que se basan también en iterar funciones, pero esta vez sobre conjuntos de un espacio métrico completo, con especial interés en $\R^2$. Desarrollaremos una introducción a los mismos y demostraremos la convergencia de esta particular sucesión de iteradas a objetos de naturaleza fractal.
+
+Seguidamente introduciremos el uso de herramientas de rasterización con el objetivo de conseguir visualizar fractales tanto 2D y 3D. Describiremos conceptos genéricos de informática gráfica y APIs de rasterización para el que lo necesite y en particular introduciremos el uso y los componentes de una aplicación gráfica basada en WebGL. Tras esta breve introducción, modificaremos la estructura y programaremos el shader para visualizar conjuntos de Julia y Mandelbrot, estándar y generalizados, aprovechando la teoría que introdujimos en capítulos anteriores.
+
+Con los fractales en dos dimensiones ya bastante asimilados, es momento de dar el salto a las 3 dimensiones. Para ello, aprenderemos los fundamentos básicos del ray-tracing, con el objetivo primitivo de programar un programa ray-tracer que únicamente visualice una escena sencilla con varias esferas y un suelo con textura de ajedrez. Aplicaremos también un modelo de iluminación local para dotar de luces, sombras y realismo a la escena
+
+Una vez aprendidas las bases del ray-tracing, modificaremos el programa para visualizar fractales tridimensionales, aplicando el algoritmo `sphere-tracing' para obtener imágenes de conjuntos de Julia y Mandelbrot generalizados a tres dimensiones.
+
+Para el desarrollo de esta memoria las fuentes fundamentales consultadas han sido \textit{Iteración y Fractales (con Mathematica)} de Gustavo N. Rubiano \cite{rubiano}, un libro en el que se abordan los principios de la geometría fractal con Mathematica, aunque de una manera muy superficial y poco rigurosa, por ello ha sido completado con más bibliografía. Particularmente, el capítulo \ref{chap:SFI} sobre sistemas de funciones iteradas ha sido fundamentalmente basado en la teoría descrita por Michael Barnsley en \textit{Fractals everywhere} \cite{Barnsley}. 
+
+En temas relacionados con la visualización de fractales con ray-tracing se ha adaptado el código C++ de \textit{Ray Tracing in One Weekend}, de Peter Shirley \cite{Shirley} a código GLSL ejecutado en la GPU. Para graficar fractales se han consultado principalmente los artículos de Íñigo Quilez, disponibles en su web personal \url{https://iquilezles.org/articles/}, los artículos de John Hart de 1989 \cite{Hart-1989} y 1995 \cite{Hart-1995} y el artículo \cite{keenan-crane} de Keenan Crane. 
+
+Sin mucho más que añadir, el humilde autor de este proyecto desea una experiencia agradable durante su lectura y el disfrute de cada una de las secciones.
+
+
+
+
+
+

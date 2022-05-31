@@ -32,6 +32,14 @@
 % ABSTRACT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\chapter*{Resumen}
+
+\import{tex/}{resumen.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ABSTRACT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter*{Abstract}
 
 \import{tex/}{abstract.tex}
@@ -77,54 +85,76 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter*{Introducción}
+\addcontentsline{toc}{chapter}{Introducción}
 \setcounter{page}{1}
 \pagenumbering{arabic}
 
 
 \import{tex/capitulos/}{introduccion.tex}
 
+\chapter*{Objetivos}
+\addcontentsline{toc}{chapter}{Objetivos}
+\label{chap:Objetivos}
 
-\chapter{El concepto de \textit{fractal}}
+\import{tex/}{objetivos.tex}
+
+
+\chapter{El concepto de \textit{fractal}.}
 \label{chap:concepto}
 
 \import{tex/capitulos/}{capitulo-1.tex}
 
-\chapter{Iteración}
+\chapter{Iteración.}
 \label{chap:iteracion}
 
 \import{tex/capitulos/}{capitulo-2.tex}
 
 
-\chapter{Conjuntos de Julia y Mandelbrot}
+\chapter{Conjuntos de Julia y Mandelbrot.}
 \label{chap:Julia-Mandelbrot}
 
 \import{tex/capitulos/}{capitulo-3.tex}
 
-\chapter{Sistemas de Funciones Iteradas}
+\chapter{Sistemas de Funciones Iteradas.}
 \label{chap:SFI}
 
 \import{tex/capitulos/}{capitulo-4.tex}
 
-\chapter{Introducción a las herramientas de renderización}
-\label{chap:renderizacion}
+\chapter*{Desarrollo del Software: Planificación y presupuesto}
+\label{chap:planificacion-presupuesto}
+
+\import{tex/capitulos/}{planificacion-presupuestos.tex}
+
+\chapter*{Desarrollo del Software: Análisis y diseño}
+\label{chap:analisis-diseno}
+
+\import{tex/capitulos/}{analisis-diseno.tex}
+
+\chapter{Introducción a las herramientas de visualización}
+\label{chap:visualizacion}
 
 \import{tex/capitulos/}{capitulo-5.tex}
 
-\chapter{Visualización de fractales en 2D}
+\chapter{Visualización de fractales en 2D.}
 \label{chap:fractales-2D}
 
 \import{tex/capitulos/}{capitulo-6.tex}
 
-\chapter{Introducción al \textit{Ray-Tracing}}
+\chapter{Introducción al \textit{Ray-Tracing}.}
 \label{chap:ray-tracing}
 
 \import{tex/capitulos/}{capitulo-7.tex}
 
-\chapter{Visualización de fractales en 3D}
+\chapter{Visualización de fractales en 3D.}
 \label{chap:fractales-3D}
 
-
 \import{tex/capitulos/}{capitulo-8.tex}
+
+\chapter*{Conclusiones}
+\addcontentsline{toc}{chapter}{Conclusiones}
+\label{chap:conclusiones}
+
+\import{tex/}{conclusiones.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % REFERENCIAS
@@ -148,6 +178,9 @@
 
 \chapter{Documentación del código JavaScript}
 \label{appendix:javascript}
+
+\import{tex/apendices/}{javascript-doc.tex}
+
 
 \chapter{Another Appendix}
 

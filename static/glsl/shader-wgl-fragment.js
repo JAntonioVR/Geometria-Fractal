@@ -70,22 +70,22 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 
 // Decide which point on the complex plane this fragment corresponds to.
 vec2 get_world_coordinates() {
-    vec2 uv = gl_FragCoord.xy / vec2(720.0, 720.0);
+    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(720.0, 720.0);
     return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
 }
 
-void assignColor(bool escaped, int iterations) {
-    gl_FragColor = escaped ? vec4(palette(
-      3.0*float(iterations)/ float(u_maxIterations),
-      vec3(0.109,0.109,0.647), 
-      vec3(0.823, 0.411, 0.0), 
-      vec3(0.769, 0.659, 0.0), 
-      vec3(0.627,0.878,0.043)
+vec4 computePixelColor(bool escaped, int iterations) {
+    return escaped ? vec4(palette(
+      float(iterations)/ float(u_maxIterations),
+      vec3(0.109,0.109,0.647), // #1C1CA5
+      vec3(0.823, 0.411, 0.0), // #D26900
+      vec3(0.769, 0.659, 0.0), // #C4A800
+      vec3(0.627,0.878,0.043)  // #A0E00B
       ), 
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
-void Julia(vec2 c, int n) {
+vec4 Julia(vec2 c, int n) {
     vec2 z0 = get_world_coordinates();
     int iterations;
     vec2 z = z0;
@@ -101,10 +101,10 @@ void Julia(vec2 c, int n) {
         }
     }
 
-    assignColor(escaped, iterations);
+    return computePixelColor(escaped, iterations);
 }
 
-void Mandelbrot(int n) {
+vec4 Mandelbrot(int n) {
 
   vec2 c = get_world_coordinates();
   
@@ -124,17 +124,19 @@ void Mandelbrot(int n) {
     }
   }
 
-  assignColor(escaped, iterations);
+  return computePixelColor(escaped, iterations);
   
 }
 
 void main() {
+  vec4 color;
   if(u_fractal == 0){
-    Mandelbrot(u_order);
+    color = Mandelbrot(u_order);
   }
   else{
-    Julia(u_juliaSetConstant, u_order);
+    color = Julia(u_juliaSetConstant, u_order);
   }
+  gl_FragColor = color;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
