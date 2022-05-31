@@ -1,4 +1,4 @@
-Una vez estimada la planificación temporal y el presupuesto del proyecto, es momento de definir correctamente los requisitos y la funcionalidad que ofrecerá el producto. Para ello, haremos un análisis de requisitos del problema, estableceremos sus casos de uso y diseñaremos las clases y métodos necesarios durante la implementación. Finalmente, diseñaremos los bocetos del sitio web que próximamente daremos vida.
+Una vez estimada la planificación temporal y el presupuesto del proyecto, es momento de definir correctamente los requisitos y la funcionalidad que ofrecerá el producto. Para ello, haremos un análisis de requisitos del problema, estableceremos sus casos de uso y veremos mediante un diagrama las interacciones entre los mismos. Finalmente, diseñaremos los bocetos del sitio web que próximamente daremos vida.
 
 \section*{Análisis de requisitos}
 
@@ -18,11 +18,11 @@ En caso de la visualización de fractales 2D:
 En caso de fractales 3D:
 \begin{itemize}
     \item \textbf{RF2.1}: Visualización de generalizaciones tridimensionales de los conjuntos de Julia y Mandelbrot.
-    \item Posibilidad de alternar qué fractal ver en el canvas en cada momento.
-    \item \textbf{RF2.2}: Posibilidad de modificar parámetros del modelo de iluminación para así observar distintos materiales y coloraciones en los fractales.
-    \item \textbf{RF2.3}: Modificar parámetros de los algoritmos de visualización que empleemos.
-    \item Posibilidad de moverse libremente por la escena utilizando una cámara orbital.
-    \item \textbf{RF2.4}: Hacer zoom en la escena para poder observar de cerca las superficies de los fractales.
+    \item \textbf{RF2.2}: Posibilidad de alternar qué fractal 3D ver en el canvas en cada momento.
+    \item \textbf{RF2.3}: Posibilidad de modificar parámetros del modelo de iluminación para así observar distintos materiales y coloraciones en los fractales.
+    \item \textbf{RF2.4}: Modificar parámetros de los algoritmos de visualización que empleemos.
+    \item \textbf{RF2.5}: Posibilidad de moverse libremente por la escena utilizando una cámara orbital.
+    \item \textbf{RF2.6}: Hacer zoom en la escena para poder observar de cerca las superficies de los fractales.
 \end{itemize}
 De forma genérica:
 \begin{itemize}
@@ -59,7 +59,7 @@ A continuación describiremos los posibles casos de uso del software a desarroll
     \item \textbf{CU7}: Mensaje de error. Ante cualquier error posible, se notifica del mismo al usuario.
 \end{itemize}
 
-Ante estos casos de uso, en la figura \ref{fig:casos-uso} vemos el diagrama de casos de uso, en el cual vemos a cuales de ellos puede acceder el usuario y qué interdependencias hay entre ellos.
+Ante estos casos de uso, en la figura \ref{fig:casos-uso} vemos el diagrama de casos de uso, en el cual vemos a cuales de ellos puede acceder el usuario y qué interdependencias hay entre los mismos.
 
 \begin{figure} [ht]
 \centering

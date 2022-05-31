@@ -8,7 +8,7 @@ En los anteriores capítulos hemos visto cómo asignar colores a los píxeles ut
 
 En el mundo de la informática gráfica existen dos formas fundamentales de proceder a la representación de escenas. Supongamos que tenemos una escena 3D con varios objetos, como pueden ser por ejemplo un cubo y un par de esferas y queremos visualizar la misma en un canvas 2D.
 \begin{itemize}
-    \item Una de las formas de representarla es la \textbf{rasterización}, ya introducida al inicio del capítulo \ref{chap:visualizacion}. Esta técnica se basa en modelos de fronteras de objetos 3D. Esto es, se representan objetos constituidos a partir de conjuntos de caras planas poligonales (típicamente triángulos), y se denominan primitivas a dichas caras. Pensemos por ejemplo en un cono como una pirámide cuya base es un polígono regular de muchas caras. El método consiste en identificar para cada primitiva que compone la escena qué píxeles ocupa y asignar color a cada píxel, aplicando posibles modelos de iluminación y texturas.
+    \item Una de las formas de representarla es la \textbf{rasterización}, ya introducida al inicio del capítulo \ref{chap:visualizacion}. Esta técnica se basa en modelos de fronteras de objetos 3D. Esto es, se representan objetos constituidos a partir de conjuntos de caras planas poligonales (típicamente triángulos), y se denominan primitivas a dichas caras. Pensemos por ejemplo en un cono como una pirámide cuya base es un polígono regular de muchos lados. El método consiste en identificar para cada primitiva que compone la escena qué píxeles ocupa y asignar color a cada píxel, aplicando posibles modelos de iluminación y texturas.
     \item Otra forma es, para cada pixel, calcular qué primitivas de la escena se proyectan sobre dicho píxel y colorearlo dependiendo de la primitiva más cercana al observador. Esta es la base del \textbf{Ray-Tracing}. En este caso los objetos son representados mediante un algoritmo de cálculo de intersección entre una semirrecta (rayo) y la superficie del objeto en cuestión. Esto engloba los modelos de fronteras utilizados en rasterización, pero además abre posibilidades como objetos con extensión infinita o los propios fractales, que son nuestro principal objetivo.
 \end{itemize}
 
@@ -29,7 +29,7 @@ Por tanto, es mucho más sencillo usar RT, el cual, si bien también es algo apr
 
 Otra gran ventaja del ray-tracing sobre la rasterización es la dificultad de elegir una conversión a modelos de fronteras con una resolución adecuada. Si la discretización es demasiado fina el tiempo de computación crece mientras que se consigue una mayor resolución, y si no es lo suficientemente fina se pierde mucha resolución.
 
-Sin embargo, este algoritmo tiene una principal desventaja, y es que es un proceso muy costoso, y más aún cuanto más detalle queramos conseguir. Es por esto que ha sido muy difícil dar el salto al ray tracing en tiempo real. Por ejemplo, en el mundo de los videojuegos, NVIDIA, que es una famosa empresa desarrolladora de tarjetas gráficas, comenzó a desarrollar algoritmos para poder utilizar RT en sus tarjetas hace varios años, pero hasta finales de 2018 no salieron al mercado las primeras gráficas con estas características. Por su parte, los juegos también deben soportar el algoritmo, por lo que aún son una minoría de videojuegos los que en la actualidad soportan Ray Tracing. En un futuro no muy lejano es posible que haya una tendencia a un desarrollo masivo de juegos que utilicen RT, pero de momento solo tenemos algunos ejemplos como Battlefield V, Minecraft, Metro Exodus, Watch Dogs y Call of Duty: Modern Warfare (2019).
+Sin embargo, este algoritmo tiene una principal desventaja, y es que es un proceso muy costoso, y más aún cuanto más detalle queramos conseguir. Es por esto que ha sido muy difícil dar el salto al ray tracing en tiempo real. Por ejemplo, en el mundo de los videojuegos NVIDIA, que es una famosa empresa desarrolladora de tarjetas gráficas, comenzó a desarrollar algoritmos para poder utilizar RT en sus tarjetas hace varios años, pero hasta finales de 2018 no salieron al mercado las primeras gráficas con estas características. Por su parte, los juegos también deben soportar el algoritmo, por lo que aún son una minoría de videojuegos los que en la actualidad soportan Ray Tracing. En un futuro no muy lejano es posible que haya una tendencia a un desarrollo masivo de juegos que utilicen RT, pero de momento solo tenemos algunos ejemplos como Battlefield V, Minecraft, Metro Exodus, Watch Dogs y Call of Duty: Modern Warfare (2019).
 
 En resumen, y por todas las ventajas y a pesar de las desventajas que hemos descrito de RT sobre la rasterización y los modelos de fronteras en nuestro problema concreto, tomamos la decisión de programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de generar fractales 3D. La idea por tanto es lanzar rayos a cada píxel y en caso de encontrar intersección con el objeto evaluar un modelo de iluminación para asignar un color concreto.
 
@@ -86,7 +86,7 @@ Las siguientes secciones irán dedicadas a explicar la programación del fragmen
 \section{Creación de rayos primarios}
 \label{section:rayo}
 
-Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (inicio de la sección \ref{section:fs-2D}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección} ($P$), que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
+Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (sección \ref{section:pantalla-plano}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección} ($P$), que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
 
 Para cada píxel debemos calcular su posición central en coordenadas de mundo a partir de las coordenadas de dispositivo, que son dos valores enteros $(x',y')$, aunque para identificar cada píxel con su centro tomaremos como coordenadas de dispositivo $(x,y)=(x',y')+\left(\frac 1 2, \frac 1 2\right)$. Este proceso es justamente el contrario al que se utiliza en rasterización, donde se necesita convertir las coordenadas de mundo de las primitivas en coordenadas de dispositivo. Para ello, se utiliza una matriz $M$ que es la composición de la matriz de vista 3D, la cual transforma coordenadas de mundo (WC) a coordenadas de cámara junto con la matriz de proyección, que calcula las coordenadas de dispositivo (DC) a partir de las coordenadas de cámara (véase la analogía con los párrafos que describen la transformación \ref{eq:transformacion-lineal-matrix}). Por tanto, en cierto sentido lo que buscamos es buscar una transformación lineal asociada a la inversa de la matriz $M$.
 
@@ -96,7 +96,7 @@ En nuestro caso concreto utilizaremos un canvas de $1280\times 720$ píxeles, qu
 <canvas id="glCanvas" width="1280" height="720"></canvas>
 \end{lstlisting}
 
-Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} u origen y denotamos como $o_c$ al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} o punto de atención $a_t$ al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. 
+Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} u origen y denotamos como $o_c$ al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} o punto de atención $a_t$ al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. En ocasiones nos referiremos al punto $o_c$ como posición del observador o punto de vista.
 
 Como convención asumimos que a la derecha se sitúa el eje positivo $X$, hacia arriba el eje positivo $Y$ y el `interior de la pantalla' es el eje negativo $Z$. Asumimos ahora también que el plano de proyección tiene 2 unidades de alto, lo cual implica que si el ratio ancho/alto es $16/9$ entonces el ancho es de $3.55$ unidades, aunque ese es un valor que calcularemos y almacenaremos en una variable y no importará realmente cual sea.
 
@@ -173,7 +173,7 @@ La transformación $\phi$ es la que corresponde a la inversa de la matriz $M$ de
     \phi(x,y) = \left(\begin{array}{ccc|c}
         \frac{P_w}{n_x} & 0 & 0 & 0 \\
         0 & \frac{P_h}{n_y} & 0 & 0 \\
-        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & -1 \\ \hline
         0 & 0 & 0 & 1
     \end{array}\right)\left(
         \begin{array}{c}
@@ -206,12 +206,13 @@ Ray get_ray(vec3 lookfrom, vec3 lookat,
 // ... 
 
 // Dimensiones del canvas
-float aspect_ratio = float(16.0) / float(9.0);
+float aspect_ratio = 16.0/9.0;
 float image_width = 1280.0;
 float image_height = image_width / aspect_ratio;
 
 // Coordenadas de dispositivo normalizadas [0,1]
-vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / 
+    vec2(image_width, image_height);
 float u = uv.x;
 float v = uv.y;
 
@@ -229,7 +230,7 @@ Ray R = get_ray(lookfrom, lookat,
     u, v);
 \end{lstlisting}
 
-Y de esta forma el fragment shader obtiene un rayo por cada píxel que tiene como origen el foco de la proyección y que interseca con el punto correspondiente al píxel en el plano de proyección.
+Y de esta forma el fragment shader obtiene un rayo por cada píxel que tiene como origen la posición del observador y que interseca con el plano de proyección en el punto correspondiente al píxel.
 
 \section{El background}
 
@@ -273,7 +274,7 @@ gl_FragColor = ray_color(R);
 
 Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez. 
 
-Para ello, y debido a la simplicidad que requiere el cálculo de intersecciones rayo-esfera y rayo-plano, calcularemos analíticamente las intersecciones, explicando detalladamente cómo hallarlas en las secciones \ref{subsection:esfera} y \ref{subsection:plano} respectivamente. En el capítulo \ref{chap:fractales-3D} sustituimos este cálculo analítico por un cálculo iterativo utilizando el algoritmo ray-marching, pero a modo introductorio es más sencillo de momento calcular directamente las intersecciones.
+Para ello, y debido a la simplicidad que requiere el cálculo de intersecciones rayo-esfera y rayo-plano, calcularemos analíticamente las intersecciones, explicando detalladamente cómo hallarlas en las secciones \ref{subsection:esfera} y \ref{subsection:plano} respectivamente. En el capítulo \ref{chap:fractales-3D} sustituimos este cálculo analítico por un cálculo iterativo utilizando el algoritmo sphere-tracing, pero a modo introductorio es más sencillo de momento calcular directamente las intersecciones.
 
 Tras esta visualización sencilla, en la sección \ref{section:Phong} emplearemos además un modelo de iluminación local sencillo pero muy utilizado: el modelo de Phong, el cual se describe con detalle a nivel teórico y a nivel de código. Con esto completaríamos los tres ítems esenciales que mencionamos al inicio de la sección \ref{section:elementos-RT}: rayos primarios, intersecciones y MIL.
 
@@ -496,7 +497,7 @@ donde de nuevo el punto $\cdot$ denota el producto escalar. Si ahora queremos ca
         t &=\dfrac{D-p_0\cdot \vec N}{\vec v\cdot \vec N}
     \end{split}
 \end{equation}
-Lo cual nos dice en qué $t$ se produce la intersección. Obsérvese que en el caso de que la dirección del rayo $\vec v$ y la normal al plano $\vec N$ sean perpendiculares (i.e. $\vec v\cdot N=0$), lo cual se traduce en que el rayo es paralelo al plano o está incluido en el mismo, no existe intersección.
+Lo cual nos dice en qué $t$ se produce la intersección. Obsérvese que en el caso de que la dirección del rayo $\vec v$ y la normal al plano $\vec N$ sean perpendiculares (\textit{i.e.} $\vec v\cdot N=0$), lo cual se traduce en que el rayo es paralelo al plano o está incluido en el mismo, no existe intersección.
 
 Como ya hemos dicho, podemos identificar unívocamente un plano a partir de su normal en cualquier punto y una constante $D\in\R$, por lo que mediante una estructura podemos representar en GLSL un plano.
 
@@ -510,7 +511,7 @@ struct Plane{
 Y a partir de la ecuación (\ref{eq:plano-recta}) podemos implementar la función \verb|hit_plane|, que hace lo correspondiente a \verb|hit_sphere| pero acepta como argumento un plano y devuelve la intersección con el mismo.
 
 \begin{lstlisting}
-Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
+Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max){
     Hit_record result;
     float oc = dot(P.normal, R.dir);
     if(oc == 0.0){  // No hay interseccion
@@ -608,9 +609,9 @@ gl_FragColor = ray_color(r, world, num_spheres, P);
 \section{Configurando la cámara}
 \label{section:camara}
 
-Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos al principio de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que el observador se mantiene fijo carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
+Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que tanto el observador como la escena se mantienen fijos carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
 
-Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa ($o_c$), es decir, el punto de vista; y \textit{lookat} al punto sobre el cual se fija la mirada ($a_t$). Nótese que realmente el punto $a_t$ puede ser cualquiera situado en la semirrecta que une al observador y el centro del plano, no tiene por qué estar incluido como tal en el plano de proyección; pensemos en alguna vez que hemos pensado que alguien nos saludaba y realmente saludaba a alguien que está detrás nuestra.
+Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa ($o_c$), es decir, el punto de vista; y \textit{lookat} al punto sobre el cual se fija la mirada ($a_t$). Nótese que realmente el punto $a_t$ puede ser cualquiera situado en la semirrecta que une al observador y el centro del plano de proyección, no tiene por qué estar incluido como tal en el propio plano de proyección; pensemos en alguna vez que hemos pensado que alguien nos saludaba y realmente saludaba a alguien que está detrás nuestra.
 
 Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ ($r=16/9$) se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 \rad$, sea $h=\tan\left(\frac \theta 2\right)=1$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica, asumiendo una distancia focal de $1$, que la altura del plano de proyección (\verb|viewport_height|) es $P_h=2h$, por lo que la anchura es $P_w=r\cdot P_h$. 
 
@@ -621,13 +622,13 @@ Se denomina \textit{field of view (FOV)} al ángulo total observable, que corres
     \label{fig:fov}
 \end{figure}
 
-Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up (vup)}, el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $\overrightarrow{\mathrm{vup}}=(0,1,0)$. Mediante el vector $\vec{v}_d=a_t-o_c$ (\textit{view direction}) y el vector $\overrightarrow{\mathrm{vup}}$ podemos crear un sistema de referencia ortonormal del plano ortogonal a $\vec{v}_d$ que pasa por el punto $o_c$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente son iguales, y son por tanto paralelos desde el punto de vista afín, son planos distintos. Precisamente de este hecho nos aprovecharemos más tarde. Presentamos entones los siguientes vectores
+Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up} ($\overrightarrow{\mathrm{vup}}$), el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $\overrightarrow{\mathrm{vup}}=(0,1,0)$. Mediante el vector $\vec{v}_d=o_c-a_t$ (\textit{view direction}) y el vector $\overrightarrow{\mathrm{vup}}$ podemos crear un sistema de referencia ortonormal del plano ortogonal a $\vec{v}_d$ que pasa por el punto $o_c$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente son iguales, y son por tanto paralelos desde el punto de vista afín, son planos distintos. Precisamente de este hecho nos aprovecharemos más tarde. Presentamos entones los siguientes vectores
 \begin{eqnarray*}
-    \vec w = \dfrac{a_t-o_c}{\|a_t-o_c\|}, \\
-    \vec u = \dfrac{\overrightarrow{\mathrm{vup}}\times \vec w}{\overrightarrow{\mathrm{vup}} \times \vec w}, \\
+    \vec w = \dfrac{o_c-a_t}{\|o_c-a_t\|}, \\
+    \vec u = \dfrac{\overrightarrow{\mathrm{vup}}\times \vec w}{\|\overrightarrow{\mathrm{vup}} \times \vec w\|}, \\
     \vec v = \vec w\times \vec u,
 \end{eqnarray*}
-de forma que los vectores $\vec u,\vec v$ son, por su propia definición ortogonales a $\vec{v}_d$ y ortogonales entre sí. Además están normalizados, constituyendo así una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}, mientras que $\vec w$ por su parte toma el relevo del vector $-(0,0,1)$. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}. El conjunto $\{o_c; \vec u, \vec v,\vec w\}$ es por tanto un sistema de referencia del plano afín paralelo al plano de proyección que pasa por el punto $o_c$, al cual se le suele denominar \textit{marco de coordenadas de vista}.
+de forma que los vectores $\vec u,\vec v$ son, por su propia definición ortogonales a $\vec{v}_d$ y ortogonales entre sí. Además están normalizados, constituyendo así una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}, mientras que $\vec w$ por su parte toma el relevo del vector $(0,0,1)$. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}. El conjunto $\{o_c; \vec u, \vec v,\vec w\}$ es por tanto un sistema de referencia del plano afín paralelo al plano de proyección que pasa por el punto $o_c$, al cual se le suele denominar \textit{marco de coordenadas de vista}.
 
 \begin{figure} [ht]
     \centering
@@ -656,7 +657,7 @@ donde \verb|origin| son las coordenadas de mundo del punto en el que se sitúa l
 \end{figure}
 
 
-Es claro que el origen es el punto \textit{lookfrom} ($o_c$), el vector horizontal es $P_w\cdot \vec u$ y el vector vertical es $P_h\cdot \vec v$. Por tanto, la esquina inferior izquierda sería
+Es claro que el origen es el punto \textit{lookfrom} ($o_c$), el vector horizontal es $P_w\cdot \vec u$ y el vector vertical es $P_h\cdot \vec v$. Por tanto, asumiendo una distancia focal de $1$, la esquina inferior izquierda sería
 $$
 \mathrm{LLC} = o_c - \frac{P_w}{2}\cdot \vec u - \frac{P_h}{2}\cdot \vec v - \vec w.
 $$
@@ -701,6 +702,7 @@ Camera init_camera (vec3 lookfrom, vec3 lookat,
     float focal_length = 1.0;
     float theta = degrees_to_radians(vfov); // Vertical FOV
     float h = tan(theta/2.0);
+    // Projection Plane dimension
     float viewport_height = 2.0*h*focal_length;
     float viewport_width = aspect_ratio * viewport_height;
 
@@ -734,8 +736,6 @@ Ray get_ray(Camera cam, float u, float v){
 \end{lstlisting}
 
 Vemos que ahora son los vectores \verb|cam.horizontal| y \verb|cam.vertical| los que hacen la función que en la primera implementación hacian los vectores \verb|vec3(viewport_width, 0.0, 0.0)| y \verb|vec3(0.0, viewport_height, 0.0)|.
-
-De nuevo, estas transformaciones no son más que aplicaciones afines, por lo que, al igual que en el caso base de la sección \ref{section:rayo} y en el caso 2D la transformación \ref{eq:transformacion-lineal-matrix} es posible representar esta transformación como la aplicación de la inversa de la matriz $M$ de vista y modelado, que en este caso debe de utilizar los parámetros de la cámara y el marco de referencia de vista. 
 
 Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_camera| y observar cómo cambia el punto de vista aunque la escena sea la misma. En principio vamos a mantener constantes el $\widehat{\mathrm{fov}}=90^\circ$, el vector $\overrightarrow{\mathrm{vup}}=(0,1,0)$ y el ratio 16:9, pero como nos gustaría poder movernos con libertad por la escena, declararemos dos variables \verb|uniform| que representen el punto $o_c$ y el punto $a_t$, a las cuales podremos asignarle variables dinámicamente desde JavaScript y dar la sensación de movimiento.
 
@@ -777,7 +777,7 @@ Por ejemplo, si fijamos $o_c = (1,1,1)$ y $a_t = (0,0,0)$ obtenemos la imagen \r
 
 \section{Modelo de iluminación de Phong}
 \label{section:Phong}
-En este punto hemos creado una escena sencilla y podemos movernos libremente por ella, pero vendría bien una dosis de realismo a la escena. Para finalizar este capítulo de introducción al Ray-Tracing, dotaremos a la escena de fuentes de luz y añadiremos a los objetos que componen la escena un material que nos permita observar sus irregularidades más allá del material normal que definimos en la sección \ref{subsection:esfera} a la hora de darle color a la esfera.
+En este punto hemos creado una escena sencilla y podemos movernos libremente por ella, pero vendría bien una dosis de realismo a la escena. Para ello, dotaremos a la escena de fuentes de luz y añadiremos a los objetos que componen la escena un material que nos permita observar su aspecto más allá del material normal que definimos en la sección \ref{subsection:esfera} a la hora de darle color a la esfera.
 
 La iluminación real es imposible de simular porque cada punto de cada objeto irradia una cantidad de luz en todas las direcciones que es inviable de computar, por ello necesitamos de aproximaciones que simulen en mayor o menor medida dicha iluminación. Existen muchos y muy distintos modelos de iluminación, tan complejos y realistas como queramos. El conocido \textit{modelo de Phong} no es ni el más realista, ni el más complejo, pero es suficiente para nuestro cometido, pues nos permite darle colores a los materiales y apariencias mate además de posibles brillos que consiguen efectos metalizados.
 
@@ -789,7 +789,7 @@ Primero de todo, haremos una clasificación de los distintos modelos de iluminac
 Como consecuencia de esta clasificación, los modelos de iluminación pueden clasificarse en:
 \begin{itemize}
     \item \textbf{Modelos locales}: Únicamente consideran la iluminación directa
-    \item \textbf{Modelos globales}: Consideran tanto iluminación direcra como indirecta.
+    \item \textbf{Modelos globales}: Consideran tanto iluminación directa como indirecta.
 \end{itemize}
 El modelo de Phong es un modelo de iluminación local, es decir, tan solo consideraremos la posible acción directa de una fuente de luz sobre los objetos, lo cual es además computacionalmente más sencillo. Este modelo se basa en descomponer la luz que incide sobre un punto de un objeto en tres componentes RGB: ambiental, difusa y especular.
 
@@ -819,7 +819,7 @@ La componente ambiental representa la luz del entorno y afecta uniformemente a t
 
 Cuando la luz impacta sobre un objeto, si este es opaco la luz es reflejada a muchas direcciones, si es translúcido entra en el objeto. Esta componente representa la cantidad de luz que es reflejada. Nosotros consideraremos que la misma cantidad de luz que incide es la que se refleja en todas las direcciones (los objetos son totalmente opacos), y esta depende tanto del ángulo de incidencia como de la normal a la superficie en dicho punto. A esta componente también se le llama reflexión de Lambert por su relación con el modelo de Lambert.
 
-Fijada una fuente de luz, la iluminación difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto $\vec N$ y la dirección de la fuente de luz $\vec L_p$, el cual, si $\vec N$ y $\vec L_p$ están normalizados se calcula simplemente como el producto escalar $\vec N\cdot \vec L_p$ (véase imagen \ref{fig:difusa}). Por tanto,
+Fijada una fuente de luz, la iluminación difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto ($\vec N$) y la dirección de la fuente de luz ($\vec L_p$), el cual, si $\vec N$ y $\vec L_p$ están normalizados se calcula simplemente como el producto escalar $\vec N\cdot \vec L_p$ (véase imagen \ref{fig:difusa}). Por tanto,
 \begin{equation}
     I_{d_p} = I_p k_d (\vec N\cdot \vec L_p)
 \end{equation}
@@ -839,7 +839,7 @@ Fijémonos que este cálculo es independiente de la posición de la cámara, sol
 
 \subsection{Componente especular}
 
-Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto con brillo. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí del foco de la proyección respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con el punto de vista, llamémoslo  $\vec V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $\vec R_p$. Véase la imagen \ref{fig:especular} para mayor claridad. El tamaño del resplandor que causan estos brillos se regula con una constante real $n\in\R$ que es parte de las propiedades del material.
+Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto con brillo. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí de la posición de la cámara respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con el punto de vista, llamémoslo  $\vec V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $\vec R_p$. Véase la imagen \ref{fig:especular} para mayor claridad. El tamaño del resplandor que causan estos brillos se regula con una constante real $n\in\R$ que es parte de las propiedades del material.
 
 \begin{figure} [ht]
     \centering
@@ -848,7 +848,7 @@ Esta componente representa a las reflexiones directas de la fuente de luz sobre 
     \label{fig:especular}
 \end{figure}
 
-A partir de toda esta información, la iluminación especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $\vec R_p$ y $\vec V$ son unitarios, $\cos\alpha=\vec R\cdot \vec V$, por lo que tenemos que
+A partir de toda esta información, la iluminación especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $\vec R_p$ y $\vec V$ son unitarios, $\cos\alpha=\vec R_p\cdot \vec V$, por lo que tenemos que
 \begin{equation}
     I_{s_p} = I_p k_s (\vec R_p\cdot \vec V)^n
 \end{equation}   
@@ -858,8 +858,9 @@ Al igual que en el caso de la componente difusa, el resultado final es la suma d
 \end{equation}
 
 \subsection{Sombras arrojadas}
+\label{subsection:sombras}
 
-Hay algunas situaciones en las que las que no se aplica iluminación difusa ni especular, y es en el caso de que la luz no incida directamente sobre el punto. Hay varias formas de saber si un punto concreto está o no en la sombra. Pensemos primero en puntos que están `en la cara oculta' de un objeto. Es decir, pertenecen a una zona de un objeto sobre la cual una fuente de luz concreta no incide. Para determinar esto se puede utilizar la normal a la superficie en dicho punto, $\vec N$, y el vector dirección de la fuente de luz, $\vec L_p$. Si el coseno del ángulo $\theta$, que recordemos que es el vector formado por $\vec N$ y $\vec L_p$, entonces consideramos que la luz no incide sobre el punto, véase la imagen \ref{fig:excepcion}.
+Hay algunas situaciones en las que las que no se aplica iluminación difusa ni especular, y es en el caso de que la luz no incida directamente sobre el punto. En este caso, al no incidir la luz se considera que el punto está en la sombra provocada por dicha luz. Hay varias formas de saber si un punto concreto está o no en la sombra. Pensemos primero en puntos que están `en la cara oculta' de un objeto. Es decir, pertenecen a una zona de un objeto sobre la cual una fuente de luz concreta no incide. Para determinar esto se puede utilizar la normal a la superficie en dicho punto, $\vec N$, y el vector dirección de la fuente de luz, $\vec L_p$. Si el coseno del ángulo $\theta$, que recordemos que es el vector formado por $\vec N$ y $\vec L_p$, es negativo, entonces consideramos que la luz no incide sobre el punto, véase la imagen \ref{fig:excepcion}.
 
 \begin{figure} [ht]
     \centering
@@ -888,11 +889,11 @@ Por ejemplo, fíjese en la imagen \ref{fig:sombras}. Si se lanza un rayo desde e
     \label{fig:sombras}
 \end{figure}
 
-Por cualquiera de las dos razones, un punto puede ocurrir que esté a la sombra, en cuyo caso no se calcularían o se anularían las componentes difusa y especular del modelo. Por tanto, las intensidades difusa y especular se redefinen multiplicando cada una de las dos por una constante binaria para cara luz $c_p$, la cual vale $0$ si el punto evaluado está a la sombra o $1$ si la luz incide sobre el mismo.
+Por cualquiera de las dos razones, un punto puede ocurrir que esté a la sombra, en cuyo caso no se calcularían o se anularían las componentes difusa y especular del modelo. Por tanto, las intensidades difusa y especular se redefinen multiplicando cada una de las dos por una constante binaria para cada luz, $c_p$, la cual vale $0$ si el punto evaluado está a la sombra o $1$ si la luz incide sobre el mismo.
 
 \begin{align*}
-    I_{d_p} &= c_p I_p k_d (\vec N\cdot \vec L_p)  & I_d &= \sum_{p=1}^k I_p k_d (\vec N\cdot \vec L_p)\\
-    I_{s_p} &= c_p I_p k_s (\vec R_p\cdot \vec V)^n & I_s &= \sum_{p=1}^k I_p k_s (\vec R_p \cdot \vec V)^n
+    I_{d_p} &= c_p I_p k_d (\vec N\cdot \vec L_p)  & I_d &= \sum_{p=1}^k c_p I_p k_d (\vec N\cdot \vec L_p)\\
+    I_{s_p} &= c_p I_p k_s (\vec R_p\cdot \vec V)^n & I_s &= \sum_{p=1}^k c_p I_p k_s (\vec R_p \cdot \vec V)^n
 \end{align*}
 
 \subsection{Evaluación del modelo de iluminación}
@@ -938,7 +939,7 @@ struct Directional_light{
 };    
 \end{lstlisting}
 
-Lo siguiente es fijarnos en que el material del objeto desempeña una labor fundamental, de hecho es el que define finalmente la apariencia del mismo. Este material tiene como elementos las reflectividades ambiental ($k_a$), difusa ($k_d$) y especular ($k_s$), las cuales son también tripletas RGB. Además de las reflectividades, el exponente de brillo $n$ también es una propiedad del material. De esta forma, podemos representar un material con un struct tal que así:
+Lo siguiente es fijarnos en que el material del objeto desempeña una labor fundamental, de hecho es el que define finalmente la apariencia del mismo. Este material tiene como elementos las reflectividades ambiental ($k_a$), difusa ($k_d$) y especular ($k_s$), las cuales son también tuplas RGBA. Además de las reflectividades, el exponente de brillo $n$ también es una propiedad del material. De esta forma, podemos representar un material con un struct tal que así:
 
 \begin{lstlisting}
 struct Material {
@@ -951,7 +952,7 @@ struct Material {
 
 Como ya hemos comentado, cada objeto tiene un único material, por lo que añadimos a las estructuras \verb|Sphere| y \verb|Plane| un nuevo campo \verb|Material mat;| de forma que a cada esfera y al plano se le puede asignar un material. Además, en caso de intersección almacenábamos información en una estructura \verb|Hit_record|, y esa información es la que nos servía para calcular el color. De igual manera que necesitábamos por ejemplo la normal ahora necesitamos saber el material del objeto con el que impacta el rayo, por lo que añadimos a \verb|Hit_record| también un campo \verb|Material mat;| al cual se le asignaría el material del objeto con el que se produce el choque.
 
-Necesitamos ahora una función que, dado un punto, trace un rayo en dirección de una fuente de luz dada y devuelva 0 si hay intersección con algún objeto y 1 si no la hay. Fijémonos que debemos calcular intersecciones que estén a una pequeña distancia del punto, ya que en otro caso las funciones que calculan la intersección siempre calcularían que existe impacto (pues el punto que se evalúa está en una superficie), de forma que todos los puntos estarían a la sombra, cosa que no tiene sentido. Además, consideramos que solo las esferas arrojan sombras.
+Para calcular la constante $c_p$ con la que conseguir el sombreado necesitamos ahora una función que, dado un punto, trace un rayo en dirección de una fuente de luz dada y devuelva 0 si hay intersección con algún objeto y 1 si no la hay. Fijémonos que debemos calcular intersecciones que estén a una pequeña distancia del punto, ya que en otro caso las funciones que calculan la intersección siempre calcularían que existe impacto (pues el punto que se evalúa está en una superficie), de forma que todos los puntos estarían a la sombra, cosa que no tiene sentido. Además, consideramos que solo las esferas arrojan sombras.
 
 \begin{lstlisting}
 float light_is_visible(Directional_light light, vec3 p, 
@@ -973,51 +974,53 @@ Además, con el objetivo de añadir eficiencia e interactividad se ha añadido u
 uniform bvec3 u_shadows;
 \end{lstlisting}
 
-Con estas variaciones ya podríamos implementar una función que evalue el modelo de iluminación completo a partir de la ecuación (\ref{eq:phong}). Esta función necesita como argumentos las fuentes de luz, el material, el punto en el que se evalúa el modelo, la normal a la superficie en dicho punto, los objetos que arrojan sombras y el punto de vista. Toda esta información puede ser recogida en un array de objetos \verb|Directional_light|, en la estructura \verb|Hit_record| que almacena la información del choque, en la variable global \verb|u_lookfrom| y el vector de esferas. Presentamos por tanto el código de dicha función.
+Con estas variaciones ya podríamos implementar una función que evalúe el modelo de iluminación completo a partir de la ecuación (\ref{eq:phong}). Esta función necesita como argumentos las fuentes de luz, el material, el punto en el que se evalúa el modelo, la normal a la superficie en dicho punto, los objetos que arrojan sombras y el punto de vista. Toda esta información puede ser recogida en un array de objetos \verb|Directional_light|, en la estructura \verb|Hit_record| que almacena la información del choque, en la variable global \verb|u_lookfrom| y el vector de esferas. Presentamos por tanto el código de dicha función.
 
 \begin{lstlisting}
 vec4 evaluate_lighting_model( 
-    Directional_light lights[ARRAY_TAM], int num_lights, 
-    Hit_record hr,
-    Sphere world[ARRAY_TAM], int size ) {
-    
-    Material mat = hr.mat;
-    Directional_light light;
-    vec3 light_dir;
-    vec3 view_dir = normalize(u_lookfrom - hr.p);
-    vec3 normal = normalize(hr.normal);
-    vec4 ambient, diffuse, specular;
-    float visibility;
-    vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
-    if(num_lights > 0){
-        for(int i = 0; i < ARRAY_TAM; i++){
-            if(i == num_lights) break;
-            ambient = vec4(0.0, 0.0, 0.0, 1.0);
-            diffuse = vec4(0.0, 0.0, 0.0, 1.0);
-            specular = vec4(0.0, 0.0, 0.0, 1.0);
-            light = lights[i];
-            ambient += mat.ka*light.color;
-            if(!u_shadows[i]) visibility = 1.0;
-            else 
-                visibility = light_is_visible(light, hr.p, world, size);
-            light_dir = normalize(light.dir);
-            float cos_theta = max(0.0,dot(normal,light_dir));
-            // Only if light is visible from surface point
-            if(cos_theta > 0 && visibility > 0.0) {
-                // Reflection direction
-                vec3 reflection_dir = reflect(-light_dir, normal);
-                diffuse = mat.kd * cos_theta;
-                specular = mat.ks * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
-            }
-            L_in += visibility * light.color * (diffuse + specular);
-        }
+  Directional_light lights[ARRAY_TAM], int num_lights, 
+  Hit_record hr,
+  Sphere world[ARRAY_TAM], int size ) {
+  
+  Material mat = hr.mat;
+  Directional_light light;
+  vec3 light_dir;
+  vec3 view_dir = normalize(u_lookfrom - hr.p);
+  vec3 normal = normalize(hr.normal);
+  vec4 ambient, diffuse, specular;
+  float visibility;
+  vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
+  if(num_lights > 0){
+    for(int i = 0; i < ARRAY_TAM; i++){
+      if(i == num_lights) break;
+      ambient = vec4(0.0, 0.0, 0.0, 1.0);
+      diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+      specular = vec4(0.0, 0.0, 0.0, 1.0);
+      light = lights[i];
+      ambient += mat.ka*light.color;
+      if(num_lights <= 3 && !u_shadows[i]) visibility = 1.0;
+      else 
+        visibility = light_is_visible(light,hr.p,world,size);
+      light_dir = normalize(light.dir);
+      float cos_theta = max(0.0,dot(normal,light_dir));
+      // Only if light is visible from surface point
+      if(cos_theta >.0 0 && visibility > 0.0) {
+        // Reflection direction
+        vec3 reflection_dir = reflect(-light_dir, normal);
+        diffuse = mat.kd * cos_theta;
+        specular = mat.ks * pow( max(0.0, 
+          dot(reflection_dir, view_dir)), 
+          mat.sh);
+      }
+      L_in += visibility * light.color * (diffuse + specular);
     }
-    L_in += ambient/float(num_lights);
-    return vec4(L_in.xyz, 1.0);
+  }
+  L_in += ambient/float(num_lights);
+  return vec4(L_in.xyz, 1.0);
 }
 \end{lstlisting}
 
-Lo siguiente es editar, aunque muy brevemente, las funciones \verb|hit_sphere| y \verb|hit_plane| para que en caso de existir intersección asignen a \verb|result.mat| el material de la esfera \verb|S.mat| y el del plano \verb|P.mat| respectivamente. Por último debemos, una vez más, editar \verb|ray_color| para que acepte como argumento el array de luces y hacer las llamadas correspondientes a la función \verb|evaluate_lighting_model|.
+Lo siguiente es editar, aunque muy levemente, las funciones \verb|hit_sphere| y \verb|hit_plane| para que en caso de existir intersección asignen a \verb|result.mat| el material de la esfera \verb|S.mat| y el del plano \verb|P.mat| respectivamente. Por último debemos, una vez más, editar \verb|ray_color| para que acepte como argumento el array de luces y hacer las llamadas correspondientes a la función \verb|evaluate_lighting_model|.
 
 Sin embargo, recordemos que el suelo tenía textura de tablero de ajedrez, por lo que no podemos asignar de manera uniforme un material al plano. Lo que sí podemos es editar los parámetros del material utilizado para el suelo asignando a sus componentes blanco o negro según corresponda, aunque a partir de este momento y por pura estética se utilizará un color gris claro \verb|rgb(178,178,178)| en lugar del blanco.
 
@@ -1052,7 +1055,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size,
 }
 \end{lstlisting}
 
-Y ya por último tan solo tenemos que inicializar las luces y los materiales. En el caso de las luces, hemos utilizado dos fuentes de luz y hemo añadido dos variables \verb|uniform| para elegir los colores de ambas, aunque inicialmente serán blancas. Las direcciones de estas luces son $(1,1,0)$ y $(0,1,0)$. Respecto a los materiales, el del plano únicamente tiene la componente especular que se le asigna en \verb|ray_color| y el de las esferas es editable por el usuario, de forma que tenemos 4 variables \verb|uniform| que son editables dinámicamente y a partir de las cuales se inicializa el material de las esferas.
+Y ya por último tan solo tenemos que inicializar las luces y los materiales. En el caso de las luces, hemos utilizado dos fuentes de luz y hemo añadido dos variables \verb|uniform| para elegir los colores de ambas, aunque inicialmente serán blancas. Las direcciones de estas luces son $(1,1,0)$ y $(0,1,0)$. Respecto a los materiales, el del plano únicamente tiene la componente difusa y especular que se le asigna en \verb|ray_color| y el de las esferas es editable por el usuario, de forma que tenemos 4 variables \verb|uniform| que son editables dinámicamente y a partir de las cuales se inicializa el material de las esferas.
 
 \begin{lstlisting}
 // Material parametrizable
@@ -1060,6 +1063,7 @@ uniform vec4 u_ka;
 uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
+
 // Colores de las luces
 uniform vec4 u_lightColor0;
 uniform vec4 u_lightColor1;
@@ -1112,9 +1116,9 @@ Evidentemente todos estos parámetros se pueden modificar y poner los que queram
     \label{fig:phong-final}
 \end{figure}
 
-\subsection{Multisampling Antiliasing}
+\section{Multisampling Antiliasing}
 
-El \textit{antiliasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
+Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El \textit{antiliasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
 
 \begin{figure} [ht]
     \centering
@@ -1123,7 +1127,9 @@ El \textit{antiliasing} es una técnica que nos permite suavizar los bordes en l
     \label{fig:no-antiliasing}
 \end{figure}
 
-Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un píxel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en su mayoría el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. Una forma sencilla de solucionar este impedimento es aplicar la técnica popularmente conocida como \textit{Multisampling Antiliasing} (MSAA). El MSAA consiste en lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve cada rayo en cada uno de los puntos. Para ello, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
+Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un píxel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en la mayor parte de su superficie el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Una forma sencilla de solucionar este impedimento es aplicar la técnica popularmente conocida como \textit{Multisampling Antiliasing} (MSAA). El MSAA consiste en lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve cada rayo en cada uno de los puntos.
+
+Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. Para lanzar más de uno, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
 
 \begin{figure}[ht]
     \centering
@@ -1143,7 +1149,7 @@ float u = uv.x;
 float v = uv.y;
 \end{lstlisting}
 
-Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{image\_width\cdot n}$ en anchura y de $h_h:=\frac{1}{image\_height\cdot n}$ en altura. Tras esto, deberíamos sumar $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto, para así tener dicha cuadrícula centrada en el píxel, véase la imagen \ref{fig:MSAA}.
+Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{\mathrm{image\_width}\cdot n}$ en anchura y de $h_h:=\frac{1}{\mathrm{image\_height}\cdot n}$ en altura. Tras esto, deberíamos sumar $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto, para así tener dicha cuadrícula centrada en el píxel, véase la imagen \ref{fig:MSAA}.
 
 \begin{figure} [ht]
     \centering
@@ -1152,7 +1158,7 @@ Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mis
     \label{fig:MSAA}
 \end{figure}
 
-Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo que queremos trazar calculamos la coordenada de dispositivo normalizada del punto al cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
+Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo calculamos la coordenada de dispositivo normalizada del punto hacia el cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
 
 La forma de hacer este cálculo es iterando un índice $i=0,\dots,n^2$. Para a partir del índice $i$ obtener la coordenada correspondiente podemos dividir el conjunto $\sigma_{n^2}=\{0,1,\dots,n^2-1\}$ en $n$ conjuntos de $n$ elementos cada uno, de forma que
 $$
@@ -1201,7 +1207,7 @@ Con esta modificación y fijando el valor que consideremos en \verb|nSamples| se
 
 El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que lanzar un único rayo por píxel, por lo que ralentiza muchísimo la ejecución. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor.
 
-Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar MSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante una variable \verb|uniform| booleana que en caso de valer \verb|true| se ejecutaría el código del antiliasing y en caso contrario se ejecutaría el código normal con un rayo por píxel, cuyo nombre es \verb|u_antiliasing|. Si esta variable es verdadera, se consultaría el valor entero que tenga la variable \verb|uniform| que llamamos \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. 
+Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar MSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante una variable \verb|uniform| booleana, cuyo nombre es \verb|u_antiliasing|, que en caso de valer \verb|true| se ejecutaría el código del antiliasing y en caso contrario se ejecutaría el código normal con un rayo por píxel. Si esta variable es verdadera, se consultaría el valor entero que tenga la variable \verb|uniform| que llamamos \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. 
 
 \begin{lstlisting}
     uniform bool u_antiliasing;

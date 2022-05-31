@@ -4,14 +4,14 @@
 
 En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesario para poder visualizar conjuntos de Julia y conjuntos de Mandelbrot 2-dimensionales en un canvas utilizando WebGL, todo ello apoyado en la teoría explicada en el capítulo \ref{chap:Julia-Mandelbrot}. Sin embargo, el objetivo de éste y de los tres capítulos anteriores es aplicar técnicas avanzadas de cálculo de imágenes para poder visualizar fractales en tres dimensiones. Recordamos que explicamos en la introducción del capítulo \ref{chap:ray-tracing} que la mejor forma de generar imágenes de fractales 3D es utilizando la técnica de `Ray Tracing', que en dicho capítulo explicamos con detalle. A pesar de ello y de conseguir escenas con varios objetos, materiales y movimientos de cámara no visualizamos nada lejanamente parecido a un fractal. Será en este capítulo en el que aprovecharemos toda la infraestructura y todo el código implementado hasta el momento en el `ray-tracer' del capítulo \ref{chap:ray-tracing} para graficar fractales tridimensionales.
 
-Para ello, antes aún debemos asentar una serie de conceptos que son los que nos ayudarán a cumplir nuestro objetivo: el algoritmo \textit{Ray-Marching} y las conocidas como \textit{Signed Distance Functions} (SDFs). Con estos dos elementos combinados conseguiremos ver hermosas figuras fractales.
+Para ello, antes aún debemos asentar una serie de conceptos que son los que nos ayudarán a cumplir nuestro objetivo: el algoritmo \textit{Sphere-Tracing} y las conocidas como \textit{Signed Distance Functions} (SDFs). Con estos dos elementos combinados conseguiremos generar hermosas figuras fractales.
 
 \section{El algoritmo Sphere-Tracing}
 \label{section:sphere-tracing}
 
 Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Recordemos entonces que en la sección \ref{section:elementos-RT} hablamos de que además de las expresiones analíticas las intersecciones se pueden calcular mediante métodos iterativos. 
 
-En literatura, se denomina \textit{Ray-Marching} a cualquier método numérico iterativo utilizado para encontrar intersecciones mediante movimientos a lo largo de un rayo. Sobre este tema hay mucha literatura y es un tema de interés vigente. El método más sencillo es la búsqueda de raíces de una función mediante el método de Newton generalizado a $\R^3$, pero existen técnicas más avanzadas. 
+En literatura, se denomina \textit{Ray-Marching} a cualquier método numérico iterativo utilizado para encontrar intersecciones mediante movimientos a lo largo de un rayo. Sobre este tema hay mucha bibliografía y es un tema de interés vigente. El método más sencillo es la búsqueda de raíces de una función mediante el método de Newton generalizado a $\R^3$, pero existen técnicas más avanzadas. 
 
 El algoritmo \textit{Sphere-Tracing} es una de estas técnicas de ray-marching descrita por \textit{John C. Hart} en \cite{Hart-1995}. Se basa estimar la distancia más corta de un punto en el rayo a cada una de las superficies que componen la escena, identificar la mínima de estas y avanzar en el rayo dicha distancia, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia mínima es lo suficientemente pequeña como para considerar que el punto forma parte de una superficie.
 
@@ -43,7 +43,7 @@ y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por 
     \label{fig:iteraciones-ST}
 \end{figure}
 
-Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto está en la esfera y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no encontrar nunca una distancia suficientemente pequeña se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida y/o un número máximo de iteraciones como parámetro del algoritmo.
+Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto pertenece a la superficie de la misma y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no encontrar nunca una distancia suficientemente pequeña se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida y/o un número máximo de iteraciones como parámetro del algoritmo, estableciendo un criterio de parada.
 
 \begin{figure}[ht]
     \centering
@@ -239,7 +239,6 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
         // closest_dist almacena la menor de las distancias
         // y object_index el indice del objeto mas cercano
         if(closest_dist < u_epsilon){   // Hay interseccion
-
             hr.hit = true;
             hr.t = current_t;
             hr.p = ray_at(r, hr.t);
@@ -247,16 +246,13 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
             if(object_index == num_spheres){ // Suelo
                 // Codigo de interseccion con el suelo ...
             }
-
             else {      // Una de las esferas
                 // Codigo de interseccion con S_hit
             }
         }
-
         // Si no hay interseccion, avanzamos en el rayo
         current_t += closest_dist;
         p = ray_at(r, current_t);
-
         // Si estamos muy lejos acabamos el bucle
         if(current_t >= MAX_DIST) break;
     }
@@ -271,26 +267,25 @@ Una modificación muy necesaria para que el código funcione es la de la funció
 
 \begin{lstlisting}
 float light_is_visible(Directional_light light, vec3 p, 
-    Sphere world[ARRAY_TAM], int num_spheres) {
-    Ray R;
-    R.dir = normalize(light.dir);
-    R.orig = p;
-    float t = 2.0*u_epsilon; // Comenzamos a una pequena distancia
-    float dist;
-    float h = MAX_DIST;
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        h = MAX_DIST;
-        for(int i = 0; i < ARRAY_TAM; i++) {
-            if(i == num_spheres) break;
-            dist = get_dist_sphere(ray_at(R,t), world[i]);
-            h = min(h, dist);
-        }
-        if(h < u_epsilon)
-            return 0.0;
-        t += h;
-        if(t >= MAX_DIST) break;
+  Sphere world[ARRAY_TAM], int num_spheres) {
+  Ray R;
+  R.dir = normalize(light.dir);
+  R.orig = p;
+  float t = 2.0*u_epsilon; // Comenzamos a una pequena distancia
+  float dist, h;
+  for(int i = 0; i < MAX_STEPS; i++ ) {
+    h = MAX_DIST;
+    for(int i = 0; i < ARRAY_TAM; i++) {
+      if(i == num_spheres) break;
+      dist = get_dist_sphere(ray_at(R,t), world[i]);
+      h = min(h, dist);
     }
-    return 1.0;
+    if(h < u_epsilon)
+      return 0.0;
+    t += h;
+    if(t >= MAX_DIST) break;
+  }
+  return 1.0;
 }
 \end{lstlisting}
 
@@ -315,30 +310,32 @@ Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser
 Aprovechando que el algoritmo sphere-tracing calcula en cada iteración la mínima distancia a objetos de la escena, podemos hacer una mejora en las sombras. Como se puede observar en las imágenes \ref{fig:componentes-aisladas}, \ref{fig:esferas-ST} y en todas las que presentan sombras hasta ahora, los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén en la sombra de un objeto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con ningún objeto, pasen muy cerca de él. En estos casos pondríamos los puntos en cuestión en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de sphere-tracing y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir algunas líneas de código a \verb|light_is_visible|.
 
 \begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p, Sphere world[ARRAY_TAM], int num_spheres) {
-    Ray R;
-    R.dir = normalize(light.dir);
-    R.orig = p;
-    float res = 1.0;
-    float t = 2.0*u_epsilon;
-    float dist;
-    float h = MAX_DIST;
-    for(int i = 0; i < MAX_STEPS; i++ ) {
-        h = MAX_DIST;
-        dist = MAX_DIST;
-        for(int i = 0; i < ARRAY_TAM; i++) {
-            if(i == num_spheres) break;
-            dist = get_dist_sphere(ray_at(R, t), world[i]);
-            if(dist < h)
-                h = dist;
-        }
-        if(h < u_epsilon)
-            return 0.0;
-        res = min(res, 16.0*h/t);
-        t += h;
-        if(t >= MAX_DIST) break;
+float light_is_visible(Directional_light light, vec3 p, 
+  Sphere world[ARRAY_TAM], int num_spheres) {
+  
+  Ray R;
+  R.dir = normalize(light.dir);
+  R.orig = p;
+  float k = 16.0;  // Constante de suavizado de bordes
+  float res = 1.0; // Inicialmente 1
+  float t = 2.0*u_epsilon;
+  float dist;
+  float h = MAX_DIST;
+  for(int i = 0; i < MAX_STEPS; i++ ) {
+    h = MAX_DIST;
+    for(int i = 0; i < ARRAY_TAM; i++) {
+      if(i == num_spheres) break;
+      dist = get_dist_sphere(ray_at(R, t), world[i]);
+      if(dist < h)
+        h = dist;
     }
-    return res;
+    if(h < u_epsilon)
+      return 0.0;
+    res = min(res, k*h/t); // Reducimos o no res
+    t += h;
+    if(t >= MAX_DIST) break;
+  }
+  return res;
 }
 \end{lstlisting}
 
@@ -363,14 +360,14 @@ La constante \verb|k| es un factor que indica si el suavizado es más o menos no
     \label{fig:sombras-k}
 \end{figure}
 
-La manera más óptima y correcta que hemos conseguido de iluminar la escena es mediante dos luces direccionales blancas cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$, es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los objetos siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
+La manera más óptima y correcta que hemos conseguido de iluminar la escena a partir de este momento, y con la mirada puesta en la visualización de fractales, es mediante dos luces direccionales cuya intensidad es parametrizable al igual que en capítulo anterior y cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$. Es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los objetos siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional blanca en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
 
 \subsection{Comentarios sobre Sphere-Tracing}
 \label{subsection:comentarios}
 
 Una vez hemos introducido e implementado el algoritmo Sphere-Tracing, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos, cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular, aplicar sphere-tracing ralentiza el procesado. Sin embargo, muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
 
-Sin embargo, sphere-tracing sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto, o al menos una cota inferior, y esta cota disminuya conforme el rayo se acerca al conjunto. Sería suficiente una cota inferior porque esta nos aseguraría que al avanzar en el rayo no nos pasamos de largo al avanzar en el rayo. Lo único que debemos garantizar es que la cota inferior debe tener exactamente los mismos ceros que la original (es decir, nunca es cero donde la original no lo es). De hecho, se puede usar esto en casos donde la función distancia exacta sea muy difícil o imposible de calcular.
+Sin embargo, sphere-tracing sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto, o al menos una cota inferior, y esta cota disminuya conforme el rayo se acerca al conjunto. Sería suficiente una cota inferior porque esta nos aseguraría que al avanzar en el rayo no nos pasamos de largo. Lo único que debemos garantizar es que la cota inferior debe tener exactamente los mismos ceros que la original (es decir, nunca es cero donde la original no lo es). De hecho, se puede usar esta metodología en casos donde incluso la función distancia exacta sea muy difícil o imposible de calcular.
 
 En concreto, podemos usar cualquier función $f$ que tenga exactamente los mismos ceros que la función distancia exacta y que sea lipschitziana, es decir, que existe una constante positiva $K$ tal que
 
@@ -416,7 +413,7 @@ De igual forma, menos iteraciones implica más rapidez, pero peores resultados, 
 
 \section{Visualización tridimensional de conjuntos de Julia}
 
-Una vez tenemos definido el algoritmo que usaremos para la visualización de fractales, que es el algortimo de ray-marching acompañado de una SDF concreta, es momento de trabajar en la visualización de fractales 3D. Comenzaremos, siguiendo el mismo orden que adoptamos en el capítulo \ref{chap:fractales-2D}, por los conjuntos de Julia en 3D.
+Una vez tenemos definido el algoritmo que usaremos para la visualización de fractales, que es el algortimo de sphere-tracing acompañado de una SDF concreta, es momento de trabajar en la visualización de fractales 3D. Comenzaremos, siguiendo el mismo orden que adoptamos en el capítulo \ref{chap:fractales-2D}, por los conjuntos de Julia en 3D.
 
 Recordemos de la sección \ref{section:Julia} que el conjunto de Julia $\mathcal{J}_c$ de un número complejo fijo $c\in\C$ se define como la frontera entre el conjunto de puntos prisioneros y el conjunto de puntos de escape bajo la iteración de la función $P_{c}(z)=z^2+c$. Es decir, $\mathcal{J}_c = \partial \mathsf{E}_c$, donde
 \begin{equation}
@@ -430,7 +427,7 @@ Podemos encontrar información sobre los cuaternios en \cite{quaternions}, pero 
     q = a i + b j + c k + d \cong (a,b,c,d)\in \R^4.
 \end{equation}
 
-Nótese que estamos denotando como componente real a $w$, la última de la terna $(x,y,z,w)$. Las unidades imaginarias se multiplican entre ellas siguiendo las siguien reglas:
+Nótese que estamos denotando como componente real a $d$, la última de la terna $(a,b,c,d)$. Las unidades imaginarias se multiplican entre ellas siguiendo las siguientes reglas:
 \begin{equation}
     \label{eq:relaciones-cuaternios}
     \begin{split}
@@ -440,18 +437,18 @@ Nótese que estamos denotando como componente real a $w$, la última de la terna
     \end{split}
 \end{equation}
 
-Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = q_x i + q_y j + q_z k + q_w\cong (q_x,q_y,q_z,q_w)$ y $q' = q'_x i + q'_y j + q'_z  k + q'_w\cong (q'_x,q'_y,q'_z,q'_w)$ es expandiendo la expresión
+Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = a i + b j + c k + d\cong (a,b,c,d)$ y $q' = a' i + b' j + c'  k + d'\cong (a',b',c',d')$ es expandiendo la expresión
 
 \begin{equation}
-    qq' = (q_x i + q_y j + q_z k + q_w)(q'_x i + q'_y j + q'_z k + q'_w) 
+    qq' = (a i + b j + c k + d)(a' i + b' j + c' k + d') 
 \end{equation}
 
-Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{xyz},q_w), q'=(q'_{xyz},q_w)$, agrupando términos y aplicando las relaciones \ref{eq:relaciones-cuaternios} el resultado puede expresarse mediante productos vectoriales y escalares:
+Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{abc},q_d),  \  \ q'=(q'_{abc},q'_d)$, agrupando términos y aplicando las relaciones \ref{eq:relaciones-cuaternios} el resultado puede expresarse mediante productos vectoriales y escalares:
 \begin{equation}
     \label{eq:producto-cuaternios}
     \begin{split}
-        (qq')_{xyz} &= q_{xyz}\times q'_{xyz} + q_w q'_{xyz} + q'_wq_{xyz} \\
-        (qq)_w &= q_wq'_w - (q_{xyz}\cdot q'_{xyz})
+        (qq')_{abc} &= q_{abc}\times q'_{abc} + q_d q'_{abc} + q'_d q_{abc} \\
+        (qq)_d &= q_d q'_d - (q_{abc}\cdot q'_{abc})
     \end{split}
 \end{equation}
 
@@ -460,8 +457,8 @@ Aplicando estas relaciones podemos deducir el cuadrado de un cuaternio con tan s
 \begin{equation}
     \label{eq:cuadrado-cuaternio}
     \begin{split}
-        (q^2)_{xyz} &= 2q_w q_{xyz} \\
-        (q^2)_w &= q_w^2 - q_{xyz}\cdot q_{xyz},
+        (q^2)_{abc} &= 2q_d q_{abc} \\
+        (q^2)_d &= q_d^2 - q_{abc}\cdot q_{abc},
     \end{split}
 \end{equation}
 que realmente es una simplificación de las ecuaciones (\ref{eq:producto-cuaternios}) teniendo en cuenta que el producto vectorial de un vector por sí mismo es $0$.
@@ -470,7 +467,7 @@ Y una vez tenemos clara la aritmética básica de los cuaternios, podemos genera
 \begin{equation}
     \label{eq:f-julia-cuaternios}
     \begin{split}
-        P_c :& \H \longrightarrow \H \\
+        P_c : \H & \longrightarrow \H \\
         q & \longmapsto q^2 + c
     \end{split}
 \end{equation}
@@ -511,7 +508,7 @@ donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con
     \begin{split}
         q'_{i+1}&=\frac{\partial P^{i+1}_c(q_0)}{\partial q_0}\\
         &= \frac{\partial}{\partial q_0}\left((P_c^i(q_0))^2+c\right)\\
-        &= 2 P_c^i(q_0)(P_c^i)'(q_0)\\
+        &= 2 P_c^i(q_0)\frac{\partial P_c^i(q_0)}{\partial q_0}\\
         &= 2 q_i q'_i
     \end{split}
 \end{equation}
@@ -527,7 +524,7 @@ Teniendo esta estimación de la distancia podemos calcular el posible punto de i
 
 \subsubsection{Método 1: Gradiente de la SDF}
 
-La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer ray-marching. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado.
+La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer sphere-tracing. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado.
 
 \begin{algorithm}[H]
     \caption{Cálculo de la normal mediante el gradiente de la SDF} \label{alg:normal-gradiente-sdf}
@@ -773,7 +770,7 @@ float get_dist_mandelbrot(vec3 p) {
 
 Por su parte, los métodos para aproximar la normal descritos en la sección \ref{subsection:normal-sdf} son igualmente válidos no sólo para este caso sino realmente para cualquier superficie, ya que son considerados métodos estándar de cálculo de normales. Por tanto podemos reutilizarlos sin más que cambiar las llamadas a \verb|get_dist_julia| por llamadas a \verb|get_dist_mandelbrot|. 
 
-Y una vez tenemos estas funciones, podemos modificar \verb|ray_color| para que en lugar de utilizar las funciones de Julia utilice las de Mandelbrot. Sin embargo, en lugar de cambiar la actual, añadiremos funcionalidad. De igual manera que en la sección \ref{subsection:alternando} explicamos que añadiendo una variable \verb|uniform| la cual en función de su valor se graficará un conjunto u otro, en este caso haremos exactamente lo mismo, añadir una variable \verb|uniform| llamada \verb|u_fractal| y en función de su valor invocaremos la SDF y el método para calcular normales de Julia o de Mandelbrot.
+Y una vez tenemos estas funciones, podemos modificar \verb|ray_color| para que en lugar de utilizar las funciones de Julia utilice las de Mandelbrot. Sin embargo, en lugar de cambiar la actual, añadiremos funcionalidad. De igual manera que en la sección \ref{section:alternando} explicamos que añadiendo una variable \verb|uniform| la cual en función de su valor se graficará un conjunto u otro, en este caso haremos exactamente lo mismo, añadir una variable \verb|uniform| llamada \verb|u_fractal| y en función de su valor invocaremos la SDF y el método para calcular normales de Julia o de Mandelbrot.
 
 \begin{lstlisting}
 uniform int u_fractal; // 1: Julia, 2: Mandelbrot 
@@ -798,10 +795,10 @@ Hay que reconocer que el resultado es un poco decepcionante, parecería un cuerp
 
 Gracias a los cuaternios hemos podido generalizar la definición de los números complejos a 4D y visualizar en 3D proyecciones de los conjuntos de Julia y el conjunto de Mandelbrot. Sin embargo, la apariencia del conjunto de Mandelbrot nos ha dejado un mal sabor de boca, y es que dista bastante de la belleza que nos ofrecía $\mathcal{M}$ en dos dimensiones. En realidad, a día de hoy no se ha conseguido ninguna generalización matemáticamente correcta que posea la complejidad y la belleza del conjunto de Mandelbrot en 2D, aunque ha habido varios intentos. El conjunto de Mandelbub es uno de estos intentos. Es una generalización tridimensional del conjunto de Mandelbrot alejada del álbegra que ofrecen cuaternios, hipercomplejos y otros tipos de álgebras, a veces inconsistentes. 
 
-Pensemos en $P_c(z)=z^2+c$, esta vez con $z,c\in\C$ como la operación que, dado un complejo $z$ multiplica su módulo por sí mismo, duplica su argumento y suma una cierta constante $c$. Si recurrimos en 3D a las coordenadas esféricas, las cuales identifican un punto $p\in\R^3$ mediante su módulo $r$, el ángulo que forma con el plano $y=0$ ($\phi$) y el ángulo que forma con el eje X ($\theta$), podemos extender esta operación. El procedimiento sería pasar el punto $p=(x,y,z)$ de coordenadas cartesianas a esféricas $(r,\phi,\theta)$, elevar al cuadrado $r$, duplicar $\phi$ y $\theta$ y devolver a coordenadas cartesianas. Es decir, tendríamos la composición 
+Pensemos en $P_c(z)=z^2+c$, esta vez con $z,c\in\C$ como la operación que, dado un complejo $z$ multiplica su módulo por sí mismo, duplica su argumento y suma una cierta constante $c$. Si recurrimos en 3D a las coordenadas esféricas, las cuales identifican un punto $p\in\R^3$ mediante su módulo $r$, el ángulo que forma con el eje $Y$ ($\varphi$) y el ángulo que formaría la proyección a $\R^2$ con el eje Z ($\theta$), podemos extender esta operación. El procedimiento sería pasar el punto $p=(x,y,z)$ de coordenadas cartesianas a esféricas $(r,\varphi,\theta)$, elevar al cuadrado $r$, duplicar $\varphi$ y $\theta$ y devolver a coordenadas cartesianas. Es decir, tendríamos la composición 
 
 $$
-(x,y,z)\longmapsto(r,\phi,\theta)\longmapsto(r^2,2\phi,2\theta)\longmapsto(x',y',z')
+(x,y,z)\longmapsto(r,\varphi,\theta)\longmapsto(r^2,2\varphi,2\theta)\longmapsto(x',y',z')
 $$
 
 Realmente, el álgebra, las operaciones, las `derivadas' utilizadas en este procedimiento y en el cálculo de la distancia al objeto no tiene ningún rigor ni fundamento matemático, pero el resultado que produce es mucho más satisfactorio.
@@ -810,13 +807,13 @@ De igual manera que utilizamos el $2$ como exponente, podemos usar cualquier otr
 
 \begin{equation}
     \label{eq:f-Mandelbub}
-    f(p)=f(x,y,z) = \Phi(|p|^8,8\phi, 8\theta),
+    f(p)=f(x,y,z) = \Phi(|p|^8,8\varphi, 8\theta),
 \end{equation}
 donde $\Phi$ es la función que pasa de coordenadas esféricas a cartesianas, es decir
 $$
-\Phi(r,\phi,\theta) = (r\sin(\phi)\sin(\theta),r\cos(\phi),r\sin(\phi)\cos(\theta))
+\Phi(r,\varphi,\theta) = (r\sin(\varphi)\sin(\theta),r\cos(\varphi),r\sin(\varphi)\cos(\theta))
 $$
-y donde $\phi = \arccos(\frac{y}{|p|})$ y $\theta=\arctan(\frac{x}{z})$.
+y donde $\varphi = \arccos(\frac{y}{|p|})$ y $\theta=\arctan(\frac{x}{z})$.
 
 El procedimiento, en lo que se refiere a iterar un punto para posteriormente estimar la distancia al objeto es bien parecido al ya conocido, solo que en este caso en lugar de utilizar la potencia y suma de cuaternios utilizamos la transformación (\ref{eq:f-Mandelbub}). Y claro está a la hora de calcular lo que entonces conocíamos como $q'$ la iteración cambia al haber cambiado el exponente. En este caso sería $|w'_{i+1}|=8|w|^7|w'|+1$, de forma que, dado un punto $w\in\R^3$, debemos calcular las iteraciones 
 \begin{align*}
@@ -835,17 +832,17 @@ Respecto de la primera, podemos aprovechar que la GPU es muy rápida calculando 
 \begin{lstlisting}
 vec3 f_Mandelbub(vec3 w, vec3 c) {
     // Coordenadas esfericas
-    float wr = sqrt(dot(w,w));
-    float wo = acos(w.y/wr);
-    float wi = atan(w.x,w.z);
+    float r = sqrt(dot(w,w));
+    float phi = acos(w.y/r);
+    float theta = atan(w.x,w.z);
     // Escalado y rotacion
-    wr = pow( wr, 8.0 );
-    wo = wo * 8.0;
-    wi = wi * 8.0;
+    r = pow( r, 8.0 );
+    phi = phi * 8.0;
+    theta = theta * 8.0;
     // Vuelta a coordenadas cartesianas
-    w.x = wr * sin(wo)*sin(wi);
-    w.y = wr * cos(wo);
-    w.z = wr * sin(wo)*cos(wi);
+    w.x = r * sin(phi)*sin(theta);
+    w.y = r * cos(phi);
+    w.z = r * sin(phi)*cos(theta);
     return c + w;
 }
 \end{lstlisting}
@@ -867,7 +864,7 @@ void iterate_mandelbub(inout vec3 w, inout float dw){
 }
 \end{lstlisting}
 
-Por último, la función que definitivamente dado un punto $p\in\R^3$ devuelve la distancia al conjunto de Mandelbub. 
+Por último, la función que definitivamente dado un punto $p\in\R^3$ devuelve la aproximación de la distancia al conjunto de Mandelbub. 
 
 \begin{lstlisting}
 float get_dist_mandelbub(vec3 p) {
@@ -879,7 +876,7 @@ float get_dist_mandelbub(vec3 p) {
 }
 \end{lstlisting}
 
-Con este nuevo código junto con el necesario para calcular las normales y las modificaciones necesarias para que se represente el conjunto de Mandelbub según el valor de \verb|u_fractal|, ya podemos visualizar el mismo. 
+Con este nuevo código junto con el necesario para calcular las normales y las modificaciones necesarias para que se represente el conjunto de Mandelbub según el valor de \verb|u_fractal|, ya podemos visualizar el mismo, véase la imagen \ref{fig:mandelbub}. 
 
 \begin{figure}[ht]
     \centering
@@ -916,7 +913,7 @@ Es decir, la sección provocada por el plano $z=0$ en los conjuntos de Julia 3D 
     \label{fig:julia-3D-2D}
 \end{figure}
 
-De hecho, la generalización tridimensional es la superficie generada por la revolución del conjunto en 2D en torno al eje $X$, fíjese en la vista ofrecida por la figura \ref{fig:julia-3D-abajo-1}. Esto de hecho ocurre con todos los conjuntos de Julia de números puramente reales (se puede comprobar interactuando con la web \url{https://jantoniovr.github.io/Geometria-Fractal/3D-fractals.html}).
+De hecho, la generalización tridimensional es la superficie generada por la revolución del conjunto en 2D en torno al eje $X$, fíjese en la vista ofrecida por la figura \ref{fig:julia-3D-abajo-1}. Esto ocurre con todos los conjuntos de Julia de números puramente reales (se puede comprobar interactuando con la web \url{https://jantoniovr.github.io/Geometria-Fractal/3D-fractals.html}).
 
 \begin{figure} [ht]
     \centering
@@ -992,13 +989,13 @@ La parte de Mandelbub que más recuerda a $\mathcal{M}_8$ es la parte inferior (
 
 \section{Posibles optimizaciones}
 
-El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del ray-marching, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs, todas ellas basadas en una misma idea: las esferas englobantes.
+El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del sphere-tracing, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs, todas ellas basadas en una misma idea: las esferas englobantes.
 
 \subsection{Esferas englobantes}
  
 Si se lanza un rayo que está muy lejano al conjunto que se esté visualizando o que apunta directamente al cielo o al suelo, antes de converger al suelo o diverger al cielo hay que evaluar, sobre todo en este último caso, hasta mil veces la SDF cuando realmente casi desde el principio podría saberse que no va a intersecar al conjunto. Para ahorrarnos todas estas evaluaciones podemos utilizar lo que se denominan esferas englobantes (\textit{bounding spheres}).
 
-La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente en el interior de la misma. Antes de aplicar ray-marching, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto en ninguna iteración, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
+La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente en el interior de la misma. Antes de aplicar sphere-tracing, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto en ninguna iteración, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
 
 Para implementar este método, hemos probado empíricamente qué radio de esfera se ajusta mejor a los conjuntos de Julia, al conjunto de Mandelbrot y al conjunto de Mandelbub, obteniendo respectivamente $2.5$, $2$ y $1.5$ respectivamente. Por tanto, ajustamos el radio de esta esfera y sólo calculamos las SDFs en caso de impacto.
 
@@ -1040,9 +1037,9 @@ Y con esta simple técnica podemos optimizar bastante las escenas en las que el 
 
 \subsection{Optimización de sombras con esferas englobantes}
 
-En ciertos píxeles hay que aplicar varias veces ray-marching, es el caso de los píxeles que corresponden a puntos del fractal o del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto donde se produce la intersección con el rayo, aplicar ray-marching en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena, asignando así a cada fuente un coeficiente de visibilidad. Aplicar varias veces ray-marching implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
+En ciertos píxeles hay que aplicar varias veces sphere-tracing, es el caso de los píxeles que corresponden a puntos del fractal o del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto donde se produce la intersección, lanzar un rayo en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena, asignando así a cada fuente un coeficiente de visibilidad. Esto supone aplicar varias veces sphere-tracing, lo que a su vez implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
 
-Sin embargo, al igual que con el ray-marching principal de \verb|ray_color|, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante. Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
+Sin embargo, al igual que con el sphere-tracing principal de \verb|ray_color|, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante. Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
 
 \begin{lstlisting}
 float light_is_visible(Directional_light light, vec3 p) {

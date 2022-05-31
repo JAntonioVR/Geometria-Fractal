@@ -239,7 +239,7 @@ Enunciamos una propiedad de la métrica de Hausdorff $h$ que nos hará falta den
 \begin{proof}
     La prueba se sigue de otra propiedad de la distancia $d$:
     \begin{eqnarray*}
-    d(A\cup B,C) & = & \max\{d(x,C)\ \ \forall x\in A\cup B\} \\
+    d(A\cup B,C) & = & \max\{d(x,C) : x\in A\cup B\} \\
                  & = & \max\left\lbrace \max\left\lbrace d(x,C):x\in A \right\rbrace, \max\left\lbrace d(x,C):x\in B \right\rbrace\right\rbrace \\
                  & = & \max\left\lbrace d(A,C),d(A,B) \right\rbrace.
     \end{eqnarray*}
@@ -257,7 +257,7 @@ Seguidamente presentamos un resultado que nos ayuda a construir aplicaciones con
     Entonces $W$ es una aplicación contractiva en $\mathcal{H}(X)$ y su constante de contractividad es $s=\max\{s_i:i=1,\dots,n\}$.
 \end{proposicion}
 \begin{proof}
-    Demostraremos el caso $n=2$, de forma que por inducción sería cierto para cualquier $n\leq 1$. Sean $A,B\in\mathcal{H}(X)$, tenemos que
+    Demostraremos el caso $n=2$, de forma que por inducción sería cierto para cualquier $n\geq 1$. Sean $A,B\in\mathcal{H}(X)$, tenemos que
     \begin{eqnarray*}
     h(W(A),W(B)) & = & h(w_1(A)\cup w_2(A), w_1(B)\cup w_2(B)) \\
                  & \leq & \max\{h(w_1(A),w_1(B)), h(w_2(A),w_2(B))\}\text{ (lema \ref{lema:uniones})} \\
@@ -360,7 +360,7 @@ En el capítulo \ref{chap:concepto} y concretamente en la sección \ref{subsecti
 
 Intuitivamente, esta condición nos afirma que podemos controlar el `tamaño' del resultado de aplicar el SFI y que además las imágenes de cada aplicación que compone el SFI no se solapan unas con otras. Gracias a esta condición podemos enunciar el siguiente teorema, que es el que nos proporcionará las herramientas esenciales para el cálculo de la dimensión en estos casos.
 
-\begin{teorema}
+\begin{teorema}[Moran]
     \label{th:Moran}
     Sean $(X,d)$ un espacio métrico completo, un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$ que satisface la condición de conjunto abierto y $\{c_i:i=1,\dots,n\}$ las constantes de contractividad de las aplicaciones $w_i$. Entonces la dimensión por cajas del atractor de $w$ es el único valor real positivo $d$ que satisface la ecuación $1 = c_1^d + \cdots c_n^d$ y esta coincide con la dimensión de Hausdorff.
 \end{teorema}
@@ -512,5 +512,5 @@ Para una mayor cantidad y variedad de ejemplos invitamos al lector a consultar \
 
 Como comentario final, decir que el teorema del collage es de hecho una potente herramienta que trasciende al ámbito fractal. Por ejemplo, se ha probado su utilidad en problemas integrales o diferenciales. Véase \cite{LaTorre} para tener una visión de ello.
 
-En conclusión, los SFI en $\R^2$ a pesar de ser herramientas muy simples como lo son las transformaciones afines, nos permiten originar complejas y bellas imágenes basadas en la iteración. Además, gracias al teorema del collage podemos aproximar una imagen simplemente a partir de las transformaciones afines que definen un SFI que converge a dicha aproximación. Toda esta teoría está además basada en una densa teoría que gira en torno al teorema del punto fijo de Banach.
+En conclusión, los SFI en $\R^2$ a pesar de ser herramientas muy simples como lo son las transformaciones afines, nos permiten originar complejas y bellas imágenes basadas en la iteración. Además, gracias al teorema del collage podemos aproximar una imagen simplemente a partir de las transformaciones afines que definen un SFI que converge a dicha aproximación. Toda esta disciplina está además basada en una densa teoría que gira en torno al teorema del punto fijo de Banach.
 

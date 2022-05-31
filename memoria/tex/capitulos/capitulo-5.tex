@@ -56,14 +56,14 @@ En caso de éxito, que se tiene en la mayoría de las ocasiones, debemos conserv
 
 \subsection{El programa \textit{Shader}}
 
-El `\textbf{shader}' es un programa escrito en el llamado \href{https://www.khronos.org/registry/OpenGL/specs/es/3.2/GLSL_ES_Specification_3.20.pdf}{OpenGL ES Shading Language}, más comúnmente conocido como \textbf{GLSL}, que a partir de la información sobre los vértices que forman una figura genera un color para cada píxel, para así dibujar dicha figura en el canvas. Hay dos tipos de \textit{shader}: el \textbf{vertex shader} y el \textbf{fragment shader}. Ambos se escriben en GLSL, de forma que se le especifica el código GLSL a WebGL y este se ejecuta en la GPU. A continuación se explicarán las principales diferencias entre estos dos componentes.
+El `\textbf{shader}' es un programa escrito en el llamado \href{https://www.khronos.org/registry/OpenGL/specs/es/3.2/GLSL_ES_Specification_3.20.pdf}{\textcolor{blue}{OpenGL ES Shading Language}}, más comúnmente conocido como \textbf{GLSL}, que a partir de la información sobre los vértices que forman una figura genera un color para cada píxel, para así dibujar dicha figura en el canvas. Hay dos tipos de \textit{shader}: el \textbf{vertex shader} y el \textbf{fragment shader}. Ambos se escriben en GLSL, de forma que se le especifica el código GLSL a WebGL y este se ejecuta en la GPU. A continuación se explicarán las principales diferencias entre estos dos componentes.
 
-El \textit{vertex shader} se ejecuta una vez por cada vértice de la figura, su misión es transformar la coordenada de mundo de dicho vértice en coordenadas normalizadas en el intervalo $[-1,1]$, rango utilizado por WebGL en su \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space}{clip space}. Tras realizar estos calculos y ajustes, se almacena el valor de salida en la variable \verb|gl_Position|. También podemos utilizar el vertex shader para otros cometidos como calcular la coordenada de textura de un objeto, calcular la normal a un objeto en dicho vértice para posteriormente aplicar algún modelo de iluminación, o cualquier otro procesado que podamos hacer en un vértice con la idea de posteriormente pasarle dicho valor al \textit{fragment shader}.
+El \textit{vertex shader} se ejecuta una vez por cada vértice de la figura, su misión es transformar la coordenada de mundo de dicho vértice en coordenadas normalizadas en el intervalo $[-1,1]$, rango utilizado por WebGL en su \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space}{\textcolor{blue}{clip space}} (imagen \ref{fig:clipspace}). Tras realizar estos calculos y ajustes, se almacena el valor de salida en la variable \verb|gl_Position|. También podemos utilizar el vertex shader para otros cometidos como calcular la coordenada de textura de un objeto, calcular la normal a un objeto en dicho vértice para posteriormente aplicar algún modelo de iluminación, o cualquier otro procesado que podamos hacer en un vértice con la idea de posteriormente pasarle dicho valor al \textit{fragment shader}.
 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C5/clip-space-graph.png}
+    \includegraphics[scale = 0.45]{img/C5/clip-space-graph.png}
     \caption{\textit{Clip space de WebGL}}
     \label{fig:clipspace}
 \end{figure}
@@ -119,7 +119,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 \end{lstlisting}
 
-Y una vez creados los buffers y el \textit{shader} por separado, debemos especificarle al buffer que transfiera la información que contiene a las posiciones de memoria que tiene el \textit{shader} reservadas para las variables que espera. Supongamos que hemos creado en un \textit{vertex shader} una variable \verb|attribute vec4 aVertexColor;| de forma que queremos asociar los colores del código anterior a esta variable por cada uno de los 4 vértices. Mostramos a continuación la forma de hacerlo, pudiendo encontrar más información clarificadora en la documentación de la clase \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext}{WebGLRenderingContext}.
+Y una vez creados los buffers y el \textit{shader} por separado, debemos especificarle al buffer que transfiera la información que contiene a las posiciones de memoria que tiene el \textit{shader} reservadas para las variables que espera. Supongamos que hemos creado en un \textit{vertex shader} una variable \verb|attribute vec4 aVertexColor;| de forma que queremos asociar los colores del código anterior a esta variable por cada uno de los 4 vértices. Mostramos a continuación la forma de hacerlo, pudiendo encontrar más información clarificadora en la documentación de la clase \href{https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext}{\textcolor{blue}{WebGLRenderingContext}}.
 
 \begin{lstlisting}
 const location = gl.getAttribLocation(

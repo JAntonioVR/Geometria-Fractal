@@ -6,7 +6,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
 
 \section{Iteración de funciones}
 \begin{definicion}
-    Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.} $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textbf{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textbf{órbita} $O_f(z)$ de $f$ en $z$.
+    Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.}, $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textbf{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textbf{órbita} $O_f(z)$ de $f$ en $z$.
     $$
     O_f(z):=\left\lbrace z, f(z), f^2(z), \dots, f^n(z), \dots\right\rbrace,
     $$
@@ -15,7 +15,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
 
 Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1)\footnote{Los códigos completos que generan cada una de las imágenes que se observan en este documento se pueden encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Iteracion-y-Fractales}}. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
 
-Para saber qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
+Para intuir qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 
 \begin{mmaCell}{Code}
   f[z_] := z^2;
@@ -77,7 +77,7 @@ Nos interesa particularmente saber qué sucesiones de iteradas convergen y a qu�
     $$
     d(x_p,x_q) = d(x_n, x_{n+r}) \leq \frac{d(x_0,x_1)K^n}{1-K} < \varepsilon,
     $$
-    de donde deducimos que $\{x_n\}$ es una sucesión de Cauchy, y como $X$ es completo, tenemos que existe $x\in X$ tal que $\{x_{n+1}\}=\{f(x_n)\}=\{f^n(x_0)\}\rightarrow x$. Pero $f$ es continua, por lo que si $\{x_n\}\rightarrow x$, necesariamente $\{f(x_n)\}\rightarrow f(x)$, por lo que $f(x)=x$.
+    de donde deducimos que $\{x_n\}$ es una sucesión de Cauchy, y como $X$ es completo, tenemos que existe $x\in X$ tal que $\{x_{n+1}\}=\{f(x_n)\}=\{f^n(x_0)\}\rightarrow x$. Pero $f$ es continua, por lo que como $\{x_n\}\rightarrow x$, necesariamente $\{f(x_n)\}\rightarrow f(x)$, por lo que $f(x)=x$.
 
     Para probar la unicidad, suponemos que $y\in X$ es otro punto fijo de $f$, por lo que $d(x,y) = d(f(x),f(y))\leq K d(x,y)$. Tomando el primero y el tercer miembro de la desigualdad deducimos que $(1-K)d(x,y)\leq 0$, luego $d(x,y)=0$.
 \end{proof}
@@ -96,7 +96,7 @@ Así pues, el teorema del punto fijo de Banach (teorema \ref{th:punto-fijo}), di
 \end{equation*}
 por lo que en realidad la constante $K$ define de forma genérica la velocidad de convergencia en términos de la función. Cuanto más cercana a $0$, más rápida será la convergencia al punto fijo. Sin embargo, vemos que realmente también depende de la condición inicial fijada, y es este el aspecto que explotaremos para obtener imágenes fractales. 
 
-En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este número de aproximaciones se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
+En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este número de iteraciones se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
     \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/FixedPointList.html}}.
