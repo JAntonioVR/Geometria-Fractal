@@ -86,7 +86,7 @@ class Scene3D extends Scene{
     };
 
     var initialLookfrom = [1.3, 0.5, -1.0];
-    //var initialLookfrom = [0.0,1.5,0.0];
+    //var initialLookfrom = [0.0,0.0,4.0];
 
     this.parameters = {
       lookfrom: initialLookfrom,

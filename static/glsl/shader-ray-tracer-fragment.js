@@ -20,7 +20,12 @@ uniform vec4 u_ka;
 uniform vec4 u_kd;
 uniform vec4 u_ks;
 uniform float u_sh;
-uniform vec4 u_light_color;
+uniform vec4 u_lightColor0;
+uniform vec4 u_lightColor1;
+uniform bvec3 u_shadows;
+uniform bool u_antiliasing;
+uniform int u_nSamples;
+
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 #define ARRAY_TAM 100
 #define PI 3.14159265359
@@ -30,6 +35,7 @@ uniform vec4 u_light_color;
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
 }
+
 //
 // ─── RAY ────────────────────────────────────────────────────────────────────────
 // Struct that represents a Ray, defined by a point 'origin' and a vector 
@@ -44,9 +50,7 @@ vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
 // ────────────────────────────────────────────────────────────────────────────────
-//
-// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
-// 
+
 //
 // ─── MATERIAL ───────────────────────────────────────────────────────────────────
 // Struct that defines a material RGB components.
@@ -62,6 +66,14 @@ Material ground_material;
 
 
 //
+// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
+// Struct that defines a directional light source.
+struct Directional_light{
+    vec3 dir;   // Light direction
+    vec4 color; // Light RGB color
+};
+
+//
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
 // Stores information about an intersection between a ray and a surface.
 struct Hit_record {
@@ -71,49 +83,7 @@ struct Hit_record {
     bool hit;       // True if surface is hit, false otherwise
     Material mat;   // Material of the hit surface
 };
-//
-// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
-// Struct that defines a directional light source.
-struct Directional_light{
-    vec3 dir;   // Light direction
-    vec4 color; // Light RGB color
-};
 
-vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ) {
-
-    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
-    Material mat = hr.mat;
-    Directional_light light;
-    vec3 light_dir;
-    vec3 view_dir = normalize(u_lookfrom - hr.p);
-    vec3 normal = normalize(hr.normal);
-    vec4 ambient, diffuse, specular;
-    ambient = vec4(0.0, 0.0, 0.0, 1.0);
-    diffuse = vec4(0.0, 0.0, 0.0, 1.0);
-    specular = vec4(0.0, 0.0, 0.0, 1.0);
-    if(num_lights > 0){
-        for(int i = 0; i < ARRAY_TAM; i++){
-            if(i == num_lights) break;
-            light = lights[i];
-            color_average += light.color;
-            light_dir = normalize(light.dir);
-            float cos_theta = max(0.0, dot(normal, light_dir));
-            
-            // Only if light is visible from surface point
-            if(cos_theta > 0.0) {
-                // Reflection direction
-                vec3 reflection_dir = reflect(-light_dir, normal);
-                diffuse += mat.kd * light.color * cos_theta;
-                specular += mat.ks * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
-            }
-        }
-        color_average /= float(num_lights);
-        ambient = mat.ka * color_average;
-    }
-
-    return ambient + diffuse + specular;
-    
-}
 // ────────────────────────────────────────────────────────────────────────────────
 //
 // ─── SPHERE ─────────────────────────────────────────────────────────────────────
@@ -206,6 +176,62 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     }
     return result;
 }
+
+//
+// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
+// 
+
+
+float light_is_visible(Directional_light light, vec3 p, Sphere world[ARRAY_TAM], int size) {
+    Ray R;
+    R.dir = normalize(light.dir);
+    R.orig = p;
+    float t = 0.01;
+    float h;
+
+    return hit_spheres_list(world, size, R, t, MAX_DIST).hit ? 0.0 : 1.0; 
+}
+
+vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr,
+    Sphere world[ARRAY_TAM], int size ) {
+    Material mat = hr.mat;
+    Directional_light light;
+    vec3 light_dir;
+    vec3 view_dir = normalize(u_lookfrom - hr.p);
+    vec3 normal = normalize(hr.normal);
+    vec4 ambient, diffuse, specular;
+    float visibility;
+    vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
+    if(num_lights > 0){
+        for(int i = 0; i < ARRAY_TAM; i++){
+            if(i == num_lights) break;
+            ambient = vec4(0.0, 0.0, 0.0, 1.0);
+            diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+            specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+            light = lights[i];
+            ambient += mat.ka*light.color;
+            if(!u_shadows[i]) visibility = 1.0;
+            else visibility = light_is_visible(light, hr.p, world, size);
+
+            light_dir = normalize(light.dir);
+            float cos_theta = max(0.0, dot(normal, light_dir));
+            
+            // Only if light is visible from surface point
+            if(cos_theta > 0.0) {
+                // Reflection direction
+                vec3 reflection_dir = reflect(-light_dir, normal);
+                diffuse = mat.kd * cos_theta;
+                specular = mat.ks * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
+            }
+            L_in += visibility * light.color * (diffuse + specular);
+
+        }
+    }
+    L_in += ambient/float(num_lights);
+    return vec4(L_in.xyz, 1.0);
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 //
 // ─── CAMERA ─────────────────────────────────────────────────────────────────────
@@ -260,7 +286,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
     if(hr.hit){
         t_closest = hr.t;
         vec3 N = hr.normal;
-        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr, world, size);
         //tmp_color = vec4(normalize(hr.normal), 1.0);
     }
     // r hits the plane? 
@@ -277,7 +303,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
         }
         else
             hr.mat.kd = vec4(0.0,0.0,0.0, 1.0);
-        tmp_color = evaluate_lighting_model(lights, num_lights, hr);
+        tmp_color = evaluate_lighting_model(lights, num_lights, hr, world, size);
     }
     // If r hits any surface
     if(t_closest < MAX_DIST) return tmp_color;
@@ -293,7 +319,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
 //
 void main() {
     // IMAGE
-    float aspect_ratio = float(16.0) / float(9.0);
+    float aspect_ratio = 16.0/9.0;
     int image_width = 1280;
     int image_height = int(float(image_width) / aspect_ratio);
     // WORLD
@@ -320,32 +346,65 @@ void main() {
 
     world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
     // Plane
-    Plane P;
-    P.normal = vec3(0.0, 1.0, 0.0);
-    P.D = -2.0;
-    P.mat = ground_material;
+    Plane ground;
+    ground.normal = vec3(0.0, 1.0, 0.0);
+    ground.D = -2.0;
+    ground.mat = ground_material;
 
     // CAMERA
     vec3 vup = vec3(0.0, 1.0, 0.0);
     float vfov = 90.0; // Vertical field of view in degrees
     vec3 lookfrom = vec3(0.0, 0.0, 0.0), lookat = vec3(0.0, 0.0, -1.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
+    //Camera cam = init_camera(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, -1.0), vup, vfov, aspect_ratio);
     
     // LIGHTING
     Directional_light lights[ARRAY_TAM];
     int num_lights = 2;
-    Directional_light l1, l2;
-    l1.color = u_light_color; l2.color = vec4(1.0, 1.0, 1.0, 1.0);
-    l1.dir = vec3(-0.5, 0.5, 0.0);
-    l2.dir = vec3(0.5, 0.5, 0.0);
-    lights[0] = l1; lights[1] = l2;
+    Directional_light l0, l1;
+    l0.color = u_lightColor0; l1.color = u_lightColor1;
+    l0.dir = vec3(-1.0, 1.0, 0.0);
+    l1.dir = vec3(1.0, 1.0, 0.0);
+
+    lights[0] = l0; lights[1] = l1; 
     
+     
     // COLOR
-    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
-    float u = uv.x;
-    float v = uv.y;
-    Ray r = get_ray(cam, u, v);
-    gl_FragColor = ray_color(r, world, num_spheres, P, lights, num_lights);
+
+
+    if(u_antiliasing) {
+        // Antiliasing
+
+        vec2 uv = (gl_FragCoord.xy) / vec2(image_width, image_height);
+        float u = uv.x;
+        float v = uv.y;
+
+        int nSamples = u_nSamples;
+        float hw = 1.0 / (float(image_width * nSamples)),
+            hh = 1.0 / (float(image_height * nSamples));
+        Ray r;
+        vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+
+        for(int i = 0; i < ARRAY_TAM; i++) {
+            if(i == nSamples*nSamples) break;
+            int x =  i/nSamples;
+            int y =  i - nSamples*x;
+            u = uv.x + float(x) * hw + 0.5 * hw;
+            v = uv.y + float(y) * hh + 0.5 * hh;
+            r = get_ray(cam, u, v);
+            sum_colors += ray_color(r, world, num_spheres, ground, lights, num_lights);
+        }
+
+        gl_FragColor = sum_colors / float(nSamples*nSamples);
+    }
+    else {
+        // No antiliasing
+        vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
+        float u = uv.x;
+        float v = uv.y;
+        Ray r = get_ray(cam, u, v);
+        gl_FragColor = ray_color(r, world, num_spheres, ground, lights, num_lights);
+    }
 }
 // ────────────────────────────────────────────────────────────────────────────────
 

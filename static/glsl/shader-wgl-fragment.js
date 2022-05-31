@@ -77,10 +77,10 @@ vec2 get_world_coordinates() {
 vec4 computePixelColor(bool escaped, int iterations) {
     return escaped ? vec4(palette(
       float(iterations)/ float(u_maxIterations),
-      vec3(0.109,0.109,0.647), 
-      vec3(0.823, 0.411, 0.0), 
-      vec3(0.769, 0.659, 0.0), 
-      vec3(0.627,0.878,0.043)
+      vec3(0.109,0.109,0.647), // #1C1CA5
+      vec3(0.823, 0.411, 0.0), // #D26900
+      vec3(0.769, 0.659, 0.0), // #C4A800
+      vec3(0.627,0.878,0.043)  // #A0E00B
       ), 
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
