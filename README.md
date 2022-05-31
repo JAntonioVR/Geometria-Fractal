@@ -1,5 +1,10 @@
 # Geometria-Fractal
 
+<a href="./2D-fractals.html>Pulsa para ver fractales en 2D</a>
+
+
+<a href="./3D-fractals.html>Pulsa para ver fractales en 3D</a>
+
 ## ¿Qué es un *fractal*?
 
 Hay distintas definiciones de fractal, basadas en el concepto de **autosimilaridad** y en el de **dimensión**. La dimensión es más compleja de entender, pero la autosimilaridad se puede entender con algunos ejemplos:
