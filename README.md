@@ -1,9 +1,9 @@
 # Geometria-Fractal
 
-<a href="./2D-fractals.html>Pulsa para ver fractales en 2D</a>
+[Pulsa para ver fractales en 2D](./2D-fractals.html)
 
 
-<a href="./3D-fractals.html>Pulsa para ver fractales en 3D</a>
+[Pulsa para ver fractales en 3D](./3D-fractals.html)
 
 ## ¿Qué es un *fractal*?
 
