@@ -3,11 +3,18 @@
     <head>
         <title>WebGL-Canvas</title>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="module"  src="static/js/fractals-2D.js"></script>
-        <link rel="stylesheet" href="static/css/style.css">
+        <!--<link rel="stylesheet" href="static/css/style.css">-->
+        <!-- Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+  
         <!-- MathJax para las expresiones matemáticas -->
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    
 <!--
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
         integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
@@ -17,69 +24,96 @@
         <!-- TODO MORE -->
     </head>
     <body>
-        <header>
-                <h1>Visualización de fractales en 2D</h1>
-        </header>
-        <main>
-            <canvas id="glCanvas"  width="720" height="720"></canvas>
-        </main>
-        <aside>
-            <h3>Controles:</h3>
-            <ul>
-                <li>Teclas +/-: Ampliar o reducir el zoom</li>
-                <li>Flechas: Desplazarse por el plano</li>
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+              <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+              <span class="fs-4"><h1>Visualización de fractales en 2D</h1></span>
+            </a>
+      
+            <ul class="nav nav-pills">
+              <li class="nav-item"><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
+              <li class="nav-item"><a href="2D-fractals.html" class="nav-link">Fractales 2D</a></li>
+              <li class="nav-item"><a href="3D-fractals.html" class="nav-link">Fractales 3D</a></li>
             </ul>
-            <div class="deslizador" id="numIteraciones">
-                <div>
-                <b>Número de iteraciones:</b>
-                </div>
-                <div>
-                <input id="nIteraciones" type="range" min="10" max="1000" step="5">
-                </div>
-                <div id="valorNIteraciones"></div>
-            </div><br>
-            <div class="fractal">
-                <b>¿Qué fractal quieres ver?</b>
-                <select id="fractales">
-                    <option value="0">Mandelbrot</option>
-                    <option value="1">Julia</option>
-                </select>
-            </div><br>
-            <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
-            <div class="deslizador" id="deslizadorJuliaX">
-                <div>
-                <b>x:</b>
-                </div>
-                <div>
-                <input id="juliaX" type="range" min="-2" max="2" step="0.01">
-                </div>
-                <div id="valorJuliaX"></div>
-            </div>
-            <div class="deslizador" id="deslizadorJuliaY">
-                <div>
-                <b>y:</b>
-                </div>
-                <div>
-                <input id="juliaY" type="range" min="-2" max="2" step="0.01">
-                </div>
-                <div id="valorJuliaY"></div>
-            </div><br>
-            <b>Exponente n de la función</b> \(f(z) = z^n + c\)
-            <div class="deslizador" id="deslizadorExponente">
-                <div>
-                <b>n:</b>
-                </div>
-                <div>
-                <input id="exponente" type="range" min="1" max="10" step="1">
-                </div>
-                <div id="valorExponente"></div>
-            </div><br>
-            <b>Volver a los parámetros por defecto</b><br>
-            <button id="botonReset">Reset</button>
+        </header>
 
-        </aside>
+        <main class="container">
+            <section class="row">
+                <div class="col-8" id="canvas-wapper">
+                        <canvas class="container-fluid" id="glCanvas" width="720" height="720"></canvas>
+                </div>
+                
+            
+                <aside class="col-4">
+
+                    <h3>Controles:</h3>
+                    <ul>
+                        <li>Teclas +/-: Ampliar o reducir el zoom</li>
+                        <li>Flechas: Desplazarse por el plano</li>
+                    </ul>
+                    <div class="container" id="numIteraciones">
+                        <div class="row align-items-center">
+                            <b class="col">Número de iteraciones:</b>
+                            <input class="col" id="nIteraciones" type="range" min="10" max="1000" step="5">
+                            <div class="col" id="valorNIteraciones"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <b class="col-7">¿Qué fractal quieres ver?</b>
+                        <div class="col-5">
+                            <select class="form-select form-select-sm mb-3" aria-label=".form-select-lg example" id="fractales">
+                                <option value="0">Mandelbrot</option>
+                                <option value="1">Julia</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="constanteJulia">
+                        <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
+                        <div class="container" id="deslizadorJuliaX">
+                            <div class="row align-items-center">
+                                <b class="col-2">x:</b>
+                                <input class="col-4" id="juliaX" type="range" min="-2" max="2" step="0.01">
+                                <div class="col-4" id="valorJuliaX"></div>
+                            </div>
+                        </div>
+                        <div class="container" id="deslizadorJuliaY">
+                            <div class="row align-items-center">
+                                <b class="col-2">y:</b>
+                                <input class="col-4" id="juliaY" type="range" min="-2" max="2" step="0.01">
+                                <div class="col-4" id="valorJuliaY"></div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <b>Exponente n de la función</b> \(f(z) = z^n + c\)
+                    <div class="container" id="deslizadorExponente">
+                        <div class="row align-items-center">
+                            <b class="col-2">n:</b>
+                            <input class="col-4" id="exponente" type="range" min="1" max="10" step="1">
+                            <div class="col-4" id="valorExponente"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <button type="button" class="btn btn-primary" id="botonReset">Volver a los parámetros por defecto</button>
+                </aside>
+            </section>
+        </main>
         <footer>
-            &copy Juan Antonio Villegas Recio
         </footer>
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center">
+              <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+                <svg class="bi" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
+              </a>
+              <span class="mb-3 mb-md-0 text-muted">&copy 2022, Juan Antonio Villegas Recio</span>
+            </div>
+        
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#twitter"></use></svg></a></li>
+              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"></use></svg></a></li>
+              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"></use></svg></a></li>
+            </ul>
+          </footer>
     </body>
 </html>

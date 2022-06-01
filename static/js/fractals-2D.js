@@ -25,12 +25,15 @@ var theScene = new Scene2D(vsSource, fsSource);
 // de los indicadores, los 'event listeners' y la primera visualización.
 function main(){
 
+  resizeCanvas();
+
   // Pulsar una tecla
   document.addEventListener("keydown", (event) => onKeyDown(event), true );
 
   // Fractal que se visualiza
   const fractal = document.querySelector("#fractales");
   fractal.selectedIndex = 0;
+  hideJuliaSliders();
   fractal.addEventListener('change', changeFractal, true);
 
   // Deslizador con el numero maximo de iteraciones
@@ -151,8 +154,20 @@ function changeExponente(event) {
 function changeFractal(){
   const fractales = document.querySelector("#fractales")
   var selected = parseInt(fractales.value);
+  if(selected != 1) 
+    hideJuliaSliders();
+  else
+    showJuliaSliders();
   theScene.setFractal(selected);
   theScene.drawScene();
+}
+
+function hideJuliaSliders() {
+  document.querySelector("#constanteJulia").style.display = 'none';
+}
+
+function showJuliaSliders() {
+  document.querySelector("#constanteJulia").style.display = 'block'
 }
 
 //
@@ -174,5 +189,17 @@ function resetParameters(){
   document.querySelector("#valorExponente").innerHTML = theScene.getOrder()
   
   document.querySelector("#fractales").value = theScene.getFractal();
+  theScene.getFractal() == 1 ? showJuliaSliders() : hideJuliaSliders();
   theScene.drawScene();
 }
+
+function resizeCanvas() {
+  let canvas = document.querySelector("#glCanvas"),
+      defaultHeight = canvas.height; 
+  if(window.innerHeight < defaultHeight) {
+    canvas.style.height = (window.innerHeight-120).toString() + "px";
+    canvas.style.width = (window.innerHeight-120).toString() + "px";
+  }
+}
+
+window.onresize = resizeCanvas;
