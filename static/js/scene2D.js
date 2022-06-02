@@ -68,7 +68,9 @@ class Scene2D extends Scene {
 
     this.parameters = {
       zoomCenter: [0.0, 0.0],
-      zoomSize: 3/4,
+      zoomSize: 3.0/4.0,
+      LLC: [-3.0/2.0, -3.0/2.0],
+      URC: [ 3.0/2.0,  3.0/2.0],
       maxIterations: 50,
       delta: 0.1,
       juliaSetConstant: [-0.12, 0.75],
@@ -159,6 +161,10 @@ class Scene2D extends Scene {
   zoomIn(){
     this.parameters.zoomSize *= 0.9;
     this.parameters.delta *= 0.9;
+    this.parameters.LLC[0] *= 0.9;
+    this.parameters.LLC[1] *= 0.9;
+    this.parameters.URC[0] *= 0.9;
+    this.parameters.URC[1] *= 0.9;
   }
 
   // ─── ZOOMOUT ────────────────────────────────────────────────────────────────────
@@ -166,7 +172,11 @@ class Scene2D extends Scene {
   // para que los desplazamientos sean mas notables.
   zoomOut(){
     this.parameters.zoomSize *= 1.1;
-    this.parameters.delta *= 1.1
+    this.parameters.delta *= 1.1;
+    this.parameters.LLC[0] *= 1.1;
+    this.parameters.LLC[1] *= 1.1;
+    this.parameters.URC[0] *= 1.1;
+    this.parameters.URC[1] *= 1.1;
   }
 
   // ─── MOVELEFT ───────────────────────────────────────────────────────────────────
@@ -174,6 +184,8 @@ class Scene2D extends Scene {
   // izquierda
   moveLeft(){
     this.parameters.zoomCenter[0] -= this.parameters.delta;
+    this.parameters.LLC[0] -= this.parameters.delta;
+    this.parameters.URC[0] -= this.parameters.delta;
   }
 
   // ─── MOVERIGHT ──────────────────────────────────────────────────────────────────
@@ -181,6 +193,8 @@ class Scene2D extends Scene {
   // derecha
   moveRight(){
     this.parameters.zoomCenter[0] += this.parameters.delta;
+    this.parameters.LLC[0] += this.parameters.delta;
+    this.parameters.URC[0] += this.parameters.delta;
   }
 
   // ─── MOVEUP ─────────────────────────────────────────────────────────────────────
@@ -188,6 +202,8 @@ class Scene2D extends Scene {
   // arriba
   moveUp(){
     this.parameters.zoomCenter[1] += this.parameters.delta;
+    this.parameters.LLC[1] += this.parameters.delta;
+    this.parameters.URC[1] += this.parameters.delta;
   }
 
   // ─── MOVEDOWN ───────────────────────────────────────────────────────────────────
@@ -195,6 +211,8 @@ class Scene2D extends Scene {
   // abajo
   moveDown(){
     this.parameters.zoomCenter[1] -= this.parameters.delta;
+    this.parameters.LLC[1] -= this.parameters.delta;
+    this.parameters.URC[1] -= this.parameters.delta;
   }
 
   //
@@ -232,6 +250,18 @@ class Scene2D extends Scene {
     return this.parameters.order;
   }
   
+  getLLC() {
+    return this.parameters.LLC;
+  }
+
+  getURC() {
+    return this.parameters.URC;
+  }
+
+  getDelta() {
+    return this.parameters.delta;
+  }
+
   //
   // ─── SETTERS ────────────────────────────────────────────────────────────────────
   //
@@ -276,6 +306,62 @@ class Scene2D extends Scene {
     this.parameters.order = newOrder;
   }
 
+  setLLCX(x, URCFixed) {
+    let desp = this.parameters.URC[0] - this.parameters.LLC[0];
+    this.parameters.LLC[0] = x;
+    if(URCFixed) {
+      desp = this.parameters.URC[0] - this.parameters.LLC[0];
+      this.parameters.LLC[1] = this.parameters.URC[1] - desp;
+    }
+    else
+      this.parameters.URC[0] = x + desp;
+    this.calculateZoomCenter();
+  }
+
+  setLLCY(y, URCFixed) {
+    let desp = this.parameters.URC[1] - this.parameters.LLC[1];
+    this.parameters.LLC[1] = y;
+    if(URCFixed) {
+      desp = this.parameters.URC[1] - this.parameters.LLC[1];
+      this.parameters.LLC[0] = this.parameters.URC[0]- desp;
+    }
+    else
+      this.parameters.URC[1] = y + desp;  
+    this.calculateZoomCenter();
+  }
+
+  setURCX(x, LLCFixed) {
+    let desp = this.parameters.URC[0] - this.parameters.LLC[0];
+    this.parameters.URC[0] = x;
+    if(LLCFixed) {
+      desp = this.parameters.URC[0] - this.parameters.LLC[0];
+      this.parameters.URC[1] = this.parameters.LLC[1] + desp;
+    }
+    else {
+      this.parameters.LLC[0] = x - desp;
+    }
+    this.calculateZoomCenter();
+  }
+
+  setURCY(y, LLCFixed) {
+    let desp = this.parameters.URC[1] - this.parameters.LLC[1];
+    this.parameters.URC[1] = y; 
+    if(LLCFixed) {
+      desp = this.parameters.URC[1] - this.parameters.LLC[1];
+      this.parameters.URC[0] = this.parameters.LLC[0] + desp;
+    }
+    else {
+      this.parameters.LLC[1] = y - desp;
+    }
+    this.calculateZoomCenter();
+  }
+
+
+  calculateZoomCenter() {
+    this.parameters.zoomCenter[0] = (this.parameters.LLC[0] + this.parameters.URC[0])/2.0;
+    this.parameters.zoomCenter[1] = (this.parameters.LLC[1] + this.parameters.URC[1])/2.0;
+    this.parameters.zoomSize = (this.parameters.zoomCenter[0]-this.parameters.LLC[0])/2.0;
+  }
   // ────────────────────────────────────────────────────────────────────────────────
 
 }

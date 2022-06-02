@@ -5,6 +5,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="module"  src="static/js/fractals-2D.js"></script>
+        <script type="text/javascript" src="static/js/jquery-3.6.0.min.js"></script>
+        
         <!--<link rel="stylesheet" href="static/css/style.css">-->
         <!-- Bootstrap -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -39,12 +41,12 @@
 
         <main class="container">
             <section class="row">
-                <div class="col-8" id="canvas-wapper">
+                <div class="col-lg-8" id="canvas-wapper">
                         <canvas class="container-fluid" id="glCanvas" width="720" height="720"></canvas>
                 </div>
                 
             
-                <aside class="col-4">
+                <aside class="col-lg-4">
 
                     <h3>Controles:</h3>
                     <ul>
@@ -52,10 +54,10 @@
                         <li>Flechas: Desplazarse por el plano</li>
                     </ul>
                     <div class="container" id="numIteraciones">
-                        <div class="row align-items-center">
-                            <b class="col">Número de iteraciones:</b>
-                            <input class="col" id="nIteraciones" type="range" min="10" max="1000" step="5">
-                            <div class="col" id="valorNIteraciones"></div>
+                        <div class="row align-items-center justify-content-between">
+                            <b class="col-4">Número de iteraciones:</b>
+                            <input class="col-4" id="nIteraciones" type="range" min="10" max="1000" step="5">
+                            <input type="number" class="col-4" id="valorNIteraciones" min="10" max="1000" step="5"></input>
                         </div>
                     </div>
                     <br>
@@ -71,30 +73,54 @@
                     <div id="constanteJulia">
                         <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
                         <div class="container" id="deslizadorJuliaX">
-                            <div class="row align-items-center">
+                            <div class="row align-items-center justify-content-between">
                                 <b class="col-2">x:</b>
-                                <input class="col-4" id="juliaX" type="range" min="-2" max="2" step="0.01">
-                                <div class="col-4" id="valorJuliaX"></div>
+                                <input class="col-5" id="juliaX" type="range" min="-2" max="2" step="0.01">
+                                <input type="number" class="col-3" id="valorJuliaX" min="-2" max="2" step="0.01"></input>
                             </div>
                         </div>
                         <div class="container" id="deslizadorJuliaY">
-                            <div class="row align-items-center">
+                            <div class="row align-items-center justify-content-between">
                                 <b class="col-2">y:</b>
-                                <input class="col-4" id="juliaY" type="range" min="-2" max="2" step="0.01">
-                                <div class="col-4" id="valorJuliaY"></div>
+                                <input class="col-5" id="juliaY" type="range" min="-2" max="2" step="0.01">
+                                <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
                             </div>
                         </div>
                         <br>
                     </div>
                     <b>Exponente n de la función</b> \(f(z) = z^n + c\)
                     <div class="container" id="deslizadorExponente">
-                        <div class="row align-items-center">
+                        <div class="row align-items-center justify-content-between">
                             <b class="col-2">n:</b>
-                            <input class="col-4" id="exponente" type="range" min="1" max="10" step="1">
-                            <div class="col-4" id="valorExponente"></div>
+                            <input class="col-5" id="exponente" type="range" min="1" max="10" step="1">
+                            <input type="number" class="col-3" id="valorExponente" min="1" max="10" step="1"></input>
                         </div>
                     </div>
                     <br>
+
+                    <h4>Región del plano visualizada</h4>
+                    <b>Esquina inferior izquierda:</b>
+                    <div class="row align-items-center">
+                        <div class="col-4"><input id="LLCX" type="number" min="-10" max="10" step="0.1"></div>
+                        <div class="col-4"><input id="LLCY" type="number" min="-10" max="10" step="0.1"></div>
+                        <div class="col-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="LLCFixed">
+                                <label class="form-check-label" for="LLCFixed">Fijo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <b>Esquina superior derecha:</b>
+                    <div class="row align-items-center">
+                        <div class="col-4"><input id="URCX" type="number" min="-10" max="10" step="0.1"></div>
+                        <div class="col-4"><input id="URCY" type="number" min="-10" max="10" step="0.1"></div>
+                        <div class="col-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="URCFixed">
+                                <label class="form-check-label" for="URCFixed">Fijo</label>
+                            </div>
+                        </div>
+                    </div><br>
                     <button type="button" class="btn btn-primary" id="botonReset">Volver a los parámetros por defecto</button>
                 </aside>
             </section>

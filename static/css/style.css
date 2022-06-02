@@ -4,7 +4,7 @@ body {  display: grid;
     gap: 0px 0px;
     grid-auto-flow: row;
   }
-  
+
 header {  display: grid;
     gap: 0px 0px;
     grid-auto-flow: row;

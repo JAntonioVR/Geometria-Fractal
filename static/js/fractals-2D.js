@@ -37,28 +37,51 @@ function main(){
   fractal.addEventListener('change', changeFractal, true);
 
   // Deslizador con el numero maximo de iteraciones
-  const deslizadorNIter = document.querySelector("#nIteraciones");
+  const deslizadorNIter = document.querySelector("#nIteraciones"),
+        valorNIter = document.querySelector("#valorNIteraciones");
   deslizadorNIter.value = theScene.getMaxIterations();
-  document.querySelector("#valorNIteraciones").innerHTML = theScene.getMaxIterations();
+  valorNIter.value = theScene.getMaxIterations();
   deslizadorNIter.addEventListener('input', (event) => changeMaxIterations(event), true);
+  valorNIter.addEventListener('change', (event) => changeMaxIterations(event), true);
 
   // Deslizador con la componente x del elemento c = x + iy del conjunto de Julia
-  const deslizadorJuliaX = document.querySelector("#juliaX");
+  const deslizadorJuliaX = document.querySelector("#juliaX"),
+        valorJuliaX = document.querySelector("#valorJuliaX");
   deslizadorJuliaX.value = theScene.getJuliaConstantX();
-  document.querySelector("#valorJuliaX").innerHTML = theScene.getJuliaConstantX();
+  valorJuliaX.value = theScene.getJuliaConstantX();
   deslizadorJuliaX.addEventListener('input', (event) => changeJuliaX(event), true);
+  valorJuliaX.addEventListener('change', (event) => changeJuliaX(event), true);
 
   // Deslizador con la componente y del elemento c = x + iy del conjunto de Julia
-  const deslizadorJuliaY = document.querySelector("#juliaY");
+  const deslizadorJuliaY = document.querySelector("#juliaY"),
+        valorJuliaY = document.querySelector("#valorJuliaY");
   deslizadorJuliaY.value = theScene.getJuliaConstantY();
-  document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstantY();
+  valorJuliaY.value = theScene.getJuliaConstantY();
   deslizadorJuliaY.addEventListener('input', (event) => changeJuliaY(event), true);
+  valorJuliaY.addEventListener('change', (event) => changeJuliaY(event), true);
 
   // Deslizador con el exponente m de la funcion P(z) = z^m + c
-  const deslizadorExp = document.querySelector("#exponente");
+  const deslizadorExp = document.querySelector("#exponente"),
+        valorExponente = document.querySelector("#valorExponente");
   deslizadorExp.value = theScene.getOrder();
-  document.querySelector("#valorExponente").innerHTML = theScene.getOrder();
+  valorExponente.value = theScene.getOrder();
   deslizadorExp.addEventListener('input', (event) => changeExponente(event), true);
+  valorExponente.addEventListener('change', (event) => changeExponente(event), true);
+
+  const LLCX = document.querySelector("#LLCX"),
+        LLCY = document.querySelector("#LLCY"),
+        URCX = document.querySelector("#URCX"),
+        URCY = document.querySelector("#URCY");
+
+  LLCX.value = theScene.getLLC()[0];
+  LLCY.value = theScene.getLLC()[1];
+  URCX.value = theScene.getURC()[0];
+  URCY.value = theScene.getURC()[1];
+
+  LLCX.addEventListener('change', (event) => changeLLCX(event), true);
+  LLCY.addEventListener('change', (event) => changeLLCY(event), true);
+  URCX.addEventListener('change', (event) => changeURCX(event), true);
+  URCY.addEventListener('change', (event) => changeURCY(event), true);
 
   // Boton de reseteo de parametros
   const botonReset = document.querySelector("#botonReset");
@@ -83,34 +106,56 @@ window.onload = main;
 //  
 function onKeyDown(event) {
   let key = event.wich || event.keyCode;
+  let LLCX = document.querySelector("#LLCX"),
+      LLCY = document.querySelector("#LLCY"),
+      URCX = document.querySelector("#URCX"),
+      URCY = document.querySelector("#URCY");
   switch (key) {
     case 37:  // Left key
       theScene.moveLeft();
+      LLCX.value = theScene.getLLC()[0].toFixed(2);
+      URCX.value = theScene.getURC()[0].toFixed(2);
       break;
 
     case 38:  // Up key
       theScene.moveUp();
+      LLCY.value = theScene.getLLC()[1].toFixed(2);
+      URCY.value = theScene.getURC()[1].toFixed(2);
       break;
 
     case 39:  // Right key
       theScene.moveRight();
+      LLCX.value = theScene.getLLC()[0].toFixed(2);
+      URCX.value = theScene.getURC()[0].toFixed(2);
       break;
 
     case 40:  // Down key
       theScene.moveDown();
+      LLCY.value = theScene.getLLC()[1].toFixed(2);
+      URCY.value = theScene.getURC()[1].toFixed(2);
       break;
     
     case 187:  // + key
       theScene.zoomIn();
+      LLCX.value = theScene.getLLC()[0].toFixed(2);
+      URCX.value = theScene.getURC()[0].toFixed(2);
+      LLCY.value = theScene.getLLC()[1].toFixed(2);
+      URCY.value = theScene.getURC()[1].toFixed(2);
       break;
 
     case 189:  // - key
       theScene.zoomOut();
+      LLCX.value = theScene.getLLC()[0].toFixed(2);
+      URCX.value = theScene.getURC()[0].toFixed(2);
+      LLCY.value = theScene.getLLC()[1].toFixed(2);
+      URCY.value = theScene.getURC()[1].toFixed(2);
       break;
 
     default:
       break;
   }
+
+
   theScene.drawScene();
 }
 
@@ -118,9 +163,15 @@ function onKeyDown(event) {
 // ─── CAMBIAR NUMERO MAXIMO DE ITERACIONES ───────────────────────────────────────
 //  
 function changeMaxIterations(event){
-  document.querySelector("#valorNIteraciones").innerHTML = event.target.value;
-  theScene.setMaxIterations(event.target.value);
+  let new_value = verifyMaxIterations(event.target.value);
+  document.querySelector("#valorNIteraciones").value = new_value;
+  document.querySelector("#nIteraciones").value = new_value;
+  theScene.setMaxIterations(new_value);
   theScene.drawScene();
+}
+
+function verifyMaxIterations(number) {
+  return parseInt(Math.min(Math.max(10, number), 1000));
 }
 
 //
@@ -128,24 +179,108 @@ function changeMaxIterations(event){
 // c = x + iy
 
 function changeJuliaX(event) {
-  document.querySelector("#valorJuliaX").innerHTML = event.target.value;
-  theScene.setJuliaConstantX(event.target.value);
+  let new_value = verifyInputJulia(event.target.value);
+  console.log(new_value);
+  document.querySelector("#valorJuliaX").value = new_value;
+  document.querySelector("#juliaX").value = new_value;
+  theScene.setJuliaConstantX(new_value);
   theScene.drawScene();
 }
 
 function changeJuliaY(event) {
-  document.querySelector("#valorJuliaY").innerHTML = event.target.value;
-  theScene.setJuliaConstantY(event.target.value);
+  let new_value = verifyInputJulia(event.target.value);
+  console.log(new_value);
+  document.querySelector("#valorJuliaY").value = new_value;
+  document.querySelector("#juliaY").value = new_value;
+  theScene.setJuliaConstantY(new_value);
   theScene.drawScene();
+}
+
+function verifyInputJulia(number) {
+  return Math.min(Math.max(-2.0, number), 2.0);
 }
 
 //
 // ─── CAMBIAR EL EXPONENTE DE P(z) ────────────────────────────────────────────────
 //
 function changeExponente(event) {
-  document.querySelector("#valorExponente").innerHTML = event.target.value;
-  theScene.setOrder(event.target.value);
+  let new_value = verifyExponent(event.target.value);
+  document.querySelector("#valorExponente").value = new_value;
+  document.querySelector("#exponente").value = new_value;
+  theScene.setOrder(new_value);
   theScene.drawScene();
+}
+
+function verifyExponent(number) {
+  return parseInt(Math.min(Math.max(1, number), 10));
+}
+
+//
+// ─── CAMBIAR EL CUADRO VISUALIZADO ──────────────────────────────────────────────
+//  
+function changeLLCX(event) {
+  if(!document.querySelector("#LLCFixed").checked){
+    let new_value = verifyLLCX(event.target.value),
+        URCFixed = document.querySelector("#URCFixed").checked;
+    theScene.setLLCX(new_value, URCFixed);
+    theScene.drawScene();
+  }
+  document.querySelector("#LLCX").value = theScene.getLLC()[0].toFixed(2);
+  document.querySelector("#URCX").value = theScene.getURC()[0].toFixed(2);
+}
+
+function changeLLCY(event) {
+  if(!document.querySelector("#LLCFixed").checked){
+    let new_value = verifyLLCY(event.target.value),
+      URCFixed = document.querySelector("#URCFixed").checked;
+  theScene.setLLCY(new_value, URCFixed);
+  theScene.drawScene();
+  }
+  document.querySelector("#LLCY").value = theScene.getLLC()[1].toFixed(2);
+  document.querySelector("#URCY").value = theScene.getURC()[1].toFixed(2);
+}
+
+function verifyLLCX(number) {
+  let URCX = document.querySelector("#URCX").value
+  return Math.min(Math.max(-10.0, number), URCX-0.1);
+}
+
+
+function verifyLLCY(number) {
+  let URCY = document.querySelector("#URCY").value
+  return Math.min(Math.max(-10.0, number), URCY-0.1);
+}
+
+function changeURCX(event) {
+  if(!document.querySelector("#URCFixed").checked) {
+    let new_value = verifyURCX(event.target.value),
+        LLCFixed = document.querySelector("#LLCFixed").checked;
+    theScene.setURCX(new_value, LLCFixed);
+    theScene.drawScene();
+  }
+  document.querySelector("#LLCX").value = theScene.getLLC()[0].toFixed(2);
+  document.querySelector("#URCX").value = theScene.getURC()[0].toFixed(2);
+}
+
+function changeURCY(event) {
+  if(!document.querySelector("#URCFixed").checked) {
+    let new_value = verifyURCY(event.target.value),
+        LLCFixed = document.querySelector("#LLCFixed").checked;
+    theScene.setURCY(new_value, LLCFixed);
+    theScene.drawScene();
+  }
+  document.querySelector("#LLCY").value = theScene.getLLC()[1].toFixed(2);
+  document.querySelector("#URCY").value = theScene.getURC()[1].toFixed(2);
+}
+
+function verifyURCX(number) {
+  let LLCX = document.querySelector("#LLCX").value
+  return Math.min(Math.max(LLCX+0.1, number), 10.0);
+}
+
+function verifyURCY(number) {
+  let LLCY = document.querySelector("#LLCY").value
+  return Math.min(Math.max(LLCY+0.1, number), 10.0);
 }
 
 //
@@ -190,16 +325,39 @@ function resetParameters(){
   
   document.querySelector("#fractales").value = theScene.getFractal();
   theScene.getFractal() == 1 ? showJuliaSliders() : hideJuliaSliders();
+
+  document.querySelector("#LLCX").value = theScene.getLLC()[0];
+  document.querySelector("#LLCY").value = theScene.getLLC()[1];
+  document.querySelector("#URCX").value = theScene.getURC()[0];
+  document.querySelector("#URCY").value = theScene.getURC()[1];
+
   theScene.drawScene();
 }
 
 function resizeCanvas() {
   let canvas = document.querySelector("#glCanvas"),
       defaultHeight = canvas.height; 
-  if(window.innerHeight < defaultHeight) {
-    canvas.style.height = (window.innerHeight-120).toString() + "px";
-    canvas.style.width = (window.innerHeight-120).toString() + "px";
+
+  if(window.innerWidth < 992) {
+    //canvas.style.width = (window.innerWidth-30).toString() + "px";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
   }
+  else {
+    if(window.innerHeight < defaultHeight) {
+      canvas.style.height = (window.innerHeight-120).toString() + "px";
+      canvas.style.width = (window.innerHeight-120).toString() + "px";
+    }
+    else if (window.innerHeight > 1200 ) {//defaultHeight + 120) {
+        canvas.style.height = defaultHeight.toString() + "px";
+        canvas.style.width = defaultHeight.toString() + "px";
+    }
+    else {
+      canvas.style.height = "600px";
+      canvas.style.width = "600px";
+    }
+  }
+  
 }
 
 window.onresize = resizeCanvas;
