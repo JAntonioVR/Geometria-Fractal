@@ -312,16 +312,16 @@ function resetParameters(){
   theScene.setInitialParameters();
 
   document.querySelector("#nIteraciones").value = theScene.getMaxIterations();
-  document.querySelector("#valorNIteraciones").innerHTML = theScene.getMaxIterations()
+  document.querySelector("#valorNIteraciones").value = theScene.getMaxIterations()
   
   document.querySelector("#juliaX").value = theScene.getJuliaConstantX();
-  document.querySelector("#valorJuliaX").innerHTML = theScene.getJuliaConstantX()
+  document.querySelector("#valorJuliaX").value = theScene.getJuliaConstantX()
 
   document.querySelector("#juliaY").value = theScene.getJuliaConstantY();
-  document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstantY()
+  document.querySelector("#valorJuliaY").value = theScene.getJuliaConstantY()
   
   document.querySelector("#exponente").value = theScene.getOrder();
-  document.querySelector("#valorExponente").innerHTML = theScene.getOrder()
+  document.querySelector("#valorExponente").value = theScene.getOrder()
   
   document.querySelector("#fractales").value = theScene.getFractal();
   theScene.getFractal() == 1 ? showJuliaSliders() : hideJuliaSliders();

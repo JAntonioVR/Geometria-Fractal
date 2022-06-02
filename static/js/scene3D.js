@@ -493,6 +493,14 @@ class Scene3D extends Scene{
     this.parameters.nSamples = newNSamples;
   }
 
+  //
+  // ─── SETPOSITION ────────────────────────────────────────────────────────────────
+  // Setter del parametro 'lookfrom', la posicion del observador
+  setPosition(newPosition) {
+    this.parameters.lookfrom = newPosition;
+    this.parameters.lookfromSpheric = cartesianToSpheric(this.parameters.lookfrom);
+  }
+
   // ─── SETSH ──────────────────────────────────────────────────────────────────────
   // Setter del parametro 'sh' (exponente de brillo).
   setSh(newSh){

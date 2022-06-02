@@ -24,6 +24,13 @@ const MouseState = Object.freeze({
   MOUSE_UP: 1
 });
 
+const Mode = Object.freeze({
+  INTERACTIVE: 0,
+  ONDEMAND: 1
+});
+
+var mode = Mode.ONDEMAND;
+
 //
 // ─── ESCENA 3D ──────────────────────────────────────────────────────────────────
 // Variable global que representa la escena 3D en la que se visualizan los fractales
@@ -36,7 +43,12 @@ var theScene = new Scene3D(vsSource, fsSource);
 function main(){
 
   // Pulsar una tecla
-  document.addEventListener("keydown", (event) => onKeyDown(event), true );
+  //document.addEventListener("keydown", (event) => onKeyDown(event), true );
+
+  $(document).keydown(onKeyDown);
+
+  $("#interactivo").change(changeMode);
+  $("#a-demanda").change(changeMode);
 
   // Movimiento de camara usando el raton
   const glCanvas = document.querySelector("#glCanvas");
@@ -56,7 +68,7 @@ function main(){
   // Color de la componente ambiental del material parametrizable
   const ka_input = document.querySelector("#ka");
   ka_input.value = rgbToHex(theScene.getKa());
-  ka_input.addEventListener('input', change_ka, true);
+  ka_input.addEventListener('change', change_ka, true);
 
   // Color de la componente difusa del material parametrizable
   const kd_input = document.querySelector("#kd");
@@ -71,13 +83,14 @@ function main(){
   // Exponente de brillo especular del material parametrizable
   const sh_input = document.querySelector("#sh");
   sh_input.value = theScene.getSh();
-  document.querySelector("#valor_sh").innerHTML = theScene.getSh();
+  document.querySelector("#valor_sh").value = theScene.getSh();
   sh_input.addEventListener('input', (event) => change_sh(event), true);
+  $('#valor_sh').change(change_sh);
 
   // Intensidad de la luz izquierda
   const lightColor0_input = document.querySelector("#lightColor0");
   lightColor0_input.value = rgbToHex(theScene.getLightColor(0));
-  lightColor0_input.addEventListener('input', change_lightColor0, true);
+  lightColor0_input.addEventListener('change', change_lightColor0, true);
 
   // La luz izquierda arroja sombras?
   const shadows_0 = document.querySelector("#shadows_0");
@@ -86,7 +99,7 @@ function main(){
   // Intensidad de la luz derecha
   const lightColor1_input = document.querySelector("#lightColor1");
   lightColor1_input.value = rgbToHex(theScene.getLightColor(1));
-  lightColor1_input.addEventListener('input', change_lightColor1, true);
+  lightColor1_input.addEventListener('change', change_lightColor1, true);
 
   // La luz derecha arroja sombras?
   const shadows_1 = document.querySelector("#shadows_1");
@@ -100,26 +113,30 @@ function main(){
   // Deslizador con la componente x del elemento c = x + yi + zj + wk del conjunto de Julia
   const juliaX_input = document.querySelector("#juliaX");
   juliaX_input.value = theScene.getJuliaConstant()[0];
-  document.querySelector("#valorJuliaX").innerHTML = theScene.getJuliaConstant()[0];
+  $('#valorJuliaX').val(theScene.getJuliaConstant()[0]);
   juliaX_input.addEventListener('input', (event) => change_julia_constant_x(event), true);
-  
+  $('#valorJuliaX').change(change_julia_constant_x);
+
   // Deslizador con la componente y del elemento c = x + yi + zj + wk del conjunto de Julia
   const juliaY_input = document.querySelector("#juliaY");
   juliaY_input.value = theScene.getJuliaConstant()[1];
-  document.querySelector("#valorJuliaY").innerHTML = theScene.getJuliaConstant()[1];
+  $('#valorJuliaY').val(theScene.getJuliaConstant()[1]);
   juliaY_input.addEventListener('input', (event) => change_julia_constant_y(event), true);
+  $('#valorJuliaY').change(change_julia_constant_y);
 
   // Deslizador con la componente z del elemento c = x + yi + zj + wk del conjunto de Julia
   const juliaZ_input = document.querySelector("#juliaZ");
   juliaZ_input.value = theScene.getJuliaConstant()[2];
-  document.querySelector("#valorJuliaZ").innerHTML = theScene.getJuliaConstant()[2];
+  $('#valorJuliaZ').val(theScene.getJuliaConstant()[2]);
   juliaZ_input.addEventListener('input', (event) => change_julia_constant_z(event), true);
+  $('#valorJuliaZ').change(change_julia_constant_z);
 
   // Deslizador con la componente w del elemento c = x + yi + zj + wk del conjunto de Julia
   const juliaW_input = document.querySelector("#juliaW");
   juliaW_input.value = theScene.getJuliaConstant()[3];
-  document.querySelector("#valorJuliaW").innerHTML = theScene.getJuliaConstant()[3];
+  $('#valorJuliaW').val(theScene.getJuliaConstant()[3]);
   juliaW_input.addEventListener('input', (event) => change_julia_constant_w(event), true);
+  $('#valorJuliaW').change(change_julia_constant_w);
 
   // No mostrar el menu si no se estan visualizando conjuntos de Julia
   if(theScene.getFractal() != 2)
@@ -133,7 +150,7 @@ function main(){
   const nSamples_input = document.querySelector("#nSamples");
   nSamples_input.value = theScene.getJuliaConstant()[0];
   document.querySelector("#valorNSamples").innerHTML = theScene.getNSamples()**2;
-  nSamples_input.addEventListener('input', (event) => change_nSamples(event), true);
+  nSamples_input.addEventListener('change', (event) => change_nSamples(event), true);
   if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
 
   // Deslizador para calcular el valor de epsilon usado en ray-marching
@@ -141,13 +158,32 @@ function main(){
   var epsilon_value = theScene.getEpsilon();
   var exp = Math.log10(epsilon_value);
   epsilon_input.value = -exp;
-  document.querySelector("#valor_epsilon").innerHTML = 10**(exp);
+  document.querySelector("#valor_epsilon").innerHTML = (10**(exp)).toFixed(4);
   epsilon_input.addEventListener('input', (event) => change_epsilon(event), true);
   
+  const initialPosition = theScene.getPosition();
+  $('#posX').val(initialPosition[0]);
+  $('#posX').change(changePosition);
+
+  $('#posY').val(initialPosition[1]);
+  $('#posY').change(changePosition);
+
+  $('#posZ').val(initialPosition[2]);
+  $('#posZ').change(changePosition);
+
+  $('#redraw').click(redraw);
+
   // First render
-  theScene.drawScene();
-    
+  redraw();
+  timeRedraw();
+
 }
+
+window.addEventListener("keydown", function(e) {
+  if(["ArrowUp","ArrowDown",].indexOf(e.code) > -1) {
+      e.preventDefault();
+  }
+}, false);
 
 window.onload = main;
 
@@ -191,7 +227,8 @@ function moveCamera(event){
 
     theScene.moveX(disp[0]);
     theScene.moveY(disp[1]);
-    theScene.drawScene();
+    if(mode == Mode.INTERACTIVE) 
+      redraw();
   }
 }
 
@@ -214,7 +251,8 @@ function mouseUp() {
 function change_ka() {
   const value = hexToRgb(document.querySelector("#ka").value);
   theScene.setKa(value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -224,7 +262,8 @@ function change_kd() {
   const value = hexToRgb(document.querySelector("#kd").value);
   console.log(value)
   theScene.setKd(value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -233,16 +272,24 @@ function change_kd() {
 function change_ks() {
   const value = hexToRgb(document.querySelector("#ks").value);
   theScene.setKs(value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
 // ─── CAMBIO DEL EXPONENTE DE BRILLO ─────────────────────────────────────────────
 //  
 function change_sh(event) {
-  document.querySelector("#valor_sh").innerHTML = event.target.value;
-  theScene.setSh(event.target.value);
-  theScene.drawScene();
+  let new_value = verifySH(event.target.value);
+  $("#valor_sh").val(new_value);
+  $('#sh').val(new_value);
+  theScene.setSh(new_value);
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
+}
+
+function verifySH(number) {
+  return parseInt(Math.min(Math.max(10, number), 1000));
 }
 
 //
@@ -251,7 +298,8 @@ function change_sh(event) {
 function change_lightColor0() {
   const value = hexToRgb(document.querySelector("#lightColor0").value);
   theScene.setLightColor(0, value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -259,7 +307,8 @@ function change_lightColor0() {
 //
 function changeShadow_0(){
   theScene.changeShadow(0);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -269,7 +318,8 @@ function change_lightColor1() {
   const value = hexToRgb(document.querySelector("#lightColor1").value);
   console.log("#lightColor1")
   theScene.setLightColor(1, value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -277,7 +327,8 @@ function change_lightColor1() {
 //
 function changeShadow_1(){
   theScene.changeShadow(1);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -291,7 +342,8 @@ function changeFractal() {
   else
     document.querySelector("#constanteJulia").style.display = 'block'
   theScene.setFractal(selected);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -299,35 +351,51 @@ function changeFractal() {
 // c = x + yi + zj + wk
 
 function change_julia_constant_x(event) {
-  document.querySelector("#valorJuliaX").innerHTML = event.target.value;
+  let new_value = verifyInputJulia(event.target.value);
+  $("#juliaX").val(new_value);
+  $("#valorJuliaX").val(new_value);
   let C = theScene.getJuliaConstant();
-  C[0] = event.target.value;
+  C[0] = new_value;
   theScene.setJuliaConstant(C);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 function change_julia_constant_y(event) {
-  document.querySelector("#valorJuliaY").innerHTML = event.target.value;
+  let new_value = verifyInputJulia(event.target.value);
+  $("#juliaY").val(new_value);
+  $("#valorJuliaY").val(new_value);
   let C = theScene.getJuliaConstant();
   C[1] = event.target.value;
   theScene.setJuliaConstant(C);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 function change_julia_constant_z(event) {
-  document.querySelector("#valorJuliaZ").innerHTML = event.target.value;
+  let new_value = verifyInputJulia(event.target.value);
+  $("#juliaZ").val(new_value);
+  $("#valorJuliaZ").val(new_value);
   let C = theScene.getJuliaConstant();
   C[2] = event.target.value;
   theScene.setJuliaConstant(C);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 function change_julia_constant_w(event) {
-  document.querySelector("#valorJuliaW").innerHTML = event.target.value;
+  let new_value = verifyInputJulia(event.target.value);
+  $("#juliaW").val(new_value);
+  $("#valorJuliaW").val(new_value);
   let C = theScene.getJuliaConstant();
   C[3] = event.target.value;
   theScene.setJuliaConstant(C);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
+}
+
+function verifyInputJulia(number) {
+  return Math.min(Math.max(-2.0, number), 2.0);
 }
 
 //
@@ -339,7 +407,8 @@ function changeAntiliasing(){
     document.querySelector("#deslizadorNSamples").style.display = 'flex';
   else
     document.querySelector("#deslizadorNSamples").style.display = 'none';   
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -348,17 +417,45 @@ function changeAntiliasing(){
 function change_nSamples(event) {
   document.querySelector("#valorNSamples").innerHTML = event.target.value**2;
   theScene.setNSamples(event.target.value);
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
 // ─── CAMBIAR EPSILON ────────────────────────────────────────────────────────────
 //  
 function change_epsilon(event) {
-  document.querySelector("#valor_epsilon").innerHTML = 10**(-event.target.value);
+  document.querySelector("#valor_epsilon").innerHTML = (10**(-event.target.value)).toFixed(4);
   theScene.setEpsilon(10**(-event.target.value));
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
+
+//
+// ─── CAMBIAR POSICION ───────────────────────────────────────────────────────────
+//
+function changePosition() {
+  let newPosition = [
+    $('#posX').val(),
+    $('#posY').val(),
+    $('#posZ').val(),
+  ];
+  theScene.setPosition(newPosition);
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
+}
+
+//
+// ─── CAMBIAR MODO INTERACTIVO/DEMANDA ─────────────────────────────────────────
+//
+function changeMode() {
+  if($("#interactivo")[0].checked)
+    mode = Mode.INTERACTIVE;
+  else
+    mode = Mode.ONDEMAND;
+  redraw();
+}
+  
 
 //
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
@@ -394,7 +491,8 @@ function onKeyDown(event) {
       break;
   }
   actualizaValorPosicion(theScene.getPosition());
-  theScene.drawScene();
+  if(mode == Mode.INTERACTIVE) 
+      redraw();
 }
 
 //
@@ -434,26 +532,38 @@ function resetParameters() {
   document.querySelector("#valor_epsilon").innerHTML = theScene.getEpsilon();
 
 
-  theScene.drawScene();
+  redraw();
 }
 
 //
 // ─── CRONOMETRO: ¿CUANTO TARDA EN PROCESARSE EL FRAME ACTUAL? ───────────────────
 //
+
+var timer;
+
 function timeRedraw() {
+  document.querySelector("#contador-valor").innerHTML = "<b>Tiempo: </b>" + timer.toFixed(5);
+}
+
+//
+// ─── REDIBUJAR ──────────────────────────────────────────────────────────────────
+//
+function redraw() {
   var start = performance.now();
   theScene.drawScene();
   var end = performance.now();
-  document.querySelector("#contador-valor").innerHTML = end-start;
+  timer = end-start;
+  timeRedraw();
 }
+  
 
 //
 // ─── ACTUALIZA LA POSICION ACTUAL ───────────────────────────────────────────────
 //  
 function actualizaValorPosicion(posicion) {
-    document.querySelector("#marcador-posicion").innerHTML = 
-    "(" + posicion[0].toFixed(2) + ", " + posicion[1].toFixed(2) + ", " + posicion[2].toFixed(2) + ")"
-
+    $('#posX').val(posicion[0].toFixed(2));
+    $('#posY').val(posicion[1].toFixed(2));
+    $('#posZ').val(posicion[2].toFixed(2));
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
