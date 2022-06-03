@@ -45,6 +45,11 @@ function main(){
   // Pulsar una tecla
   //document.addEventListener("keydown", (event) => onKeyDown(event), true );
 
+  if(window.screen.width <= 480) {
+    window.alert("No es posible ejecutar esta página en dispositivos móviles");
+    return;
+  }
+
   $(document).keydown(onKeyDown);
 
   $("#interactivo").change(changeMode);
@@ -179,13 +184,9 @@ function main(){
 
 }
 
-window.addEventListener("keydown", function(e) {
-  if(["ArrowUp","ArrowDown",].indexOf(e.code) > -1) {
-      e.preventDefault();
-  }
-}, false);
-
 window.onload = main;
+window.onresize = resizeCanvas;
+
 
 //
 // ────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -565,5 +566,13 @@ function actualizaValorPosicion(posicion) {
     $('#posY').val(posicion[1].toFixed(2));
     $('#posZ').val(posicion[2].toFixed(2));
 }
+
+function resizeCanvas () {
+  if(window.innerWidth < 992) {
+    document.querySelector("#glCanvas").style.width = "100%";
+  }
+}
+
+
 
 // ────────────────────────────────────────────────────────────────────────────────
