@@ -245,8 +245,7 @@ function changeLLCX(event) {
     theScene.setLLCX(new_value, URCFixed);
     theScene.drawScene();
   }
-  document.querySelector("#LLCX").value = theScene.getLLC()[0].toFixed(2);
-  document.querySelector("#URCX").value = theScene.getURC()[0].toFixed(2);
+  reloadPositionInput();
 }
 
 function changeLLCY(event) {
@@ -256,8 +255,7 @@ function changeLLCY(event) {
   theScene.setLLCY(new_value, URCFixed);
   theScene.drawScene();
   }
-  document.querySelector("#LLCY").value = theScene.getLLC()[1].toFixed(2);
-  document.querySelector("#URCY").value = theScene.getURC()[1].toFixed(2);
+  reloadPositionInput();
 }
 
 function verifyLLCX(number) {
@@ -278,8 +276,7 @@ function changeURCX(event) {
     theScene.setURCX(new_value, LLCFixed);
     theScene.drawScene();
   }
-  document.querySelector("#LLCX").value = theScene.getLLC()[0].toFixed(2);
-  document.querySelector("#URCX").value = theScene.getURC()[0].toFixed(2);
+  reloadPositionInput()
 }
 
 function changeURCY(event) {
@@ -289,8 +286,7 @@ function changeURCY(event) {
     theScene.setURCY(new_value, LLCFixed);
     theScene.drawScene();
   }
-  document.querySelector("#LLCY").value = theScene.getLLC()[1].toFixed(2);
-  document.querySelector("#URCY").value = theScene.getURC()[1].toFixed(2);
+  reloadPositionInput();
 }
 
 function verifyURCX(number) {
@@ -301,6 +297,13 @@ function verifyURCX(number) {
 function verifyURCY(number) {
   let LLCY = document.querySelector("#LLCY").value
   return Math.min(Math.max(parseFloat(LLCY)+0.1, parseFloat(number)), 10.0);
+}
+
+function reloadPositionInput() {
+  $("#LLCX").val(theScene.getLLC()[0].toFixed(2));
+  $("#LLCY").val(theScene.getLLC()[1].toFixed(2));
+  $("#URCX").val(theScene.getURC()[0].toFixed(2));
+  $("#URCY").val(theScene.getURC()[1].toFixed(2));
 }
 
 //
@@ -346,10 +349,7 @@ function resetParameters(){
   document.querySelector("#fractales").value = theScene.getFractal();
   theScene.getFractal() == 1 ? showJuliaSliders() : hideJuliaSliders();
 
-  document.querySelector("#LLCX").value = theScene.getLLC()[0];
-  document.querySelector("#LLCY").value = theScene.getLLC()[1];
-  document.querySelector("#URCX").value = theScene.getURC()[0];
-  document.querySelector("#URCY").value = theScene.getURC()[1];
+  reloadPositionInput();
 
   theScene.drawScene();
 }
