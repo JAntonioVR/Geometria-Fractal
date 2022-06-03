@@ -20,13 +20,13 @@
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
               <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-              <span class="fs-4"><h1>Visualización de Fractales 3D</h1></span>
+              <span class="fs-4"><h1>Visualización de Fractales 2D</h1></span>
             </a>
       
             <ul class="nav nav-pills">
-              <li class="nav-item"><a href="./index.html" class="nav-link active" aria-current="page">Home</a></li>
-              <li class="nav-item"><a href="./2D-fractals.html" class="nav-link">Fractales 2D</a></li>
-              <li class="nav-item"><a href="./3D-fractals.html" class="nav-link">Fractales 3D</a></li>
+              <li class="nav-item"><a href="./index.html"><button class="btn-change">Home</button></a></li>
+              <li class="nav-item"><a href="./2D-fractals.html"><button class="btn-change">Fractales 2D</button></a></li>
+              <li class="nav-item"><a href="./3D-fractals.html"><button class="btn-change">Fractales 3D</button></a></li>
 
             </ul>
         </header>
@@ -43,23 +43,33 @@
                         <li>Teclas +/-: Ampliar o reducir el zoom</li>
                         <li>Flechas: Desplazarse por el espacio</li>
                     </ul>
-
-                    <h4>Modo de uso</h4>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="modo" id="interactivo" value="0">
-                        <label class="form-check-label" for="interactivo">
-                          Modo interactivo
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="modo" id="a-demanda" value="1" checked>
-                        <label class="form-check-label" for="a-demanda">
-                          Modo a demanda
-                        </label>
-                    </div>
-                    <br>
                     
                     <div class="accordion accordion-flush" id="accordionFlushExample">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseZero" aria-expanded="false" aria-controls="flush-collapseZero">
+                                    <span class="fs-5 text">Modo de uso</span>
+                                </button>
+                            </h2>
+                            <div id="flush-collapseZero" class="accordion-collapse collapse" aria-labelledby="flush-headingZero" >
+                                <div class="accordion-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="modo" id="interactivo" value="0">
+                                        <label class="form-check-label" for="interactivo">
+                                          Modo interactivo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="modo" id="a-demanda" value="1" checked>
+                                        <label class="form-check-label" for="a-demanda">
+                                          Modo a demanda
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="accordion-item">
                             <h4 class="accordion-header" id="flush-headingOne">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
@@ -234,12 +244,11 @@
                         </div>
                     </div>
 
-                    <div class="row justify-content-around">
-                        <button type="button" class="col-3 btn btn-primary" id="botonReset">Reset</button>
-                        <button class="col-3 btn btn-primary" id="contador">Timer</button>
-                        <button class="col-3 btn btn-primary" id="redraw">Redibujar</button>
+                    <div class="row justify-content-between">
+                        <button type="button" class="col-4 btn-change" id="botonReset">Reset</button>
+                        <button class="col-4 btn-change" id="redraw">Redibujar</button>
                     </div>
-                    <div id="contador-valor"></div><br>
+                    <span id="contador-valor" class="fs-5 text"></span>
                 </aside>
             
 

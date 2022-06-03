@@ -66,10 +66,6 @@ function main(){
   botonReset.onclick = resetParameters;
   actualizaValorPosicion(theScene.getPosition());
 
-  // Cronometro para saber cuanto tarda en renderizar el frame actual
-  const botonContador = document.querySelector("#contador");
-  botonContador.onclick = timeRedraw;
-
   // Color de la componente ambiental del material parametrizable
   const ka_input = document.querySelector("#ka");
   ka_input.value = rgbToHex(theScene.getKa());
@@ -543,7 +539,7 @@ function resetParameters() {
 var timer;
 
 function timeRedraw() {
-  document.querySelector("#contador-valor").innerHTML = "<b>Tiempo: </b>" + timer.toFixed(5);
+  document.querySelector("#contador-valor").innerHTML = "<b>Tiempo de procesado: </b>" + timer.toFixed(5);
 }
 
 //
