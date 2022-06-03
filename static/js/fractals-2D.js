@@ -26,7 +26,16 @@ var theScene = new Scene2D(vsSource, fsSource);
 function main(){
 
   resizeCanvas();
-
+/*
+  let LLCXX = document.querySelector("#LLCX");
+  $('#LLCX').keydown(function(e) {
+    e.stopPropagation();
+  })
+/*
+  $("#LLCX").on("keypress keydown keyup", function(e) {
+    e.stopPropagation();
+  }); 
+*/
   // Pulsar una tecla
   document.addEventListener("keydown", (event) => onKeyDown(event), true );
 
@@ -72,6 +81,8 @@ function main(){
         LLCY = document.querySelector("#LLCY"),
         URCX = document.querySelector("#URCX"),
         URCY = document.querySelector("#URCY");
+  
+
 
   LLCX.value = theScene.getLLC()[0];
   LLCY.value = theScene.getLLC()[1];
@@ -105,6 +116,15 @@ window.onload = main;
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
 //  
 function onKeyDown(event) {
+  if( document.activeElement === document.querySelector("#nIteraciones") ||
+      document.activeElement === document.querySelector("#juliaX") ||
+      document.activeElement === document.querySelector("#juliaY") ||
+      document.activeElement === document.querySelector("#exponente") ||
+      document.activeElement === document.querySelector("#LLCX") ||
+      document.activeElement === document.querySelector("#LLCY") ||
+      document.activeElement === document.querySelector("#URCX") ||
+      document.activeElement === document.querySelector("#URCY")) return;
+
   let key = event.wich || event.keyCode;
   let LLCX = document.querySelector("#LLCX"),
       LLCY = document.querySelector("#LLCY"),
@@ -242,13 +262,13 @@ function changeLLCY(event) {
 
 function verifyLLCX(number) {
   let URCX = document.querySelector("#URCX").value
-  return Math.min(Math.max(-10.0, number), URCX-0.1);
+  return Math.min(Math.max(-10.0, parseFloat(number)), parseFloat(URCX)-0.1);
 }
 
 
 function verifyLLCY(number) {
   let URCY = document.querySelector("#URCY").value
-  return Math.min(Math.max(-10.0, number), URCY-0.1);
+  return Math.min(Math.max(-10.0, parseFloat(number)), parseFloat(URCY)-0.1);
 }
 
 function changeURCX(event) {
@@ -274,13 +294,13 @@ function changeURCY(event) {
 }
 
 function verifyURCX(number) {
-  let LLCX = document.querySelector("#LLCX").value
-  return Math.min(Math.max(LLCX+0.1, number), 10.0);
+  let LLCX = document.querySelector("#LLCX").value;
+  return Math.min(Math.max(parseFloat(LLCX)+0.1, parseFloat(number)), 10.0);
 }
 
 function verifyURCY(number) {
   let LLCY = document.querySelector("#LLCY").value
-  return Math.min(Math.max(LLCY+0.1, number), 10.0);
+  return Math.min(Math.max(parseFloat(LLCY)+0.1, parseFloat(number)), 10.0);
 }
 
 //
