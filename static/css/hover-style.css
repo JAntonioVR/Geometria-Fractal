@@ -1,0 +1,127 @@
+:root {
+    --bg-color: #000000 ;
+    --font-color: #FFFFFF;
+
+}
+
+/*
+ * ─── INDEX OPTION HOVER ─────────────────────────────────────────────────────────
+ */
+
+.title {
+    font-size: 3rem;
+    position: relative;
+    align-items: center;
+}
+
+.title::after {
+    position: absolute;
+    content: "";
+    width: 0%;
+    height: 4px;
+    background-color: black;
+    left: 50%;
+    bottom: -10px;
+    transition: all 0.4s ease-in-out;
+}
+
+.contenedor a:hover .title::after {
+    width: 100%;
+    left: 0;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+a :hover {
+    color: initial;
+}
+
+.contenedor a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: inherit;
+    text-decoration: inherit;
+}
+
+.contenedor a img {
+    width: 80%;
+    height: auto;
+    -webkit-transition: .3s ease-in-out;
+    transition: .3s ease-in-out;
+}
+
+.contenedor a:hover img {
+    width: 100%;
+}
+
+
+/*
+ * ─── BUTTON HOVER ───────────────────────────────────────────────────────────────
+ */
+
+
+.boton {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.8s ease;
+    position: relative;
+    border: 2px solid var(--bg-color);
+    margin: 0 40px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.boton::before,
+.boton::after {
+    position: absolute;
+    display: block;
+    content: "";
+    width: 100%;
+    height: 100%;
+}
+
+.boton2 {
+    border: none;
+    z-index: 10;
+}
+
+.boton2 h4 {
+    z-index: 10;
+    color: var(--bg-color);
+    font-size:larger;
+}
+
+.boton2:after {
+    border: 2px solid var(--bg-color);
+    transition: all 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-color: var(--font-color);
+}
+
+.boton2:before {
+    width: 0;
+    height: 0;
+    transition: all 500ms ease;
+}
+
+.boton2:hover:after {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.boton2:hover:before {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+}
+
+.boton2:hover h4 {
+    color: var(--font-color);
+}   
