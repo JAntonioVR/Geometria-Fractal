@@ -13,7 +13,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
     donde $f^n$ denota a $f\circ f^{n-1}$.
 \end{definicion}
 
-Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1)\footnote{Los códigos completos que generan cada una de las imágenes que se observan en este documento se pueden encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Iteracion-y-Fractales}}. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
+Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1)\footnote{Los códigos completos que generan las imágenes fractales creadas con Mathematica que se observan en este documento se pueden encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Mathematica}.}. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
 
 Para intuir qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 
@@ -132,7 +132,7 @@ Recordemos que dada una ecuación $f(z)=0$ para cierta función compleja y anal�
 \end{equation} 
 comenzando por un punto $z_0$ cercano a la raíz. Es decir, calcula la sucesión $\{z_n\}$ definida como $z_{n+1}=N_f(z_n) \ \forall n\in\N$, la cual aplicando el teorema \ref{th:punto-fijo} podemos deducir que converge a un punto $a\in\C$ que verifica $f(a)=0$ siempre que $f'(a)\not= 0$. Para mayor detalle acerca de la convergencia local ver \cite[Capítulo 7]{Ostrowski} y \cite[Sección 5.4]{Atkinson}.
 
-Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayor que 1, existen varias soluciones distintas, pero el método de Newton converge sólo a una de ellas, dependiendo de qué $z_0$ fijemos. Nuestro objetivo ahora se sitúa en discernir, para cada punto $z_0$ del plano, a qué solución de la ecuación $f(z)=0$ converge la sucesión $\{z_n\}$ dada por el método de Newton utilizando a $z_0$ como semilla. En las siguientes secciones veremos algunos ejemplos de esta distinción y su utilidad, llegando a las primeras imágenes fractales generadas por iteración.
+Sin embargo, en muchas ecuaciones, comenzando por las polinómicas de grado mayor que 1, existen varias soluciones distintas, pero el método de Newton converge sólo a una de ellas, dependiendo de qué $z_0$ fijemos. Nuestro objetivo ahora se sitúa en discernir, para cada punto $z_0$ del plano, a qué solución de la ecuación $f(z)=0$ converge la sucesión $\{z_n\}$ dada por el método de Newton utilizando a $z_0$ como semilla, es decir, como iteración inicial. En las siguientes secciones veremos algunos ejemplos de esta distinción y su utilidad, llegando a las primeras imágenes fractales generadas por iteración.
 
 \begin{ejemplo}
 \label{ejemplo:cuencas-1}
