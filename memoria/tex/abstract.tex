@@ -5,7 +5,7 @@ There are lots of types of fractals and ways to generate them. However, many of 
 
 We also created an interactive website where you can visualize 2D and 3D fractals. All the methods and tools we had used is explained and documented along the project.
 
-Now, let's explain in detail the chapters of this document and their contents.
+Now, we will explain in detail the chapters of this document and their contents.
 
 \section*{Chapter 1: The concept of `fractal'}
 
@@ -53,7 +53,7 @@ In order to simplify the debug process we set up the Object Oriented paradigm an
 
 It is easy to identify a pixel of the screen with an element of the complex plane $\C$. This makes the 2D process so easy. However, render a 3D scene and fractals is not that simple. There are different ways of representing a 3D scene in a 2D screen. We will use the `Ray-Tracing' technic, which consists of identifying each pixel with a point of the space, launching a ray for each pixel, identify the possible intersections between the rays and the scene's objects and assign a color to each pixel depending on the intersection or missing.
 
-In this chapter, we give a deeper definition of this method and its components. The goal now is develop a simple, but complete, ray-tracer. It means, render a scene with easy objects, like spheres and a plane. Now let's introduce the roadmap we followed.
+In this chapter, we give a deeper definition of this method and its components. The goal now is develop a simple, but complete, ray-tracer. It means, render a scene with easy objects, like spheres and a plane. Now we are going to introduce the roadmap we followed.
 
 First, the creation of the rays, there is not ray-tracing without rays. After that, we assign a color to each pixel asuming the scene is empty. It means, we define which colors will we assign to the pixels whose rays miss. Next, we add some spheres and a plane to the scene, programming the intersection sphere-ray and plane-ray, which fortunately are so easy. Once we have filled the scene with objects, it is time to move the camera. We modify the ray creation code in order to let us change freely the point of view, allowing us to see different perspectives of the same scene. Later, we introduce in detail and implement a lighting model in order to give volume, shine, shadows and realism to the scene, assigning a material to each object, creating light sources and evaluating this lighting model at each intersection point. Specifically, we will use the `Phong lighting model', which is not very complex, but enough for our purpose. Last, but not least, we introduce a edge smoothing technic called `Multisampling Antiliasing', which we will use in order to care about the realism.
 
