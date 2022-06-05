@@ -9,6 +9,8 @@
 \renewcommand{\figurename}{Imagen}
 \renewcommand{\listfigurename}{Lista de Imágenes}
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% PORTADA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,7 +100,6 @@
 
 \import{tex/}{objetivos.tex}
 
-
 \chapter{El concepto de \textit{fractal}.}
 \label{chap:concepto}
 
@@ -164,6 +165,73 @@
 %%\bibliographystyle{plain}
 %%\bibliography{references}
 
+\begin{comment}
+\nocite{*}
+
+\bibliographystyle{apalike} % We choose the "plain" reference style
+\bibliography{references} % Entries are in the refs.bib file
+
+%\nocite{Gerald, Falconer, Hurewicz-Wallman, Wagon, Apuntes-AMI-Paya, Ostrowski, Atkinson, John-Milnor, agness-scott, Sandra-Snyder, Evan-Dummit, Bandt, Foroutan, cgdirector, computer-graphics, wikipedia-webgl, MDN-2, MDN-3, MDN-4, MDN-5, learn-opengl, khronos, HTML5rocks, renderingcontextdoc, RT-que-es, shadows, 3D-SDFs, quaternion-product, romanescu, rayo, menger, calima, curvas-nivel}
+
+\nocite{Gerald}
+\nocite{Falconer}
+\nocite{Hurewicz-Wallman}
+\nocite{Wagon}
+\nocite{Apuntes-AMI-Paya}
+\nocite{Ostrowski}
+\nocite{Atkinson}
+\nocite{John-Milnor}
+
+\nocite{agness-scott}
+\nocite{Sandra-Snyder}
+\nocite{Evan-Dummit}
+\nocite{Bandt}
+\nocite{Foroutan}
+\nocite{cgdirector}
+\nocite{computer-graphics}
+\nocite{wikipedia-webgl}
+
+\nocite{MDN-2}
+\nocite{MDN-3}
+\nocite{MDN-4}
+\nocite{MDN-5}
+\nocite{learn-opengl}
+\nocite{khronos}
+\nocite{HTML5rocks}
+\nocite{renderingcontextdoc}
+
+
+
+\defbibfilter{papers}{
+  type=article or
+  type=book or 
+  type=misc or 
+  type=inproceedings or 
+  type=incollection or 
+  type=report 
+}
+
+\printbibliography[
+heading=bibintoc, filter=papers,
+title={Libros y artículos}
+] %Prints the entire bibliography with the title "Whole bibliography"
+
+\printbibliography[
+heading=bibintoc, type=online,
+title={Enlaces a la web}
+] %Prints the entire bibliography with the title "Whole bibliography"
+
+\defbibfilter{multimedia}{
+  type=image or
+  type=video
+}
+
+\printbibliography[
+heading=bibintoc, filter=multimedia,
+title={Multimedia}
+]
+
+\end{comment}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % APENDICES
