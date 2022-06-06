@@ -44,7 +44,7 @@
         <main class="container">
             <section class="row">
                 <div class="col-lg-8" id="canvas-wapper">
-                        <canvas class="container-fluid" id="glCanvas" width="720" height="720"></canvas>
+                        <canvas class="container-fluid" id="glCanvas" width="1280" height="720"></canvas>
                 </div>
                 
             
@@ -55,77 +55,144 @@
                         <li>Teclas +/-: Ampliar o reducir el zoom</li>
                         <li>Flechas: Desplazarse por el plano</li>
                     </ul>
-                    <div class="container" id="numIteraciones">
-                        <div class="row align-items-center justify-content-between">
-                            <b class="col-4">Número de iteraciones:</b>
-                            <input class="col-4" id="nIteraciones" type="range" min="10" max="1000" step="5">
-                            <input type="number" class="col-4" id="valorNIteraciones" min="10" max="1000" step="5"></input>
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <b class="col-7">¿Qué fractal quieres ver?</b>
-                        <div class="col-5">
-                            <select class="form-select form-select-sm mb-3" aria-label=".form-select-lg example" id="fractales">
-                                <option value="0">Mandelbrot</option>
-                                <option value="1">Julia</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="constanteJulia">
-                        <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
-                        <div class="container" id="deslizadorJuliaX">
-                            <div class="row align-items-center justify-content-between">
-                                <b class="col-2">x:</b>
-                                <input class="col-5" id="juliaX" type="range" min="-2" max="2" step="0.01">
-                                <input type="number" class="col-3" id="valorJuliaX" min="-2" max="2" step="0.01"></input>
+                    
+                    <div class="accordion" id="accordionPanelsStayOpenExample">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                                <span class="fs-5 text">Fractal que se visualiza</span>
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <b class="col-6">¿Qué fractal quieres ver?</b>
+                                    <div class="col-6">
+                                        <select class="form-select form-select-sm mb-3" aria-label=".form-select-lg example" id="fractales">
+                                            <option value="0">Mandelbrot</option>
+                                            <option value="1">Julia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <br>
+                                <b>Constante del Conjunto de Julia</b> \(c = x + i\cdot y\)
+                                <div id="constanteJulia">
+                                    <div class="container" id="deslizadorJuliaX">
+                                        <div class="row align-items-center justify-content-between">
+                                            <b class="col-2">x:</b>
+                                            <input class="col-5" id="juliaX" type="range" min="-2" max="2" step="0.01">
+                                            <input type="number" class="col-3" id="valorJuliaX" min="-2" max="2" step="0.01"></input>
+                                        </div>
+                                    </div>
+                                    <div class="container" id="deslizadorJuliaY">
+                                        <div class="row align-items-center justify-content-between">
+                                            <b class="col-2">y:</b>
+                                            <input class="col-5" id="juliaY" type="range" min="-2" max="2" step="0.01">
+                                            <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+                                <br><br>
+                                <b>Exponente n de la función</b> \(f(z) = z^n + c\)
+                                <div class="container" id="deslizadorExponente">
+                                    <div class="row align-items-center justify-content-between">
+                                        <b class="col-2">n:</b>
+                                        <input class="col-5" id="exponente" type="range" min="1" max="10" step="1">
+                                        <input type="number" class="col-3" id="valorExponente" min="1" max="10" step="1"></input>
+                                    </div>
+                                </div>
                             </div>
+                          </div>
                         </div>
-                        <div class="container" id="deslizadorJuliaY">
-                            <div class="row align-items-center justify-content-between">
-                                <b class="col-2">y:</b>
-                                <input class="col-5" id="juliaY" type="range" min="-2" max="2" step="0.01">
-                                <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
+        
+        
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                                <span class="fs-5 text">Máximo de iteraciones \( M \)</span>
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
+                            <div class="accordion-body">
+                                <div class="container" id="numIteraciones">
+                                    <div class="row align-items-center justify-content-between">
+                                        <b class="col-5">Número de iteraciones:</b>
+                                        <input class="col-4" id="nIteraciones" type="range" min="10" max="1000" step="5">
+                                        <input type="number" class="col-3" id="valorNIteraciones" min="10" max="1000" step="5"></input>
+                                    </div>
+                                </div>
                             </div>
+                          </div>
                         </div>
-                        <br>
-                    </div>
-                    <b>Exponente n de la función</b> \(f(z) = z^n + c\)
-                    <div class="container" id="deslizadorExponente">
-                        <div class="row align-items-center justify-content-between">
-                            <b class="col-2">n:</b>
-                            <input class="col-5" id="exponente" type="range" min="1" max="10" step="1">
-                            <input type="number" class="col-3" id="valorExponente" min="1" max="10" step="1"></input>
+        
+        
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                              <span class="fs-5 text">Supersampling Antiliasing</span>
+                            </button>
+                          </h2>
+                          <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
+                            <div class="accordion-body">
+                                <div class="form-check form-switch" style="padding-left: 5.5em;">
+                                    <input class="form-check-input" type="checkbox" id="antiliasing">
+                                    <label class="form-check-label" for="antiliasing">Activar/desactivar</label>
+                                </div>
+        
+                                <div class="container" id="deslizadorNSamples">
+                                    <div class="row align-items-center justify-content-between">
+                                        <b class="col-6">Rayos por píxel:</b>
+                                        <input class="col-4" id="nSamples" type="range" min="1" max="4" step="1">
+                                        <div class="col-2" id="valorNSamples"></div>
+                                    </div>
+                                </div>  
+                            </div>
+                          </div>
                         </div>
+        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="panelsStayOpen-headingFour">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
+                                <span class="fs-5 text">Región del plano visualizada</span>
+                              </button>
+                            </h2>
+                            <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingFour">
+                              <div class="accordion-body">
+                                <b>Esquina inferior izquierda:</b>
+                                <div class="row justify-content-around align-items-center">
+                                    <input class="col-3" id="LLCX" type="number" min="-10" max="10" step="0.1">
+                                    <input class="col-3" id="LLCY" type="number" min="-10" max="10" step="0.1">
+                                    <div class="col-4">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="LLCFixed">
+                                            <label class="form-check-label" for="LLCFixed">Fijo</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <b>Esquina superior derecha:</b>
+                                <div class="row justify-content-around align-items-center">
+                                    <input class="col-3" id="URCX" type="number" min="-10" max="10" step="0.1">
+                                    <input class="col-3" id="URCY" type="number" min="-10" max="10" step="0.1">
+                                    <div class="col-4">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="URCFixed">
+                                            <label class="form-check-label" for="URCFixed">Fijo</label>
+                                        </div>
+                                    </div>
+                                </div><br>
+                                
+                              </div>
+                            </div>
+                          </div>
+        
                     </div>
-                    <br>
 
-                    <h4>Región del plano visualizada</h4>
-                    <b>Esquina inferior izquierda:</b>
-                    <div class="row align-items-center">
-                        <div class="col-4"><input id="LLCX" type="number" min="-10" max="10" step="0.1"></div>
-                        <div class="col-4"><input id="LLCY" type="number" min="-10" max="10" step="0.1"></div>
-                        <div class="col-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="LLCFixed">
-                                <label class="form-check-label" for="LLCFixed">Fijo</label>
-                            </div>
-                        </div>
-                    </div>
-                    <b>Esquina superior derecha:</b>
-                    <div class="row align-items-center">
-                        <div class="col-4"><input id="URCX" type="number" min="-10" max="10" step="0.1"></div>
-                        <div class="col-4"><input id="URCY" type="number" min="-10" max="10" step="0.1"></div>
-                        <div class="col-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="URCFixed">
-                                <label class="form-check-label" for="URCFixed">Fijo</label>
-                            </div>
-                        </div>
-                    </div><br>
-                    <button type="button" class="btn-change" id="botonReset">Volver a los parámetros por defecto</button>
+                    <button type="button" class="btn-change" id="botonReset">Reset</button>
                 </aside>
             </section>
+            
         </main>
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-4 d-flex align-items-center">

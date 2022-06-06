@@ -149,8 +149,8 @@ function main(){
 
   // En caso de activar antiliasing, cuantos rayos por pixel?
   const nSamples_input = document.querySelector("#nSamples");
-  nSamples_input.value = theScene.getJuliaConstant()[0];
-  document.querySelector("#valorNSamples").innerHTML = theScene.getNSamples()**2;
+  nSamples_input.value = theScene.getNSamples();
+  document.querySelector("#valorNSamples").value = theScene.getNSamples()**2;
   nSamples_input.addEventListener('change', (event) => change_nSamples(event), true);
   if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
 
@@ -181,6 +181,12 @@ function main(){
 }
 
 window.onload = main;
+window.addEventListener("keydown", function(e) {
+  if(["ArrowUp","ArrowDown"].indexOf(e.code) > -1) {
+      e.preventDefault();
+  }
+}, false);
+
 window.onresize = resizeCanvas;
 
 

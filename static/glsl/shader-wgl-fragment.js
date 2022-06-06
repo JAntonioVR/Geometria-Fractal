@@ -30,6 +30,10 @@ uniform int u_order;
 /* Render Mandelbrot or Julia set */
 uniform int u_fractal;
 
+/* Antiliasing */
+uniform bool u_antiliasing;
+uniform int u_nSamples;
+
 float r = 16.0/9.0; // Ratio r = width/height
 int viewportWidth = 1280,   // Canvas width (pixels)
     viewportHeight = 720;   // Canvas height (pixels)
@@ -120,8 +124,8 @@ void iterateJulia(vec2 z0, vec2 c, int n, out bool escaped, out int iterations) 
 
 vec4 Julia(vec2 c, int n) {
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
-  //int nSamples = u_antiliasing ? u_nSamples : 1;
-  int nSamples = 3;
+  int nSamples = u_antiliasing ? u_nSamples : 1;
+  //int nSamples = 3;
 
   for(int i = 0; i < 10000; i++) {
     if(i == nSamples*nSamples) break;
@@ -151,8 +155,7 @@ void iterateMandelbrot(vec2 c, int n, out bool escaped, out int iterations) {
 vec4 Mandelbrot(int n) {
 
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
-  //int nSamples = u_antiliasing ? u_nSamples : 1;
-  int nSamples = 3;
+  int nSamples = u_antiliasing ? u_nSamples : 1;
 
   for(int i = 0; i < 1000; i++) {
       if(i == nSamples*nSamples) break;

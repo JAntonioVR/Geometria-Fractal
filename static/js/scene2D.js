@@ -62,20 +62,36 @@ class Scene2D extends Scene {
         maxIterations: gl.getUniformLocation(WGLShader, 'u_maxIterations'),
         juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
         order: gl.getUniformLocation(WGLShader, 'u_order'),
-        fractal: gl.getUniformLocation(WGLShader, 'u_fractal')
+        fractal: gl.getUniformLocation(WGLShader, 'u_fractal'),
+        antiliasing: gl.getUniformLocation(WGLShader, 'u_antiliasing'),
+        nSamples: gl.getUniformLocation(WGLShader, 'u_nSamples')
       }
     };
+
+    this.ratio = 16.0/9.0;
+    var initialHeight = 4.0,
+        initialWidth = initialHeight*this.ratio;
+    
+
 
     this.parameters = {
       zoomCenter: [0.0, 0.0],
       zoomSize: 3.0/4.0,
-      LLC: [-3.0/2.0, -3.0/2.0],
-      URC: [ 3.0/2.0,  3.0/2.0],
+      LLC: [
+        0.75*(-initialWidth/2.0),
+        0.75*(-initialHeight/2.0)
+      ],
+      URC: [
+        0.75*(initialWidth/2.0),
+        0.75*(initialHeight/2.0)
+      ],
       maxIterations: 50,
       delta: 0.1,
       juliaSetConstant: [-0.12, 0.75],
       order: 2,
-      fractal: 0
+      fractal: 0,
+      antiliasing: false,
+      nSamples: 1,
     };
 
     const initialParameters = JSON.parse(JSON.stringify(this.parameters));
@@ -104,7 +120,9 @@ class Scene2D extends Scene {
         maxIterations = this.parameters.maxIterations,
         juliaSetConstant = this.parameters.juliaSetConstant,
         order = this.parameters.order,
-        fractal = this.parameters.fractal;
+        fractal = this.parameters.fractal,
+        antiliasing = this.parameters.antiliasing,
+        nSamples = this.parameters.nSamples;
     var that = this;
     {
       const numComponents = that.bufferInfo.numFloatsPV;  // pull out 2 values per iteration
@@ -144,6 +162,12 @@ class Scene2D extends Scene {
     gl.uniform1i(
       this.programInfo.uniformLocations.fractal,
       fractal);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.antiliasing,
+      antiliasing);
+    gl.uniform1i(
+      this.programInfo.uniformLocations.nSamples,
+      nSamples);
 
     {
       const offset = 0;
@@ -215,9 +239,22 @@ class Scene2D extends Scene {
     this.parameters.URC[1] -= this.parameters.delta;
   }
 
+  // ─── CHANGEANTILIASING ──────────────────────────────────────────────────────────
+  // Cambia el valor booleano del parametro 'antiliasing'. Es una forma de decirle al
+  // programa si queremos que se aplique o no antiliasing a los píxeles.
+  changeAntiliasing() {
+    this.parameters.antiliasing = !this.parameters.antiliasing;
+  }
+
   //
   // ─── GETTERS ────────────────────────────────────────────────────────────────────
   //
+
+  // ─── GETANTILIASING ─────────────────────────────────────────────────────────────
+  // Getter del parametro 'antiliasing', de tipo booleano.
+  getAntiliasing() {
+    return this.parameters.antiliasing
+  }
 
   // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────
   // Getter del parametro fractal, de tipo number.
@@ -242,6 +279,12 @@ class Scene2D extends Scene {
   // Getter del parametro maxIterations, de tipo number.
   getMaxIterations(){
     return this.parameters.maxIterations;
+  }
+
+  // ─── GETNSAMPLES ────────────────────────────────────────────────────────────────
+  // Getter del parametro 'nSamples', de tipo number.
+  getNSamples() {
+    return this.parameters.nSamples;
   }
 
   // ─── GETORDER ───────────────────────────────────────────────────────────────────
@@ -300,6 +343,12 @@ class Scene2D extends Scene {
     this.parameters.maxIterations = newValue;
   }
 
+  // ─── SETNSAMPLES ────────────────────────────────────────────────────────────────
+  // Setter del parametro 'nSamples'.
+  setNSamples(newNSamples) {
+    this.parameters.nSamples = newNSamples;
+  }
+
   // ─── SETORDER ───────────────────────────────────────────────────────────────────
   // Setter del parametro order
   setOrder(newOrder) {
@@ -311,7 +360,7 @@ class Scene2D extends Scene {
     this.parameters.LLC[0] = x;
     if(URCFixed) {
       desp = this.parameters.URC[0] - this.parameters.LLC[0];
-      this.parameters.LLC[1] = this.parameters.URC[1] - desp;
+      this.parameters.LLC[1] = this.parameters.URC[1] - desp/this.ratio;
     }
     else
       this.parameters.URC[0] = x + desp;
@@ -323,7 +372,7 @@ class Scene2D extends Scene {
     this.parameters.LLC[1] = y;
     if(URCFixed) {
       desp = this.parameters.URC[1] - this.parameters.LLC[1];
-      this.parameters.LLC[0] = this.parameters.URC[0]- desp;
+      this.parameters.LLC[0] = this.parameters.URC[0]- desp*this.ratio;
     }
     else
       this.parameters.URC[1] = y + desp;  
@@ -335,7 +384,7 @@ class Scene2D extends Scene {
     this.parameters.URC[0] = x;
     if(LLCFixed) {
       desp = this.parameters.URC[0] - this.parameters.LLC[0];
-      this.parameters.URC[1] = this.parameters.LLC[1] + desp;
+      this.parameters.URC[1] = this.parameters.LLC[1] + desp/this.ratio;
     }
     else {
       this.parameters.LLC[0] = x - desp;
@@ -348,7 +397,7 @@ class Scene2D extends Scene {
     this.parameters.URC[1] = y; 
     if(LLCFixed) {
       desp = this.parameters.URC[1] - this.parameters.LLC[1];
-      this.parameters.URC[0] = this.parameters.LLC[0] + desp;
+      this.parameters.URC[0] = this.parameters.LLC[0] + desp*this.ratio;
     }
     else {
       this.parameters.LLC[1] = y - desp;
@@ -360,7 +409,7 @@ class Scene2D extends Scene {
   calculateZoomCenter() {
     this.parameters.zoomCenter[0] = (this.parameters.LLC[0] + this.parameters.URC[0])/2.0;
     this.parameters.zoomCenter[1] = (this.parameters.LLC[1] + this.parameters.URC[1])/2.0;
-    this.parameters.zoomSize = (this.parameters.zoomCenter[0]-this.parameters.LLC[0])/2.0;
+    this.parameters.zoomSize = (this.parameters.URC[1]-this.parameters.LLC[1])/4.0;
   }
   // ────────────────────────────────────────────────────────────────────────────────
 
