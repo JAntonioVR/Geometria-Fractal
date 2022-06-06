@@ -30,6 +30,14 @@ uniform int u_order;
 /* Render Mandelbrot or Julia set */
 uniform int u_fractal;
 
+/* Antiliasing */
+uniform bool u_antiliasing;
+uniform int u_nSamples;
+
+float r = 16.0/9.0; // Ratio r = width/height
+int viewportWidth = 1280,   // Canvas width (pixels)
+    viewportHeight = 720;   // Canvas height (pixels)
+
 //
 // ─── COMPLEX POW ────────────────────────────────────────────────────────────────
 //  
@@ -69,9 +77,23 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 }
 
 // Decide which point on the complex plane this fragment corresponds to.
-vec2 get_world_coordinates() {
-    vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(720.0, 720.0);
-    return u_zoomCenter + (uv * 4.0 - vec2(2.0)) * u_zoomSize;
+vec2 get_world_coordinates(int i, int nSamples) {
+
+  float hw = 1.0 / (float(viewportWidth * nSamples)),
+        hh = 1.0 / (float(viewportHeight * nSamples));
+
+  float height = 4.0,
+        width = float(r)*height;
+
+  int x =  i/nSamples;
+  int y =  i - nSamples*x;
+
+  vec2 uv = (gl_FragCoord.xy) / vec2(float(viewportWidth), float(viewportHeight));
+  float u = uv.x + float(x) * hw + 0.5 * hw,
+        v = uv.y + float(y) * hh + 0.5 * hh;
+
+  vec2 normalizedDC = vec2(u/float(viewportWidth), v/float(viewportHeight));
+  return u_zoomCenter + u_zoomSize * vec2(u*width-width/2.0, v*height-height/2.0);;
 }
 
 vec4 computePixelColor(bool escaped, int iterations) {
@@ -86,36 +108,76 @@ vec4 computePixelColor(bool escaped, int iterations) {
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
-vec4 Julia(vec2 c, int n) {
-    vec2 z0 = get_world_coordinates();
-    int iterations;
-    vec2 z = z0;
-    bool escaped = false;
-    float length_c = length(c);
-    for(int i = 0; i < 10000; i++) {
-        if(i > u_maxIterations) break;
-        iterations = i;
-        z = P(z, c, n);
-        if (length(z) > 2.0){
-            escaped = true;
-            break;
-        }
+void iterateJulia(vec2 z0, vec2 c, int n, out bool escaped, out int iterations) {
+  vec2 z = z0;
+  escaped = false;
+  for(int i = 0; i < 10000; i++) {
+    if(i > u_maxIterations) break;
+    iterations = i;
+    z = P(z, c, n);
+    if (length(z) > 2.0){
+        escaped = true;
+        break;
     }
+  }
+}
 
-    return computePixelColor(escaped, iterations);
+vec4 Julia(vec2 c, int n) {
+  vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+  int nSamples = u_antiliasing ? u_nSamples : 1;
+  //int nSamples = 3;
+
+  for(int i = 0; i < 10000; i++) {
+    if(i == nSamples*nSamples) break;
+    vec2 z0 = get_world_coordinates(i, nSamples);
+    bool escaped;
+    int iterations;
+    iterateJulia(z0, c, n, escaped, iterations);
+    sum_colors += computePixelColor(escaped, iterations);
+  } 
+  return sum_colors/float(nSamples*nSamples);
+}
+
+void iterateMandelbrot(vec2 c, int n, out bool escaped, out int iterations) {
+  vec2 z = vec2(0.0);
+  escaped = false;
+  for (int i = 0; i < 10000; i++) {
+    if (i == u_maxIterations) break;
+    iterations = i;
+    z = P(z, c, n);
+    if (length(z) > 2.0) {
+      escaped = true;
+      break;
+    }
+  }
 }
 
 vec4 Mandelbrot(int n) {
 
+  vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+  int nSamples = u_antiliasing ? u_nSamples : 1;
+
+  for(int i = 0; i < 1000; i++) {
+      if(i == nSamples*nSamples) break;
+      vec2 c = get_world_coordinates(i, nSamples);
+      /* Now iterate the function. */
+      bool escaped;
+      int iterations;
+      iterateMandelbrot(c, n, escaped, iterations);
+      sum_colors += computePixelColor(escaped, iterations);
+  }
+    return sum_colors/float(nSamples*nSamples);
+/*
+
   vec2 c = get_world_coordinates();
   
-  /* Now iterate the function. */
+  /* Now iterate the function. 
   int iterations;
   vec2 z = vec2(0.0);
   bool escaped = false;
   for (int i = 0; i < 10000; i++) {
     /* Unfortunately, GLES 2 doesn't allow non-constant expressions in loop
-       conditions so we have to do this ugly thing instead. */
+       conditions so we have to do this ugly thing instead. 
     if (i > u_maxIterations) break;
     iterations = i;
     z = P(z, c, n);
@@ -125,7 +187,7 @@ vec4 Mandelbrot(int n) {
     }
   }
 
-  return computePixelColor(escaped, iterations);
+  return computePixelColor(escaped, iterations);*/
   
 }
 

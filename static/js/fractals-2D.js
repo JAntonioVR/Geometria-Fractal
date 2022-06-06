@@ -42,7 +42,7 @@ function main(){
   // Fractal que se visualiza
   const fractal = document.querySelector("#fractales");
   fractal.selectedIndex = 0;
-  hideJuliaSliders();
+  $("#constanteJulia").hide();
   fractal.addEventListener('change', changeFractal, true);
 
   // Deslizador con el numero maximo de iteraciones
@@ -77,6 +77,18 @@ function main(){
   deslizadorExp.addEventListener('input', (event) => changeExponente(event), true);
   valorExponente.addEventListener('change', (event) => changeExponente(event), true);
 
+  // Activar/desactivar antiliasing
+  const antiliasing = document.querySelector("#antiliasing");
+  antiliasing.addEventListener('change', changeAntiliasing, true);
+
+  // En caso de activar antiliasing, cuantas muestras por pixel?
+  const nSamples_input = document.querySelector("#nSamples");
+  nSamples_input.value = theScene.getNSamples();
+  document.querySelector("#valorNSamples").innerHTML = theScene.getNSamples()**2;
+  nSamples_input.addEventListener('change', (event) => change_nSamples(event), true);
+  if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
+
+
   const LLCX = document.querySelector("#LLCX"),
         LLCY = document.querySelector("#LLCY"),
         URCX = document.querySelector("#URCX"),
@@ -84,10 +96,10 @@ function main(){
   
 
 
-  LLCX.value = theScene.getLLC()[0];
-  LLCY.value = theScene.getLLC()[1];
-  URCX.value = theScene.getURC()[0];
-  URCY.value = theScene.getURC()[1];
+  LLCX.value = theScene.getLLC()[0].toFixed(2);
+  LLCY.value = theScene.getLLC()[1].toFixed(2);
+  URCX.value = theScene.getURC()[0].toFixed(2);
+  URCY.value = theScene.getURC()[1].toFixed(2);
 
   LLCX.addEventListener('change', (event) => changeLLCX(event), true);
   LLCY.addEventListener('change', (event) => changeLLCY(event), true);
@@ -104,6 +116,11 @@ function main(){
 }
 
 window.onload = main;
+window.addEventListener("keydown", function(e) {
+  if(["ArrowUp","ArrowDown"].indexOf(e.code) > -1) {
+      e.preventDefault();
+  }
+}, false);
 
 //
 // ────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -174,10 +191,31 @@ function onKeyDown(event) {
     default:
       break;
   }
-
-
   theScene.drawScene();
 }
+
+
+//
+// ─── ACTIVAR O DESACTIVAR ANTILIASING ───────────────────────────────────────────
+//
+function changeAntiliasing(){
+  theScene.changeAntiliasing();
+  if(theScene.getAntiliasing())
+    $("#deslizadorNSamples").show();
+  else
+    $("#deslizadorNSamples").hide();   
+  theScene.drawScene();
+}
+
+//
+// ─── CAMBIAR NUMERO DE RAYOS POR PIXEL ──────────────────────────────────────────
+// Solo se aplica si el antiliasing esta activado
+function change_nSamples(event) {
+  document.querySelector("#valorNSamples").innerHTML = event.target.value**2;
+  theScene.setNSamples(event.target.value);
+  theScene.drawScene();
+}
+
 
 //
 // ─── CAMBIAR NUMERO MAXIMO DE ITERACIONES ───────────────────────────────────────
@@ -313,20 +351,14 @@ function changeFractal(){
   const fractales = document.querySelector("#fractales")
   var selected = parseInt(fractales.value);
   if(selected != 1) 
-    hideJuliaSliders();
+    $("#constanteJulia").hide();
   else
-    showJuliaSliders();
+    $("#constanteJulia").show();
   theScene.setFractal(selected);
   theScene.drawScene();
 }
 
-function hideJuliaSliders() {
-  document.querySelector("#constanteJulia").style.display = 'none';
-}
 
-function showJuliaSliders() {
-  document.querySelector("#constanteJulia").style.display = 'block'
-}
 
 //
 // ─── RESTABLECER PARAMETROS INICIALES ───────────────────────────────────────────
@@ -335,24 +367,32 @@ function resetParameters(){
   theScene.setInitialParameters();
 
   document.querySelector("#nIteraciones").value = theScene.getMaxIterations();
-  document.querySelector("#valorNIteraciones").value = theScene.getMaxIterations()
+  document.querySelector("#valorNIteraciones").value = theScene.getMaxIterations();
   
   document.querySelector("#juliaX").value = theScene.getJuliaConstantX();
-  document.querySelector("#valorJuliaX").value = theScene.getJuliaConstantX()
+  document.querySelector("#valorJuliaX").value = theScene.getJuliaConstantX();
 
   document.querySelector("#juliaY").value = theScene.getJuliaConstantY();
-  document.querySelector("#valorJuliaY").value = theScene.getJuliaConstantY()
+  document.querySelector("#valorJuliaY").value = theScene.getJuliaConstantY();
   
   document.querySelector("#exponente").value = theScene.getOrder();
-  document.querySelector("#valorExponente").value = theScene.getOrder()
+  document.querySelector("#valorExponente").value = theScene.getOrder();
   
   document.querySelector("#fractales").value = theScene.getFractal();
-  theScene.getFractal() == 1 ? showJuliaSliders() : hideJuliaSliders();
+  theScene.getFractal() == 1 ? $("#constanteJulia").show() : $("#constanteJulia").hide();
+
+  $("#antiliasing").prop('checked', false);
+  if(theScene.getAntiliasing()) theScene.changeAntiliasing();
+  $("#nSamples").val(1);
+  $("#valorNSamples").text("1");
+  $("#deslizadorNSamples").hide();
+
 
   reloadPositionInput();
 
   theScene.drawScene();
 }
+/*
 
 function resizeCanvas() {
   let canvas = document.querySelector("#glCanvas"),
@@ -378,6 +418,13 @@ function resizeCanvas() {
     }
   }
   
+}*/
+
+function resizeCanvas () {
+  if(window.innerWidth < 992) {
+    document.querySelector("#glCanvas").style.width = "100%";
+  }
 }
+
 
 window.onresize = resizeCanvas;
