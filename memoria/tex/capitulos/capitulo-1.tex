@@ -15,7 +15,7 @@ Las primeras preguntas que se pueden plantear son ¿qué es un fractal? ¿Qué t
 \label{fig:objetos}
 \end{figure}
 
-Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños trozos que recuerdan el objeto original, mientras que estos pequeños trozos a su vez también están formados de pequeños trozos similares al objeto inicial, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras divisiones, formando pequeños rayos semejantes al rayo primitivo.
+Observemos que el romanescu, que es un tipo de coliflor, pareciera que está formado de pequeños fragmentos que recuerdan el objeto original, mientras que estos a su vez también están formados de pequeños trozos similares al objeto inicial, y así sucesivamente. Por su parte, el rayo se compone de un destello principal del que salen ramificaciones de las que a su vez se originan otras divisiones, formando pequeños rayos semejantes al rayo primitivo.
 
 Esta idea de objetos prácticamente iguales al original salvo cambios de escala es la subyacente al concepto de autosimilaridad.
 
@@ -252,11 +252,11 @@ En caso de coincidir, se denomina \textit{dimensión por cajas} de $A$ al valor
 
 También es conocida en literatura como \textit{dimensión por conteo de cajas} o \textit{dimensión de Minkowski-Bouligand}.
 
-Hay varias definiciones equivalentes, generalmente más sencillas de utilizar. Por ejemplo, si tomamos en $\R^n$ una cuadrícula de lado $\delta$, \textit{i.e.}, con conjuntos de la forma
+Hay varias definiciones equivalentes, generalmente más sencillas de utilizar. Por ejemplo, si dividimos $\R^n$ con conjuntos de la forma
 $$
 [m_1 \delta, (m_1+1)\delta]\times\cdots\times[m_n \delta, (m_n+1)\delta]
 $$
-donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en rectángulos de $\R^n$, comúnmente conocidos como `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{alma991007022459704990}.
+donde $m_1,\dots,m_n$ son enteros, tendríamos $\R^n$ dividido en cuadrados de $\R^n$ de lado $\delta$, comúnmente conocidos como `cajas', de diámetro $\delta\sqrt{n}$ y contando el número de cajas que recubren a $A$, obtenemos el mismo resultado, puede comprobarse en \cite[sección 3.1]{Falconer}.
 
 \begin{figure}[ht]
 \begin{tabular}{cc}
@@ -310,7 +310,7 @@ $$
 \mathcal{H}^s(A) := \lim_{\varepsilon\rightarrow 0}\mathcal{H}_\varepsilon^s(A).
 $$
 
-En \cite[Secciones 5.2 y 5.4]{alma991007022459704990} se comprueba que $\mathcal{H}^s(A)$ es una medida definida en la $\sigma$-álgebra de Borel que llamamos \textit{medida $s$-dimensional de Hausdorff} del conjunto $A$.
+En \cite[Secciones 5.2 y 5.4]{Falconer} se comprueba que $\mathcal{H}^s(A)$ es una medida definida en la $\sigma$-álgebra de Borel que llamamos \textit{medida $s$-dimensional de Hausdorff} del conjunto $A$.
 
 Veamos el comportamiento de $\mathcal{H}^s(A)$ como función de $s$. Es claro que siempre que $\varepsilon < 1$, $\mathcal{H}_\varepsilon^s(A)$ decrece conforme $s$ aumenta, por tanto $\mathcal{H}^s(A)$ también es decreciente. Podemos de hecho probar el siguiente resultado.
 
@@ -395,7 +395,7 @@ En $\R^2$ dotado de la topología usual, consideramos una recta cualquiera, llam
 
 La dimensión por cajas, aunque útil en la práctica, al comienzo de la sección \ref{subsection:dim-Hausdorff} hemos comprobado que tiene algunos problemas. No obstante, para muchos fractales, y en particular para los que cumplen la \textit{condición de conjunto abierto} (véase sección \ref{section:sfi-conjuntos-autosimilares}), resulta más sencillo computacionalmente calcular su dimensión por cajas frente a su dimensión de Hausdorff.
 
-En general, y como se puede comprobar en \cite[Sección 3.1]{alma991007022459704990}, ocurre que la dimensión por cajas acota superiormente a la dimensión de Hausdorff, es más, dado $A\subset\R^n$:
+En general, y como se puede comprobar en \cite[Sección 3.1]{Falconer}, ocurre que la dimensión por cajas acota superiormente a la dimensión de Hausdorff, es más, dado $A\subset\R^n$:
 $$
 \dim_H(A)\leq\diminf (A) \leq \dimsup (A),
 $$
@@ -417,7 +417,7 @@ En conclusión, para un conjunto no vacío y acotado $A\subseteq\R^n$, se tiene 
   \dim_T(A)\leq\dim_H(A)\leq\dim_B(A)\leq n.
 \end{equation}
 
-A partir de esta cadena de desigualdades, en la que notamos que la dimensión fractal, entendiendo por esta la dimensión de Hausdorff que es la más general, y que siempre excede o iguala a la dimensión topológica, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot} en \cite{alma991007242979704990}.
+A partir de esta cadena de desigualdades, en la que notamos que la dimensión fractal, entendiendo por esta la dimensión de Hausdorff que es la más general, y que siempre excede o iguala a la dimensión topológica, podemos enunciar nuestra primera definición de fractal, que fue formulada por \textit{Benoit Mandelbrot} en \cite{Mandelbrot}.
 
 \begin{definicion}[Fractal]
 \label{def:fractal}

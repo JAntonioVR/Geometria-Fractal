@@ -134,7 +134,7 @@ Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos pr
     \EndIf
     \State $i++$
   \EndWhile
-  \If{$i==M$}
+  \If{$i=M$}
     \State $z_0$ es un punto prisionero
     \State \textbf{return} color de puntos prisioneros
   \Else
@@ -268,7 +268,7 @@ Además, en el momento que una iterada se sitúe fuera de $\bar D(0,2)$, podemos
     \EndIf
     \State $i++$
   \EndWhile
-  \If{$i==M$}
+  \If{$i=M$}
     \State $c\in\mathcal{M}$
     \State \textbf{return} color de puntos de $\mathcal{M}$
   \Else
@@ -407,7 +407,7 @@ De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados
 
 Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos determinar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
 
-Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del proyecto, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
+Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del TFG, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
 
 \newpage
 \subsection{Conjuntos de Julia con funciones no polinómicas}
