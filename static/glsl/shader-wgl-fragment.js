@@ -112,7 +112,7 @@ void iterateJulia(vec2 z0, vec2 c, int n, out bool escaped, out int iterations) 
   vec2 z = z0;
   escaped = false;
   for(int i = 0; i < 10000; i++) {
-    if(i > u_maxIterations) break;
+    if(i == u_maxIterations) break;
     iterations = i;
     z = P(z, c, n);
     if (length(z) > 2.0){
@@ -167,28 +167,6 @@ vec4 Mandelbrot(int n) {
       sum_colors += computePixelColor(escaped, iterations);
   }
     return sum_colors/float(nSamples*nSamples);
-/*
-
-  vec2 c = get_world_coordinates();
-  
-  /* Now iterate the function. 
-  int iterations;
-  vec2 z = vec2(0.0);
-  bool escaped = false;
-  for (int i = 0; i < 10000; i++) {
-    /* Unfortunately, GLES 2 doesn't allow non-constant expressions in loop
-       conditions so we have to do this ugly thing instead. 
-    if (i > u_maxIterations) break;
-    iterations = i;
-    z = P(z, c, n);
-    if (length(z) > 2.0) {
-      escaped = true;
-      break;
-    }
-  }
-
-  return computePixelColor(escaped, iterations);*/
-  
 }
 
 void main() {
