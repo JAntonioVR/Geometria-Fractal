@@ -29,7 +29,7 @@ uniform float u_epsilon;
 
 uniform int u_fractal;
 uniform vec4 u_juliaSetConstant;
-uniform bool u_antiliasing;
+uniform bool u_antialiasing;
 uniform int u_nSamples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
@@ -699,8 +699,8 @@ void main() {
     
     // COLOR
     
-    if(u_antiliasing) {
-        // Antiliasing
+    if(u_antialiasing) {
+        // Antialiasing
 
         vec2 uv = (gl_FragCoord.xy) / vec2(image_width, image_height);
         float u = uv.x;
@@ -725,7 +725,7 @@ void main() {
         gl_FragColor = sum_colors / float(nSamples*nSamples);
     }
     else {
-        // No antiliasing
+        // No antialiasing
         vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
         float u = uv.x;
         float v = uv.y;

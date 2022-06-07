@@ -63,7 +63,7 @@ class Scene2D extends Scene {
         juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
         order: gl.getUniformLocation(WGLShader, 'u_order'),
         fractal: gl.getUniformLocation(WGLShader, 'u_fractal'),
-        antiliasing: gl.getUniformLocation(WGLShader, 'u_antiliasing'),
+        antialiasing: gl.getUniformLocation(WGLShader, 'u_antialiasing'),
         nSamples: gl.getUniformLocation(WGLShader, 'u_nSamples')
       }
     };
@@ -90,7 +90,7 @@ class Scene2D extends Scene {
       juliaSetConstant: [-0.12, 0.75],
       order: 2,
       fractal: 0,
-      antiliasing: false,
+      antialiasing: false,
       nSamples: 1,
     };
 
@@ -121,7 +121,7 @@ class Scene2D extends Scene {
         juliaSetConstant = this.parameters.juliaSetConstant,
         order = this.parameters.order,
         fractal = this.parameters.fractal,
-        antiliasing = this.parameters.antiliasing,
+        antialiasing = this.parameters.antialiasing,
         nSamples = this.parameters.nSamples;
     var that = this;
     {
@@ -163,8 +163,8 @@ class Scene2D extends Scene {
       this.programInfo.uniformLocations.fractal,
       fractal);
     gl.uniform1i(
-      this.programInfo.uniformLocations.antiliasing,
-      antiliasing);
+      this.programInfo.uniformLocations.antialiasing,
+      antialiasing);
     gl.uniform1i(
       this.programInfo.uniformLocations.nSamples,
       nSamples);
@@ -240,10 +240,10 @@ class Scene2D extends Scene {
   }
 
   // ─── CHANGEANTILIASING ──────────────────────────────────────────────────────────
-  // Cambia el valor booleano del parametro 'antiliasing'. Es una forma de decirle al
-  // programa si queremos que se aplique o no antiliasing a los píxeles.
-  changeAntiliasing() {
-    this.parameters.antiliasing = !this.parameters.antiliasing;
+  // Cambia el valor booleano del parametro 'antialiasing'. Es una forma de decirle al
+  // programa si queremos que se aplique o no antialiasing a los píxeles.
+  changeAntialiasing() {
+    this.parameters.antialiasing = !this.parameters.antialiasing;
   }
 
   //
@@ -251,9 +251,9 @@ class Scene2D extends Scene {
   //
 
   // ─── GETANTILIASING ─────────────────────────────────────────────────────────────
-  // Getter del parametro 'antiliasing', de tipo booleano.
-  getAntiliasing() {
-    return this.parameters.antiliasing
+  // Getter del parametro 'antialiasing', de tipo booleano.
+  getAntialiasing() {
+    return this.parameters.antialiasing
   }
 
   // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────

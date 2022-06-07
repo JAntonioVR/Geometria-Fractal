@@ -143,16 +143,16 @@ function main(){
   if(theScene.getFractal() != 2)
     document.querySelector("#constanteJulia").style.display = 'none';
 
-  // Activar/desactivar antiliasing
-  const antiliasing = document.querySelector("#antiliasing");
-  antiliasing.addEventListener('change', changeAntiliasing, true);
+  // Activar/desactivar antialiasing
+  const antialiasing = document.querySelector("#antialiasing");
+  antialiasing.addEventListener('change', changeAntialiasing, true);
 
-  // En caso de activar antiliasing, cuantos rayos por pixel?
+  // En caso de activar antialiasing, cuantos rayos por pixel?
   const nSamples_input = document.querySelector("#nSamples");
   nSamples_input.value = theScene.getNSamples();
   document.querySelector("#valorNSamples").value = theScene.getNSamples()**2;
   nSamples_input.addEventListener('change', (event) => change_nSamples(event), true);
-  if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
+  if(!antialiasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
 
   // Deslizador para calcular el valor de epsilon usado en ray-marching
   const epsilon_input = document.querySelector("#current_epsilon");
@@ -404,9 +404,9 @@ function verifyInputJulia(number) {
 //
 // ─── ACTIVAR O DESACTIVAR ANTILIASING ───────────────────────────────────────────
 //
-function changeAntiliasing(){
-  theScene.changeAntiliasing();
-  if(theScene.getAntiliasing())
+function changeAntialiasing(){
+  theScene.changeAntialiasing();
+  if(theScene.getAntialiasing())
     document.querySelector("#deslizadorNSamples").style.display = 'flex';
   else
     document.querySelector("#deslizadorNSamples").style.display = 'none';   
@@ -416,7 +416,7 @@ function changeAntiliasing(){
 
 //
 // ─── CAMBIAR NUMERO DE RAYOS POR PIXEL ──────────────────────────────────────────
-// Solo se aplica si el antiliasing esta activado
+// Solo se aplica si el antialiasing esta activado
 function change_nSamples(event) {
   document.querySelector("#valorNSamples").innerHTML = event.target.value**2;
   theScene.setNSamples(event.target.value);
@@ -525,10 +525,10 @@ function resetParameters() {
   if(theScene.getFractal() != 2)
     document.querySelector("#constanteJulia").style.display = 'none';
 
-  document.querySelector("#antiliasing").checked = false;
+  document.querySelector("#antialiasing").checked = false;
   document.querySelector("#nSamples").value = theScene.getNSamples();
   document.querySelector("#valorNSamples").innerHTML = theScene.getNSamples()**2;
-  if(!theScene.getAntiliasing()) 
+  if(!theScene.getAntialiasing()) 
     document.querySelector("#deslizadorNSamples").style.display = 'none';
 
   document.querySelector("#current_epsilon").value = -Math.log10(theScene.getEpsilon());

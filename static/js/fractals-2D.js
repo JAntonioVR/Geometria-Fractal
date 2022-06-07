@@ -77,16 +77,16 @@ function main(){
   deslizadorExp.addEventListener('input', (event) => changeExponente(event), true);
   valorExponente.addEventListener('change', (event) => changeExponente(event), true);
 
-  // Activar/desactivar antiliasing
-  const antiliasing = document.querySelector("#antiliasing");
-  antiliasing.addEventListener('change', changeAntiliasing, true);
+  // Activar/desactivar antialiasing
+  const antialiasing = document.querySelector("#antialiasing");
+  antialiasing.addEventListener('change', changeAntialiasing, true);
 
-  // En caso de activar antiliasing, cuantas muestras por pixel?
+  // En caso de activar antialiasing, cuantas muestras por pixel?
   const nSamples_input = document.querySelector("#nSamples");
   nSamples_input.value = theScene.getNSamples();
   document.querySelector("#valorNSamples").innerHTML = theScene.getNSamples()**2;
   nSamples_input.addEventListener('change', (event) => change_nSamples(event), true);
-  if(!antiliasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
+  if(!antialiasing.checked) document.querySelector("#deslizadorNSamples").style.display = 'none';
 
 
   const LLCX = document.querySelector("#LLCX"),
@@ -198,9 +198,9 @@ function onKeyDown(event) {
 //
 // ─── ACTIVAR O DESACTIVAR ANTILIASING ───────────────────────────────────────────
 //
-function changeAntiliasing(){
-  theScene.changeAntiliasing();
-  if(theScene.getAntiliasing())
+function changeAntialiasing(){
+  theScene.changeAntialiasing();
+  if(theScene.getAntialiasing())
     $("#deslizadorNSamples").show();
   else
     $("#deslizadorNSamples").hide();   
@@ -209,7 +209,7 @@ function changeAntiliasing(){
 
 //
 // ─── CAMBIAR NUMERO DE RAYOS POR PIXEL ──────────────────────────────────────────
-// Solo se aplica si el antiliasing esta activado
+// Solo se aplica si el antialiasing esta activado
 function change_nSamples(event) {
   document.querySelector("#valorNSamples").innerHTML = event.target.value**2;
   theScene.setNSamples(event.target.value);
@@ -381,8 +381,8 @@ function resetParameters(){
   document.querySelector("#fractales").value = theScene.getFractal();
   theScene.getFractal() == 1 ? $("#constanteJulia").show() : $("#constanteJulia").hide();
 
-  $("#antiliasing").prop('checked', false);
-  if(theScene.getAntiliasing()) theScene.changeAntiliasing();
+  $("#antialiasing").prop('checked', false);
+  if(theScene.getAntialiasing()) theScene.changeAntialiasing();
   $("#nSamples").val(1);
   $("#valorNSamples").text("1");
   $("#deslizadorNSamples").hide();

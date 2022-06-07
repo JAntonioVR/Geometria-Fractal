@@ -1123,7 +1123,7 @@ En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{sec
 \begin{figure} [ht]
     \centering
     \includegraphics[width=130mm]{img/C7/no-antialiasing.png}
-    \caption{Suelo antes de aplicar antiliasing}
+    \caption{Suelo antes de aplicar antialiasing}
     \label{fig:no-antialiasing-3D}
 \end{figure}
 
@@ -1144,7 +1144,7 @@ Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por 
 Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iteramos un índice $i=0,\dots,n^2$, de forma que $i/n$ sería la fila e $i\%n$ la columna, de forma que a la coordenada de dispositivo normalizada inicial habría que sumarle $(i/n)h_w + \frac{1}{2}h_w$ en anchura e $(i\%n)h_h+ \frac{1}{2}h_h$ en altura para obtener la coordenada normalizada a la que lanzar el rayo. De nuevo, aconsejamos revisitar la sección \ref{section:SSAA-2D} para mayor detalle en esta explicación. El código GLSL por tanto sería el siguiente
 
 \begin{lstlisting}
-// Antiliasing
+// Antialiasing
 
 vec2 uv = (gl_FragCoord.xy) / vec2(nx, ny);
 float u = uv.x;
@@ -1170,24 +1170,24 @@ for(int i = 0; i < 1000; i++) {
 gl_FragColor = sum_colors / float(nSamples*nSamples);
 \end{lstlisting}
 
-Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSamples|) se consiguen resultados como el de la figura \ref{fig:antiliasing-3D}. Como se puede ver, los bordes son más suaves y de mejor calidad y las regiones más lejanas tienen mejor resolución.
+Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSamples|) se consiguen resultados como el de la figura \ref{fig:antialiasing-3D}. Como se puede ver, los bordes son más suaves y de mejor calidad y las regiones más lejanas tienen mejor resolución.
 
 \begin{figure} [ht]
     \centering
     \includegraphics[width=130mm]{img/C7/antialiasing.png}
-    \caption{Suelo tras de aplicar antiliasing}
-    \label{fig:antiliasing-3D}
+    \caption{Suelo tras de aplicar antialiasing}
+    \label{fig:antialiasing-3D}
 \end{figure}
 
-De nuevo, por cuestiones de eficiencia e interactividad, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA en 3D, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante las variables \verb|uniform| \verb|u_antiliasing| y \verb|u_nSamples|, cuyas funciones son las mismas que las ya explicadas en la sección \ref{section:SSAA-2D}, aunque se puede deducir del código presentado a continuación.
+De nuevo, por cuestiones de eficiencia e interactividad, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA en 3D, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante las variables \verb|uniform| \verb|u_antialiasing| y \verb|u_nSamples|, cuyas funciones son las mismas que las ya explicadas en la sección \ref{section:SSAA-2D}, aunque se puede deducir del código presentado a continuación.
 
 \begin{lstlisting}
-    uniform bool u_antiliasing;
+    uniform bool u_antialiasing;
     uniform int u_nSamples;
 // ...
 void main() {
     // ... 
-    if(u_antiliasing) {
+    if(u_antialiasing) {
         // Aplicar SSAA
         int nSamples = u_nSamples;
         // ... 

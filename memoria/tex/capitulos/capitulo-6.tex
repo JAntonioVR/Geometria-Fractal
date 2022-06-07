@@ -399,19 +399,19 @@ Para terminar este capítulo, introduciremos una técnica que aportará realismo
   \label{fig:no-antialiasing-2D}
 \end{figure}
 
-Una forma simple de corregir estos efectos se consigue teniendo en cuenta que se está identificando cada píxel con un único punto del plano, cuando realmente en cada píxel hay infinitos puntos. Podría incluso ocurrir que el conjunto de Julia atravesara el píxel de forma que la mayor parte de sus puntos sean de escape pero el que evalúa el algoritmo es prisionero, coloreando el píxel de color negro cuando realmente no todos los puntos que lo componen son prisioneros. Una solución sencilla a este impedimento es aplicar la técnica popularmente conocida como \textit{Supersampling Antiliasing} (SSAA). El SSAA consiste en calcular más de un punto por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve el algoritmo en cada uno de los puntos.
+Una forma simple de corregir estos efectos se consigue teniendo en cuenta que se está identificando cada píxel con un único punto del plano, cuando realmente en cada píxel hay infinitos puntos. Podría incluso ocurrir que el conjunto de Julia atravesara el píxel de forma que la mayor parte de sus puntos sean de escape pero el que evalúa el algoritmo es prisionero, coloreando el píxel de color negro cuando realmente no todos los puntos que lo componen son prisioneros. Una solución sencilla a este impedimento es aplicar la técnica popularmente conocida como \textit{Supersampling Antialiasing} (SSAA). El SSAA consiste en calcular más de un punto por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve el algoritmo en cada uno de los puntos.
 
-Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano complejo que iteraríamos y calcularíamos el color asociado según las técnicas implementadas hasta el momento. Para calcular más de un punto, fijamos un número natural $n\in\N$ y programaremos la forma de calcular $n^2$ puntos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
+Fijémonos en la figura \ref{fig:pantalla-antialiasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano complejo que iteraríamos y calcularíamos el color asociado según las técnicas implementadas hasta el momento. Para calcular más de un punto, fijamos un número natural $n\in\N$ y programaremos la forma de calcular $n^2$ puntos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antialiasing} (b) con $n=2$.
 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.20]{img/C6/pixeles-sin-antiliasing.png} &
-      \includegraphics[scale=0.20]{img/C6/pixeles-con-antiliasing.png} \\    
-    (a) Sin antiliasing & (b) Con antiliasing  \\
+        \includegraphics[scale=0.20]{img/C6/pixeles-sin-antialiasing.png} &
+      \includegraphics[scale=0.20]{img/C6/pixeles-con-antialiasing.png} \\    
+    (a) Sin antialiasing & (b) Con antialiasing  \\
     \end{tabular}
     \caption{Representación de los rayos que se lanzan a una pantalla}
-    \label{fig:pantalla-antiliasing}
+    \label{fig:pantalla-antialiasing}
 \end{figure}
 
 Por tanto, ahora, en lugar de calcular las ``coordenadas de mundo de cada píxel'', a las cuales nos referíamos como las coordenadas de mundo del punto situado en el centro del píxel, ahora debemos calcular, por cada píxel, $n^2$ coordenadas. 
@@ -495,27 +495,27 @@ vec4 Julia(vec2 c, int n) {
 }
 \end{lstlisting}
 
-El resultado tras aplicar esta modificación en $\mathcal{J}_{-0.53 + 0.53i}$, que es el conjunto que aparece en la imagen \ref{fig:no-antialiasing-2D}, es la imagen \ref{fig:antiliasing-2D}. Fijémonos como la sensación de irregularidad desaparece, dando apariencia más suavizada, mejorando notablemente la calidad de la imagen.
+El resultado tras aplicar esta modificación en $\mathcal{J}_{-0.53 + 0.53i}$, que es el conjunto que aparece en la imagen \ref{fig:no-antialiasing-2D}, es la imagen \ref{fig:antialiasing-2D}. Fijémonos como la sensación de irregularidad desaparece, dando apariencia más suavizada, mejorando notablemente la calidad de la imagen.
 
 \begin{figure} [ht]
   \centering
   \includegraphics[width=130mm]{img/C6/antialiasing.png}
   \caption{Detalle de $\mathcal{J}_{-0.53 + 0.53i}$ tras aplicar SSAA}
-  \label{fig:antiliasing-2D}
+  \label{fig:antialiasing-2D}
 \end{figure}
 
 El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que utilizar un único punto por píxel, por lo que se ralentiza mucho la ejecución. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor.
 
-Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante dos variables \verb|uniform|. Una de ellas es booleana, su nombre es \verb|u_antiliasing|, que en caso de valer \verb|true| se aplicaría antialiasing y en caso contrario se utilizaría un único punto por píxel. Para ello utilizamos la otra variable \verb|uniform|, que es entera y su nombre es \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. En caso de que \verb|u_antialiasing| tenga el valor \verb|false|, \verb|u_nSamples| tendrá el valor $1$, en caso contrario tendrá el valor que decida el usuario.  
+Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante dos variables \verb|uniform|. Una de ellas es booleana, su nombre es \verb|u_antialiasing|, que en caso de valer \verb|true| se aplicaría antialiasing y en caso contrario se utilizaría un único punto por píxel. Para ello utilizamos la otra variable \verb|uniform|, que es entera y su nombre es \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. En caso de que \verb|u_antialiasing| tenga el valor \verb|false|, \verb|u_nSamples| tendrá el valor $1$, en caso contrario tendrá el valor que decida el usuario.  
 
 \begin{lstlisting}
-    uniform bool u_antiliasing;
+    uniform bool u_antialiasing;
     uniform int u_nSamples;
 // ...
 vec4 Julia(vec2 c, int n) {
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
   // int nSamples = 3;
-  int nSamples = u_antiliasing ? u_nSamples : 1;
+  int nSamples = u_antialiasing ? u_nSamples : 1;
   // ... 
 }
 \end{lstlisting}

@@ -39,9 +39,9 @@ class Scene3D extends Scene{
   // - juliaSetConstant: Array. Cuaternio 'c' en la ecuacion P(q) = q^2 + c.
   // - epsilon: number. Distancia minima utilizada en ray-marching para decidir
   //            cuando un punto esta en la frontera del fractal.
-  // - antiliasing: boolean. Si es true se aplicara antiliasing a la escena. En
+  // - antialiasing: boolean. Si es true se aplicara antialiasing a la escena. En
   //                caso contrario se lanzara un único rayo por pixel.
-  // - nSamples: number. Valor entero que en caso de que antiliasing sea true se
+  // - nSamples: number. Valor entero que en caso de que antialiasing sea true se
   //              lanzaran nSamples^2 rayos por pixel.
   // - delta: number. Incremento que se suma o se resta a la hora de desplazarse por
   //          la escena.
@@ -80,7 +80,7 @@ class Scene3D extends Scene{
         fractal: gl.getUniformLocation(WGLShader, 'u_fractal'),
         juliaSetConstant: gl.getUniformLocation(WGLShader, 'u_juliaSetConstant'),
         epsilon: gl.getUniformLocation(WGLShader, 'u_epsilon'),
-        antiliasing: gl.getUniformLocation(WGLShader, 'u_antiliasing'),
+        antialiasing: gl.getUniformLocation(WGLShader, 'u_antialiasing'),
         nSamples: gl.getUniformLocation(WGLShader, 'u_nSamples')
       }
     };
@@ -103,7 +103,7 @@ class Scene3D extends Scene{
       epsilon: 0.001,
       fractal: 1,
       juliaSetConstant: [0.75, 0.0, 0.0, -0.12],
-      antiliasing: false,
+      antialiasing: false,
       nSamples: 1,
       delta: 0.1
     };
@@ -141,7 +141,7 @@ class Scene3D extends Scene{
         shadows = this.parameters.shadows,
         fractal = this.parameters.fractal,
         juliaSetConstant = this.parameters.juliaSetConstant,
-        antiliasing = this.parameters.antiliasing,
+        antialiasing = this.parameters.antialiasing,
         nSamples = this.parameters.nSamples,
         epsilon = this.parameters.epsilon;
         
@@ -205,8 +205,8 @@ class Scene3D extends Scene{
       this.programInfo.uniformLocations.juliaSetConstant,
       juliaSetConstant[0], juliaSetConstant[1], juliaSetConstant[2], juliaSetConstant[3]);
     gl.uniform1i(
-      this.programInfo.uniformLocations.antiliasing,
-      antiliasing
+      this.programInfo.uniformLocations.antialiasing,
+      antialiasing
     );
     gl.uniform1i(
       this.programInfo.uniformLocations.nSamples,
@@ -310,10 +310,10 @@ class Scene3D extends Scene{
   }
 
   // ─── CHANGEANTILIASING ──────────────────────────────────────────────────────────
-  // Cambia el valor booleano del parametro 'antiliasing'. Es una forma de decirle al
-  // programa si queremos que se aplique o no antiliasing a los píxeles.
-  changeAntiliasing() {
-    this.parameters.antiliasing = !this.parameters.antiliasing;
+  // Cambia el valor booleano del parametro 'antialiasing'. Es una forma de decirle al
+  // programa si queremos que se aplique o no antialiasing a los píxeles.
+  changeAntialiasing() {
+    this.parameters.antialiasing = !this.parameters.antialiasing;
   }
 
   //
@@ -342,9 +342,9 @@ class Scene3D extends Scene{
   //
 
   // ─── GETANTILIASING ─────────────────────────────────────────────────────────────
-  // Getter del parametro 'antiliasing', de tipo booleano.
-  getAntiliasing() {
-    return this.parameters.antiliasing
+  // Getter del parametro 'antialiasing', de tipo booleano.
+  getAntialiasing() {
+    return this.parameters.antialiasing
   }
 
   // ─── GETEPSILON ─────────────────────────────────────────────────────────────────

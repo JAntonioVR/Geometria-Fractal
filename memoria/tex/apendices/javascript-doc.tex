@@ -275,7 +275,7 @@ uniform float u_epsilon;
 
 uniform int u_fractal;
 uniform vec4 u_juliaSetConstant;
-uniform bool u_antiliasing;
+uniform bool u_antialiasing;
 uniform int u_nSamples;
 \end{lstlisting}
 
@@ -313,8 +313,8 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
         \item \verb|fractal: number|. Si este parámetro vale 1 se visualizará el conjunto de Mandelbub. Si vale 2 se visualizará el conjunto de Julia asociado al campo \verb|juliaSetConstant|. Si vale 3 se visualizara el conjunto de Mandelbrot 3D.
         \item \verb|juliaSetConstant: Array|. Cuaternio $c$ en la ecuacion $P_c(q) = q^2 + c$.
         \item \verb|epsilon: number|. Distancia mínima $\varepsilon$ utilizada en ray-marching para decidir cuándo un punto esta en la frontera del fractal.
-        \item \verb|antiliasing: boolean|. Si es true se aplicará antiliasing a la escena. En caso contrario se trazará un único rayo por píxel.
-        \item \verb|nSamples: number|. Valor entero que en caso de que \verb|antiliasing| sea true se lanzarán $nSamples^2$ rayos por píxel.
+        \item \verb|antialiasing: boolean|. Si es true se aplicará antialiasing a la escena. En caso contrario se trazará un único rayo por píxel.
+        \item \verb|nSamples: number|. Valor entero que en caso de que \verb|antialiasing| sea true se lanzarán $nSamples^2$ rayos por píxel.
         \item \verb|delta: number|. Incremento que se suma o se resta a la hora de desplazarse por la escena.
     \end{itemize}
     \item \verb|programInfo: Object|. Objeto que almacena información genérica relativa al programa:
@@ -364,12 +364,12 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \begin{itemize}
         \item \verb|i: number|: Índice de la luz cuyas sombras queremos activar o desactivar.
     \end{itemize}
-    \item \verb|changeAntiliasing|: Cambia el valor booleano del parámetro \verb|antiliasing|. Es una forma de decirle al programa si queremos que se aplique o no antiliasing a los píxeles.
+    \item \verb|changeAntialiasing|: Cambia el valor booleano del parámetro \verb|antialiasing|. Es una forma de decirle al programa si queremos que se aplique o no antialiasing a los píxeles.
     \item \verb|#rescaleAngles|: Cuando se modifican los ángulos de las coordenadas esféricas es posible que se salgan del rango $[0, 2\pi]$. Esta función ajusta esos valores para que siempre se sitúen en el intervalo correcto.
 \end{itemize}
 \textbf{Getters}
 \begin{itemize}
-    \item \verb|getAntiliasing|: Getter del parámetro \verb|antiliasing|, de tipo booleano.
+    \item \verb|getAntialiasing|: Getter del parámetro \verb|antialiasing|, de tipo booleano.
     \item \verb|getEpsilon|: Getter del parámetro \verb|epsilon|, de tipo number.
     \item \verb|getFractal|: Getter del parámetro \verb|fractal|, de tipo number.
     \item \verb|getJuliaConstant|: Getter del parámetro \verb|juliaSetConstant|, de tipo Array (cuaternio).
