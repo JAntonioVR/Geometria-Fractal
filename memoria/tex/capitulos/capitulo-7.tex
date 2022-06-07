@@ -1127,7 +1127,7 @@ En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{sec
     \label{fig:no-antialiasing-3D}
 \end{figure}
 
-Por suerte, podemos aplicar SSAA también en 3D. De igual forma que calculamos $n^2$ puntos por píxel en la región del plano que representábamos en 2D, podemos calcular, por cada píxel, $n^2$ puntos del plano de proyección, lanzar un rayo en dirección de cada uno y promediar el color que calculado para cada rayo. La metodología es prácticamente análoga a la utilizada en la sección \ref{section:SSAA-2D}, teniendo en cuenta que en este caso calculamos puntos del plano de proyección para posteriormente crear rayos. Procedemos a explicar dicha metodología.
+Por suerte, podemos aplicar SSAA también en 3D. De igual forma que calculamos $n^2$ puntos por píxel en la región del plano que representábamos en 2D, podemos calcular, por cada píxel, $n^2$ puntos del plano de proyección, lanzar un rayo en dirección de cada uno y promediar el color que calculado para cada rayo. La metodología es prácticamente análoga a la utilizada en la sección \ref{section:SSAA-2D}, teniendo en cuenta que en este caso calculamos puntos del plano de proyección para posteriormente crear rayos. De hecho, invitamos al lector que visite dicha sección si no entiende algunos de los razonamientos, los cuales hemos abreviado por su parecido a los ya explicados en la sección \ref{section:SSAA-2D}. Procedemos entonces a explicar la metodología.
 
 
 En \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, ahora debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
@@ -1141,7 +1141,7 @@ Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mis
 
 Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo calculamos la coordenada de dispositivo normalizada del punto hacia el cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
 
-Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iteramos un índice $i=0,\dots,n^2$, de forma que $i/n$ sería la fila e $i\%n$ la columna, de forma que a la coordenada de dispositivo normalizada inicial habría que sumarle $(i/n)h_w + \frac{1}{2}h_w$ en anchura e $(i\%n)h_h+ \frac{1}{2}h_h$ en altura para obtener la coordenada normalizada a la que lanzar el rayo. De nuevo, aconsejamos revisitar la sección \ref{section:SSAA-2D} para mayor detalle en esta explicación. El código GLSL por tanto sería el siguiente
+Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iteramos un índice $i=0,\dots,n^2$, de forma que $i/n$ sería la fila e $i\%n$ la columna, de forma que a la coordenada de dispositivo normalizada inicial habría que sumarle $(i/n)h_w + \frac{1}{2}h_w$ en anchura e $(i\%n)h_h+ \frac{1}{2}h_h$ en altura para obtener la coordenada normalizada a la que lanzar el rayo. El código GLSL por tanto sería el siguiente
 
 \begin{lstlisting}
 // Antialiasing
