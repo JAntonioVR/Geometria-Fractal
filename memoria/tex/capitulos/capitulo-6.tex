@@ -388,6 +388,7 @@ void main() {
 \end{lstlisting}
 
 \section{Supersampling Antialiasing}
+\label{section:SSAA-2D}
 
 Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El aliasing es un efecto que ocurre en muchas aplicaciones gráficas debido a la discretización que se realiza de una imagen real en un subconjunto finito de píxeles. Por ejemplo, a no ser que una línea recta sea totalmente vertical u horizontal, se presentará con sobresaltos impropios de una línea recta (véase imagen \ref{fig:no-antialiasing}).Por su parte, el \textit{antialiasing} es un conjunto de técnicas que nos permite evitar este efecto mediante el suavizado de bordes. Por ejemplo, fíjese en la imagen \ref{fig:no-antialiasing-2D}, de $\mathcal{J}_{-0.53 + 0.53i}$. En ella se pueden observar irregularidades, como por ejemplo pequeños puntos negros o píxeles consecutivos de colores muy distintos.
 
@@ -476,7 +477,7 @@ vec2 get_world_coordinates(int i, int nSamples) {
 }
 \end{lstlisting}
 
-Finalmente, en las funciones \verb|Julia| y \verb|Mandelbrot|, en lugar de hacer una única llamada a \verb|get_world_coordinates()|, hacemos $n^2$ llamadas a \verb|get_world_coordinates(i, nSamples)|, fijando previamente el valor de $n$ (\verb|nSamples|). Sumamos los $n^2$ colores que se calculan en cada muestra y finalmente se devuelve el promedio. Mostramos el código de la función \verb|Julia|, ya que el de \verb|Mandelbrot| es totalmente análogo.
+Finalmente, en las funciones \verb|Julia| y \verb|Mandelbrot|, en lugar de hacer una única llamada a la función \texttt{get\_world\_coordinates()}, hacemos $n^2$ llamadas a \texttt{get\_world\_coordinates(i, nSamples)}, fijando previamente el valor de $n$ (\verb|nSamples|). Sumamos los $n^2$ colores que se calculan en cada muestra y finalmente se devuelve el promedio. Mostramos el código de la función \verb|Julia|, ya que el de \verb|Mandelbrot| es totalmente análogo.
 
 \begin{lstlisting}
 vec4 Julia(vec2 c, int n) {

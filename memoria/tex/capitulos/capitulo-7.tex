@@ -207,12 +207,12 @@ Ray get_ray(vec3 lookfrom, vec3 lookat,
 
 // Dimensiones del canvas
 float aspect_ratio = 16.0/9.0;
-float image_width = 1280.0;
-float image_height = image_width / aspect_ratio;
+float nx = 1280.0;
+float ny = nx / aspect_ratio;
 
 // Coordenadas de dispositivo normalizadas [0,1]
 vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / 
-    vec2(image_width, image_height);
+    vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
 
@@ -746,8 +746,8 @@ uniform vec3 u_lookat;      // lookat point
 
 // ... 
 // aspect_ratio = 16/9
-// image_width = 1280 pixels
-// image_height = 720 pixels
+// nx = 1280 pixels
+// ny = 720 pixels
 
 // CAMERA
 vec3 vup = vec3(0.0, 1.0, 0.0);
@@ -756,7 +756,7 @@ Camera cam = init_camera(u_lookfrom, u_lookat,
     vup, vfov, aspect_ratio);
 
 // [0,1] normalized device coordinates
-vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
 
@@ -1116,74 +1116,47 @@ Evidentemente todos estos parámetros se pueden modificar y poner los que queram
     \label{fig:phong-final}
 \end{figure}
 
-\section{Supersampling Antialiasing}
+\section{SSAA en Ray-Tracing}
 
-Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El \textit{antialiasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
+En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{section:SSAA-2D} mostramos la posibilidad de utilizar más de un punto del plano por píxel, calcular el color asociado a cada uno y asignar un valor promedio a \verb|gl_FragColor|. Esta modificación producía imágenes y bordes más suavizados, con un nivel más alto de realismo. En 3D, esta técnica es igualmente aplicable y necesaria de hecho, fíjese por ejemplo en la imagen \ref{fig:no-antialiasing-3D}, en la cual se aprecian las irregularidades en los bordes de las fichas negras y blancas y a distancias mayores la textura se distorsiona bastante.
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C7/no-antiliasing.png}
+    \includegraphics[width=130mm]{img/C7/no-antialiasing.png}
     \caption{Suelo antes de aplicar antiliasing}
-    \label{fig:no-antialiasing}
+    \label{fig:no-antialiasing-3D}
 \end{figure}
 
-Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un píxel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en la mayor parte de su superficie el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Una forma sencilla de solucionar este impedimento es aplicar la técnica popularmente conocida como \textit{Supersampling Antiliasing} (SSAA). El SSAA consiste en lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve cada rayo en cada uno de los puntos.
+Por suerte, podemos aplicar SSAA también en 3D. De igual forma que calculamos $n^2$ puntos por píxel en la región del plano que representábamos en 2D, podemos calcular, por cada píxel, $n^2$ puntos del plano de proyección, lanzar un rayo en dirección de cada uno y promediar el color que calculado para cada rayo. La metodología es prácticamente análoga a la utilizada en la sección \ref{section:SSAA-2D}, teniendo en cuenta que en este caso calculamos puntos del plano de proyección para posteriormente crear rayos. Procedemos a explicar dicha metodología.
 
-Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. Para lanzar más de uno, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
-\begin{comment}
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.20]{img/C7/pixeles-sin-antiliasing.png} &
-      \includegraphics[scale=0.20]{img/C7/pixeles-con-antiliasing.png} \\    
-    (a) Sin antiliasing & (b) Con antiliasing  \\
-    \end{tabular}
-    \caption{Representación de los rayos que se lanzan a una pantalla}
-    \label{fig:pantalla-antiliasing}
-\end{figure}
-\end{comment}
 
-Por tanto, en \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
+En \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, ahora debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
 \begin{lstlisting}
-vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(image_width, image_height);
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
 \end{lstlisting}
 
-Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{\mathrm{image\_width}\cdot n}$ en anchura y de $h_h:=\frac{1}{\mathrm{image\_height}\cdot n}$ en altura. Tras esto, deberíamos sumar $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto, para así tener dicha cuadrícula centrada en el píxel, véase la imagen \ref{fig:SSAA}.
-\begin{comment}
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.45]{img/C7/SSAA.png}
-    \caption{Construcción de los puntos por el píxel en SSAA}
-    \label{fig:SSAA}
-\end{figure}
-\end{comment}
+Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{n_x\cdot n}$ en anchura y de $h_h:=\frac{1}{n_y \cdot n}$ en altura. Tras esto, centramos la cuadrícula sumando $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto (revisitar imagen \ref{fig:SSAA}).
+
 Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo calculamos la coordenada de dispositivo normalizada del punto hacia el cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
 
-La forma de hacer este cálculo es iterando un índice $i=0,\dots,n^2$. Para a partir del índice $i$ obtener la coordenada correspondiente podemos dividir el conjunto $\sigma_{n^2}=\{0,1,\dots,n^2-1\}$ en $n$ conjuntos de $n$ elementos cada uno, de forma que
-$$
-\sigma_{n^2} = \bigcup_{k=0}^{n-1} \{nk, nk+1, \dots, nk+n-1\}.
-$$
-
-Cada subconjunto de $\sigma_{n^2}$ representa una fila de puntos del píxel. Por tanto, aplicando la división entera, $i/n$ será la fila e $i\%n$ la columna. Por lo que habría que sumar $(i/n)h_w + \frac{1}{2}h_w$ a la coordenada anchura inicial e $(i\%n)h_h+ \frac{1}{2}h_h$ a la altura para obtener la coordenada a la que lanzar el rayo.
-
-El código por tanto sería el siguiente
+Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iteramos un índice $i=0,\dots,n^2$, de forma que $i/n$ sería la fila e $i\%n$ la columna, de forma que a la coordenada de dispositivo normalizada inicial habría que sumarle $(i/n)h_w + \frac{1}{2}h_w$ en anchura e $(i\%n)h_h+ \frac{1}{2}h_h$ en altura para obtener la coordenada normalizada a la que lanzar el rayo. De nuevo, aconsejamos revisitar la sección \ref{section:SSAA-2D} para mayor detalle en esta explicación. El código GLSL por tanto sería el siguiente
 
 \begin{lstlisting}
 // Antiliasing
 
-vec2 uv = (gl_FragCoord.xy) / vec2(image_width, image_height);
+vec2 uv = (gl_FragCoord.xy) / vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
 
 int nSamples = 3; // O cualquier otro numero
-float hw = 1.0 / (float(image_width * nSamples)),
-      hh = 1.0 / (float(image_height * nSamples));
+float hw = 1.0 / (float(nx * nSamples)),
+      hh = 1.0 / (float(ny * nSamples));
 Ray r;
 vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
 
-for(int i = 0; i < ARRAY_TAM; i++) {
+for(int i = 0; i < 1000; i++) {
     if(i == nSamples*nSamples) break;
     int x =  i/nSamples;
     int y =  i - nSamples*x;
@@ -1197,20 +1170,16 @@ for(int i = 0; i < ARRAY_TAM; i++) {
 gl_FragColor = sum_colors / float(nSamples*nSamples);
 \end{lstlisting}
 
-Con esta modificación y fijando el valor que consideremos en \verb|nSamples| se consiguen resultados como el de la figura \ref{fig:antiliasing}. Como se puede ver, los bordes son más suaves y de mejor calidad
-\begin{comment}
-    \begin{figure} [ht]
+Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSamples|) se consiguen resultados como el de la figura \ref{fig:antiliasing-3D}. Como se puede ver, los bordes son más suaves y de mejor calidad y las regiones más lejanas tienen mejor resolución.
+
+\begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C7/antiliasing.png}
+    \includegraphics[width=130mm]{img/C7/antialiasing.png}
     \caption{Suelo tras de aplicar antiliasing}
-    \label{fig:antiliasing}
+    \label{fig:antiliasing-3D}
 \end{figure}
-\end{comment}
 
-
-El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que lanzar un único rayo por píxel, por lo que ralentiza muchísimo la ejecución. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor.
-
-Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante una variable \verb|uniform| booleana, cuyo nombre es \verb|u_antiliasing|, que en caso de valer \verb|true| se ejecutaría el código del antiliasing y en caso contrario se ejecutaría el código normal con un rayo por píxel. Si esta variable es verdadera, se consultaría el valor entero que tenga la variable \verb|uniform| que llamamos \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. 
+De nuevo, por cuestiones de eficiencia e interactividad, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA en 3D, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante las variables \verb|uniform| \verb|u_antiliasing| y \verb|u_nSamples|, cuyas funciones son las mismas que las ya explicadas en la sección \ref{section:SSAA-2D}, aunque se puede deducir del código presentado a continuación.
 
 \begin{lstlisting}
     uniform bool u_antiliasing;
@@ -1219,19 +1188,18 @@ Precisamente por este costo, se incluye en el software la posibilidad de decidir
 void main() {
     // ... 
     if(u_antiliasing) {
-        // Antiliasing
+        // Aplicar SSAA
         int nSamples = u_nSamples;
         // ... 
     }
     else {
-        // No antiliasing
+        // No aplicar SSAA
         // ...
     }
 }   
 \end{lstlisting}
 
 Para terminar esta exposición y este capítulo mostraremos una última imagen que resume todo lo desarrollado: Ray-Tracing, intersecciones con distintos cuerpos, posicionamiento de cámara, iluminación, sombras y SSAA.
-
 
 \begin{figure} [ht]
     \centering
