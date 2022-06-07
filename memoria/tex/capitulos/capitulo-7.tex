@@ -1116,21 +1116,21 @@ Evidentemente todos estos parámetros se pueden modificar y poner los que queram
     \label{fig:phong-final}
 \end{figure}
 
-\section{Supersampling Antiliasing}
+\section{Supersampling Antialiasing}
 
-Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El \textit{antiliasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
+Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El \textit{antialiasing} es una técnica que nos permite suavizar los bordes en las imágenes presentadas por píxeles. Para ello, debemos implementar algunos métodos concretos para que la imagen se presente más real. Por ejemplo, fíjese en la imagen \ref{fig:no-antiliasing}, en la cual se notan mucho los bordes entre las casillas negras y blancas, de forma que si ampliamos la imagen se vería muy pixelada.
 
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.5]{img/C7/no-antiliasing.png}
     \caption{Suelo antes de aplicar antiliasing}
-    \label{fig:no-antiliasing}
+    \label{fig:no-antialiasing}
 \end{figure}
 
 Para corregir este efecto, debemos tener en cuenta que al dividir el plano de proyección en píxeles lanzamos un único rayo por píxel, pero por la región del plano que corresponde puede pasar una recta diagonal como las de la imagen \ref{fig:no-antiliasing}, lo cual puede derivar en que un píxel se dibuje totalmente negro cuando realmente no lo es. De hecho podría ocurrir que en la mayor parte de su superficie el píxel fuera blanco pero justo el rayo se lanza hacia un punto que se evalúa como negro, en cuyo caso el píxel se colorearía negro. Una forma sencilla de solucionar este impedimento es aplicar la técnica popularmente conocida como \textit{Supersampling Antiliasing} (SSAA). El SSAA consiste en lanzar más de un rayo por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve cada rayo en cada uno de los puntos.
 
 Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano de proyección hacia el cual se lanzaría un rayo según las técnicas implementadas hasta el momento. Para lanzar más de uno, fijamos un número natural $n\in\N$ y programaremos la forma de lanzar $n^2$ rayos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
-
+\begin{comment}
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
@@ -1141,6 +1141,7 @@ Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual represent
     \caption{Representación de los rayos que se lanzan a una pantalla}
     \label{fig:pantalla-antiliasing}
 \end{figure}
+\end{comment}
 
 Por tanto, en \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
 \begin{lstlisting}
@@ -1150,14 +1151,14 @@ float v = uv.y;
 \end{lstlisting}
 
 Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{\mathrm{image\_width}\cdot n}$ en anchura y de $h_h:=\frac{1}{\mathrm{image\_height}\cdot n}$ en altura. Tras esto, deberíamos sumar $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto, para así tener dicha cuadrícula centrada en el píxel, véase la imagen \ref{fig:SSAA}.
-
+\begin{comment}
 \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.45]{img/C7/SSAA.png}
     \caption{Construcción de los puntos por el píxel en SSAA}
     \label{fig:SSAA}
 \end{figure}
-
+\end{comment}
 Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo calculamos la coordenada de dispositivo normalizada del punto hacia el cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
 
 La forma de hacer este cálculo es iterando un índice $i=0,\dots,n^2$. Para a partir del índice $i$ obtener la coordenada correspondiente podemos dividir el conjunto $\sigma_{n^2}=\{0,1,\dots,n^2-1\}$ en $n$ conjuntos de $n$ elementos cada uno, de forma que
@@ -1197,13 +1198,15 @@ gl_FragColor = sum_colors / float(nSamples*nSamples);
 \end{lstlisting}
 
 Con esta modificación y fijando el valor que consideremos en \verb|nSamples| se consiguen resultados como el de la figura \ref{fig:antiliasing}. Como se puede ver, los bordes son más suaves y de mejor calidad
-
-\begin{figure} [ht]
+\begin{comment}
+    \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.5]{img/C7/antiliasing.png}
     \caption{Suelo tras de aplicar antiliasing}
     \label{fig:antiliasing}
 \end{figure}
+\end{comment}
+
 
 El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que lanzar un único rayo por píxel, por lo que ralentiza muchísimo la ejecución. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor.
 

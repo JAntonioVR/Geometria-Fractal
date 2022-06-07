@@ -130,12 +130,14 @@ uniform vec2 u_zoomCenter;
 vec2 get_world_coordinates() {
     int nx = 1280, ny = 720; // Canvas size (pixels)
     float r = 16.0/9.0;      // Ratio width/height = 16/9
-    float w = 4.0, h = r * w;  // Image size (units) 
+    float h = 4.0, w = r * h;  // Image size (units) 
     // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
     vec2 uv = (gl_FragCoord.xy + vec2(0.5)) 
                 / vec2(float(nx), float(ny));
+    float u = uv.x;
+    float v = uv.y;
     // Punto del plano complejo al que corresponde el pixel
-    return u_zoomCenter + vec2(uv.x*w - w/2.0, uv.y*h - h/2.0) * u_zoomSize;
+    return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
 }
 \end{lstlisting}
 
@@ -382,5 +384,137 @@ void main() {
     color = Julia(u_juliaSetConstant, u_order);
   }
   gl_FragColor = color;
+}
+\end{lstlisting}
+
+\section{Supersampling Antialiasing}
+
+Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El aliasing es un efecto que ocurre en muchas aplicaciones gráficas debido a la discretización que se realiza de una imagen real en un subconjunto finito de píxeles. Por ejemplo, a no ser que una línea recta sea totalmente vertical u horizontal, se presentará con sobresaltos impropios de una línea recta (véase imagen \ref{fig:no-antialiasing}).Por su parte, el \textit{antialiasing} es un conjunto de técnicas que nos permite evitar este efecto mediante el suavizado de bordes. Por ejemplo, fíjese en la imagen \ref{fig:no-antialiasing-2D}, de $\mathcal{J}_{-0.53 + 0.53i}$. En ella se pueden observar irregularidades, como por ejemplo pequeños puntos negros o píxeles consecutivos de colores muy distintos.
+
+\begin{figure} [ht]
+  \centering
+  \includegraphics[width=130mm]{img/C6/no-antialiasing.png}
+  \caption{Detalle de $\mathcal{J}_{-0.53 + 0.53i}$ antes de aplicar antialiasing}
+  \label{fig:no-antialiasing-2D}
+\end{figure}
+
+Una forma simple de corregir estos efectos se consigue teniendo en cuenta que se está identificando cada píxel con un único punto del plano, cuando realmente en cada píxel hay infinitos puntos. Podría incluso ocurrir que el conjunto de Julia atravesara el píxel de forma que la mayor parte de sus puntos sean de escape pero el que evalúa el algoritmo es prisionero, coloreando el píxel de color negro cuando realmente no todos los puntos que lo componen son prisioneros. Una solución sencilla a este impedimento es aplicar la técnica popularmente conocida como \textit{Supersampling Antiliasing} (SSAA). El SSAA consiste en calcular más de un punto por píxel, de forma que se cubra una región más representativa del mismo y se promedie el color que devuelve el algoritmo en cada uno de los puntos.
+
+Fijémonos en la figura \ref{fig:pantalla-antiliasing} (a), en la cual representamos una pantalla de $5\times 3$ píxeles y cada punto señalado sería un punto del plano complejo que iteraríamos y calcularíamos el color asociado según las técnicas implementadas hasta el momento. Para calcular más de un punto, fijamos un número natural $n\in\N$ y programaremos la forma de calcular $n^2$ puntos en cada píxel, tal y como vemos en la imagen \ref{fig:pantalla-antiliasing} (b) con $n=2$.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[scale=0.20]{img/C6/pixeles-sin-antiliasing.png} &
+      \includegraphics[scale=0.20]{img/C6/pixeles-con-antiliasing.png} \\    
+    (a) Sin antiliasing & (b) Con antiliasing  \\
+    \end{tabular}
+    \caption{Representación de los rayos que se lanzan a una pantalla}
+    \label{fig:pantalla-antiliasing}
+\end{figure}
+
+Por tanto, ahora, en lugar de calcular las ``coordenadas de mundo de cada píxel'', a las cuales nos referíamos como las coordenadas de mundo del punto situado en el centro del píxel, ahora debemos calcular, por cada píxel, $n^2$ coordenadas. 
+
+Recordamos, del código de la función \verb|get_world_coordinates| presentado en la sección \ref{section:pantalla-plano}, 
+
+que utilizamos las variables \verb|u,v| como las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
+
+\begin{lstlisting}
+// ... 
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / 
+          vec2(float(nx), float(ny));
+float u = uv.x;
+float v = uv.y;
+\end{lstlisting}
+
+Si ahora en lugar de utilizar un punto por píxel situado en centro del mismo deseamos tener $n^2$ puntos uniformemente distribuidos por la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{n_x\cdot n}$ en anchura y de $h_h:=\frac{1}{n_y\cdot n}$ en altura. Tras esto, deberíamos sumar $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto, para así tener dicha cuadrícula centrada en el píxel, véase la imagen \ref{fig:SSAA}.
+
+\begin{figure} [ht]
+  \centering
+  \includegraphics[scale = 0.45]{img/C6/SSAA.png}
+  \caption{Construcción de los puntos por píxel en SSAA}
+  \label{fig:SSAA}
+\end{figure}
+
+Seguidamente, calculamos los $n^2$ colores, uno por cada punto que utilicemos. Por cada punto, iteramos la función $P_{c,m}$ igual que en las secciones anteriores y que en los algoritmos \ref{alg:Julia} y \ref{alg:Mandelbrot} y calculamos el color que le corresponde, de forma que sumamos los $n^2$ colores que se calculan.  Finalmente, dividimos esta suma entre $n^2$, obteniendo así el color promedio del píxel, siendo este el valor que se asignaría finalmente a \verb|gl_FragColor|.
+
+La forma de hacer este cálculo es iterando un índice $i=0,\dots,n^2$. Para a partir del índice $i$ obtener la coordenada correspondiente podemos dividir el conjunto $\sigma_{n^2}=\{0,1,\dots,n^2-1\}$ en $n$ conjuntos de $n$ elementos cada uno, de forma que
+$$
+\sigma_{n^2} = \bigcup_{k=0}^{n-1} \{nk, nk+1, \dots, nk+n-1\}.
+$$
+
+Cada subconjunto de $\sigma_{n^2}$ representa una fila de puntos del píxel. Por tanto, aplicando la división entera, $i/n$ será la fila e $i\%n$ la columna. Por lo que habría que sumar $(i/n)h_w + \frac{1}{2}h_w$ a la coordenada anchura inicial e $(i\%n)h_h+ \frac{1}{2}h_h$ a la altura para obtener la coordenada del punto $i$-ésimo.
+
+Para ello, modificamos la función \verb|get_world_coordinates| para que acepte el índice $i$ (\verb|int i|) y el valor $n$ (\verb|int nSamples|) como parámetros y calcule las coordenadas de mundo del punto $i$-ésimo del píxel.
+
+\begin{lstlisting}
+
+  
+  // Punto del plano complejo al que corresponde el pixel
+  return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
+
+vec2 get_world_coordinates(int i, int nSamples) {
+
+  int nx = 1280, ny = 720; // Canvas size (pixels)
+  float r = 16.0/9.0;      // Ratio width/height = 16/9
+  float h = 4.0, w = r * h;  // Image size (units) 
+
+  // Incrementos
+  float hw = 1.0 / (float(nx * nSamples)),
+        hh = 1.0 / (float(ny * nSamples));
+
+  int x =  i/nSamples;
+  int y =  i - nSamples*x;
+
+  // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
+  vec2 uv = (gl_FragCoord.xy) / 
+            vec2(float(nx), float(ny));
+  float u = uv.x + float(x) * hw + 0.5 * hw,
+        v = uv.y + float(y) * hh + 0.5 * hh;
+  
+        return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
+}
+\end{lstlisting}
+
+Finalmente, en las funciones \verb|Julia| y \verb|Mandelbrot|, en lugar de hacer una única llamada a \verb|get_world_coordinates()|, hacemos $n^2$ llamadas a \verb|get_world_coordinates(i, nSamples)|, fijando previamente el valor de $n$ (\verb|nSamples|). Sumamos los $n^2$ colores que se calculan en cada muestra y finalmente se devuelve el promedio. Mostramos el código de la función \verb|Julia|, ya que el de \verb|Mandelbrot| es totalmente análogo.
+
+\begin{lstlisting}
+vec4 Julia(vec2 c, int n) {
+  vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+  int nSamples = 3;
+  for(int i = 0; i < 10000; i++) {
+    if(i == nSamples*nSamples) break;
+    vec2 z0 = get_world_coordinates(i, nSamples);
+    bool escaped;
+    int iterations;
+    iterateJulia(z0, c, n, escaped, iterations);
+    sum_colors += computePixelColor(escaped, iterations);
+  } 
+  return sum_colors/float(nSamples*nSamples);
+}
+\end{lstlisting}
+
+El resultado tras aplicar esta modificación en $\mathcal{J}_{-0.53 + 0.53i}$, que es el conjunto que aparece en la imagen \ref{fig:no-antialiasing-2D}, es la imagen \ref{fig:antiliasing-2D}. Fijémonos como la sensación de irregularidad desaparece, dando apariencia más suavizada, mejorando notablemente la calidad de la imagen.
+
+\begin{figure} [ht]
+  \centering
+  \includegraphics[width=130mm]{img/C6/antialiasing.png}
+  \caption{Detalle de $\mathcal{J}_{-0.53 + 0.53i}$ tras aplicar SSAA}
+  \label{fig:antiliasing-2D}
+\end{figure}
+
+El principal y mayor inconveniente que presenta esta técnica es que, como se puede imaginar, es $n^2$ veces más costosa que utilizar un único punto por píxel, por lo que se ralentiza mucho la ejecución. Sin embargo, si se desea una imagen concreta con parámetros muy claros y no tanto la interacción es una buena herramienta, pues proporciona un nivel de detalle mucho mayor.
+
+Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante dos variables \verb|uniform|. Una de ellas es booleana, su nombre es \verb|u_antiliasing|, que en caso de valer \verb|true| se aplicaría antialiasing y en caso contrario se utilizaría un único punto por píxel. Para ello utilizamos la otra variable \verb|uniform|, que es entera y su nombre es \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. En caso de que \verb|u_antialiasing| tenga el valor \verb|false|, \verb|u_nSamples| tendrá el valor $1$, en caso contrario tendrá el valor que decida el usuario.  
+
+\begin{lstlisting}
+    uniform bool u_antiliasing;
+    uniform int u_nSamples;
+// ...
+vec4 Julia(vec2 c, int n) {
+  vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+  // int nSamples = 3;
+  int nSamples = u_antiliasing ? u_nSamples : 1;
+  // ... 
 }
 \end{lstlisting}

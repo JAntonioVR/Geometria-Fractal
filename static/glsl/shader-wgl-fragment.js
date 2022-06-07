@@ -91,9 +91,7 @@ vec2 get_world_coordinates(int i, int nSamples) {
   vec2 uv = (gl_FragCoord.xy) / vec2(float(viewportWidth), float(viewportHeight));
   float u = uv.x + float(x) * hw + 0.5 * hw,
         v = uv.y + float(y) * hh + 0.5 * hh;
-
-  vec2 normalizedDC = vec2(u/float(viewportWidth), v/float(viewportHeight));
-  return u_zoomCenter + u_zoomSize * vec2(u*width-width/2.0, v*height-height/2.0);;
+  return u_zoomCenter + u_zoomSize * vec2(u*width-width/2.0, v*height-height/2.0);
 }
 
 vec4 computePixelColor(bool escaped, int iterations) {
