@@ -27,7 +27,7 @@ class Scene {
   //   tiene el codigo comun a escenas 2D y 3D
   constructor(vsSource, fsSource) {
     if(this.constructor === Scene)
-    throw new Error("No es posible crear un objeto de una clase abstracta");
+      throw new Error("No es posible crear un objeto de una clase abstracta");
     const canvas = document.querySelector("#glCanvas");
     // Initialize the GL context
     const gl = canvas.getContext("webgl2");
@@ -40,7 +40,7 @@ class Scene {
     this.context = gl;
     
     this.shaderProgram = this.initShaderProgram(vsSource, fsSource);
-    this.bufferInfo = this.initBuffers(gl)
+    this.buffer = this.initBuffers(gl)
   }
 
   // ─── INITSHADERPROGRAM ──────────────────────────────────────────────────────────
@@ -67,10 +67,7 @@ class Scene {
   // Parametros: ───────────────────────────
   // No acepta
   // Devuelve: ─────────────────────────────
-  // Un Objeto de JavaScript cuyos campos son:
-  // - positionBuffer: WebGLBuffer. Buffer de posiciones
-  // - numFloatsPV: number. Numero de valores en coma flotante por cada vertice
-  // - numVertexes: number. Numero de vertices que se almacenan en el buffer
+  // Un objeto de la clase Buffer con informacion sobre el buffer de posiciones.
   initBuffers() {
     let gl = this.context;
 
@@ -86,13 +83,9 @@ class Scene {
     let positionsNFPV = 2,   // Number of floats per vertex in 'positions' array
         positionsNV   = positions.length / positionsNFPV    // Number of vertexes in 'positions' array
 
-    let positionBuffer = new Buffer(gl, positions)
+    let positionBuffer = new Buffer(gl, positions, positionsNV, positionsNFPV);
 
-    return {
-      positionBuffer: positionBuffer.getBuffer(),
-      numFloatsPV: positionsNFPV,
-      numVertexes: positionsNV
-    };
+    return positionBuffer;
   }
 
   //
@@ -117,6 +110,7 @@ class Scene {
       return
     }
     else{
+      alert("Ha ocurrido un error de OpenGL, prueba a recargar la página.")
       const msg = `Ha ocurrido un error de OpenGL: [${err}]`;
       throw new Error(msg);
     }

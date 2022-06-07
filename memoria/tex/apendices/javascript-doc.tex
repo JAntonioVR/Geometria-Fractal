@@ -1,4 +1,4 @@
-En este apéndice documentaremos todas las clases, métodos y atributos que se han utilizado en el lenguaje JavaScript. Estas han sido utilizadas para gestionar desde un nivel más alto de abstracción los distintos componentes de WebGL explicados en la sección \ref{section:componentes-wgl}, modificar el DOM de los documentos HTML y darle valores a las variables \verb|attribute| y, de forma dinámica, también a las variables \verb|uniform| del fragment shader. Los ficheros que aquí documentamos pueden ser todos ellos encontrados en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/static/js}, donde además de encontrar las funciones aquí descritas con su código fuente, también encontraremos la misma cabecera descriptiva que incluimos en este apéndice.
+En este apéndice documentaremos todas las clases, métodos y atributos que se han utilizado en el lenguaje JavaScript. Estas han sido utilizadas para gestionar desde un nivel más alto de abstracción los distintos componentes de WebGL explicados en la sección \ref{section:componentes-wgl}, modificar el DOM de los documentos HTML y darle valores a las variables \verb|attribute| y, de forma dinámica, también a las variables \verb|uniform| del fragment shader. Mencionar también el uso de la biblioteca \href{https://jquery.com/}{\textcolor{blue}{jQuery}}, la cual mediante una sintaxis simplificada de JavaScript nativo facilita en gran parte la programación en dicho lenguaje. Los ficheros que aquí documentamos pueden ser todos ellos encontrados en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/static/js}, donde además de encontrar las funciones aquí descritas con su código fuente, también encontraremos la misma cabecera descriptiva que incluimos en este apéndice.
 
 Presentamos también en (TODO insert referencia) un diagrama UML con las relaciones que tienen estas clases entre sí.
 
@@ -69,11 +69,13 @@ Fichero que contiene una abstraccion de un buffer de datos de WebGL.
 
 \subsubsection{Class `Buffer'}
 
-Clase que contiene un atributo del tipo WebGLBuffer y encapsula el comportamiento relativo a la inicialización de un buffer de WebGL. 
+Clase que contiene un atributo del tipo WebGLBuffer, información sobre el mismo y encapsula el comportamiento relativo a la inicialización de un buffer de WebGL. 
 
 \paragraph*{Atributos}
 \begin{itemize}
     \item \verb|buffer: WebGLBuffer|. Buffer de WebGL que contendrá la información requerida.
+    \item \verb|nElements: number|. Número de elementos (como pueden ser vértices, colores, coordenadas de textura...) almacenadas en el buffer.
+    \item \verb|nValuesPE: number|. Numero de valores por elemento. Número de valores consecutivos que representan a cada elemento. Por ejemplo, un vértice 2D serían dos valores, un color RGB serían tres valores, etc.
 \end{itemize}
 
 \paragraph*{Métodos}
@@ -83,10 +85,14 @@ Clase que contiene un atributo del tipo WebGLBuffer y encapsula el comportamient
     \begin{itemize}
         \item \verb|gl: WebGLContext|. Contexto de WebGL.
         \item \verb|array: Array|. Array de JavaScript a partir del cual se crea el buffer.
+        \item \verb|nElements: number|. Número de elementos que se almacenan en el buffer.
+        \item \verb|nValuesPE: number|. Número de valores consecutivos que componen cada elemento.
     \end{itemize}
     \textbf{Devuelve}: Un elemento de la clase Buffer inicializado.
     
-    \item \verb|getBuffer|: Getter del atributo buffer, de la clase WebGLBuffer.
+    \item \verb|getBuffer|: Getter del atributo \verb|buffer|, de la clase WebGLBuffer.
+    \item \verb|getNumberOfElements|: Getter del atributo \verb|nElements|, de tipo number.
+    \item \item \verb|getNumberOfValuesPerElements|: Getter del atributo \verb|nValuesPE|, de tipo number.
 \end{itemize}
 
 \subsection{Fichero `scene.js'}
@@ -100,7 +106,7 @@ Es una clase abstracta que contiene el código común de una escena 2D y una 3D.
 \begin{itemize}
     \item \verb|context: WebGLContext|. Contexto de WebGL.
     \item \verb|shaderProgram: ShaderProgram|. Programa Shader utilizado para graficar la escena en el canvas.
-    \item \verb|bufferInfo: Object|. Objeto tipo diccionario que almacena información sobre los buffer de datos.
+    \item \verb|buffer: Buffer|. Objeto de la clase Buffer que almacenará las posiciones de los vértices que utilizaremos para el vertex shader.
 \end{itemize}
 \paragraph*{Métodos}
 \begin{itemize}
@@ -149,7 +155,7 @@ Es una clase abstracta que contiene el código común de una escena 2D y una 3D.
 
 Con la sección anterior hemos aclarado que utilizaremos el mismo buffer de posiciones, las mismas clases para el programa shader y mucho código común para las escenas. Las diferencias fundamentales entre el código JavaScript dedicado al uso de WebGL para visualizar fractales 2D y 3D se encuentra en los parámetros de la escena y en las maneras de gestionar los eventos. En esta sección describiremos todos estos aspectos en lo relativo a escenas 2D.
 
-Recordamos que durante todo el capítulo \ref{chap:fractales-2D} estuvimos principalmente describiendo el código del fragment shader, pues es este el que se ejecuta en cada píxel, de forma que identificábamos cada píxel del canvas con un punto del plano complejo $\C$ y calculábamos si éste pertenecía al conjunto de Mandelbrot o al conjunto de Julia que decidiéramos. Para ayudarnos a visualizar distintas regiones del plano, distintos conjuntos de Julia fijando diferentes constantes $c\in\C$ o cambiar el exponente de la función $P_{c,m}=z^m+c$ utilizamos variables \verb|uniform| que insistíamos que se asignaba su valor utilizando JavaScript. La clase que gestiona esa asignación de valores y el cambio de forma dinámica de los mismos es \verb|Scene2D|, de ahí el valor de esta clase. En concreto, y aunque ahora explicaremos su significado en relación con los atributos de la clase, las distintas variables \verb|uniform| que hemos utilizado en el shader (fichero `shader-wgl-fragment.js') son:
+Recordamos que durante todo el capítulo \ref{chap:fractales-2D} estuvimos principalmente describiendo el código del fragment shader, pues es este el que se ejecuta en cada píxel, de forma que identificábamos cada píxel del canvas con un punto del plano complejo $\C$ (o varios si se aplica \hyperref[section:SSAA-2D]{\textcolor{blue}{SSAA}}) y calculábamos si éste pertenecía al conjunto de Mandelbrot o al conjunto de Julia que decidiéramos. Para ayudarnos a visualizar distintas regiones del plano, distintos conjuntos de Julia fijando diferentes constantes $c\in\C$ o cambiar el exponente de la función $P_{c,m}=z^m+c$ utilizamos variables \verb|uniform| que insistíamos que se asignaba su valor utilizando JavaScript. La clase que gestiona esa asignación de valores y el cambio de forma dinámica de los mismos es \verb|Scene2D|, de ahí el valor de esta clase. En concreto, y aunque ahora explicaremos su significado en relación con los atributos de la clase, las distintas variables \verb|uniform| que hemos utilizado en el shader (fichero `shader-wgl-fragment.js') son:
 
 \begin{lstlisting}
 uniform vec2 u_zoomCenter;
@@ -158,6 +164,8 @@ uniform int u_maxIterations;
 uniform vec2 u_juliaSetConstant;
 uniform int u_order;
 uniform int u_fractal;
+uniform bool u_antialiasing;
+uniform int u_nSamples;
 \end{lstlisting}
 
 Recordando y teniendo estos detalles en mente, procedemos a documentar la clase \verb|Scene2D|.
@@ -171,17 +179,22 @@ Código respectivo a la clase Scene2D, que representa una escena en la que podem
 Es una clase que hereda de Scene y que contiene el código relativo a la creacion, parámetros, visualizado y gestion de una escena 2D en la cual representaremos fractales 2D en un canvas de WebGL.
 
 \paragraph*{Atributos}
+
 Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 \begin{itemize}
     \item \verb|parameters: Object|. Objeto (diccionario) de JavaScript con varios campos, estos campos guardan una estrecha relación con las variables \verb|uniform| descritas anteriormente, ya que albergan los valores que posteriormente se enviarán a la variable homónima. Estos campos son:
     \begin{itemize}
         \item \verb|zoomCenter: Array|. Punto en WC que se encuentra en el centro del canvas $(x_0,y_0)$.
         \item \verb|zoomSize: number|. Valor que representa cuanto zoom hacemos en la escena $(\lambda)$.
+        \item \verb|LLC: Array|. Esquina inferior izquierda (\textit{Lower Left Corner}) de la región del plano que se está representando en el canvas.
+        \item \verb|URC: Array|. Esquina superior derecha (\textit{Upper Right Corner}) de la región del plano que se está representando en el canvas.
         \item \verb|maxIterations: number|. Número máximo de iteraciones que se fijan en los algoritmos para graficar conjuntos de Julia y Mandelbrot.
         \item \verb|delta: number|. Incremento que se suma o resta a la hora de desplazarse por la escena.
         \item \verb|juliaSetConstant: Array|. Valor complejo $c$ en la ecuación $P_{c,m}(z)=z^m + c$.
         \item \verb|order: number|. Exponente $m$ en la ecuación $P_{c,m}(z) = z^m + c$.
         \item \verb|fractal: number|. Si este parámetro vale 0 se visualizará el conjunto de Mandelbrot. Si valiera 1 se graficaría el conjunto de Julia asociado al campo \verb|juliaSetConstant|.
+        \item \verb|antialiasing: boolean|. Si es true se aplicará SSAA a la escena. En caso contrario se identificará cada píxel con un único punto situado en el centro del mismo.
+        \item \verb|nSamples: number|. Valor entero tal que en caso de que \verb|antialiasing| sea true se utilizarán $\mathtt{nSamples}^2$ puntos por píxel para calcular el color final. 
     \end{itemize}
     \item \verb|programInfo: Object|. Objeto que almacena información genérica relativa al programa:
     \begin{itemize}
@@ -191,10 +204,14 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \end{itemize}
     \item \verb|initialParameters: Object|. Objeto tipo diccionario que es una copia exacta de \verb|parameters|, salvo que es inmutable, de forma que se permite restaurar los parámetros por defecto en caso de que se desee.
 \end{itemize}
+
 \paragraph*{Métodos}
+
 \begin{itemize}
     \item \verb|constructor|: A partir del código fuente del vertex y el fragment shader, llama al constructor de la clase 'Scene', el cual crea el programa shader y el buffer de posiciones de los vértices que maneja el vertex shader. Además inicializa el atributo \verb|parameters|, con los parámetros iniciales que maneja la escena. Se crea y se le dan valores al atributo \verb|programInfo| y se almacenan en el atributo \verb|initialParameters| los parámetros iniciales de la escena.
-    \textbf{Parámetros}
+
+    \textbf{Argumentos}
+
     \begin{itemize}
         \item \verb|vsSource: string|. Código fuente del vertex shader.
         \item \verb|fsSource: string|. Código fuente del fragment shader.
@@ -213,16 +230,22 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|moveRight|: Se aumenta la primera coordenada de \verb|zoomCenter| para desplazar la escena a la derecha.
     \item \verb|moveUp|: Se aumenta la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia arriba.
     \item \verb|moveDown|: Se reduce la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia abajo.
+    \item \verb|changeAntialiasing|: Se cambia el valor del parámetro booleano \verb|antialiasing|.
+    \item \verb|calculateZoom|: Recalcula los parámetros \verb|zoomCenter| y \verb|zoomSize| ante posibles cambios en LLC y URC.
 \end{itemize}
 
-\pagebreak
 \textbf{Getters}
 \begin{itemize}
+    \item \verb|getAntialiasing|: Getter del parámetro \verb|antialiasing|, de tipo booleano.
+    \item \verb|getDelta|: Getter del parametro \verb|delta|, de tipo number.
     \item \verb|getFractal|: Getter del parámetro \verb|fractal|, de tipo number.
     \item \verb|getJuliaConstantX|: Getter de la primera componente del parámetro \verb|juliaSetConstant|, de tipo number.
     \item \verb|getJuliaConstantY|: Getter de la segunda componente del parámetro \verb|juliaSetConstant|, de tipo number.
+    \item \verb|getLLC|: Getter del parámetro \verb|LLC|, de tipo Array.
     \item \verb|getMaxIterations|: Getter del parámetro \verb|maxIterations|, de tipo number.
+    \item \verb|getNSamples|: Getter del parámetro \verb|nSamples|, de tipo number.
     \item \verb|getOrder|: Getter del parámetro \verb|order|, de tipo number.
+    \item \verb|getURC|: Getter del parámetro \verb|URC|, de tipo Array.
 \end{itemize}
 \textbf{Setters}
 \begin{itemize}
@@ -230,25 +253,67 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|setInitialParameters|: Método que restablece los parámetros del objeto \verb|parameters| a los valores iniciales.
     \item \verb|setJuliaConstantX|: Setter de la primera componente del parámetro \verb|juliaSetConstant|.
     \item \verb|setJuliaConstantY|: Setter de la segunda componente del parámetro \verb|juliaSetConstant|.
+    \item \verb|setLLCX|: Setter de la primera componente del parámetro \verb|LLC|.
+    
+    \textbf{Argumentos}:
+
+    \begin{itemize}
+        \item \verb|x: number|. Nuevo valor que se le asignará a \verb|LLC[0]|.
+        \item \verb|URCFixed: boolean|. Simboliza si el usuario ha decidido que la esquina superior derecha quede fija, en cuyo caso también habría que modificar el valor de \verb|LLC[1]| para mantener la proporcion 16:9.
+    \end{itemize}
+
+    \item \verb|setLLCY|: Setter de la segunda componente del parámetro \verb|LLC|.
+    
+    \textbf{Argumentos}:
+    
+    \begin{itemize}
+        \item \verb|y: number|. Nuevo valor que se le asignará a \verb|LLC[1]|.
+        \item \verb|URCFixed: boolean|. Simboliza si el usuario ha decidido que la esquina superior derecha quede fija, en cuyo caso también habría que modificar el valor de \verb|LLC[0]| para mantener la proporcion 16:9.
+    \end{itemize}
     \item \verb|setMaxIterations|: Setter del parámetro \verb|maxIterations|.
+    \item \verb|setNSamples|: Setter del parámetro \verb|nSamples|.
     \item \verb|setOrder|: Setter del parámetro \verb|order|.
+    \item \verb|setURCX|: Setter de la primera componente del parámetro \verb|URC|.
+    
+    \textbf{Argumentos}:
+    
+    \begin{itemize}
+        \item \verb|x: number|. Nuevo valor que se le asignará a \verb|URC[0]|.
+        \item \verb|LLCFixed: boolean|. Simboliza si el usuario ha decidido que la esquina inferior izquierda quede fija, en cuyo caso también habría que modificar el valor de \verb|URC[1]| para mantener la proporcion 16:9.
+    \end{itemize}
+    \item \verb|setURCY|: Setter de la segunda componente del parámetro \verb|URC|.
+    
+    \textbf{Argumentos}:
+    
+    \begin{itemize}
+        \item \verb|y: number|. Nuevo valor que se le asignará a \verb|URC[1]|.
+        \item \verb|LLCFixed: boolean|. Simboliza si el usuario ha decidido que la esquina inferior izquierda quede fija, en cuyo caso también habría que modificar el valor de \verb|URC[0]| para mantener la proporcion 16:9.
+    \end{itemize}
+
 \end{itemize}
 
 \subsection{Fichero `fractals-2D.js'}
 
-Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|2D-fractals.html|, entendiendo estos últimos como los pequeños elementos del documento en los cuales escribimos el valor actual de un parámetro (véase el documento \verb|2D-fractals| y cualquier etiqueta \verb|input| para una mejor comprensión). En este archivo se declara y utiliza continuamente una variable global de la clase \verb|Scene2D|, ya que es ésta la que lleva toda la interacción entre WebGL y los parámetros modificables. Este fichero, por su parte, sirve como intermediario entre el `front-end' HTML y la escena.
+Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|2D-fractals.html|, entendiendo estos últimos como los pequeños elementos del documento en los cuales escribimos el valor actual de un parámetro (véase el documento \verb|2D-fractals.html| y cualquier etiqueta \verb|input| para una mejor comprensión). En este archivo se declara y utiliza continuamente una variable global de la clase \verb|Scene2D|, ya que es ésta la que lleva toda la interacción entre WebGL y los parámetros modificables. Este fichero, por su parte, sirve como intermediario entre el `front-end' HTML y la escena.
 
 No existen como tal clases, tan sólo métodos que se utilizan como gestores de eventos y una función \verb|main|, la cual se ejecuta al cargar la página y contiene la inicialización de los indicadores HTML, la asignación de los 'event listeners' y la primera visualización.
 
-Por su parte, las funciones gestoras de eventos modifican el HTML si es necesario, llaman al setter necesario para cambiar el parámetro con el nuevo valor y llaman a \verb|drawScene| para redibujar la escena con los nuevos parámetros. Incluimos debajo un ejemplo en el caso del deslizador que permite cambiar el parámetro \verb|maxIterations|:
+Por su parte, las funciones gestoras de eventos verifican y modifican los valores de los elementos y cierto HTML si es necesario, llaman al setter indicado para cambiar el parámetro con el nuevo valor y llaman a \verb|drawScene| para redibujar la escena con los nuevos parámetros. Incluimos debajo un ejemplo en el caso del deslizador que permite cambiar el parámetro \verb|maxIterations|:
 
 \begin{lstlisting}
 // CAMBIAR NUMERO MAXIMO DE ITERACIONES
 function changeMaxIterations(event){
-    document.querySelector("#valorNIteraciones").innerHTML 
-        = event.target.value;
-    theScene.setMaxIterations(event.target.value);
-    theScene.drawScene();
+  let new_value = verifyMaxIterations(event.target.value);
+  $("#valorNIteraciones").val(new_value);
+  $("#nIteraciones").val(new_value);
+  theScene.setMaxIterations(new_value);
+  theScene.drawScene();
+}
+
+// Asegura que number este entre 10 y 1000, truncando si es
+// necesario.
+function verifyMaxIterations(number) {
+  return parseInt(Math.min(Math.max(10, number), 1000));
 }
 \end{lstlisting}
 
@@ -402,7 +467,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
         \item \verb|i: number|. Si vale 0, se modifica la terna RGB de la luz 0, en otro caso se modifica la terna de la luz 1.
     \end{itemize}
     \item \verb|setNSamples|: Setter del parámetro \verb|nSamples|.
-    
+    \item \verb|setPosition|: Setter del parámetro \verb|lookfrom|, la posición del observador.
     \item \verb|setSh|: Setter del parámetro \verb|sh| (exponente de brillo).
 \end{itemize}
 
@@ -410,7 +475,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 
 Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|3D-fractals.html|. La metodología utilizada en este fichero es la misma que la empleada en el caso 2-dimensional, solo que al haber más parámetros modificables, también hay más elementos HTML, y por tanto más eventos que gestionar y más indicadores que editar. Esta vez utilizamos una variable global de la clase \verb|Scene3D| para gestionar toda la interacción entre WebGL y los parámetros modificables.
 
-Tampoco existen clases, únicamente funciones manejadoras de eventos y la función \verb|main| que se ejecuta al cargar la página y contiene la inicialización de los indicadores HTML, la asignación de los 'event listeners' y la primera visualización.
+Tampoco existen clases, únicamente funciones manejadoras de eventos y la función \verb|main| que se ejecuta al cargar la página y contiene la inicialización de los elementos e indicadores HTML, la asignación de los 'event listeners' y la primera visualización.
 
 Para no alargar innecesariamente este apéndice y para que el propio lector observe la metodología por sí mismo, lo invitamos a visitar el fichero completo en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/js/fractals-3D.js}.
 
@@ -420,7 +485,7 @@ En la imagen \ref{fig:UML} podemos ver un diagrama de clases del código recién
 
 \begin{figure} [ht]
 \centering
-\includegraphics[scale = 0.45]{img/UML.png}
+\includegraphics[width = 140mm]{img/UML.png}
 \caption{Diagrama de clases JavaScript utilizadas}
     \label{fig:UML}
 \end{figure}

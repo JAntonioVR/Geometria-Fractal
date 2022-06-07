@@ -10,7 +10,7 @@ import { sphericToCartesian, cartesianToSpheric } from "./utils.js";
 import { Scene } from './scene.js';
 
 //
-// ─── SCENE2D ────────────────────────────────────────────────────────────────────
+// ─── SCENE3D ────────────────────────────────────────────────────────────────────
 // Clase Scene3D, una clase que hereda de Scene y que contiene el codigo relativo
 // a la creacion, parametros, visualizado y gestion de una escena 3D en la cual
 // representaremos fractales 3D en un canvas de WebGL.
@@ -58,7 +58,6 @@ class Scene3D extends Scene{
   // Un objeto de la clase Scene3D con todos sus atributos inicializados.
   constructor(vsSource, fsSource) {
     super(vsSource, fsSource);
-    var that = this;
     var gl = this.context;
     var WGLShader = this.shaderProgram.getShaderProgram();
 
@@ -147,13 +146,13 @@ class Scene3D extends Scene{
         
     var that = this;
     {
-      const numComponents = that.bufferInfo.numFloatsPV;  // pull out 2 values per iteration
+      const numComponents = that.buffer.getNumberOfValuesPerElement();  // pull out 2 values per iteration
       const type = gl.FLOAT;    // the data in the buffer is 32bit floats
       const normalize = false;  // don't normalize
       const stride = 0;         // how many bytes to get from one set of values to the next
                                 // 0 = use type and numComponents above
       const offset = 0;         // how many bytes inside the buffer to start from
-      gl.bindBuffer(gl.ARRAY_BUFFER, that.bufferInfo.positionBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, that.buffer.getBuffer());
       gl.vertexAttribPointer(
           that.programInfo.attribLocations.vertexPosition,
           numComponents,
@@ -220,7 +219,7 @@ class Scene3D extends Scene{
 
     {
       const offset = 0;
-      const vertexCount = that.bufferInfo.numVertexes;
+      const vertexCount = that.buffer.getNumberOfElements();
       gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
     }
 
@@ -233,6 +232,7 @@ class Scene3D extends Scene{
   // acercar la escena
   zoomIn(){
     this.parameters.lookfromSpheric[0] *= 0.9;
+    this.parameters.delta *= 0.9;
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
@@ -241,6 +241,7 @@ class Scene3D extends Scene{
   // alejar la escena
   zoomOut(){
     this.parameters.lookfromSpheric[0] *= 1.1;
+    this.parameters.delta *= 1.1;
     this.parameters.lookfrom = sphericToCartesian(this.parameters.lookfromSpheric);
   }
 
@@ -419,15 +420,15 @@ class Scene3D extends Scene{
 
   // ─── SETEPSILON ─────────────────────────────────────────────────────────────────
   // Setter del parametro 'epsilon'.
-  setEpsilon(new_epsilon) {
-    this.parameters.epsilon = new_epsilon;
+  setEpsilon(newEpsilon) {
+    this.parameters.epsilon = newEpsilon;
   }
 
   //
   // ─── SETFRACTAL ─────────────────────────────────────────────────────────────────
   // Setter del parametro 'fractal'. 
-  setFractal(index) {
-    this.parameters.fractal = index;
+  setFractal(newFractal) {
+    this.parameters.fractal = newFractal;
   }
 
   // ─── SETINITIALPARAMETERS ───────────────────────────────────────────────────────

@@ -222,8 +222,8 @@ function change_nSamples(event) {
 //  
 function changeMaxIterations(event){
   let new_value = verifyMaxIterations(event.target.value);
-  document.querySelector("#valorNIteraciones").value = new_value;
-  document.querySelector("#nIteraciones").value = new_value;
+  $("#valorNIteraciones").val(new_value);
+  $("#nIteraciones").val(new_value);
   theScene.setMaxIterations(new_value);
   theScene.drawScene();
 }

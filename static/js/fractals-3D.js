@@ -59,7 +59,7 @@ function main(){
   const glCanvas = document.querySelector("#glCanvas");
   glCanvas.addEventListener('mousemove', (event) => moveCamera(event), true);
   glCanvas.addEventListener('mousedown', (event) => mouseDown(event), true);
-  glCanvas.addEventListener('mouseup', mouseUp, true);
+  glCanvas.addEventListener('mouseup', (event) => mouseUp(event), true);
 
   // Boton de reseteo de parametros
   const botonReset = document.querySelector("#botonReset");
@@ -226,8 +226,6 @@ function moveCamera(event){
       (mousePosition[1] - mouseDownPosition[1])/height
     ]
 
-    document.querySelector("#marcador-raton").innerHTML = "(" + disp[0] +", " + disp[1] +")";
-
     theScene.moveX(disp[0]);
     theScene.moveY(disp[1]);
     if(mode == Mode.INTERACTIVE) 
@@ -237,13 +235,16 @@ function moveCamera(event){
 
 // ─── MOUSE DOWN ─────────────────────────────────────────────────────────────────
 function mouseDown(event){
-  mouseState = MouseState.MOUSE_DOWN;
-  mouseDownPosition = [event.clientX, event.clientY];
+  if(event.button == 0) {   // Only left button
+    mouseState = MouseState.MOUSE_DOWN;
+    mouseDownPosition = [event.clientX, event.clientY];
+  }
 }
 
 // ─── MOUSE UP ───────────────────────────────────────────────────────────────────
-function mouseUp() {
-  mouseState = MouseState.MOUSE_UP;
+function mouseUp(event) {
+  if(event.button == 0)   // Only left button
+    mouseState = MouseState.MOUSE_UP;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────

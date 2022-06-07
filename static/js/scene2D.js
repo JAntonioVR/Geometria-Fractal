@@ -46,7 +46,6 @@ class Scene2D extends Scene {
   constructor(vsSource, fsSource) {
 
     super(vsSource, fsSource);
-    var that = this;
     var gl = this.context;
 
     var WGLShader = this.shaderProgram.getShaderProgram();
@@ -125,13 +124,13 @@ class Scene2D extends Scene {
         nSamples = this.parameters.nSamples;
     var that = this;
     {
-      const numComponents = that.bufferInfo.numFloatsPV;  // pull out 2 values per iteration
+      const numComponents = that.buffer.getNumberOfValuesPerElement();  // pull out 2 values per iteration
       const type = gl.FLOAT;    // the data in the buffer is 32bit floats
       const normalize = false;  // don't normalize
       const stride = 0;         // how many bytes to get from one set of values to the next
                                 // 0 = use type and numComponents above
       const offset = 0;         // how many bytes inside the buffer to start from
-      gl.bindBuffer(gl.ARRAY_BUFFER, that.bufferInfo.positionBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, that.buffer.getBuffer());
       gl.vertexAttribPointer(
           that.programInfo.attribLocations.vertexPosition,
           numComponents,
@@ -171,7 +170,7 @@ class Scene2D extends Scene {
 
     {
       const offset = 0;
-      const vertexCount = that.bufferInfo.numVertexes;
+      const vertexCount = that.buffer.getNumberOfElements();
       gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
     }
 
@@ -256,6 +255,14 @@ class Scene2D extends Scene {
     return this.parameters.antialiasing
   }
 
+  //
+  // ─── GETDELTA ───────────────────────────────────────────────────────────────────
+  // Getter del parametro 'delta', de tipo number
+  getDelta() {
+    return this.parameters.delta;
+  }
+
+
   // ─── GETFRACTAL ─────────────────────────────────────────────────────────────────
   // Getter del parametro fractal, de tipo number.
   getFractal() {
@@ -275,6 +282,14 @@ class Scene2D extends Scene {
     return this.parameters.juliaSetConstant[1];
   }
 
+
+  //
+  // ─── GETLLC ─────────────────────────────────────────────────────────────────────
+  // Getter del parametro LLC, de tipo Array
+  getLLC() {
+    return this.parameters.LLC;
+  }
+
   // ─── GETMAXITERATIONS ───────────────────────────────────────────────────────────
   // Getter del parametro maxIterations, de tipo number.
   getMaxIterations(){
@@ -292,18 +307,14 @@ class Scene2D extends Scene {
   getOrder() {
     return this.parameters.order;
   }
-  
-  getLLC() {
-    return this.parameters.LLC;
-  }
 
+  //
+  // ─── GETURC ─────────────────────────────────────────────────────────────────────
+  // Getter del parametro URC, de tipo Array
   getURC() {
     return this.parameters.URC;
   }
-
-  getDelta() {
-    return this.parameters.delta;
-  }
+  
 
   //
   // ─── SETTERS ────────────────────────────────────────────────────────────────────
@@ -337,6 +348,46 @@ class Scene2D extends Scene {
     this.parameters.juliaSetConstant[1] = newY;
   }
 
+  //
+  // ─── SETLLCX ────────────────────────────────────────────────────────────────────
+  // Setter de la primera componente del parametro LLC
+  // Parametros: ───────────────────────────
+  // - x: number. Nuevo valor que se le asignará a LLC[0].
+  // - URCFixed: boolean. Simboliza si el usuario ha decidido que la esquina superior 
+  //   derecha quede fija, en cuyo caso también habría que modificar el valor de 
+  //   LLC[1] para mantener la proporcion 16:9.
+  setLLCX(x, URCFixed) {
+    let desp = this.parameters.URC[0] - this.parameters.LLC[0];
+    this.parameters.LLC[0] = x;
+    if(URCFixed) {
+      desp = this.parameters.URC[0] - this.parameters.LLC[0];
+      this.parameters.LLC[1] = this.parameters.URC[1] - desp/this.ratio;
+    }
+    else
+      this.parameters.URC[0] = x + desp;
+    this.calculateZoom();
+  }
+
+  //
+  // ─── SETLLCY ────────────────────────────────────────────────────────────────────
+  // Setter de la segunda componente del parametro LLC
+  // Parametros: ───────────────────────────
+  // - y: number. Nuevo valor que se le asignará a LLC[1].
+  // - URCFixed: boolean. Simboliza si el usuario ha decidido que la esquina superior 
+  //   derecha quede fija, en cuyo caso también habría que modificar el valor de 
+  //   LLC[0] para mantener la proporcion 16:9.
+  setLLCY(y, URCFixed) {
+    let desp = this.parameters.URC[1] - this.parameters.LLC[1];
+    this.parameters.LLC[1] = y;
+    if(URCFixed) {
+      desp = this.parameters.URC[1] - this.parameters.LLC[1];
+      this.parameters.LLC[0] = this.parameters.URC[0]- desp*this.ratio;
+    }
+    else
+      this.parameters.URC[1] = y + desp;  
+    this.calculateZoom();
+  }
+
   // ─── SETMAXITERATIONS ───────────────────────────────────────────────────────────
   // Setter del parametro maxIterations
   setMaxIterations(newValue){
@@ -355,30 +406,14 @@ class Scene2D extends Scene {
     this.parameters.order = newOrder;
   }
 
-  setLLCX(x, URCFixed) {
-    let desp = this.parameters.URC[0] - this.parameters.LLC[0];
-    this.parameters.LLC[0] = x;
-    if(URCFixed) {
-      desp = this.parameters.URC[0] - this.parameters.LLC[0];
-      this.parameters.LLC[1] = this.parameters.URC[1] - desp/this.ratio;
-    }
-    else
-      this.parameters.URC[0] = x + desp;
-    this.calculateZoomCenter();
-  }
-
-  setLLCY(y, URCFixed) {
-    let desp = this.parameters.URC[1] - this.parameters.LLC[1];
-    this.parameters.LLC[1] = y;
-    if(URCFixed) {
-      desp = this.parameters.URC[1] - this.parameters.LLC[1];
-      this.parameters.LLC[0] = this.parameters.URC[0]- desp*this.ratio;
-    }
-    else
-      this.parameters.URC[1] = y + desp;  
-    this.calculateZoomCenter();
-  }
-
+  //
+  // ─── SETURCX ────────────────────────────────────────────────────────────────────
+  // Setter de la primera componente del parametro URC
+  // Parametros: ───────────────────────────
+  // - x: number. Nuevo valor que se le asignará a URC[0].
+  // - LLCFixed: boolean. Simboliza si el usuario ha decidido que la esquina inferior
+  //   izquierda quede fija, en cuyo caso también habría que modificar el valor de 
+  //   URC[1] para mantener la proporcion 16:9.
   setURCX(x, LLCFixed) {
     let desp = this.parameters.URC[0] - this.parameters.LLC[0];
     this.parameters.URC[0] = x;
@@ -389,9 +424,17 @@ class Scene2D extends Scene {
     else {
       this.parameters.LLC[0] = x - desp;
     }
-    this.calculateZoomCenter();
+    this.calculateZoom();
   }
 
+  //
+  // ─── SETURCY ────────────────────────────────────────────────────────────────────
+  // Setter de la segunda componente del parametro URC
+  // Parametros: ───────────────────────────
+  // - y: number. Nuevo valor que se le asignará a URC[1].
+  // - LLCFixed: boolean. Simboliza si el usuario ha decidido que la esquina inferior
+  //   izquierda quede fija, en cuyo caso también habría que modificar el valor de 
+  //   URC[0] para mantener la proporcion 16:9.
   setURCY(y, LLCFixed) {
     let desp = this.parameters.URC[1] - this.parameters.LLC[1];
     this.parameters.URC[1] = y; 
@@ -402,11 +445,15 @@ class Scene2D extends Scene {
     else {
       this.parameters.LLC[1] = y - desp;
     }
-    this.calculateZoomCenter();
+    this.calculateZoom();
   }
 
 
-  calculateZoomCenter() {
+  //
+  // ─── CALCULATEZOOM ──────────────────────────────────────────────────────────────
+  // Recalcula los parametros zoomCenter y zoomSize ante posibles cambios en los
+  // parametros LLC y URC.
+  calculateZoom() {
     this.parameters.zoomCenter[0] = (this.parameters.LLC[0] + this.parameters.URC[0])/2.0;
     this.parameters.zoomCenter[1] = (this.parameters.LLC[1] + this.parameters.URC[1])/2.0;
     this.parameters.zoomSize = (this.parameters.URC[1]-this.parameters.LLC[1])/4.0;
