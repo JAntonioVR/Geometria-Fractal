@@ -506,6 +506,12 @@ function onKeyDown(event) {
 //
 function resetParameters() {
   theScene.setInitialParameters();
+  mode = Mode.ONDEMAND;
+  $("#interactivo").prop("checked", false);
+  $("#a-demanda").prop("checked", true);
+  //console.log($("#interactivo").val())
+  //console.log($("#a-demanda").val())
+
   document.querySelector("#ka").value = rgbToHex(theScene.getKa());
   console.log(theScene.getKd());
   document.querySelector("#kd").value = rgbToHex(theScene.getKd());
@@ -537,6 +543,9 @@ function resetParameters() {
   document.querySelector("#current_epsilon").value = -Math.log10(theScene.getEpsilon());
   document.querySelector("#valor_epsilon").innerHTML = theScene.getEpsilon();
 
+  $("#posX").val(theScene.getPosition()[0]);
+  $("#posY").val(theScene.getPosition()[1]);
+  $("#posZ").val(theScene.getPosition()[2]);
 
   redraw();
 }
