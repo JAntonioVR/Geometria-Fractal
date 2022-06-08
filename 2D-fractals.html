@@ -6,6 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="module"  src="static/js/fractals-2D.js"></script>
         <script type="text/javascript" src="static/js/jquery-3.6.0.min.js"></script>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         
         
         <!-- Bootstrap -->
@@ -27,19 +29,17 @@
         <!-- TODO MORE -->
     </head>
     <body>
-        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-              <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-              <span class="fs-4"><h1>Visualización de Fractales 2D</h1></span>
-            </a>
-      
-            <ul class="nav nav-pills">
-              <li class="nav-item"><a href="./index.html"><button class="btn-change">Home</button></a></li>
-              <li class="nav-item"><a href="./2D-fractals.html"><button class="btn-change">Fractales 2D</button></a></li>
-              <li class="nav-item"><a href="./3D-fractals.html"><button class="btn-change">Fractales 3D</button></a></li>
-
-            </ul>
-        </header>
+      <header class="row d-flex flex-wrap justify-content-between py-3 mb-4 border-bottom">
+        <a href="index.html" class="d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none col-xl-8">
+          <img src="static/img/logo.png" id="logo">
+          <span class="fs-4"><h1>Visualización de Fractales 2D</h1></span>
+        </a>
+        <ul class="nav nav-pills col-xl-4 justify-content-center">
+            <li class="nav-item"><a href="./index.html"><button class="btn-change">Home</button></a></li>
+            <li class="nav-item"><a href="./2D-fractals.html"><button class="btn-change">Fractales 2D</button></a></li>
+            <li class="nav-item"><a href="./3D-fractals.html"><button class="btn-change">Fractales 3D</button></a></li>    
+        </ul>
+      </header>
 
         <main class="container">
             <section class="row">
@@ -94,10 +94,10 @@
                                     <br>
                                 </div>
                                 <br><br>
-                                <b>Exponente n de la función</b> \(f(z) = z^n + c\)
+                                <b>Exponente \(m\) de la función</b> \(P_{c,m}(z) = z^m + c\)
                                 <div class="container" id="deslizadorExponente">
                                     <div class="row align-items-center justify-content-between">
-                                        <b class="col-2">n:</b>
+                                        <b class="col-2">m:</b>
                                         <input class="col-5" id="exponente" type="range" min="1" max="10" step="1">
                                         <input type="number" class="col-3" id="valorExponente" min="1" max="10" step="1"></input>
                                     </div>
@@ -192,21 +192,68 @@
                     <button type="button" class="btn-change" id="botonReset">Reset</button>
                 </aside>
             </section>
+            <section class="container">
+              <h2 id="ayuda2D">Ayuda</h2>
+              <p>En los siguientes párrafos se explica de forma intuitiva el significado y el efecto provocado por cada uno de los parámetros modificables del panel de la parte derecha. Previamente, introducimos unas pequeñas nociones sobre cómo se grafican los conjuntos de Julia y Mandelbrot.
+              </p>
+              <p>
+                Partimos de la familia de funciones complejas \(P_{c,m}(z)=z^m + c\), siendo \(c\in\mathbb C\) un número complejo. A su vez, identificamos la pantalla con una región del plano complejo, asociando cada píxel de la pantalla a un número complejo. Para visualizar un conjunto de Julia, fijamos un número complejo \(c\in\mathbb C\), de forma que hay tantos conjuntos de Julia como números complejos, aunque los más interesantes son aquellos asociados a constantes \(c\) con módulo pequeño. Denotamos \(\mathcal J_{c,m}\) al conjunto de Julia asociado al complejo \(c\). 
+              </p><p>
+                Así, para cada punto \(z_0\in\mathbb C\) (es decir, para cada píxel) calculamos la sucesión de iteradas \(z_0, P_{c,m}(z_0), P_{c,m}(P_{c,m}(z_0)),\dots\). Es decir, la sucesión \(z_0, z_0^m + c, (z_0^m + c)^m +c, \dots\). Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(z_0\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color.
+              </p>
+              <p>
+                De forma similar, para graficar el conjunto de Mandelbrot, \(\mathcal M_m\), tomamos \(z_0=0\) como primer término y para cada complejo \(c\in\mathbb C\) (es decir, para cada píxel) se calculan las iteradas \(0, P_{c,m}(0), P_{c,m}(P_{c,m}(0)),\dots\), es decir, \(0, c, c^m +c,\dots\). Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(c\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color. 
+              </p>
+              <p>Tras esta introducción, presentamos el significado de cada parámetro:</p>
+              <h3 id="ayuda-fractal">Fractal que se visualiza</h3>
+              <p>Estos parámetros definen qué conjunto de Julia o Mandelbrot se visualiza. Podemos elegir entre qué conjuntos ver, si Julia o Mandelbrot, y en el caso de elegir que deseamos ver conjuntos de Julia, elegir qué constante \(c=x+i\cdot y\) fijar, pudiendo elegir la coordenada \(x\) y la coordenada \(y\). Ambos valores se permite que estén en el intervalo \([-2,2]\) por que fuera de esta región los conjuntos de Julia carecen de interés. También se puede elegir qué exponente \(m\) se fija en la función \(P_{c_m}(z)=z^{\mathbf m}+c\)</p>
+              <p>Se recomienda variar los exponentes y visualizar el conjunto de Mandelbrot estándar \(\mathcal M\) correspondiente a \(m=2\) y sus generalizaciones a órdenes superiores \(\mathcal M_m\), o seleccionar conjuntos de Julia y variar los deslizadores de \(x\) e \(y\) e ir viendo cómo cambian los conjuntos de Julia al variar la constante \(c\).</p>
+              <h3>Máximo número de iteraciones \(M\)</h3>
+              <p>Valor de \(M\), es decir, el número máximo de iteraciones que se dan antes de decidir si las sucesiones convergen o divergen. A mayor número, mayor coste computacional pero mayor precisión en la representación.</p>
+              <p>
+              Se recomienda ampliar alguna región del plano (con la tecla '+' y las flechas o con los parámetros de la <a href="#ayuda-region-plano" class="text-primary">región del plano visualizada</a>) y aumentar este parámetro para observar cómo mejora la resolución.
+              </p>
+              <p><strong>CUIDADO:</strong> Un número alto de iteraciones por píxel aumenta considerablemente el coste computacional, por lo que no recomendamos abusar de la interactividad si no se dispone de una gráfica suficientemente buena.</p>
+              <h3>Supersampling Antialiasing</h3>
+              <p>Anteriormente hemos mencionado que se identifica cada píxel con un único punto del plano, pero esto suele provocar calidades bajas y bordes bruscos. Con este parámetro se permite identificar cada píxel con \(n^2\) puntos, calcular el color asociado a cada punto y finalmente asignar al píxel el color promedio. De esta forma se visualizan los bordes más suavizados y se obtienen imágenes de mayor calidad. Esta técnica se conoce como Supersampling Antialiasing (SSAA)</p>
+              <p>Recomendamos ampliar una región del plano, aumentar el número de iteraciones \(M\) y posteriormente activar el antialiasing y aumentar el número de puntos por píxel. En esta situación, puede activar y desactivar el parámetro y observar cómo cambia la imagen.</p>
+              <p><strong>CUIDADO:</strong> Esta operación es considerablemente más costosa que el visualizado estándar, por lo que recomendamos no abusar de la interactividad con un número alto de puntos por píxel si no se dispone de una gráfica suficientemente buena.</p>
+              <h3 id="ayuda-region-plano">Región del plano visualizada</h3>
+              <p>Definimos dos números complejos a los cuales llamaremos \(\mathrm{LLC}\) (Lower Left Corner) y \(\mathrm{URC}\) (Upper Right Corner) como los números complejos que se identifican con los puntos situados en la esquina inferior izquierda y la esquina superior derecha de la región del plano que se visualiza en la pantalla. Estos valores son modificables, de forma que nos permiten movernos libremente por el plano complejo y fijar una de las dos y cambiar la otra, pudiendo así mostrar la región del plano que deseemos (siempre que se mantengan la proporción 16:9). Estos parámetros representan una alternativa al uso de las flechas y las teclas '+/-' para movernos por la región del plano</p>
+              <h3>Botón 'Reset'</h3>
+              <p>
+              Al pulsarlo se restablecen los parámetros a los iniciales, es decir, los que había al cargar la página por primera vez.  
+              </p>
+              <div class="row align-items-center">
+                <img class="col-3" style="width: 70px;" src="static/img/warning.png">
+                <h2 class="col-9">ADVERTENCIA</h2>
+              </div>
+              
+              <p>
+              Como se ha mencionado anteriormente, es posible que su dispositivo no soporte interactividad de forma fluida con un número alto de iteraciones y aplicando SSAA con un número elevado de muestras por píxel. Recomendamos por ello que si se utilizan valores altos, se desplace por el plano con pequeños incrementos, evitando mantener las teclas pulsadas.
+              </p>
+              <p>
+              En caso de que la web se sobrecargue, es posible que se ponga en blanco la pantalla. En este caso debe ser suficiente una simple recarga de la página para solucionarlo, aunque en ciertos casos puede ser necesario reiniciar el navegador.
+              </p>
+            </section>
             
         </main>
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-            <div class="col-md-4 d-flex align-items-center">
-              <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
-                <svg class="bi" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
-              </a>
-              <span class="mb-3 mb-md-0 text-muted">&copy 2022, Juan Antonio Villegas Recio</span>
-            </div>
-        
-            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#twitter"></use></svg></a></li>
-              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"></use></svg></a></li>
-              <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"></use></svg></a></li>
-            </ul>
+          <div class="col-md-4 d-flex align-items-center">
+            <a href="index.html" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+              <img src="static/img/logo.png" id="logo">
+            </a>
+          </div>
+          <div class="col-md-4 d-flex align-items-center justify-content-center">
+            <span class="mb-3 mb-md-0 text-muted">&copy 2022, Juan Antonio Villegas Recio</span>
+          </div> 
+          <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+            <li class="ms-3"><a href="https://github.com/JAntonioVR" class="fa fa-github"></a></li>
+            <li class="ms-3"><a href="https://www.linkedin.com/in/juan-antonio-villegas-recio/" class="fa fa-linkedin"></a></li>
+            <li class="ms-3"><a href="https://www.instagram.com/juanantonio_79/" class="fa fa-instagram"></a></li>
+            <li class="ms-3"><a href="https://www.facebook.com/profile.php?id=100010525867626" class="fa fa-facebook"></a></li>
+            <li class="ms-3"><a href="mailto:juanantoniovr98@gmail.com" class="fa fa-google"></a></li>
+          </ul>
         </footer>
     </body>
 </html>
