@@ -42,6 +42,8 @@ var theScene = new Scene3D(vsSource, fsSource);
 // de los indicadores, los 'event listeners' y la primera visualización.
 function main(){
 
+  resizeCanvas();
+
   // Pulsar una tecla
   //document.addEventListener("keydown", (event) => onKeyDown(event), true );
 
@@ -576,6 +578,6 @@ function resizeCanvas () {
   }
 }
 
-
+window.onresize = resizeCanvas;
 
 // ────────────────────────────────────────────────────────────────────────────────
