@@ -65,9 +65,9 @@ Por último, en [este enlace](https://nodejs.org/en/knowledge/HTTP/servers/how-t
 Sin nada más que añadir, deseamos que el lector disfrute de todo lo que se le ofrece, comenzando por las siguientes dos imágenes.
 
 <div style="display: flex;">
-<img src="./static/img/Julia-readme.png" style="width: 50%">
+<img src="./static/img/Julia-readme.png" style="width: 45%">
 
-<img src="./static/img/julia2-readme.png" style="width: 50%">
+<img src="./static/img/julia2-readme.png" style="width: 45%">
 </div>
 
 
