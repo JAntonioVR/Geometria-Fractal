@@ -42,12 +42,12 @@ Por su parte, en JavaScript podemos acceder mediante el DOM al elemento \verb|<c
 
 \begin{lstlisting}
 const canvas = document.querySelector("#glCanvas");
-// Initialize the GL context
+// Inicializamos el contexto de WebGL
 const gl = canvas.getContext("webgl2");
 
-// Only continue if WebGL is available and working
+// Solo continuamos si WebGL esta disponible y funciona
 if (gl === null) {
-    alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+    alert("No se ha podido inicializar WebGL. Es posible que su navegador o dispositivo no lo permitan");
     return;
 }
 \end{lstlisting}
@@ -73,16 +73,15 @@ Por su parte, el \textit{fragment shader}, que es en el que nos centraremos mayo
 El conjunto formado por el \textit{vertex shader} y el \textit{fragment shader} es conocido como \textbf{shader program}, que comúnmente se refiere al mismo únicamente como \textit{shader}. A partir del código fuente de ambos \textit{shaders}, cada uno se crea y compila por separado, para seguidamente unirse en único programa. En el siguiente código se puede ver este procedimiento, siendo el objeto \verb|shaderProgram| el objeto que representa el \textit{programa shader}.
 
 \begin{lstlisting}
-// vsSource: Vertex Shader Source Code
-// fsSource: Fragment Shader Source Code
+// vsSource: Codigo fuente del Vertex Shader
+// fsSource: Codigo fuente del Fragment Shader
 
 const vertexShader   = loadShader(gl, gl.VERTEX_SHADER, 
                                   vsSource);
 const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, 
                                   fsSource);
   
-// Create the shader program
-
+// Creamos el programa shader
 const shaderProgram = gl.createProgram();
 gl.attachShader(shaderProgram, vertexShader);
 gl.attachShader(shaderProgram, fragmentShader);
@@ -106,16 +105,16 @@ En el sentido más general de la palabra, un \textit{buffer} es una memoria de a
 
 \begin{lstlisting}
 const colors = [
-    1.0,  1.0,  1.0,  1.0,    // white
-    1.0,  0.0,  0.0,  1.0,    // red
-    0.0,  1.0,  0.0,  1.0,    // green
-    0.0,  0.0,  1.0,  1.0,    // blue
+    1.0,  1.0,  1.0,  1.0,    // blanco
+    1.0,  0.0,  0.0,  1.0,    // rojo
+    0.0,  1.0,  0.0,  1.0,    // verde
+    0.0,  0.0,  1.0,  1.0,    // azul
 ];
-// Buffer creation
+// Creacion del Buffer
 const colorBuffer = gl.createBuffer();
-// We select the buffer for the future buffer operations
+// Seleccionamos el buffer para las proximas operaciones
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-// We assign the 'colors' array data to the buffer
+// Asignamos el array 'colors' al buffer
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 \end{lstlisting}
 
@@ -130,7 +129,7 @@ const normalize = false;    // Do not normalize
 const stride = 0;           // Stride
 const offset = 0;           // offset
 
-// Select the buffer
+// Seleccionamos el buffer
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(
     location,

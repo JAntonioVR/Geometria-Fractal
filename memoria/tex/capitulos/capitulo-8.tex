@@ -189,9 +189,9 @@ En realidad podríamos aprovechar que utilizamos como suelo el plano horizontal 
 Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones que se darán en el algoritmo (\texttt{MAX\_STEPS}) y $\varepsilon$, la distancia mínima por debajo de la misma se considera que un punto pertenece a la superficie. La primera de ellas la podemos tomar como una macro, al igual que hicimos con el tamaño de los arrays, pero la segunda interesa que sea parametrizable, para así poder observar los niveles de detalle y qué variaciones experimenta la escena al modificar este valor. Por ello, usamos una variable \verb|uniform| a la que pasaremos valor vía JavaScript, que llamaremos \texttt{u\_epsilon}.
 
 \begin{lstlisting}
-    uniform float u_epsilon;
-    // ... 
-    #define MAX_STEPS 1000
+uniform float u_epsilon;
+// ... 
+#define MAX_STEPS 1000
 \end{lstlisting}
 
 
@@ -203,7 +203,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
     Plane ground,
     Directional_light lights[ARRAY_TAM], int num_lights) {
     
-    Hit_record hr; hr.hit = false;  // Hit_record structure
+    Hit_record hr; hr.hit = false;  // Estructura Hit_record
     float dist = MAX_DIST;          // Distancia a cada objeto 
     vec3 p = r.orig;                // Punto del rayo
     float closest_dist = MAX_DIST;  // Menor distancia
@@ -212,8 +212,8 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
     Sphere S_hit;                   // Esfera mas cercana
     
     int object_index;   // 0,...,num_spheres-1: esferas,
-                        // num_spherees: plano
-    // Ray Marching
+                        // num_spheres: plano
+    // Sphere Tracing
     for(int i = 0; i < MAX_STEPS; i++) {
         // Calculamos el objeto mas cercano
         closest_dist = MAX_DIST;
@@ -257,7 +257,7 @@ vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres,
         if(current_t >= MAX_DIST) break;
     }
     // No hay interseccion
-    // Background code ...       
+    // Codigo del background ...       
 }
 \end{lstlisting}
 
@@ -693,7 +693,7 @@ vec4 ray_color(Ray r, Plane ground,
             hr.hit = true;
             hr.t = current_t;
             hr.p = ray_at(r, hr.t);
-            if(object_index == 0){      // r hits the ground
+            if(object_index == 0){      // r interseca el suelo
                 // ... 
             else {      // r hits Julia
                 hr.mat = fractal_material;
@@ -705,7 +705,7 @@ vec4 ray_color(Ray r, Plane ground,
         p = ray_at(r, current_t);
         if(current_t >= MAX_DIST) break;
     }
-    // r does not hit nothing
+    // r no interseca ninguna superficie
     // ... 
 }
 \end{lstlisting}
@@ -1000,7 +1000,7 @@ La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentid
 Para implementar este método, hemos probado empíricamente qué radio de esfera se ajusta mejor a los conjuntos de Julia, al conjunto de Mandelbrot y al conjunto de Mandelbub, obteniendo respectivamente $2.5$, $2$ y $1.5$ respectivamente. Por tanto, ajustamos el radio de esta esfera y sólo calculamos las SDFs en caso de impacto.
 
 \begin{lstlisting}
-// Returns true if R hits S, false otherwise
+// Devuelve true si R interseca a S, false en otro caso
 bool hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
     float a = dot(R.dir,R.dir);
@@ -1018,11 +1018,11 @@ vec4 ray_color(Ray r, ...) {
         (u_fractal == 2 ? 2.5 : 2.0);
     bool hits_bounding_sphere = hit_sphere_limits(bounding_sphere, r);
     
-    // Ray Marching
+    // Sphere Tracing
     for(int i = 0; i < MAX_STEPS; i++) {
         // Distancia al plano ... 
         // ... 
-        // Distancia Julia/Mandelbrot/Mandelbub
+        // Distancia a Julia/Mandelbrot/Mandelbub
         if(hits_bounding_sphere) {
             dist = get_dist(p)
             // ... 
@@ -1049,7 +1049,7 @@ float light_is_visible(Directional_light light, vec3 p) {
     // ... 
     if(!hit_sphere_limits(bounding_sphere, R))
         return 1.0;
-    // Ray Marching
+    // Sphere Tracing
     for(int i = 0; i < 50; i++ ) {
         // ... 
     }
@@ -1058,4 +1058,3 @@ float light_is_visible(Directional_light light, vec3 p) {
 \end{lstlisting}
 
 El inconveniente es que esta mejora sólo puede aplicarse a ocasiones en las que el canvas visualice puntos lejanos al conjunto, por lo que cuando se esté graficando un detalle de un fractal puede ser poco útil. No obstante, en estos casos al haber menos puntos del plano directamente no tiene por qué ejecutarse en gran medida el código correspondiente a las sombras, por lo que hemos mejorado la eficiencia en los casos donde se ejecutaba dicho código más veces, es decir, en planos más abiertos y lejanos al conjunto.
-

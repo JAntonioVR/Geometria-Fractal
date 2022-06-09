@@ -128,9 +128,9 @@ uniform vec2 u_zoomCenter;
 // ... 
 
 vec2 get_world_coordinates() {
-    int nx = 1280, ny = 720; // Canvas size (pixels)
-    float r = 16.0/9.0;      // Ratio width/height = 16/9
-    float h = 4.0, w = r * h;  // Image size (units) 
+    int nx = 1280, ny = 720; // Tamano del canvas (pixels)
+    float r = 16.0/9.0;      // Ratio ancho/alto = 16/9
+    float h = 4.0, w = r * h;  // Tamano de imagen (unidades) 
     // Coordenadas de dispositivo normalizadas en [0,1]x[0,1]
     vec2 uv = (gl_FragCoord.xy + vec2(0.5)) 
                 / vec2(float(nx), float(ny));
@@ -165,7 +165,8 @@ y esto es válido para cualquier $n\in\N$. Podemos utilizar iterativamente la ec
 vec2 complex_pow(vec2 z, int n) {
   vec2 current_pow = vec2(1.0, 0.0);
   for (int i = 1; i < 100; i++) {
-    vec2 z_ant = current_pow;
+    vec2 z_ant = current_pow; // z^i
+    // Calculamos z^{i+1} = z^i * z
     current_pow = vec2( z_ant.x*z.x - z_ant.y*z.y, 
                         z_ant.x*z.y + z_ant.y*z.x);
     if(i >= n) break;
@@ -449,11 +450,6 @@ Cada subconjunto de $\sigma_{n^2}$ representa una fila de puntos del píxel. Por
 Para ello, modificamos la función \verb|get_world_coordinates| para que acepte el índice $i$ (\verb|int i|) y el valor $n$ (\verb|int nSamples|) como parámetros y calcule las coordenadas de mundo del punto $i$-ésimo del píxel.
 
 \begin{lstlisting}
-
-  
-  // Punto del plano complejo al que corresponde el pixel
-  return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
-
 vec2 get_world_coordinates(int i, int nSamples) {
 
   int nx = 1280, ny = 720; // Canvas size (pixels)
@@ -473,7 +469,7 @@ vec2 get_world_coordinates(int i, int nSamples) {
   float u = uv.x + float(x) * hw + 0.5 * hw,
         v = uv.y + float(y) * hh + 0.5 * hh;
   
-        return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
+  return u_zoomCenter + vec2(u*w - w/2.0, v*h - h/2.0) * u_zoomSize;
 }
 \end{lstlisting}
 
@@ -509,8 +505,8 @@ El principal y mayor inconveniente que presenta esta técnica es que, como se pu
 Precisamente por este costo, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante dos variables \verb|uniform|. Una de ellas es booleana, su nombre es \verb|u_antialiasing|, que en caso de valer \verb|true| se aplicaría antialiasing y en caso contrario se utilizaría un único punto por píxel. Para ello utilizamos la otra variable \verb|uniform|, que es entera y su nombre es \verb|u_nSamples|, que es la análoga a la $n$ que hemos utilizado en las explicaciones. En caso de que \verb|u_antialiasing| tenga el valor \verb|false|, \verb|u_nSamples| tendrá el valor $1$, en caso contrario tendrá el valor que decida el usuario.  
 
 \begin{lstlisting}
-    uniform bool u_antialiasing;
-    uniform int u_nSamples;
+uniform bool u_antialiasing;
+uniform int u_nSamples;
 // ...
 vec4 Julia(vec2 c, int n) {
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);

@@ -111,8 +111,8 @@ A nivel de código GLSL, la manera de representar un rayo será utilizando una e
 
 \begin{lstlisting}
 struct Ray {
-    vec3 orig;      // Ray's origin
-    vec3 dir;       // Ray's direction
+    vec3 orig;      // Origen del rayo
+    vec3 dir;       // Direccion del rayo
 };
 \end{lstlisting}
 
@@ -240,7 +240,7 @@ En concreto, hemos decidido simular algo parecido al cielo mediante un degradado
 
 \begin{lstlisting}
 vec4 ray_color(Ray R) {
-    // R does not hit any surface
+    // R no interseca ninguna superficie
     vec3 unit_direction = normalize(R.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
@@ -306,8 +306,8 @@ A nivel de código podemos codificar una esfera como un \verb|struct| cuyos elem
 
 \begin{lstlisting}
 struct Sphere{
-    vec3 center;
-    float radius;
+    vec3 center;    // Centro de la esfera
+    float radius;   // Radio de la esfera
 };
 \end{lstlisting}
 
@@ -325,10 +325,9 @@ struct Hit_record {
 Claro que los tres primeros campos solo tendrán sentido si el campo \verb|hit| es verdadero, si es falso no tiene sentido calcular ni consultar los demás. A continuación presentamos el código GLSL para visualizar una esfera utilizando estas estructuras.
 
 \begin{lstlisting}
-// Calculates the intersection between a Ray and a 
-// Sphere and stores the hit information in a Hit_record 
-// struct.
-
+// Calcula la interseccion entre un rayo y una esfera
+// y almacena la informacion del impacto en una
+// estructura Hit_record
 Hit_record hit_sphere(Sphere S, Ray R, 
     float t_min, float t_max) {
 
@@ -343,12 +342,13 @@ Hit_record hit_sphere(Sphere S, Ray R,
         return result;
     }
     float sqrtd = sqrt(discriminant);
-    float root = (-b - sqrt(discriminant))/(2.0*a); // First root
+    float root = (-b - sqrt(discriminant))/(2.0*a); // Primera raiz
     if (root < t_min || t_max < root){ 
-        // The first root is out of range
-        root = (-b + sqrt(discriminant))/(2.0*a); // The other root
+        // La primera raiz esta fuera del rango que nos interesa
+        root = (-b + sqrt(discriminant))/(2.0*a); // La otra raiz
         if(root < t_min || t_max < root){ 
-            // Both roots are out of range
+            // Las dos raices estan fuera del rango,
+            // consideramos que no existe impacto
             result.hit = false;
             return result;
         }
@@ -375,7 +375,7 @@ Realizamos por tanto la primera modificación del código de \verb|ray_color|, q
 
 vec4 ray_color(Ray R, Sphere S) {
 
-    // R hits the sphere?
+    // R interseca la esfera?
     Hit_record hr = hit_sphere(S, R, 0.0, MAX_DIST);
     if(hr.hit){
         // Nos llevamos las componentes a [0,1]
@@ -383,14 +383,14 @@ vec4 ray_color(Ray R, Sphere S) {
         return vec4(normalize(hr.normal), 1.0);
     }
 
-    // R does not hit any surface
+    // R no interseca ninguna superficie
     vec3 unit_direction = normalize(R.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
 
 // ... 
-// R is the Ray
+// R es el rayo (Ray)
 
 Sphere S; 
 S.center = vec3(0.0, 0.0, -1.0); S.radius = 0.5;
@@ -440,19 +440,19 @@ Y en la función \verb|main| inicializamos algunas esferas, editamos \verb|ray_c
 \begin{lstlisting}
 vec4 ray_color(Ray R, Sphere world[ARRAY_TAM], int size) {
 
-    // R hits any sphere?
+    // R interseca alguna superficie?
     Hit_record hr = hit_spheres_list(world, size, R, 0.0, MAX_DIST);
     if(hr.hit)
         return vec4(normalize(hr.normal), 1.0);
 
-    // R does not hit any surface
-    // Background code ... 
+    // R no interseca ninguna superficie
+    // Codigo del background ... 
 }
 
 // ... 
-// R is the Ray
+// R es el rayo (Ray)
 
-// Spheres
+// Esferas
 int num_spheres = 4;
 Sphere world[ARRAY_TAM];
 Sphere S1, S2, S3, S4;
@@ -553,7 +553,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM],
     int size, Plane P) {
     
     float t_closest = MAX_DIST;   
-    // r hits any sphere?
+    // r interseca alguna esfera?
     vec4 tmp_color;
     Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
     if(hr.hit){
@@ -561,7 +561,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM],
         tmp_color = vec4((hr.normal + vec3(1.0))/float(2.0), 1.0);
     }
 
-    // r hits the plane? 
+    // r interseca el plano?
     // Solo intersecciones mas cercanas
     hr = hit_plane(P, r, 0.0, t_closest);
     if(hr.hit){
@@ -577,10 +577,10 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM],
         else                // Suma impar
             tmp_color = vec4(0.0,0.0,0.0, 1.0);
     }
-    // If r hits any surface
+    // Si r interseca alguna superficie
     if(t_closest < MAX_DIST) return tmp_color;
-    // r does not hit any surface
-    // Background code ... 
+    // r no interseca ninguna superficie
+    // Codigo del background ... 
 }
 \end{lstlisting}
 
@@ -588,10 +588,10 @@ Y tras declarar el plano $y=-2$, las esferas y realizar la llamada a \verb|ray_c
 
 \begin{lstlisting}
 // ... 
-// R is the Ray
-// world is the Sphere array
+// R es el rayo (Ray)
+// world es el array de objetos 'Sphere'
 
-// Plane
+// Plano
 Plane P;
 P.normal = vec3(0.0, 1.0, 0.0);
 P.D = -2.0;     // y = -2.0
@@ -642,8 +642,8 @@ Ahora recordamos que para crear el rayo en la seccion \ref{section:rayo} calcula
 \begin{lstlisting}
 struct Camera{
     vec3 origin;        // Punto desde el que se observa
-    vec3 horizontal;    // Vector horizontal de modulo PP_width
-    vec3 vertical;      // Vector vertical de modulo PP_height
+    vec3 horizontal;    // Vector horizontal de modulo P_w
+    vec3 vertical;      // Vector vertical de modulo P_h
     vec3 lower_left_corner; // Punto situado en la esquina
 };
 \end{lstlisting}
@@ -700,9 +700,9 @@ Camera init_camera (vec3 lookfrom, vec3 lookat,
     
     Camera cam;
     float focal_length = 1.0;
-    float theta = degrees_to_radians(vfov); // Vertical FOV
+    float theta = degrees_to_radians(vfov); // FOV vertical
     float h = tan(theta/2.0);
-    // Projection Plane dimension
+    // Dimensiones del plano de proyeccion
     float viewport_height = 2.0*h*focal_length;
     float viewport_width = aspect_ratio * viewport_height;
 
@@ -741,21 +741,21 @@ Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_c
 
 \begin{lstlisting}
 
-uniform vec3 u_lookfrom;    // lookfrom point
-uniform vec3 u_lookat;      // lookat point
+uniform vec3 u_lookfrom;    // Punto lookfrom
+uniform vec3 u_lookat;      // Punto lookat
 
 // ... 
 // aspect_ratio = 16/9
 // nx = 1280 pixels
 // ny = 720 pixels
 
-// CAMERA
+// CAMARA
 vec3 vup = vec3(0.0, 1.0, 0.0);
 float vfov = 90.0; // Vertical field of view in degrees
 Camera cam = init_camera(u_lookfrom, u_lookat, 
     vup, vfov, aspect_ratio);
 
-// [0,1] normalized device coordinates
+// Coordenadas de dispositivo normalizadas [0,1]
 vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
@@ -1003,8 +1003,8 @@ vec4 evaluate_lighting_model(
         visibility = light_is_visible(light,hr.p,world,size);
       light_dir = normalize(light.dir);
       float cos_theta = max(0.0,dot(normal,light_dir));
-      // Only if light is visible from surface point
-      if(cos_theta >.0 0 && visibility > 0.0) {
+      // Solo si la fuente de luz es visible desde el punto
+      if(cos_theta > 0.0 && visibility > 0.0) {
         // Reflection direction
         vec3 reflection_dir = reflect(-light_dir, normal);
         diffuse = mat.kd * cos_theta;
@@ -1029,7 +1029,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size,
     Plane P, Directional_light lights[ARRAY_TAM], 
     int num_lights) {
 
-    // r hits any sphere?
+    // r interseca alguna esfera?
     // ...
     if(hr.hit){
         // ... 
@@ -1037,7 +1037,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size,
             num_lights, hr, world, size);
     }
 
-    // r hits the plane? 
+    // r interseca el plano? 
     // ...
     if(hr.hit){
         // ... 
@@ -1070,7 +1070,7 @@ uniform vec4 u_lightColor1;
 
 // ... 
 
-// Materials
+// Materiales
 Material mat, ground_material;
 mat.ka = u_ka;
 mat.kd = u_kd;
@@ -1081,18 +1081,18 @@ ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
 ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
 ground_material.sh = 1.0;
 
-// Spheres
+// Esferas
 // ... 
 S1.mat = mat; S2.mat = mat;
 S3.mat = mat; S4.mat = mat;
 // ...
 
-// Plane
+// Plano
 // ...
 P.mat = ground_material;
 // ... 
 
-// Lights
+// Luces
 Directional_light lights[ARRAY_TAM];
 int num_lights = 2;
 Directional_light l0, l1;
@@ -1145,12 +1145,11 @@ Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iter
 
 \begin{lstlisting}
 // Antialiasing
-
 vec2 uv = (gl_FragCoord.xy) / vec2(nx, ny);
 float u = uv.x;
 float v = uv.y;
 
-int nSamples = 3; // O cualquier otro numero
+int nSamples = 3; // O cualquier otro numero natural
 float hw = 1.0 / (float(nx * nSamples)),
       hh = 1.0 / (float(ny * nSamples));
 Ray r;
@@ -1182,8 +1181,8 @@ Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSample
 De nuevo, por cuestiones de eficiencia e interactividad, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA en 3D, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante las variables \verb|uniform| \verb|u_antialiasing| y \verb|u_nSamples|, cuyas funciones son las mismas que las ya explicadas en la sección \ref{section:SSAA-2D}, aunque se puede deducir del código presentado a continuación.
 
 \begin{lstlisting}
-    uniform bool u_antialiasing;
-    uniform int u_nSamples;
+uniform bool u_antialiasing;
+uniform int u_nSamples;
 // ...
 void main() {
     // ... 
