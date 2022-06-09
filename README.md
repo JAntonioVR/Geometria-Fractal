@@ -2,7 +2,7 @@
 ## Fundamentos Matemáticos y Visualización con Ray-Tracing
 
 
-> Trabajo de Fin de Grado
+> **Trabajo de Fin de Grado**
 > 
 > Doble Grado en Ingeniería Informática y Matemáticas
 > 
