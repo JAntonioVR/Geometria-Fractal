@@ -111,6 +111,7 @@ $(window).keydown(function(e) {
       e.preventDefault();
   }
 });
+$(window).on('resize', resizeCanvas);
 
 //
 // ────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -374,11 +375,12 @@ function resetParameters(){
   theScene.drawScene();
 }
 
+//
+// ─── AJUSTAR EL TAMANO DEL CANVAS ───────────────────────────────────────────────
+//  
 function resizeCanvas () {
   if(window.innerWidth < 992) {
-    $("#glCanvas").width("100%");
+    document.querySelector("#glCanvas").style.width = "100%";
   }
 }
 
-
-$(window).on('resize', resizeCanvas);
