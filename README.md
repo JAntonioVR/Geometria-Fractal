@@ -17,8 +17,9 @@
 > Curso 2021/2022
 > 
 
-<img src="./static/img/logo.png" style="width:30%; display:table; margin:auto">
-
+<p align="center">
+<img src="./static/img/logo.png" style="width:30%;">
+</p>
 
 Este es el repositorio principal en el que pueden encontrarse todos los ficheros correspondientes al proyecto: los guiones de Mathematica, los archivos de $\LaTeX$ utilizados para la elaboración de la memoria, los ficheros de HTML, CSS y JavaScript correspondientes a la web, el código GLSL de los shaders utilizados, imágenes, etc.
 
@@ -63,10 +64,10 @@ Por último, en [este enlace](https://nodejs.org/en/knowledge/HTTP/servers/how-t
 
 Sin nada más que añadir, deseamos que el lector disfrute de todo lo que se le ofrece, comenzando por las siguientes dos imágenes.
 
-<div style="display: flex; justify-content: space-around">
-<img src="./static/img/Julia-readme.png" style="width: 45%">
+<div style="display: flex;">
+<img src="./static/img/Julia-readme.png" style="width: 50%">
 
-<img src="./static/img/julia2-readme.png" style="width: 45%">
+<img src="./static/img/julia2-readme.png" style="width: 50%">
 </div>
 
 
