@@ -10,12 +10,12 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - run: echo `ls`
-      - run: mv memoria/*.sty .
+      - run: mv memoria/* .
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
           args: -pdf
-          root_file: memoria/main.tex
+          root_file: main.tex
       - name: Upload PDF document
         uses: actions/upload-artifact@v2
         with:
