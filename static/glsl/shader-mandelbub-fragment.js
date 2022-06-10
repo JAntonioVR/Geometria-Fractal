@@ -415,43 +415,42 @@ float light_is_visible(Directional_light light, vec3 p) {
     return res;
 }
 
-vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ) {
+vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
+    vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
     Material mat = hr.mat;
     Directional_light light;
     vec3 light_dir;
     vec3 view_dir = normalize(u_lookfrom - hr.p);
     vec3 normal = normalize(hr.normal);
     vec4 ambient, diffuse, specular;
+    ambient = vec4(0.0, 0.0, 0.0, 1.0);
+    diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+    specular = vec4(0.0, 0.0, 0.0, 1.0);
     float visibility;
-    vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
     if(num_lights > 0){
         for(int i = 0; i < ARRAY_TAM; i++){
             if(i == num_lights) break;
-            ambient = vec4(0.0, 0.0, 0.0, 1.0);
-            diffuse = vec4(0.0, 0.0, 0.0, 1.0);
-            specular = vec4(0.0, 0.0, 0.0, 1.0);
-
             light = lights[i];
-            ambient += mat.ka*light.color;
-            if(!u_shadows[i]) visibility = 1.0;
-            else visibility = light_is_visible(light, hr.p);
-
+            color_average += light.color;
             light_dir = normalize(light.dir);
             float cos_theta = max(0.0, dot(normal, light_dir));
+
+            if(!u_shadows[i]) visibility = 1.0;
+            else visibility = light_is_visible(light, hr.p);
             
             // Only if light is visible from surface point
             if(cos_theta > 0.0 && visibility > 0.0) {
                 // Reflection direction
                 vec3 reflection_dir = reflect(-light_dir, normal);
-                diffuse = mat.kd * cos_theta;
-                specular = mat.ks * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
+                diffuse += mat.kd * visibility * light.color * cos_theta;
+                specular += mat.ks * visibility * light.color * pow( max(0.0, dot(reflection_dir, view_dir)), mat.sh);
             }
-            L_in += visibility * light.color * (diffuse + specular);
-
         }
+        color_average /= float(num_lights);
+        ambient = mat.ka * color_average;
     }
-    L_in += ambient/float(num_lights);
-    return vec4(L_in.xyz, 1.0);
+    return ambient + diffuse + specular;
+    
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
