@@ -10,13 +10,11 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Compile LaTeX document
-        working-directory: ./memoria
         uses: xu-cheng/latex-action@v2
         with:
-          #args: -synctex=1 -interaction=nonstopmode -file-line-error -recorder -output-directory=memoria
-          root_file: main.tex
+          args: -pdf
+          root_file: ./memoria/main.tex
       - name: Upload PDF document
-        working-directory: ./memoria
         uses: actions/upload-artifact@v2
         with:
           name: PDF
