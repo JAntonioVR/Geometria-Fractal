@@ -15,7 +15,8 @@
 > Universidad de Granada
 > 
 > Curso 2021/2022
-> 
+
+![](https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge)
 
 <p align="center">
 <img src="./static/img/logo.png" style="width:30%;">
