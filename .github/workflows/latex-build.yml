@@ -9,8 +9,8 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
-      - run: cd memoria
       - run: echo `ls`
+      - run: mv memoria/*.sty .
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
