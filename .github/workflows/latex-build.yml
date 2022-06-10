@@ -15,7 +15,7 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           args: -pdf
-          root_file: main.tex
+          root_file: memoria/main.tex
       - name: Upload PDF document
         uses: actions/upload-artifact@v2
         with:
