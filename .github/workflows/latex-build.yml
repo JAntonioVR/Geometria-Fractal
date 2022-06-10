@@ -14,9 +14,9 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           #args: -synctex=1 -interaction=nonstopmode -file-line-error -recorder -output-directory=memoria
-          root_file: ./memoria/main.tex
+          root_file: main.tex
       - name: Upload PDF document
         uses: actions/upload-artifact@v2
         with:
           name: PDF
-          path: ./memoria/main.pdf
+          path: main.pdf
