@@ -13,7 +13,7 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
-          args: -synctex=1 -interaction=nonstopmode -file-line-error -recorder -output-directory=memoria
+          #args: -synctex=1 -interaction=nonstopmode -file-line-error -recorder -output-directory=memoria
           root_file: ./memoria/main.tex
       - name: Upload PDF document
         uses: actions/upload-artifact@v2
