@@ -6,7 +6,7 @@
 // '2D-fractals.html'
 
 
-// ─── IMPORTS ──────────────────────────────────────────────────────────────────── 
+// ─── IMPORTS ────────────────────────────────────────────────────────────────────
 // Escena 2D
 import { Scene2D } from "./scene2D.js";
 // Vertex shader
@@ -84,7 +84,7 @@ function main(){
         LLCY = $("#LLCY"),
         URCX = $("#URCX"),
         URCY = $("#URCY");
-  
+
 
 
   LLCX.val(theScene.getLLC()[0].toFixed(2));
@@ -99,10 +99,10 @@ function main(){
 
   // Boton de reseteo de parametros
   $("#botonReset").click(resetParameters);
-  
+
   // First render
   theScene.drawScene();
-    
+
 }
 
 $(window).ready(main);
@@ -122,7 +122,7 @@ $(window).on('resize', resizeCanvas);
 
 //
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
-//  
+//
 function onKeyDown(event) {
   if( $("#nIteraciones").is(':focus') ||
       $("#juliaX").is(':focus') ||
@@ -162,9 +162,11 @@ function onKeyDown(event) {
       LLCY.val(theScene.getLLC()[1].toFixed(2));
       URCY.val(theScene.getURC()[1].toFixed(2));
       break;
-    
+
     case 187:  // + key
-      theScene.zoomIn();
+      if (!event.ctrlKey) {
+        theScene.zoomIn();
+      }
       LLCX.val(theScene.getLLC()[0].toFixed(2));
       URCX.val(theScene.getURC()[0].toFixed(2));
       LLCY.val(theScene.getLLC()[1].toFixed(2));
@@ -172,7 +174,9 @@ function onKeyDown(event) {
       break;
 
     case 189:  // - key
-      theScene.zoomOut();
+      if (!event.ctrlKey) {
+        theScene.zoomOut();
+      }
       LLCX.val(theScene.getLLC()[0].toFixed(2));
       URCX.val(theScene.getURC()[0].toFixed(2));
       LLCY.val(theScene.getLLC()[1].toFixed(2));
@@ -194,7 +198,7 @@ function changeAntialiasing(){
   if(theScene.getAntialiasing())
     $("#deslizadorNSamples").show();
   else
-    $("#deslizadorNSamples").hide();   
+    $("#deslizadorNSamples").hide();
   theScene.drawScene();
 }
 
@@ -209,7 +213,7 @@ function changeNSamples(event) {
 
 //
 // ─── CAMBIAR NUMERO MAXIMO DE ITERACIONES ───────────────────────────────────────
-//  
+//
 function changeMaxIterations(event){
   let new_value = verifyMaxIterations(event.target.value);
   $("#valorNIteraciones").val(new_value);
@@ -263,7 +267,7 @@ function verifyExponent(number) {
 
 //
 // ─── CAMBIAR EL CUADRO VISUALIZADO ──────────────────────────────────────────────
-//  
+//
 function changeLLCX(event) {
   if(!$("#LLCFixed").prop('checked')){
     let new_value = verifyLLCX(event.target.value),
@@ -334,11 +338,11 @@ function reloadPositionInput() {
 
 //
 // ─── CAMBIAR EL FRACTAL QUE SE VISUALIZA ────────────────────────────────────────
-//  
+//
 function changeFractal(){
   const fractales = $("#fractales");
   var selected = parseInt(fractales.val());
-  if(selected != 1) 
+  if(selected != 1)
     $("#constanteJulia").hide();
   else
     $("#constanteJulia").show();
@@ -377,10 +381,9 @@ function resetParameters(){
 
 //
 // ─── AJUSTAR EL TAMANO DEL CANVAS ───────────────────────────────────────────────
-//  
+//
 function resizeCanvas () {
   if(window.innerWidth < 992) {
     document.querySelector("#glCanvas").style.width = "100%";
   }
 }
-

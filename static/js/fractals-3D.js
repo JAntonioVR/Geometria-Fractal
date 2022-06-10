@@ -5,7 +5,7 @@
 // Fichero javascript que gestiona los eventos y los indicadores HTML del fichero
 // '3D-fractals.html'
 
-// ─── IMPORTS ──────────────────────────────────────────────────────────────────── 
+// ─── IMPORTS ────────────────────────────────────────────────────────────────────
 // Escena 3D
 import { Scene3D } from "./scene3D.js";
 // Vertex shader
@@ -26,7 +26,7 @@ const MouseState = Object.freeze({
 
 //
 // ─── MODO DE USO ────────────────────────────────────────────────────────────────
-// Enumerado para describir el modo de uso: interactivo o a demanda  
+// Enumerado para describir el modo de uso: interactivo o a demanda
 const Mode = Object.freeze({
   INTERACTIVE: 0,
   ONDEMAND: 1
@@ -76,7 +76,7 @@ function main(){
 
   // Color de la componente difusa del material parametrizable
   const kd_input = $("#kd");
-  kd_input.val(rgbToHex(theScene.getKd()));    
+  kd_input.val(rgbToHex(theScene.getKd()));
   kd_input.change(change_kd);
 
   // Color de la componente especular del material parametrizable
@@ -163,7 +163,7 @@ function main(){
   epsilon.val(-exp);
   $("#valor_epsilon").html((10**(exp)).toFixed(4));
   epsilon.on('input', changeEpsilon);
-  
+
   const initialPosition = theScene.getPosition();
   $('#posX').val(initialPosition[0]);
   $('#posX').change(changePosition);
@@ -200,12 +200,12 @@ $(window).on('resize', resizeCanvas);
 
 //
 // ─── MOVIMIENTO DE CAMARA CON EL RATON ──────────────────────────────────────────
-//  
+//
 
 // Variables auxiliares para el movimiento de la camara con el raton
 var mousePosition = [0,0];
 var mouseDownPosition = [0,0];
-var mouseState = MouseState.MOUSE_UP; 
+var mouseState = MouseState.MOUSE_UP;
 
 //
 // ─── MOVER CAMARA ───────────────────────────────────────────────────────────────
@@ -229,7 +229,7 @@ function moveCamera(event){
 
     theScene.moveX(disp[0]);
     theScene.moveY(disp[1]);
-    if(mode == Mode.INTERACTIVE) 
+    if(mode == Mode.INTERACTIVE)
       redraw();
   }
 }
@@ -252,44 +252,44 @@ function mouseUp(event) {
 
 //
 // ─── CAMBIO DE LA COMPONENTE AMBIENTAL ──────────────────────────────────────────
-//  
+//
 function change_ka() {
   const value = hexToRgb($("#ka").val());
   theScene.setKa(value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
 //
 // ─── CAMBIO DE LA COMPONENTE DIFUSA ─────────────────────────────────────────────
-//  
+//
 function change_kd() {
   const value = hexToRgb($("#kd").val());
   console.log(value)
   theScene.setKd(value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
 //
 // ─── CAMBIO DE LA COMPONENTE ESPECULAR ──────────────────────────────────────────
-//  
+//
 function change_ks() {
   const value = hexToRgb($("#ks").val());
   theScene.setKs(value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
 //
 // ─── CAMBIO DEL EXPONENTE DE BRILLO ─────────────────────────────────────────────
-//  
+//
 function change_sh(event) {
   let new_value = verifySH(event.target.value);
   $("#valor_sh").val(new_value);
   $('#sh').val(new_value);
   theScene.setSh(new_value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -299,11 +299,11 @@ function verifySH(number) {
 
 //
 // ─── CAMBIO DE LA INTENSIDAD DE LA LUZ 0 ────────────────────────────────────────
-//  
+//
 function changeLightColor0() {
   const value = hexToRgb($("#lightColor0").val());
   theScene.setLightColor(0, value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -312,7 +312,7 @@ function changeLightColor0() {
 //
 function changeShadow0(){
   theScene.changeShadow(0);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -322,7 +322,7 @@ function changeShadow0(){
 function changeLightColor1() {
   const value = hexToRgb($("#lightColor1").val());
   theScene.setLightColor(1, value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -331,22 +331,22 @@ function changeLightColor1() {
 //
 function changeShadow1(){
   theScene.changeShadow(1);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
 //
 // ─── CAMBIAR EL FRACTAL QUE SE VISUALIZA ────────────────────────────────────────
-//  
+//
 function changeFractal() {
   const fractales = $("#fractales")
   var selected = parseInt(fractales.val());
-  if(selected != 2) 
+  if(selected != 2)
     $("#constanteJulia").hide()
   else
     $("#constanteJulia").show();
   theScene.setFractal(selected);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
     redraw();
 }
 
@@ -361,7 +361,7 @@ function changeJuliaConstantX(event) {
   let C = theScene.getJuliaConstant();
   C[0] = new_value;
   theScene.setJuliaConstant(C);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -372,7 +372,7 @@ function changeJuliaConstantY(event) {
   let C = theScene.getJuliaConstant();
   C[1] = event.target.value;
   theScene.setJuliaConstant(C);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -383,7 +383,7 @@ function changeJuliaConstantZ(event) {
   let C = theScene.getJuliaConstant();
   C[2] = event.target.value;
   theScene.setJuliaConstant(C);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -394,7 +394,7 @@ function changeJuliaConstantW(event) {
   let C = theScene.getJuliaConstant();
   C[3] = event.target.value;
   theScene.setJuliaConstant(C);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -410,8 +410,8 @@ function changeAntialiasing(){
   if(theScene.getAntialiasing())
     $("#deslizadorNSamples").show();
   else
-    $("#deslizadorNSamples").hide();   
-  if(mode == Mode.INTERACTIVE) 
+    $("#deslizadorNSamples").hide();
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -421,17 +421,17 @@ function changeAntialiasing(){
 function changeNSamples(event) {
   $("#valorNSamples").html(event.target.value**2);
   theScene.setNSamples(event.target.value);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
 //
 // ─── CAMBIAR EPSILON ────────────────────────────────────────────────────────────
-//  
+//
 function changeEpsilon(event) {
   $("#valor_epsilon").html((10**(-event.target.value)).toFixed(4));
   theScene.setEpsilon(10**(-event.target.value));
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -445,7 +445,7 @@ function changePosition() {
     $('#posZ').val(),
   ];
   theScene.setPosition(newPosition);
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -459,11 +459,11 @@ function changeMode() {
     mode = Mode.ONDEMAND;
   redraw();
 }
-  
+
 
 //
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
-//  
+//
 function onKeyDown(event) {
   let key = event.wich || event.keyCode;
   switch (key) {
@@ -482,20 +482,24 @@ function onKeyDown(event) {
     case 40:  // Down key
       theScene.moveDown();
       break;
-    
+
     case 187:  // + key
-      theScene.zoomIn();
-      break;
+      if (!event.ctrlKey) {
+        theScene.zoomIn();
+        break;
+      }
 
     case 189:  // - key
-      theScene.zoomOut();
-      break;
+      if (!event.ctrlKey) {
+        theScene.zoomOut();
+        break;
+      }
 
     default:
       break;
   }
   actualizaValorPosicion(theScene.getPosition());
-  if(mode == Mode.INTERACTIVE) 
+  if(mode == Mode.INTERACTIVE)
       redraw();
 }
 
@@ -532,7 +536,7 @@ function resetParameters() {
   $("#antialiasing").prop('checked', false);
   $("#nSamples").val(theScene.getNSamples());
   $("#valorNSamples").html(theScene.getNSamples()**2);
-  if(!theScene.getAntialiasing()) 
+  if(!theScene.getAntialiasing())
     $("#deslizadorNSamples").hide();
 
   $("#current_epsilon").val(-Math.log10(theScene.getEpsilon()));
@@ -565,11 +569,11 @@ function redraw() {
   timer = end-start;
   timeRedraw();
 }
-  
+
 
 //
 // ─── ACTUALIZA LA POSICION ACTUAL ───────────────────────────────────────────────
-//  
+//
 function actualizaValorPosicion(posicion) {
     $('#posX').val(posicion[0].toFixed(2));
     $('#posY').val(posicion[1].toFixed(2));
