@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
+      - run: cd memoria  
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
@@ -19,4 +20,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: PDF
-          path: main.pdf
+          path: ./memoria/main.pdf
