@@ -18,6 +18,7 @@
 
 <div style="display: flex; justify-content:around">
 ![](https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge)
+  
 ![](https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge)
 </div>
 
