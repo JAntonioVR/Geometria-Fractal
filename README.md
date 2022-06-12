@@ -16,12 +16,13 @@
 > 
 > Curso 2021/2022
 
-<div style="display: flex; justify-content:around">
+<div style="display: flex; justify-content:space-between">
   
-![](https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge)
+<img src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge">
+
+<img src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge">
   
-![](https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge)
-  
+<img src="https://img.shields.io/github/license/JAntonioVR/Geometria-Fractal?style=for-the-badge">  
 </div>
 
 <p align="center">
