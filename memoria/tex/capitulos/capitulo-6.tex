@@ -179,45 +179,51 @@ A continuación describiremos los posibles casos de uso del software a desarroll
     \item \textbf{CU1}: Primer acceso a la página. El usuario accede por primera vez a la página.
     \item \textbf{CU2}: Modificar un parámetro. El usuario cambia uno de los distintos parámetros modificables.
     \item \textbf{CU3}: Comprobar si un nuevo parámetro es incorrecto o inviable. Ante el cambio de un parámetro, es necesario comprobar que no se ha introducido un valor imposible o computacionalmente inviable. Por ejemplo, un número negativo o demasiado grande de iteraciones.
-    \item \textbf{CU4}: Web sobrecargada. Posible sobrecarga provocada por una excesiva demanda de cálculo en poco tiempo.
+    \item \textbf{CU4}: Truncar o modificar valores de los parámetros. Ante la introducción de valores incorrectos, el sistema por sí solo modifica estos valores estableciendo unos límites o valores por defecto.
     \item \textbf{CU5}: Establecer valores por defecto. Cambiar los parámetros de la escena a los que se toman por defecto.
     \item \textbf{CU6}: Dibujar la escena. Visualizar la escena a partir de los parámetros actuales, estando seguros de que son correctos.
-    \item \textbf{CU7}: Mensaje de error. Ante cualquier error posible, se notifica del mismo al usuario.
 \end{itemize}
 
 Ante estos casos de uso, en la figura \ref{fig:casos-uso} vemos el diagrama de casos de uso, en el cual vemos a cuales de ellos puede acceder el usuario y qué interdependencias hay entre los mismos.
 
 \begin{figure} [ht]
 \centering
-\includegraphics[scale = 0.6]{img/diagrama-CU.png}
+\includegraphics[width=15cm]{img/diagrama-CU.png}
 \caption{Diagrama de Casos de Uso}
     \label{fig:casos-uso}
 \end{figure}
+
+Por último, con el objetivo de clarificar las distintas actividades que puede realizar tanto el software como el usuario, presentamos en la imagen \ref{fig:diagrama-actividad} un diagrama de actividad, en el cual podemos observar cómo tras la generación de una imagen el usuario puede continuar indefinidamente variando parámetros hasta que finalmente decida cerrar la página.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=12cm]{img/diagrama-actividad.png}
+    \caption{Diagrama de Actividad}
+        \label{fig:diagrama-actividad}
+    \end{figure}
 
 \newpage
 \section{Bocetos de la web}
 
 A continuación presentaremos los bocetos básicos, a veces llamados `wireframes', de la apariencia que tendrá la web. Son únicamente tres pantallas, y dos de ellas son prácticamente iguales en lo que a nivel de boceto se refiere. La pantalla en la que se visualizan fractales 2D y 3D en un canvas (imagen \ref{fig:wireframe-fractals}) es prácticamente igual en ambos casos, por lo que sólo hemos incluido una de ellas entendiendo que los enlaces y los títulos son intercambiables en cada versión. 
 
+
+Como vemos en la imagen \ref{fig:wireframe-home}, al acceder a la web nos aparecería la posibilidad de elegir si queremos explorar el mundo de los fractales 2D o 3D. Debajo del menú seleccionable aparecería una breve introducción al mundo de los fractales desde un punto de vista entendible por casi cualquier persona con conocimientos básicos.
+
+Sobre la pantalla de la imagen \ref{fig:wireframe-fractals}, aparecería a la izquierda el canvas donde se visualizarían los fractales y los distintos controles y parámetros modificables estarían en el lado derecho. Debajo de esta sección de la pantalla también se incluiría un texto documentando el sentido de cada parámetro para que el usuario que no conozca demasiado el trasfondo matemático ni informático pueda interactuar sin problemas.
+
+\newpage
+
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=12cm]{img/wireframe-home.png}
+    \includegraphics[width=11cm]{img/wireframe-home.png}
     \caption{Wireframe de la portada de la página}
     \label{fig:wireframe-home}
     \end{figure}
 
-
-
-Como vemos en la imagen \ref{fig:wireframe-home}, al acceder a la web nos aparecería la posibilidad de elegir si queremos explorar el mundo de los fractales 2D o 3D. Debajo del menú seleccionable aparecería una breve introducción al mundo de los fractales desde un punto de vista entendible por casi cualquier persona con conocimientos básicos.
-
-
-\newpage
-
-Sobre la pantalla de la imagen \ref{fig:wireframe-fractals}, aparecería a la izquierda el canvas donde se visualizarían los fractales y los distintos controles y parámetros modificables estarían en el lado derecho. Debajo de esta sección de la pantalla también se incluiría un texto documentando el sentido de cada parámetro para que el usuario que no conozca demasiado el trasfondo matemático ni informático pueda interactuar sin problemas.
-
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=12cm]{img/wireframe-1.png}
+    \includegraphics[width=11cm]{img/wireframe-1.png}
     \caption{Wireframe de la pantalla en la que se visualizan fractales}
         \label{fig:wireframe-fractals}
     \end{figure}
