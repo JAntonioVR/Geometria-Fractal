@@ -1,1060 +1,1210 @@
 %
-% ─── CAPITULO 8: VISUALIZACION DE FRACTALES 3D ──────────────────────────────────
+% ─── CAPITULO 7: INTRODUCCION AL RAY TRACING ────────────────────────────────────
 %
 
-En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesario para poder visualizar conjuntos de Julia y conjuntos de Mandelbrot 2-dimensionales en un canvas utilizando WebGL, todo ello apoyado en la teoría explicada en el capítulo \ref{chap:Julia-Mandelbrot}. Sin embargo, el objetivo de éste y de los tres capítulos anteriores es aplicar técnicas avanzadas de cálculo de imágenes para poder visualizar fractales en tres dimensiones. Recordamos que explicamos en la introducción del capítulo \ref{chap:ray-tracing} que la mejor forma de generar imágenes de fractales 3D es utilizando la técnica de `Ray Tracing', que en dicho capítulo explicamos con detalle. A pesar de ello y de conseguir escenas con varios objetos, materiales y movimientos de cámara no visualizamos nada lejanamente parecido a un fractal. Será en este capítulo en el que aprovecharemos toda la infraestructura y todo el código implementado hasta el momento en el `ray-tracer' del capítulo \ref{chap:ray-tracing} para graficar fractales tridimensionales.
+En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente generar fractales en tridimensionales.
 
-Para ello, antes aún debemos asentar una serie de conceptos que son los que nos ayudarán a cumplir nuestro objetivo: el algoritmo \textit{Sphere-Tracing} y las conocidas como \textit{Signed Distance Functions} (SDFs). Con estos dos elementos combinados conseguiremos generar hermosas figuras fractales.
+\section{Definición de Ray-Tracing}
 
-\section{El algoritmo Sphere-Tracing}
-\label{section:sphere-tracing}
-
-Hasta ahora siempre hemos calculado las intersecciones rayo-esfera de manera totalmente analítica, ya que es muy sencillo describir una esfera o un plano mediante una ecuación y solucionar esta ecuación en $t$, como vimos en las secciones \ref{subsection:esfera} y \ref{subsection:plano}. Sin embargo, no es tan sencillo encontrar ecuaciones que describan la superficie de los fractales. Es por esto que necesitamos otra manera de encontrar las intersecciones rayo-superficie. Recordemos entonces que en la sección \ref{section:elementos-RT} hablamos de que además de las expresiones analíticas las intersecciones se pueden calcular mediante métodos iterativos. 
-
-En literatura, se denomina \textit{Ray-Marching} a cualquier método numérico iterativo utilizado para encontrar intersecciones mediante movimientos a lo largo de un rayo. Sobre este tema hay mucha bibliografía y es un tema de interés vigente. El método más sencillo es la búsqueda de raíces de una función mediante el método de Newton generalizado a $\R^3$, pero existen técnicas más avanzadas. 
-
-El algoritmo \textit{Sphere-Tracing} es una de estas técnicas de ray-marching descrita por \textit{John C. Hart} en \cite{Hart-1995}. Se basa estimar la distancia más corta de un punto en el rayo a cada una de las superficies que componen la escena, identificar la mínima de estas y avanzar en el rayo dicha distancia, pues se tiene la certeza de que al menos en una esfera de radio dicha distancia no hay ninguna intersección con ningún otro cuerpo. Una vez se ha avanzado en el rayo se repite esta operación y así sucesivamente hasta que la estimación de la distancia mínima es lo suficientemente pequeña como para considerar que el punto forma parte de una superficie.
-
-Aclaramos que \textit{Ray-Marching} y \textit{Sphere-Tracing} no son sinónimos, aunque en ocasiones se abusa del lenguaje y se utilizan indistintamente. Sphere-Tracing es un tipo de técnica de Ray-Marching, siendo este último un concepto que engloba no solo a sphere-tracing, sino a toda técnica iterativa que busque intersecciones recorriendo el rayo.
-
-Pongamos un ejemplo. Supongamos que tenemos una escena con una esfera tangente al plano horizontal $y=0$, un rayo $R$ fijo y queremos aplicar Sphere-Tracing para encontrar la intersección.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.2]{img/C8/situacion-inicial.png}
-    \caption{Situación a la que aplicar Sphere-Tracing}
-    \label{fig:ST-inicial}
-\end{figure}
-
-La distancia de un punto $p$ a una esfera $S$ de centro $c$ y radio $r$ es 
-\begin{equation}
-    \label{eq:distancia-punto-esfera}
-    d(p,S) = \|p-c\| - r 
-\end{equation}
-y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por tanto, partiendo del origen, calculamos la distancia a la esfera y la distancia al plano, vemos que es menor la del plano, por lo que avanzamos en el rayo una distancia igual a la calculada para el plano (imagen \ref{fig:iteraciones-ST} (a)). Seguidamente repetimos la operación: volvemos a calcular la distancia a la esfera y al plano. De nuevo el plano es el objeto más cercano, por lo que avanzamos en el rayo la misma distancia que había hasta el plano (imagen \ref{fig:iteraciones-ST} (b)).
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{ccc}
-      \includegraphics[scale=0.16]{img/C8/sphere-tracing-1.png} &     \includegraphics[scale=0.196]{img/C8/sphere-tracing-2.png} \\
-    (a) Primera iteración & (b) Segunda iteración \\[6pt]
-    \end{tabular}
-    \caption{Dos primeras iteraciones de Sphere-Tracing}
-    \label{fig:iteraciones-ST}
-\end{figure}
-
-Si repetimos este proceso indefinidamente, llegará el momento en el que la distancia a la esfera será tan pequeña que consideraremos que el punto pertenece a la superficie de la misma y habremos encontrado la intersección (imagen \ref{fig:finales} (a)). En caso de que no exista ninguna intersección, el algoritmo seguirá avanzando en el rayo, pero al no encontrar nunca una distancia suficientemente pequeña se avanzará indefinidamente (imagen \ref{fig:finales} (b)), por lo que hay que fijar una distancia máxima recorrida y/o un número máximo de iteraciones como parámetro del algoritmo, estableciendo un criterio de parada.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{ccc}
-      \includegraphics[scale=0.2]{img/C8/sphere-tracing-final.png} &     \includegraphics[scale=0.197]{img/C8/sphere-tracing-miss.png} \\
-    (a) Encuentra intersección & (b) El rayo se pierde \\[6pt]
-    \end{tabular}
-    \caption{Posibles estados finales del algoritmo Sphere-Tracing}
-    \label{fig:finales}
-\end{figure}
-
-\subsection{Signed Distance Functions (SDFs)}
-\label{subsection:SDFs}
-
-Como hemos visto, es indispensable para poder aplicar este algoritmo disponer para cada objeto que componga la escena de una función que estime la distancia de un punto cualquiera de $\R^3$ a su superficie. A grandes rasgos, son las conocidas como `Signed Distance Function' (SDFs) las que para una superficie concreta calculan para cualquier punto la distancia estimada a dicha superficie.
-
-Primero explicaremos brevemente el fundamento matemático. Sea $f:\R^n\longrightarrow\R$ una función continua que define implícitamente el conjunto 
-$$
-A = \{x\in\R^n: f(x)\leq 0\}.
-$$
-Por continuidad, $f(x)=0\ \ \forall x\in\partial A$. Decimos que la frontera $\partial A$ define la \textit{superficie implícita} de $f$. De hecho, $f$ es negativa en el interior de $A$ ($f(x)<0 \ \ \forall x\in\mathring A$), por lo que podemos decir que dicha superficie implícita $\partial A$ coincide precisamente con el conjunto $f^{-1}(0)$. A partir de una función real y continua podemos entonces definir una superficie en $\R^n$.
-
-\begin{definicion}[SDF]
-    Una función continua $f:\R^3\longrightarrow\R$ se conoce como una \textbf{`Signed Distance Bound'} (cota de la distancia con signo) de su superficie implícita $f^{-1}(0)$ si, y solo si
-    \begin{equation}
-        \label{eq:SDB}
-        |f(x)|\leq d(x,f^{-1}(0)) \ \ \forall x\in\R^3
-    \end{equation}
-    
-    Si se tiene la igualdad en (\ref{eq:SDB}), entonces $f$ es una \textbf{`Signed Distance Function'} (función distancia con signo).
-\end{definicion}
-
-El caso de las `signed distance bound' también suele ser llamado `BDF' (Bounding Distance Function).
-
-Una forma sencilla de entender este concepto es concibiendo una superficie como los puntos en los que se anula la función distancia. Es decir, si un punto se sitúa a distancia 0 es porque pertenece a dicha superficie. En caso de que la distancia sea positiva en módulo el punto se sitúa fuera, tan lejos como diga dicho módulo.
-
-Como ya hemos visto en la sección anterior, algunas primitivas, como las esferas, pueden ser fácilmente definidas por su SDF. Recordamos de la ecuación (\ref{eq:distancia-punto-esfera}) que la SDF de una esfera es $f(x)=|x-c|-r$ siendo $c\in\R^3$ su centro y $r\in\R$ su radio. Entonces un punto exterior a la esfera tendrá un valor de la SDF positivo, uno interior tendrá un valor negativo y únicamente se anulará en el caso de que el punto pertenezca a la superficie de la esfera (ver imagen \ref{fig:SDF-esfera}).
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.5]{img/C8/SDF-esfera.png}
-    \caption{Ejemplos de puntos con distintos valores de la SDF de una esfera}
-    \label{fig:SDF-esfera}
-\end{figure}
-
-Otro ejemplo sencillo es el caso de la SDF de un plano. Sea entonces un plano arbitrario $P$ definido por la ecuación $Ax+By+Cz = D$, siendo $\vec N=(A,B,C)$ el vector normal al plano. El punto $p_0$ perteneciente a un plano más cercano a otro punto $p$ dado es aquel que interseca con la recta cuyo vector director es el normal al plano y que pasa por $p$. Es decir, el punto de la recta $S(t)=p+\vec Nt$ que satisface la ecuación $(A,B,C)\cdot (x,y,z) = D$. Veámos para qué $t$ se satisfacen las ecuaciones.
-\begin{equation}
-    \label{eq:t-mas-cercano}
-    \begin{split}
-        \vec N\cdot S(t) &= D \\
-        \vec N\cdot (p+\vec N t) &= D \\
-        t &= \dfrac{D-\vec N \cdot p}{|\vec N|^2}
-    \end{split}
-\end{equation}
-Por tanto la distancia entre punto y plano es la longitud del vector que une a $p$ con $p_0$, véase en la imagen \ref{fig:SDF-plano}.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.4]{img/C8/SDF-plano.png}
-    \caption{Cálculo de la distancia de un punto a un plano}
-    \label{fig:SDF-plano}
-\end{figure}
-
-En \cite[Table 1]{Hart-1995} podemos encontrar una lista de primitivas con referencias a sus correspondientes SDFs.
-
-\subsection{Implementación de Sphere-Tracing en pseudocódigo}
-
-Una vez conocemos el funcionamiento intuitivo del algoritmo y la necesidad de SDFs para cada objeto, podemos empezar a pensar en una primera implementación en pseudocódigo del algoritmo. Previamente, necesitamos fijar algunas constantes que sirven como parámetro al algoritmo. Estas constantes son:
+En el mundo de la informática gráfica existen dos formas fundamentales de proceder a la representación de escenas. Supongamos que tenemos una escena 3D con varios objetos, como pueden ser por ejemplo un cubo y un par de esferas y queremos visualizar la misma en un canvas 2D.
 \begin{itemize}
-    \item $\mathtt{MAX\_STEPS}$: Número máximo de iteraciones o avances en el rayo que se procesarán antes de decidir que el rayo no impacta con ninguna superficie. Es decir, alcanzado dicho número de iteraciones, el algoritmo concluye que el rayo se pierde en el infinito.
-    \item \texttt{MAX\_DIST}: Distancia máxima considerada. A distancia del origen del rayo mayor que ésta suponemos que no existe ningún objeto en la escena.
-    \item $\varepsilon$: Mínima distancia tal que si en una iteración la distancia mínima calculada es menor que $\varepsilon$ se considera que el punto evaluado pertenece a la superficie del objeto. Claramente un valor pequeño de $\varepsilon$ supone una resolución mayor a cambio de un mayor tiempo de cálculo.
+    \item Una de las formas de representarla es la \textbf{rasterización}, ya introducida al inicio del capítulo \ref{chap:visualizacion}. Esta técnica se basa en modelos de fronteras de objetos 3D. Esto es, se representan objetos constituidos a partir de conjuntos de caras planas poligonales (típicamente triángulos), y se denominan primitivas a dichas caras. Pensemos por ejemplo en un cono como una pirámide cuya base es un polígono regular de muchos lados. El método consiste en identificar para cada primitiva que compone la escena qué píxeles ocupa y asignar color a cada píxel, aplicando posibles modelos de iluminación y texturas.
+    \item Otra forma es, para cada pixel, calcular qué primitivas de la escena se proyectan sobre dicho píxel y colorearlo dependiendo de la primitiva más cercana al observador. Esta es la base del \textbf{Ray-Tracing}. En este caso los objetos son representados mediante un algoritmo de cálculo de intersección entre una semirrecta (rayo) y la superficie del objeto en cuestión. Esto engloba los modelos de fronteras utilizados en rasterización, pero además abre posibilidades como objetos con extensión infinita o los propios fractales, que son nuestro principal objetivo.
 \end{itemize}
-Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ (cada uno identificado por un entero $i$, empezando en $0$) y un rayo $R(t)=p_0 + \vec v t$, se describiría como indica el algoritmo \ref{alg:Sphere-Tracing}.
+
+Más en profundidad, la idea es situar al observador en una cierta posición de la escena y colocar frente a él un plano, el cual estará dividido en tantos píxeles como tenga el canvas, de tal manera que se `trazan rayos' que salen desde la posición del observador (en adelante también llamada `punto de vista' o `foco de la proyección') en dirección a cada píxel, por lo que se lanzan tantos rayos como píxeles haya. El rayo atraviesa el plano y avanza por la escena hasta que encuentra la intersección con un objeto. En este caso, se calcula en qué punto se ha alcanzado la intersección y se evalúa un modelo de iluminación o se asigna un color dependiendo de las características de la escena. También es posible que el rayo no alcance ningún objeto, en cuyo caso habría que saber qué hacer con los píxeles cuyos rayos se pierden en el infinito. En la imagen \ref{fig:RT} se puede observar un esquema aclarativo del funcionamiento de este método.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/RT.png}
+    \caption{Esquema básico del funcionamiento del Ray-Tracing}
+    \label{fig:RT}
+\end{figure}
+
+La principal ventaja que tiene el Ray-Tracing (en adelante RT) sobre la rasterización es que este trazado de rayos nos permite facilitar el cálculo de los reflejos y sombras creados por las iluminaciones del entorno, consiguiendo así efectos mucho más realistas en las escenas. Además, las figuras fractales como objetos matemáticos ideales carecen de una superficie o frontera que sea una variedad bidimensional o superficie regular continua, ni siquiera continua a trozos, por lo que no es posible representarlos idealmente utilizando modelos de fronteras como los que utiliza la rasterización. 
+
+No obstante, al igual que en la mayoría de problemas de computación gráfica, los fractales 3D se pueden convertir a modelos de fronteras asumiendo un cierto error de discretización, el cual es totalmente inevitable. Por tanto, partiendo de este hecho, es posible visualizar esos modelos con rasterización o con ray-tracing. Sin embargo, esa conversión es lenta y produce modelos de gran tamaño en memoria. 
+
+Por tanto, es mucho más sencillo usar RT, el cual, si bien también es algo aproximado, es muchísimo más eficiente en memoria, ya que no requiere de ninguna estructura de datos, sino simplemente de un algoritmo de intersección aproximado entre una semirrecta y el fractal. Además no emplea tiempo en la conversión a modelo de fronteras. 
+
+Otra gran ventaja del ray-tracing sobre la rasterización es la dificultad de elegir una conversión a modelos de fronteras con una resolución adecuada. Si la discretización es demasiado fina el tiempo de computación crece mientras que se consigue una mayor resolución, y si no es lo suficientemente fina se pierde mucha resolución.
+
+Sin embargo, este algoritmo tiene una principal desventaja, y es que es un proceso muy costoso, y más aún cuanto más detalle queramos conseguir. Es por esto que ha sido muy difícil dar el salto al ray tracing en tiempo real. Por ejemplo, en el mundo de los videojuegos NVIDIA, que es una famosa empresa desarrolladora de GPUs, comenzó a desarrollar algoritmos para poder utilizar RT en sus GPUs hace varios años, pero hasta finales de 2018 no salieron al mercado las primeras gráficas con estas características. Por su parte, los juegos también deben soportar el algoritmo, por lo que aún son una minoría de videojuegos los que en la actualidad soportan Ray Tracing. En un futuro no muy lejano es posible que haya una tendencia a un desarrollo masivo de juegos que utilicen RT, pero de momento solo tenemos algunos ejemplos como Battlefield V, Minecraft, Metro Exodus, Watch Dogs y Call of Duty: Modern Warfare (2019).
+
+En resumen, y por todas las ventajas y a pesar de las desventajas que hemos descrito de RT sobre la rasterización y los modelos de fronteras en nuestro problema concreto, tomamos la decisión de programar un \textit{ray-tracer} inicialmente básico con el objetivo futuro de generar fractales 3D. La idea por tanto es lanzar rayos a cada píxel y en caso de encontrar intersección con el objeto evaluar un modelo de iluminación para asignar un color concreto.
+
+\section{Elementos y estructura de un Ray-Tracer}
+\label{section:elementos-RT}
+
+Hasta ahora hemos visto y explicado en qué consiste el algoritmo RT desde un punto de vista básico. Veamos ahora qué componentes tiene un programa que emplee ray-tracing y conceptos generales, pero más concretos, acerca del cálculo de intersecciones entre semirrectas y objetos 3D. Tres de los componentes más esenciales en un \textit{ray-tracer} son:
+
+\begin{itemize}
+    \item \textbf{Generación de rayos primarios}: Por cada píxel se crea un rayo (llamado \textit{rayo primario} o \textit{rayo de cámara}).
+    \item \textbf{Cálculo de intersecciones}: Dado un punto $o\in\R^3$ y un vector $\vec v\in\R^3$, se trata de encontrar el mínimo valor positivo de $t$ tal que el punto $p(t)=o+\vec v t$ se encuentra en la superficie o frontera de algún objeto de la escena.
+    \item \textbf{Modelo de Iluminación Local}: Abreviado como MIL, calcula el color que se asigna a cada píxel cuyo rayo asociado ha intersecado un objeto en función del material asignado, las fuentes de luz y el punto de intersección rayo-objeto. RT además en este caso nos proporciona una poderosa ventaja, pues trazando un rayo desde cualquier punto de la escena en dirección a una fuente de luz podemos evaluar si dicho punto está o no en la sombra arrojada de algún objeto sin más que evaluar si el rayo encuentra alguna intersección en su camino hacia la fuente de luz.
+\end{itemize}
+
+Con estos tres elementos, una primera descripción en pseudocódigo del algoritmo fundamental de Ray-Tracing sería el del algoritmo \ref{alg:Ray-Tracing}.
 
 \begin{algorithm}[H]
-\caption{Sphere-Tracing} \label{alg:Sphere-Tracing}
-\begin{algorithmic}
-\Procedure{Sphere-Tracing}{$objects[num\_objects], R(t)= p_0 + \vec v t$}
-\State $p\gets p_0$
-\State $steps \gets 0$
-
-\While{$steps < \mathtt{MAX\_STEPS}$} \Comment{También se puede fijar una distancia máxima}
-    \State $min\_dist \gets \mathtt{MAX\_DIST}$
-    \State $i\gets 0$
-    
-    \While{$i < num\_objects$}\Comment{Cálculo de la mínima distancia de cada iteración}
-        \State $dist \gets SDF_{objects[i]}(p)$
-        \If{$dist < min\_dist$}
-            \State $min\_dist \gets dist$
-            \State $index\gets i$
-        \EndIf
-        \State $i++$
-    \EndWhile
-    \If{$min\_dist < \varepsilon$}
-        \State \textbf{Hay intersección} con $objects[index]$
-    \Else
-        \State $p\gets p + \vec v \cdot min\_dist$ \Comment{Avanzamos en el rayo}
-    \EndIf
-    \State $steps++$
-\EndWhile
-
-\State \textbf{No existe intersección}
-\EndProcedure
-\end{algorithmic}
+    \caption{Ray Tracing} \label{alg:Ray-Tracing}
+    \begin{algorithmic}
+        \State $o\gets$ posición del observador en WC.
+        \For{cada píxel $(i,j)$ del canvas}
+            \State $q\gets$punto central del píxel $(i,j)$ en WC
+            \State $\vec v\gets$ vector desde $o$ hasta $q$
+            \State $O\gets$ primer objeto visible desde $o$ en la dirección $\vec v$
+            \If{no existe objeto visible}
+                \State $rad\gets$ color de fondo para $\vec v$ 
+            \Else
+                \State $p\gets$ punto de intersección en $O$
+                \State $rad\gets$ evaluarMIL($O,p$).
+            \EndIf
+            \State Asignar el color $rad$ al píxel $(i,j)$
+        \EndFor
+    \end{algorithmic}
 \end{algorithm}
+
+Sobre el cálculo de intersecciones, en caso de que se utilicen modelos de fronteras es necesario a su vez utilizar indexación espacial. Esto es, dividir jerárquicamente el espacio en zonas de forma que sea más sencillo localizar un objeto. Esto se debe a que, en caso de encontrarse una intersección con un objeto, para saber de cual se trata podemos hacer una búsqueda secuencial, pero sería muy ineficiente en escenas muy complejas. Por ello, se divide en regiones el espacio y se busca en orden de complejidad logarítmica.
+
+Por su parte, para intersecciones de rayos con objetos no definidos mediante modelos de fronteras debemos calcular el primer cero de determinado campo escalar a lo largo del rayo. Para ello hay dos posibilidades:
+\begin{itemize}
+    \item \textbf{Usando expresiones analíticas}. Por ejemplo, una esfera de centro $c\in\R^3$ y radio $r>0$ encuentra una intersección con el rayo $o+\vec v t$ en el punto que se verifica la ecuación
+    $$
+    \|o+\vec v t - c\| - r = 0
+    $$
+    Este tema se aborda con detalle en la sección \ref{subsection:esfera}.
+    \item \textbf{Con un método iterativo}. En ocasiones la resolución de estas ecuaciones es demasiado compleja, por lo que se abordan soluciones iterativas, como pueden ser técnicas estándar de resolución de ecuaciones como el método de Newton. Dentro de esta posibilidad, podemos también contar con una función que estima la distancia a la superficie del objeto y aplicar el algoritmo conocido como `ray marching' o `sphere tracing', el cual explicaremos detenidamente en la sección \ref{section:sphere-tracing}, pero adelantamos que fue introducido por Hart en \cite{Hart-1995}.
+\end{itemize}
+
+
+A partir de ahora, veremos como implementar un \textit{ray-tracer} básico utilizando WebGL. Utilizaremos objetos sencillos como planos y esferas, cuyas intersecciones con rayos se pueden calcular fácilmente de forma analítica sin recurrir a métodos iterativos ni a modelos de fronteras.
+
+En nuestro caso, y de manera similar a la efectuada con los fractales 2D, el vertex shader utilizado es trivial, de hecho es exactamente el mismo que se puede encontrar al inicio del capítulo \ref{chap:fractales-2D}. Por tanto el grueso de la programación se hará de nuevo en el fragment shader, que es el que se ejecuta una vez por píxel. Por su parte, usaremos JavaScript para pasarle variables uniform al shader y para añadir interactividad a la escena. Usaremos de nuevo las clases \verb|Shader| y \verb|Buffer|, pero por las diferencias que existen entre los parámetros de una escena en 2D y una escena en 3D se ha implementado una nueva clase \verb|Scene3D|, que realmente hace lo mismo que \verb|Scene2D| pero utilizando parámetros que requiere una escena 3D. También para gestionar la interacción usuario-escena se ha utilizado un nuevo fichero de JavaScript: \verb|fractals-3D.js|, llamado así porque es el mismo fichero que en el futuro utilizaremos para interactuar con fractales. Recomendamos revisitar la sección \ref{section:codigo} para recordar el papel que realiza la escena y el fichero que gestiona la interacción y los eventos. Puede consultar la documentación del código de JavaScript en el apéndice \ref{appendix:javascript}.
+
+Las siguientes secciones irán dedicadas a explicar la programación del fragment shader, ya que es el elemento que mayor complejidad y lógica contiene.
+
+\section{Creación de rayos primarios}
+\label{section:rayo}
+
+Recordamos que cuando se trataba de fractales 2D utilizamos una transformación lineal para identificar cada píxel con un punto del plano complejo (sección \ref{section:pantalla-plano}). En este caso debemos identificar cada píxel con un punto no del plano complejo, sino del que llamaremos \textit{plano de proyección} ($P$), que es el plano que colocamos frente al espectador dividido en tantos píxeles como tenga el canvas, de forma que se trazan rayos desde el espectador y hacia dichos píxeles. Supongamos a partir de ahora que queremos representar la escena en un canvas de $n_x\times n_y$ píxeles.
+
+Para cada píxel debemos calcular su posición central en coordenadas de mundo a partir de las coordenadas de dispositivo, que son dos valores enteros $(x',y')$, aunque para identificar cada píxel con su centro tomaremos como coordenadas de dispositivo $(x,y)=(x',y')+\left(\frac 1 2, \frac 1 2\right)$. Este proceso es justamente el contrario al que se utiliza en rasterización, donde se necesita convertir las coordenadas de mundo de las primitivas en coordenadas de dispositivo. Para ello, se utiliza una matriz $M$ que es la composición de la matriz de vista 3D, la cual transforma coordenadas de mundo (WC) a coordenadas de cámara junto con la matriz de proyección, que calcula las coordenadas de dispositivo (DC) a partir de las coordenadas de cámara (véase la analogía con los párrafos que describen la transformación \ref{eq:transformacion-lineal-matrix}). Por tanto, en cierto sentido lo que buscamos es buscar una transformación lineal asociada a la inversa de la matriz $M$.
+
+En nuestro caso concreto utilizaremos un canvas de $1280\times 720$ píxeles, que guarda una proporción de $16:9$, que es de hecho la más habitual.
+
+\begin{lstlisting}
+<canvas id="glCanvas" width="1280" height="720"></canvas>
+\end{lstlisting}
+
+Inicialmente, supongamos que el observador se sitúa en el punto $(0,0,0)$ y que el plano de proyección se sitúa a distancia 1 en el eje negativo $Z$. Esta distancia del observador al plano de proyección es la conocida como la \textit{distancia focal}. Se denomina \textit{lookfrom} u origen y denotamos como $o_c$ al punto desde el que se observa, es decir, en el que se sitúa el observador; y \textit{lookat} o punto de atención $a_t$ al punto hacia el que mira, que en este caso sería el $(0,0,-1)$. En ocasiones nos referiremos al punto $o_c$ como posición del observador o punto de vista.
+
+Como convención asumimos que a la derecha se sitúa el eje positivo $X$, hacia arriba el eje positivo $Y$ y el `interior de la pantalla' es el eje negativo $Z$. Asumimos ahora también que el plano de proyección tiene 2 unidades de alto, lo cual implica que si el ratio ancho/alto es $16/9$ entonces el ancho es de $3.55$ unidades, aunque ese es un valor que calcularemos y almacenaremos en una variable y no importará realmente cual sea.
+
+Un rayo es en realidad simplemente una semirrecta de $\R^3$, las cuales están unívocamente determinadas por un punto $p$ del espacio afín $\R^3$ al cual llamaremos \textit{origen} y por un vector $\vec v$ del espacio vectorial $\R^3$ que denominamos \textit{dirección}. De esta forma, un rayo puede ser expresado como la imagen de la función
+
+$$
+R(t) = p + t\cdot \vec v \ \ \forall t\in\R_0^+,
+$$
+de forma que para cualquier punto $p_0$ del rayo $R$ existe un único $t_0\in\R_0^+$ tal que $R(t_0) = p_0$.
+
+A nivel de código GLSL, la manera de representar un rayo será utilizando una estructura (\verb|struct|) que denominaremos \verb|Ray|. Las estructuras en GLSL son muy parecidas en sintaxis y también en uso a las del lenguaje C. 
+
+\begin{lstlisting}
+struct Ray {
+    vec3 orig;      // Origen del rayo
+    vec3 dir;       // Direccion del rayo
+};
+\end{lstlisting}
+
+Y si dado un rayo $R$ queremos calcular qué punto de $\R^3$ le corresponde a cierto $t\in\R_0^+$, utilizamos la siguiente función.
+
+\begin{lstlisting}
+vec3 ray_at(Ray R, float t){
+    return R.orig + t*R.dir;
+}
+\end{lstlisting}
+
+Esta función nos será útil a la hora de calcular el punto exacto en el que se produce una intersección rayo-objeto cuando solo se conoce la distancia $t$ a la que se produce el impacto.
 
 \begin{observacion}
-\label{observacion:vector-normalizado}
-    Cabe destacar un importante detalle, y es que a partir de este momento es indispensable que en la creación del rayo el vector dirección esté normalizado, pues si queremos avanzar $min\_dist$ unidades en la dirección $\vec v$ y $|v| \not= 1$ se avanzaría una distancia distinta y el algoritmo no funcionaría correctamente, véase imagen \ref{fig:vectores-no-normalizados}.
+    Realmente se pueden utilizar valores de $t\in\R$ positivos o negativos, pero pensemos que los valores negativos corresponden a puntos del rayo situados detrás del observador, que no se pueden ver, por lo que es preferible restringirnos a valores no negativos.
 \end{observacion}
 
-Nótese cómo para el cálculo de la distancia utilizamos funciones distintas que dependen de cada objeto, de ahí el subíndice.
+Una vez tenemos determinada una forma de representar un rayo, es momento de crear un rayo cuyo origen sea la posición del observador y su dirección sea el vector que tiene como origen el observador y como destino el punto del plano de proyección que identificamos con el píxel. En la situación hipotética que hemos planteado antes en la cual $o_c=(0,0,0)$, llamamos $d_f$ a la distancia focal, $P_h=2$ a la altura del plano de proyección, $P_w$ a la anchura del plano de proyección, $r = 16/9$ (\textit{aspect ratio}) a la proporción $r = \frac{P_w}{P_h}$, de forma que se verifica $P_w=r\cdot P_h$. Con estas variables, llamemos $\mathrm{LLC}$ (\textit{Lower Left Corner}) al punto situado en la esquina inferior izquierda del plano de proyección, entonces:
+\begin{equation}
+    \label{eq:LLC-inicial}
+    \mathrm{LLC} = o_c - \frac{P_w}{2}\cdot(1,0,0) - \frac{P_h}{2}\cdot(0,1,0) - d_f \cdot (0,0,1)
+\end{equation}
 
-\subsection{Implementación de Shere-Tracing en GLSL}
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/elementos-PP.png}
+    \caption{Elementos que participan el RT}
+    \label{fig:elementos}
+\end{figure}
 
-Veámos ahora cómo podemos llevarnos todos estos nuevos conocimientos a la GPU con GLSL. El objetivo ahora es modificar el fragment shader eliminando la dependencia de \verb|Hit_Sphere| y de \verb|Hit_Plane| para utilizar Sphere-Tracing en el momento de calcular las intersecciones. Realmente el resultado de estas modificaciones debería ser el mismo que en el final del capítulo anterior, pero ahora encontraremos las intersecciones del rayo de forma distinta. 
+Una vez conocemos las coordenadas de mundo de la esquina superior izquierda, la cual identificamos con el píxel inferior izquierdo del canvas, debemos recuperar la transformación \ref{eq:transformacion-lineal-3}, pero en este caso nos debemos llevar la región $[0,n_x]\times[0,n_y]$ a $[0,P_w]\times[0,P_h]\times\{-1\}$ (recordemos que estamos situando el plano de proyección en el plano $z=-1$). La transformación por tanto en este caso es
 
-Lo primero que necesitaremos es una función que calcule la distancia de un punto a una esfera $S$ y otra que calcule la distancia a un plano $P$. Respecto a la esfera, es tan sencillo como implementar una función que calcule la fórmula \ref{eq:distancia-punto-esfera}.
+\begin{equation}
+    \label{eq:transformacion-lineal-4}
+    \begin{split}
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow [0,P_w]\times[0,P_h]\times \{-1\} \\
+        (x,y) & \longmapsto \left(\frac{P_w\cdot x}{n_x},\frac{P_h\cdot y}{n_y},-1\right)
+    \end{split}
+\end{equation}
+donde $(x,y)$ son las coordenadas de dispositivo en términos de píxeles a las que puede acceder el fragment shader a traves de \verb|gl_FragCoor|, a las cuales recordamos que se les suele añadir $\frac{1}{2}$ en cada componente para así hacer la identificación con el punto que se encuentra en el centro del píxel, y no la esquina inferior izquierda. Así identificamos el alto y ancho del canvas con el alto y ancho del plano de proyección, de manera que a partir de estos valores y conociendo qué punto se sitúa en la esquina inferior izquierda podemos definitivamente calcular con qué punto del plano de proyección ($P$) identificamos el píxel:
+\begin{equation}
+    \label{eq:transformacion-lineal-5}
+    \begin{split}
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow P \\
+        (x,y) & \longmapsto LLC + \left(\frac{P_w}{n_x}x,\frac{P_h}{n_y}y,-1\right)
+    \end{split}
+\end{equation}
+Y por tanto, la dirección del rayo sería
+$$
+\vec v = \phi(x,y) - o_c
+$$
+y el origen sería obviamente el punto $o_c$.
+
+La transformación $\phi$ es la que corresponde a la inversa de la matriz $M$ de vista y proyección, pues transforma las coordenadas de dispositivo en coordenadas de mundo del plano de proyección. Suponiendo que identificamos las coordenadas de dispositivo $(x,y)$ con el vector $(x,y,0,1)^t$ y un punto $p=(p_1,p_2,p_3)\in\R^3$ con el vector $(p_1,p_2,p_3,1)^t$, la transformación (\ref{eq:transformacion-lineal-5}) puede expresarse matricialmente como:
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix-3D-base}
+    \phi(x,y) = \left(\begin{array}{ccc|c}
+        \frac{P_w}{n_x} & 0 & 0 & 0 \\
+        0 & \frac{P_h}{n_y} & 0 & 0 \\
+        0 & 0 & 0 & -1 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+        \begin{array}{c}
+            x \\ y \\ 0 \\ \hline 1
+        \end{array}\right)
+\end{equation}
+
+El código GLSL que hemos utilizado hasta este punto, en el que hemos calculado $\mathrm{LLC}$ e implementado la transformación (\ref{eq:transformacion-lineal-5}), sería el siguiente:
 
 \begin{lstlisting}
-// Dada una esfera S y un punto p, calcula la distancia
-// del punto a la superficie de la esfera
-float get_dist_sphere(vec3 p, Sphere S){
-    return length(S.center - p) - S.radius;
+
+Ray get_ray(vec3 lookfrom, vec3 lookat, 
+    float viewport_width, float viewport_height, 
+    float u, float v) {
+    
+    Ray R;
+    R.orig = lookfrom;
+    float df = length(lookat - lookfrom); // Distancia focal
+    vec3 lower_left_corner = lookfrom
+        - viewport_width/float(2.0)*vec3(1.0, 0.0, 0.0)
+        - viewport_height/float(2.0)*vec3(0.0, 1.0, 0.0) 
+        - df*vec3(0.0, 0.0, 1.0);
+    R.dir = lower_left_corner 
+        + u*vec3(viewport_width, 0.0, 0.0)
+        + v*vec3(0.0, viewport_height, 0.0) 
+        - lookfrom;
+    return R;
 }
-\end{lstlisting}
 
-Por parte del plano, ya vimos en la sección \ref{subsection:SDFs} cómo calcular la distancia de un punto $p$ a un plano dado por la ecuación $Ax+By+Cz=D$. Primero calculamos el valor de $t$ dado por la ecuación \ref{eq:t-mas-cercano} para así obtener el punto del plano más cercano a $P$, y a partir de ahí obtener la distancia. El código entonces sería:
-
-\begin{lstlisting}
-// Dado un plano P y un punto p, calcula la distancia del 
-// punto p a la superficie del plano.
-float get_dist_plane (vec3 p, Plane P) {
-    float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
-    vec3 closest_point = p + t_interseccion * P.normal;
-    return length(p-closest_point);
-}
-\end{lstlisting}
-
-En realidad podríamos aprovechar que utilizamos como suelo el plano horizontal $y=-2$ y la SDF sería simplemente la componente $y$ del punto $p$ más dos, pero estaríamos limitando la función a este único plano.
-
-Seguidamente necesitamos fijar dos constantes: el número máximo de iteraciones que se darán en el algoritmo (\texttt{MAX\_STEPS}) y $\varepsilon$, la distancia mínima por debajo de la misma se considera que un punto pertenece a la superficie. La primera de ellas la podemos tomar como una macro, al igual que hicimos con el tamaño de los arrays, pero la segunda interesa que sea parametrizable, para así poder observar los niveles de detalle y qué variaciones experimenta la escena al modificar este valor. Por ello, usamos una variable \verb|uniform| a la que pasaremos valor vía JavaScript, que llamaremos \texttt{u\_epsilon}.
-
-\begin{lstlisting}
-uniform float u_epsilon;
 // ... 
-#define MAX_STEPS 1000
+
+// Dimensiones del canvas
+float aspect_ratio = 16.0/9.0;
+float nx = 1280.0;
+float ny = nx / aspect_ratio;
+
+// Coordenadas de dispositivo normalizadas [0,1]
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / 
+    vec2(nx, ny);
+float u = uv.x;
+float v = uv.y;
+
+// Dimensiones del plano de proyeccion
+float viewport_height = float(2.0);
+float viewport_width = viewport_height * aspect_ratio;
+
+// lookfrom y lookat
+vec3 lookfrom = vec3(0.0, 0.0, 0.0);
+vec3 lookat = vec3(0.0, 0.0, -1.0);
+
+// Ray
+Ray R = get_ray(lookfrom, lookat, 
+    viewport_width, viewport_height, 
+    u, v);
 \end{lstlisting}
 
+Y de esta forma el fragment shader obtiene un rayo por cada píxel que tiene como origen la posición del observador y que interseca con el plano de proyección en el punto correspondiente al píxel.
 
+\section{El background}
 
-Y ya tenemos todo preparado para implementar el sphere-tracing. La función que dado un rayo calcula posibles intersecciones con los cuerpos y asigna un color es \verb|ray_color|, por lo que lo más natural es editar el código de esta función. En lugar de llamar a \verb|hit_sphere_list| y \verb|hit_plane| como hicimos en la sección \ref{subsection:plano} aplicaremos sphere-tracing. Como GLSL no nos permite mantener un array heterogéneo en el que almacenar todos los objetos independientemente de su tipo, tenemos que hacerlo de forma secuencial. Y como tampoco permite acceder a elementos de un array a partir de índices no constantes, utilizaremos una variable donde almacenar la esfera más cercana, para recuperarla en caso de intersección, véase el código.
+Una vez tenemos creado el rayo asignado a un píxel debemos asignar un color. La función que dado un rayo $R$ devuelve el color del cual colorearemos el píxel la llamaremos \verb|ray_color|. Esta función se verá sometida a muchos cambios, sobre todo en sus argumentos dependiendo de los elementos que compongan la escena, pero de momento asumimos una escena vacía. Que la escena esté vacía supone que ningún rayo interseca ninguna superficie, pero independientemente de ello hay que asignar un color al píxel. Esta asignación de color a un rayo que no interseca ninguna superficie determina el fondo (\textit{background}) de la escena, y esta decisión que tomaremos ahora sobre cómo colorear el fondo nos acompañará durante el resto del desarrollo. 
+
+En concreto, hemos decidido simular algo parecido al cielo mediante un degradado vertical de un \textcolor{background-blue}{azul} \texttt{rgb(127, 178, 255)} a blanco \texttt{rgb(255, 255, 255)}, definiendo el color a partir de la componente $y$ del vector director normalizado. Mostramos el código correspondiente también para clarificar esta descripción.
 
 \begin{lstlisting}
-vec4 ray_color(Ray r, Sphere S[ARRAY_TAM], int num_spheres, 
-    Plane ground,
-    Directional_light lights[ARRAY_TAM], int num_lights) {
-    
-    Hit_record hr; hr.hit = false;  // Estructura Hit_record
-    float dist = MAX_DIST;          // Distancia a cada objeto 
-    vec3 p = r.orig;                // Punto del rayo
-    float closest_dist = MAX_DIST;  // Menor distancia
-    float current_t = 0.0;          // p=orig+current_t*dir
-    vec4 tmp_color;                 // Color temporal
-    Sphere S_hit;                   // Esfera mas cercana
-    
-    int object_index;   // 0,...,num_spheres-1: esferas,
-                        // num_spheres: plano
-    // Sphere Tracing
-    for(int i = 0; i < MAX_STEPS; i++) {
-        // Calculamos el objeto mas cercano
-        closest_dist = MAX_DIST;
-
-        // Distancia a las esferas
-        for(int i = 0; i < ARRAY_TAM; i++) {
-            if(i == num_spheres) break;
-            dist = get_dist_sphere(p, S[i]);
-            if(dist < closest_dist) {
-                closest_dist = dist;
-                object_index = i;
-                S_hit = S[i];
-            }
-        }
-
-        // Distancia al suelo
-        dist = get_dist_plane(p, ground);
-        if(dist < closest_dist) {
-            closest_dist = dist;
-            object_index = num_spheres;
-        }
-    
-        // closest_dist almacena la menor de las distancias
-        // y object_index el indice del objeto mas cercano
-        if(closest_dist < u_epsilon){   // Hay interseccion
-            hr.hit = true;
-            hr.t = current_t;
-            hr.p = ray_at(r, hr.t);
-
-            if(object_index == num_spheres){ // Suelo
-                // Codigo de interseccion con el suelo ...
-            }
-            else {      // Una de las esferas
-                // Codigo de interseccion con S_hit
-            }
-        }
-        // Si no hay interseccion, avanzamos en el rayo
-        current_t += closest_dist;
-        p = ray_at(r, current_t);
-        // Si estamos muy lejos acabamos el bucle
-        if(current_t >= MAX_DIST) break;
-    }
-    // No hay interseccion
-    // Codigo del background ...       
+vec4 ray_color(Ray R) {
+    // R no interseca ninguna superficie
+    vec3 unit_direction = normalize(R.dir);
+    float t = 0.5*(unit_direction.y + 1.0);
+    return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
 \end{lstlisting}
 
-Fíjese que concuerda con la estructura que describe el algoritmo \ref{alg:Sphere-Tracing}. 
+De esta forma, si el rayo apunta hacia arriba el color del píxel será más azul y si apunta hacia abajo más blanco. En la imagen \ref{fig:background} podemos ver el gradiente utilizado.
 
-Una modificación muy necesaria para que el código funcione es la de la función \verb|light_is_visible|, que también utilizaba trazado de rayos para saber qué puntos se situaban a la sombra. La idea es la misma que la aplicada en \verb|ray_color|: sustituir la llamada a \verb|hit_sphere_list| por un bucle que implemente sphere-tracing hasta encontrar una intersección.
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/background-gradient.png}
+    \caption{Gradiente utilizado para el fondo de la escena}
+    \label{fig:background}
+\end{figure}
+
+Y en la imagen \ref{fig:first-render} podemos ver el resultado de efectuar la llamada a \verb|ray_color| una vez creado el rayo. Esta es la primera escena 3D generada utilizando RT en WebGL. Nótese que en la imagen no aparecen todos los colores del gradiente de la imagen \ref{fig:background}, y esto se debe a que los rayos que se trazan en esta situación inicial no cubren todas las alturas posibles. Por ejemplo, no se traza un rayo totalmente vertical hacia arriba ni hacia abajo, solo se trazan las alturas necesarias para cubrir el plano de proyección. Esto nos da una manera de orientarnos en la altura una vez parametricemos la posición y orientación de la cámara (sección \ref{section:camara}), de tal manera que si vemos el fondo muy azul podemos asumir que se está mirando `al cielo' y si el color es blanco se estará mirando `al vacío'. 
 
 \begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p, 
-  Sphere world[ARRAY_TAM], int num_spheres) {
-  Ray R;
-  R.dir = normalize(light.dir);
-  R.orig = p;
-  float t = 2.0*u_epsilon; // Comenzamos a una pequena distancia
-  float dist, h;
-  for(int i = 0; i < MAX_STEPS; i++ ) {
-    h = MAX_DIST;
-    for(int i = 0; i < ARRAY_TAM; i++) {
-      if(i == num_spheres) break;
-      dist = get_dist_sphere(ray_at(R,t), world[i]);
-      h = min(h, dist);
-    }
-    if(h < u_epsilon)
-      return 0.0;
-    t += h;
-    if(t >= MAX_DIST) break;
-  }
-  return 1.0;
-}
+gl_FragColor = ray_color(R);
 \end{lstlisting}
 
-Hecha esta modificación, el resultado fijando ciertos parámetros dinámicamente es el mostrado en la imagen \ref{fig:esferas-ST}. Tal y como adelantamos, el resultado es muy similar al obtenido cuando calculábamos las intersecciones exactas, ya que realmente lo único que cambia es la forma de calcular las intersecciones, nada estrictamente visual.
-
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C8/esferas-sphere-tracing.png}
-    \caption{Escena tras implementar Sphere Tracing}
-    \label{fig:esferas-ST}
+    \includegraphics[scale = 0.35]{img/C7/first-render.png}
+    \caption{Primera escena vacía visualizada}
+    \label{fig:first-render}
 \end{figure}
 
-Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser un vector normalizado, es decir, unitario. De otro modo los avances en el rayo no estarán controlados, obsérvese en la imagen \ref{fig:vectores-no-normalizados} los resultados obtenidos al no normalizar el vector director al crear el rayo.
+\section{Visualizando una escena sencilla}
+\label{section:escena}
 
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.35]{img/C8/vectores-no-normalizados.png}
-    \caption{Escena utilizando vectores no unitarios en los rayos}
-    \label{fig:vectores-no-normalizados}
-\end{figure}
+Hasta este momento hemos diseñado la estructura del ray tracer como un observador situado en la posición $(0, 0,0)$ y proyectando una escena vacía en un plano de $2$ unidades de alto y guardando un ratio de 16:9. Sin embargo, aún queda lo más importante, que es añadir cuerpos a la escena con los que los rayos puedan intersecar. El objetivo de esta sección es describir la metodología y el código GLSL necesario para dibujar una escena con una o varias esferas y un plano con textura de tablero de ajedrez. 
 
-Aprovechando que el algoritmo sphere-tracing calcula en cada iteración la mínima distancia a objetos de la escena, podemos hacer una mejora en las sombras. Como se puede observar en las imágenes \ref{fig:componentes-aisladas}, \ref{fig:esferas-ST} y en todas las que presentan sombras hasta ahora, los límites de las sombras están muy marcados, lo cual queda poco realista. La apariencia mejoraría si se suavizaran los bordes, asignándole valores intermedios entre $0$ y $1$ a puntos que, aunque no estén en la sombra de un objeto, estén cerca. El truco consiste en pensar en los rayos que, aunque no impacten con ningún objeto, pasen muy cerca de él. En estos casos pondríamos los puntos en cuestión en una especie de penumbra, de forma que cuanto más cerca pase del conjunto, más oscuro se representará, es decir, se devolverá un valor más cercano a $0$. Por tanto, calcularemos un factor de penumbra en cada iteración de sphere-tracing y nos quedaremos con el menor de ellos. Tan solo tenemos que añadir algunas líneas de código a \verb|light_is_visible|.
+Para ello, y debido a la simplicidad que requiere el cálculo de intersecciones rayo-esfera y rayo-plano, calcularemos analíticamente las intersecciones, explicando detalladamente cómo hallarlas en las secciones \ref{subsection:esfera} y \ref{subsection:plano} respectivamente. En el capítulo \ref{chap:fractales-3D} sustituimos este cálculo analítico por un cálculo iterativo utilizando el algoritmo sphere-tracing, pero a modo introductorio es más sencillo de momento calcular directamente las intersecciones.
 
-\begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p, 
-  Sphere world[ARRAY_TAM], int num_spheres) {
-  
-  Ray R;
-  R.dir = normalize(light.dir);
-  R.orig = p;
-  float k = 16.0;  // Constante de suavizado de bordes
-  float res = 1.0; // Inicialmente 1
-  float t = 2.0*u_epsilon;
-  float dist;
-  float h = MAX_DIST;
-  for(int i = 0; i < MAX_STEPS; i++ ) {
-    h = MAX_DIST;
-    for(int i = 0; i < ARRAY_TAM; i++) {
-      if(i == num_spheres) break;
-      dist = get_dist_sphere(ray_at(R, t), world[i]);
-      if(dist < h)
-        h = dist;
-    }
-    if(h < u_epsilon)
-      return 0.0;
-    res = min(res, k*h/t); // Reducimos o no res
-    t += h;
-    if(t >= MAX_DIST) break;
-  }
-  return res;
-}
-\end{lstlisting}
+Tras esta visualización sencilla, en la sección \ref{section:Phong} emplearemos además un modelo de iluminación local sencillo pero muy utilizado: el modelo de Phong, el cual se describe con detalle a nivel teórico y a nivel de código. Con esto completaríamos los tres ítems esenciales que mencionamos al inicio de la sección \ref{section:elementos-RT}: rayos primarios, intersecciones y MIL.
 
-La constante \verb|k| es un factor que indica si el suavizado es más o menos notable. El valor $16$ es suficientemente bueno para nuestro cometido, véase el resultado final en la imagen \ref{fig:sombras-final}, pero mostramos en las imágenes \ref{fig:sombras-k} la representación con los valores $k=2,32$. Nótese como en la imagen \ref{fig:sombras-k} (a) el sombreado es muy difuminado y en la imagen \ref{fig:sombras-k} (b) es bastante más marcado.
+\subsection{Visualizando una esfera}
+\label{subsection:esfera}
 
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.4]{img/C8/sombras-final.png}
-    \caption{Resultado final de la modificación}
-    \label{fig:sombras-final}
-\end{figure}
-
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.25]{img/C8/sombras-k-2.png} &
-      \includegraphics[scale=0.25]{img/C8/sombras-k-32.png} \\    
-    (a) $k=2$ & (b) $k=32$  \\
-    \end{tabular}
-    \caption{Sombras con el parámetro $k=2,32$}
-    \label{fig:sombras-k}
-\end{figure}
-
-La manera más óptima y correcta que hemos conseguido de iluminar la escena a partir de este momento, y con la mirada puesta en la visualización de fractales, es mediante dos luces direccionales cuya intensidad es parametrizable al igual que en capítulo anterior y cuyos vectores de dirección son $(-1,1,0)$ y $(1,1,0)$. Es decir, dos luces que iluminan `desde arriba y por ambos lados'. Sin embargo, esto provoca que la parte de abajo de los objetos siempre se vea oscura, por lo que hemos dotado a la escena de una tercera luz direccional blanca en la dirección $(0,-1,0)$, con la particularidad de que esta no arroja sombras (siempre se le asigna \verb|visibility=1.0|), simplemente aporta iluminación a las partes bajas.
-
-\subsection{Comentarios sobre Sphere-Tracing}
-\label{subsection:comentarios}
-
-Una vez hemos introducido e implementado el algoritmo Sphere-Tracing, el lector es posible que piense que es una forma menos exacta y además menos eficiente que calcular analíticamente las intersecciones con los cuerpos. Es cierto que en casos como el de esferas o planos, cuyas ecuaciones implícitas y sus intersecciones con rayos están muy bien definidos y son sencillas de calcular, aplicar sphere-tracing ralentiza el procesado. Sin embargo, muchas superficies, como es el caso de los fractales, no cuentan con una ecuación implícita que la defina. Otras sí cuentan con ecuaciones implícitas pero estas son muy difíciles de resolver. En este último caso se pueden aplicar métodos numéricos para aproximar las soluciones, que son métodos precisamente iterativos. 
-
-Sin embargo, sphere-tracing sólo necesita, para cada cuerpo, una función que aproxime suficientemente bien la distancia a un conjunto, o al menos una cota inferior, y esta cota disminuya conforme el rayo se acerca al conjunto. Sería suficiente una cota inferior porque esta nos aseguraría que al avanzar en el rayo no nos pasamos de largo. Lo único que debemos garantizar es que la cota inferior debe tener exactamente los mismos ceros que la original (es decir, nunca es cero donde la original no lo es). De hecho, se puede usar esta metodología en casos donde incluso la función distancia exacta sea muy difícil o imposible de calcular.
-
-En concreto, podemos usar cualquier función $f$ que tenga exactamente los mismos ceros que la función distancia exacta y que sea lipschitziana, es decir, que existe una constante positiva $K$ tal que
-
+Primero introduciremos código para visualizar una esfera. Por simple geometría euclídea sabemos que, fijado un centro $c=(c_x,c_y,c_z)\in\R^3$ y un radio $r\in\R^+$, una esfera $S$ se define como aquellos puntos de $\R^3$ tales que su distancia a $c$ es $r$, es decir:
 $$
-|f(p)-f(q)|\leq K \|p-q\| \ \ \forall p,q\in\R^3 
+S = \{p\in\R^3:\|p-c\|=r\} = \{p\in\R^3:(p-c)\cdot (p-c)=r^2\}. 
 $$
-de tal forma que si llamamos $p_0$ al punto de la superficie más cercano a $p$, por hipótesis $f(p_0)=0$, por lo que
-
+donde en esta definición el operador $\cdot$ denota el producto escalar de $\R^3$. Si recordamos que los puntos que componen un rayo $R$ se pueden expresar como $R(t)= p_0 + \vec vt$ (donde $p_0$ es el origen del rayo y el vector $\vec v$ su dirección) con valores de $t$ reales no negativos, podemos calcular la intersección rayo-esfera sin más que resolver la ecuación
 $$
-|f(p)|\leq K \| p-p_0\|
+(R(t)-c)\cdot(R(t)-c)=r^2
 $$
-
-Si tomamos la función $g=f/K$, directamente se tendría 
-
-$$
-|g(p)|\leq\|p-p_0\|
-$$
-Convirtiendo a $g$ en una cota inferior de la distancia a $p_0$ (una BDF), por lo que podemos utilizar a $g$ para aplicar sphere tracing.
-
-Sin embargo, si tomamos una cota inferior en lugar de la exacta, al dar pasos más pequeños, se tiene menos eficiencia. Dicho esto, queda claro que la función distancia exacta de un punto a la superficie es la mejor opción, pues es lipschitziana por definición y su constante es de Lipschtiz es $1$, pero por dificultad en su cálculo se suelen usar cotas inferiores.
-
-Por tanto, a partir de un rayo y dichas funciones se puede aplicar sphere-tracing, de forma que se converge finalmente al punto de intersección. Por contra, si buscamos intersecciones analíticas hay que resolver ecuaciones, en ocasiones para acabar aproximando las soluciones, y retener la más pequeña. 
-
-Un aspecto a destacar de sphere-tracing es la dependencia de sus parámetros. Es importante fijar un valor $\varepsilon$ adecuado, ya que si es demasiado grande puede brindarnos resultados muy pobres. En la imagen \ref{fig:esferas-ST} se ha utilizado $\varepsilon=0.001$ y nos da un resultado muy bueno, pero obsérvese en la imagen \ref{fig:epsilon-grande} qué ocurre si se fija $\varepsilon=0.1$. Los límites de los cuadrados del suelo se distorsionan y las apariencias de las esferas también se ven muy resentidas. No obstante, es cierto que a mayor valor de $\varepsilon$ menos iteraciones y por tanto más velocidad, pero los resultados son peores. Es por tanto necesario utilizar valores de $\varepsilon$ adecuados a la situación, siendo suficientemente pequeños como para obtener un buen resultado pero suficientemente grandes como para que sea computacionalmente viable.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.3]{img/C8/epsilon-grande.png}
-    \caption{Escena generada utilizando $\varepsilon=0.1$}
-    \label{fig:epsilon-grande}
-\end{figure}
-
-Una reflexión similar se puede aplicar al parámetro que define el número máximo de iteraciones (\verb|MAX_STEPS|). Pensemos en un rayo que pasa muy cerca de un objeto pero no llega a intersecarlo, sino que finalmente interseca al suelo. Durante las iteraciones que el rayo pase cerca del objeto quizá avance muy lentamente durante varias iteraciones, pues la distancia mínima es la distancia a dicho objeto que es pequeña. Este hecho puede provocar que se alcance el número máximo de iteraciones, considerando así que el rayo no golpea ningún objeto y asignándole el color de fondo cuando realmente con algunas iteraciones más podría alcanzarse la intersección con el suelo. Este hecho se puede observar en la imagen \ref{fig:pocas-iteraciones}, donde se ha utilizado \verb|MAX_STEPS=100|. Fíjese en las fronteras entre el horizonte y las esferas, o en los bordes de las esferas.
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.3]{img/C8/pocas-iteraciones.png}
-    \caption{Escena generada utilizando $\mathtt{MAX\_STEPS}$=100}
-    \label{fig:pocas-iteraciones}
-\end{figure}
-
-De igual forma, menos iteraciones implica más rapidez, pero peores resultados, por lo que es necesario fijar un valor correcto.
-
-\section{Visualización tridimensional de conjuntos de Julia}
-
-Una vez tenemos definido el algoritmo que usaremos para la visualización de fractales, que es el algortimo de sphere-tracing acompañado de una SDF concreta, es momento de trabajar en la visualización de fractales 3D. Comenzaremos, siguiendo el mismo orden que adoptamos en el capítulo \ref{chap:fractales-2D}, por los conjuntos de Julia en 3D.
-
-Recordemos de la sección \ref{section:Julia} que el conjunto de Julia $\mathcal{J}_c$ de un número complejo fijo $c\in\C$ se define como la frontera entre el conjunto de puntos prisioneros y el conjunto de puntos de escape bajo la iteración de la función $P_{c}(z)=z^2+c$. Es decir, $\mathcal{J}_c = \partial \mathsf{E}_c$, donde
+de tal manera que, si resolvemos la ecuación en $t$ podremos saber en qué valor de $t$ golpea el rayo la esfera, si es que efectivamente lo interseca.
 \begin{equation}
-    \mathsf{E}_c = \{z_0\in\C: \{|P_c^n(z_0)|\}\rightarrow \infty \}
-\end{equation}
-
-Queda por tanto a la vista una clara dependencia de los números complejos en esta definición, los cuales podemos identificar únicamente con puntos del plano euclídeo $\R^2$. Necesitamos por tanto una generalización tridimensional de los números complejos. Estrictamente, no existe como tal una generalización tridimensional que mantenga la aritmética compleja, pero sí que existe una en cuatro dimensiones: los cuaternios, usualmente denotados como $\H$.
-
-Podemos encontrar información sobre los cuaternios en \cite{quaternions}, pero introduciremos brevemente su aritmética. De igual forma que para los números complejos se utiliza la unidad imaginaria $i$, en los cuaternios se tienen tres unidades imaginarias: $i,j,k$, de tal manera que un cuaternio se compone de una parte real y tres imaginarias, pudiendo expresarlo como:
-\begin{equation}
-    q = a i + b j + c k + d \cong (a,b,c,d)\in \R^4.
-\end{equation}
-
-Nótese que estamos denotando como componente real a $d$, la última de la terna $(a,b,c,d)$. Las unidades imaginarias se multiplican entre ellas siguiendo las siguientes reglas:
-\begin{equation}
-    \label{eq:relaciones-cuaternios}
+    \label{eq:rayo-recta}
     \begin{split}
-        ij = k \quad jk &= i \quad ki = j \\
-        ji = -k \quad kj &= -i \quad ik = -j \\
-        i^2 = j^2 &= k^2 = -1. 
+        (R(t)-c)\cdot(R(t)-c)&=r^2 \\
+        (p_0 + \vec vt - c)\cdot(p_0 + \vec vt - c) &= r^2 \\
+        (\vec vt + (p_0 -c))\cdot (\vec vt + (p_0 -c))&= r^2 \\
+        (\vec v\cdot \vec v)t^2 + 2(\vec v\cdot(p_0-c))t + (p_0 -c)\cdot (p_0 -c) - r^2 &= 0 
     \end{split}
 \end{equation}
 
-Lo cual nos da a entender que los cuaternios tienen estructura de anillo no conmutativo. Una forma de calcular el producto de dos cuaternios arbitrarios $q = a i + b j + c k + d\cong (a,b,c,d)$ y $q' = a' i + b' j + c'  k + d'\cong (a',b',c',d')$ es expandiendo la expresión
+Y esto es una ecuación de segundo grado en $t$. Esto nos dice que el rayo puede intersecar dos veces con la esfera (secante), una única vez si el discriminante se anula (tangente) o ninguna si el discriminante es negativo (el rayo no interseca con la esfera). En caso de que exista intersección debemos quedarnos con el valor de $t$ más pequeño, que es el más cercano al punto de vista. También debemos quedarnos únicamente con valores de $t$ positivos, pues si es negativo significa que la esfera está detrás del observador, en cuyo caso no es visible.
 
-\begin{equation}
-    qq' = (a i + b j + c k + d)(a' i + b' j + c' k + d') 
-\end{equation}
-
-Si utilizamos su expresión como ternas de $\R^4$, denotando $q=(q_{abc},q_d),  \  \ q'=(q'_{abc},q'_d)$, agrupando términos y aplicando las relaciones \ref{eq:relaciones-cuaternios} el resultado puede expresarse mediante productos vectoriales y escalares:
-\begin{equation}
-    \label{eq:producto-cuaternios}
-    \begin{split}
-        (qq')_{abc} &= q_{abc}\times q'_{abc} + q_d q'_{abc} + q'_d q_{abc} \\
-        (qq)_d &= q_d q'_d - (q_{abc}\cdot q'_{abc})
-    \end{split}
-\end{equation}
-
-Aplicando estas relaciones podemos deducir el cuadrado de un cuaternio con tan solo multiplicarlo por sí mismo, obteniendo
-
-\begin{equation}
-    \label{eq:cuadrado-cuaternio}
-    \begin{split}
-        (q^2)_{abc} &= 2q_d q_{abc} \\
-        (q^2)_d &= q_d^2 - q_{abc}\cdot q_{abc},
-    \end{split}
-\end{equation}
-que realmente es una simplificación de las ecuaciones (\ref{eq:producto-cuaternios}) teniendo en cuenta que el producto vectorial de un vector por sí mismo es $0$.
-
-Y una vez tenemos clara la aritmética básica de los cuaternios, podemos generalizar fácilmente los conjuntos de Julia sin más que extender la función $P_c(z)$ a $\H$, fijando un cuaternio $c\in\H$:
-\begin{equation}
-    \label{eq:f-julia-cuaternios}
-    \begin{split}
-        P_c : \H & \longrightarrow \H \\
-        q & \longmapsto q^2 + c
-    \end{split}
-\end{equation}
-
-De forma que ahora separamos el espacio $\H$ en puntos prisioneros y de escape frente a la iteración de $P_c(q)$ y redefinimos los conjuntos de Julia en 4D como la frontera entre los puntos prisioneros y de escape. 
-
-Sin embargo, es claro que no podemos visualizar conjuntos en 4D de forma tan directa como lo hacemos en 2D, pero sí podemos generarlos y visualizar una proyección en 3D. Pensemos en los mapas de curvas de nivel que se usan en topografía (imagen \ref{fig:curva-de-nivel}), los cuales fijando una altura concreta representan la curva que dibujaría una montaña al intersecarla con un plano horizontal situado a esa altura, permitiéndonos hacernos una idea de la forma en 3D de la montaña a partir de un plano en 2D. 
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.3]{img/C8/curvas-de-nivel2.png}
-    \caption{Representación de una montaña con curvas de nivel}
-    \label{fig:curva-de-nivel}
-\end{figure}
-
-En nuestro contexto, podemos fijar una dimensión y visualizar el conjunto de Julia para las otras tres. 
-
-Es por tanto momento de estimar la distancia de un punto cualquiera $p\in\R^3$ a un conjunto de Julia $\mathcal{J}_c$, con $c\in\H$. Lo primero es indentificar un punto del espacio euclídeo $(x,y,z)\in\R^3$ con un cuaternio. La forma que escogeremos será identificando $x$ con la parte real y la segunda y tercera componente con las dos primeras componentes imaginarias, fijando a $0$ la tercera componente imaginaria ($k$). Es decir,
-\begin{equation}
-    p=(x,y,z)\cong q = x + yi + zj \cong (y,z,0,x)
-\end{equation}
-
-Es posible que parezca antinatural identificar $(x,y,z)$ con $(y,z,0,x)$, pero si utilizamos la relación $(x,y,z)\cong xi+yj+zk$ anulando la parte imaginaria, los conjuntos de Julia que se calculen serían todos esferas concéntricas, lo cual carece de interés \cite{Hart-1989}.
-
-Tengamos en cuenta que en principio los rayos van a partir de un punto que está fuera del conjunto de Julia, es decir, al iterar la función $P_c$ la sucesión va a ser divergente, por lo que la SDF nos debe de dar una distancia positiva. La idea es que cada vez nos dé un valor menor conforme nos acerquemos a $\mathcal{J}_c$ hasta prácticamente anularse en caso de que el rayo interseque con el conjunto. 
-
-Debemos por tanto antes de nada iterar $q$ para hacernos a la idea de esta distancia al conjunto, de forma que si tras cierto número $M$ de iteraciones el módulo de la iterada $|P_c^M(q)|$ no es suficientemente grande consideraremos que el punto es convergente, aunque esto probablemente ocurra únicamente si se evalúa en un punto muy cercano a la superficie del conjunto. Es decir, iteramos el punto con una amplia posibilidad de que antes o después la $n$-ésima iterada tenga un módulo grande, y en caso contrario la iterada convergerá a algún valor tras las $M$ iteraciones. Denotamos como $q_n=P_c^n(q)$ a esta $n$-ésima iterada. A partir de este cuaternio, definimos la SDF del conjunto de Julia como 
-\begin{equation}
-    \label{eq:SDF-Julia}
-    \begin{split}
-        d_c&:\R^3\longrightarrow\R \\
-        d_c(p) &= \dfrac{|q_n|\log|q_n|}{2|q'_n|}
-    \end{split}
-\end{equation}
-
-donde $q'_n$ es otra sucesión iterativa que se puede calcular conjuntamente con $q_n$ mediante $q'_{i+1}=2q_i q'_i$, comenzando con $q'_0=1\cong(0,0,0,1)$, aunque como realmente sólo necesitamos su módulo podemos calcular $|q'_{i+1}|=2|q_i||q'_i|$\footnote{El módulo de un cuaternio es $|xi+yj+zk+w|=\sqrt{x^2+y^2+z^2+w^2}$}. Esta sucesión $q'_n$ es la derivada de $q_i$ respecto de $q_0$, calculada iterativamente según la regla de la cadena, es decir
-\begin{equation}
-    \begin{split}
-        q'_{i+1}&=\frac{\partial P^{i+1}_c(q_0)}{\partial q_0}\\
-        &= \frac{\partial}{\partial q_0}\left((P_c^i(q_0))^2+c\right)\\
-        &= 2 P_c^i(q_0)\frac{\partial P_c^i(q_0)}{\partial q_0}\\
-        &= 2 q_i q'_i
-    \end{split}
-\end{equation}
-
-La función \ref{eq:SDF-Julia} es una aproximación de la distancia real, concretamente una cota inferior, la cual se basa en el potencial de Hubbard-Douady, tal y como se describe en \cite{Hubbard-Douady}[Capítulo 8]. Para ello se usa la posibilidad de usar BDFs que se mencionó en el apartado \ref{subsection:comentarios}.
-
-Sabemos hasta ahora que iterando el punto inicial y aplicando la transformación (\ref{eq:SDF-Julia}) podemos estimar a qué distancia se sitúa el punto del conjunto de Julia $\mathcal{J}_c$. 
-
-\subsection{Aproximando la normal}
-\label{subsection:normal-sdf}
-
-Teniendo esta estimación de la distancia podemos calcular el posible punto de intersección de un rayo con $\mathcal{J}_c$, pero si queremos evaluar el modelo de iluminación en dicho punto, antes necesitamos conocer la normal a la superficie en dicho punto. Y aquí es donde tenemos que afrontar la dificultad que supone la propia belleza de los fractales, que es su irregularidad y que su superficie en general no es diferenciable. Por ello, no existe un plano tangente a la superficie ni un vector normal a la misma en ninguno de sus puntos. Sin embargo, nosotros estamos aproximando esa superficie ideal con otra distinta, muy similar, pero no igual, y esa otra superficie aproximada sí es diferenciable, por lo que podemos utilizar ciertos métodos para aproximar esta normal.
-
-\subsubsection{Método 1: Gradiente de la SDF}
-
-La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer sphere-tracing. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado.
-
-\begin{algorithm}[H]
-    \caption{Cálculo de la normal mediante el gradiente de la SDF} \label{alg:normal-gradiente-sdf}
-    \begin{algorithmic}
-    \Procedure{CalcularNormalGradiente}{$p$: punto de $\R^3$, $d_c$: SDF del objecto}
-        \State $h\gets\varepsilon$
-        \State $g_{x+}\gets p + (h,0,0)$
-        \State $g_{x-}\gets p - (h,0,0)$
-        \State $g_{y+}\gets p + (0,h,0)$
-        \State $g_{y-}\gets p - (0,h,0)$
-        \State $g_{z+}\gets p + (0,0,h)$
-        \State $g_{z-}\gets p - (0,0,h)$
-
-        \State $\nabla d_{c_x} \gets d_c(g_{x+})-d_c(g_{x-})$
-        \State $\nabla d_{c_y} \gets d_c(g_{y+})-d_c(g_{y-})$
-        \State $\nabla d_{c_z} \gets d_c(g_{z+})-d_c(g_{z-})$
-            \State \textbf{return} $\dfrac{(\nabla d_{c_x},\nabla d_{c_y},\nabla d_{c_z})}{\|(\nabla d_{c_x},\nabla d_{c_y},\nabla d_{c_z})\|}$
-    \EndProcedure
-    \end{algorithmic}
-\end{algorithm}
-
-En realidad debería tomarse en cada componente del gradiente la diferencia dividida entre $2h$, pero la propia normalización del vector se encarga de reescalar el vector adecuadamente.    
-
-\subsubsection{Método 2: Técnica del tetraedro}
-
-Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces una aproximación de la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
-
-\begin{algorithm}[H]
-    \caption{Técnica del tetraedro para el cálculo de normales} \label{alg:normal-tetraedro}
-    \begin{algorithmic}
-    \Procedure{CalcularNormalTetraedro}{$p$: punto de $\R^3$, $d_c$: SDF del objecto}
-    \State $h\gets\varepsilon$
-    \State $p_0 \gets p + h(1,-1,-1)$
-    \State $p_1 \gets p + h(-1,-1,1)$
-    \State $p_2 \gets p + h(-1,1,-1)$
-    \State $p_3 \gets p + h(1,1,1)$
-
-    \State $N\gets \sum_{i=0}^3 k_i d_c(p_i)$
-
-    \State \textbf{return} $\dfrac{N}{\|N\|}$
-    \EndProcedure
-    \end{algorithmic}
-\end{algorithm}
-
-\subsection{Implementación en GLSL}
-
-Tenemos por tanto ya la forma de calcular tanto la distancia de un punto al conjunto de Julia de un $c\in\H$ fijo como un método para calcular la normal a la superficie del fractal en un punto, dos de hecho. Es por tanto momento de la implementación. Basta con programar funciones que calculen la SDF y sustituir las llamadas a \verb|get_dist_sphere| por una llamada a dicha función, y una vez se conoce el punto de intersección calcular la normal y evaluar el modelo de iluminación.
-
-De manera natural, igual que identificamos un cuaternio con un elemento de $\R^4$ utilizaremos el tipo \verb|vec4| para representar a los mismos en GLSL. Recordemos que en este caso es la última componente la parte real del cuaternio.
+A nivel de código podemos codificar una esfera como un \verb|struct| cuyos elementos sean su centro y su radio
 
 \begin{lstlisting}
-vec4 q; // Representa un cuaternio (a,b,c,d)
-// q = ai + bj + cz + d
+struct Sphere{
+    vec3 center;    // Centro de la esfera
+    float radius;   // Radio de la esfera
+};
 \end{lstlisting}
 
-Si ahora seguimos la ecuación (\ref{eq:cuadrado-cuaternio}) podemos rápidamente implementar una función que dado un cuaternio calcule su cuadrado.
+Además, para el futuro necesitaremos una estructura que almacene información sobre un impacto rayo-superficie. Información como el punto en el que se produce, en qué $t$, la normal a la superficie en ese punto, etc. En estas fases tan tempranas igual no es tan necesario pero pronto encontraremos su utilidad.
 
 \begin{lstlisting}
-// Dado un cuaternio q, calcula su cuadrado q^2
-vec4 quat_square(vec4 q){
-    vec3 xyz = 2.0*q.w*q.xyz;
-    float w = q.w*q.w - dot(q.xyz, q.xyz);
-    return vec4(xyz, w);
-}
+struct Hit_record {
+    vec3 p;         // Punto donde se produce el impacto
+    vec3 normal;    // Normal a la superficie en el punto p
+    float t;        // Valor de t para el que el rayo impacta
+    bool hit;       // True sii se golpea alguna superficie
+};
 \end{lstlisting}
 
-Por lo que gracias a esta función y a la aritmética ya programada es sencillo programar la función $P_c(q)=q^2+c$. Utilizamos una función para iterar el cuaternio asociado a un punto $p$, aprovechando la posibilidad que nos ofrece GLSL de simular el paso de parámetros por referencia mediante las variables \verb|out| e \verb|inout|. En el último caso, una función recibe un parámetro y en caso de que su valor cambie durante la ejecución éste mantiene su valor tras el retorno de la función. El código es 
-\begin{lstlisting}
-// Itera la funcion P_c y obtiene tanto q_n como |q'_n|
-// q: Cuaternio que se itera
-// dq: Sucesion |q'_n|
-// c: Constante fija de P_c asociada al conjunto de Julia
-void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
-    for(int i = 0; i < 50; i++) {   // 50 son suficientes
-        dq = 2.0 * length(q) * dq;
-        q = quat_square(q) + c;     // P_c(q) = q^2 +c
-        if(dot(q, q) > 64.0) break;    // |q| es grande
-    }
-}
-\end{lstlisting}
-
-Fíjese que esta función itera un cuaternio mediante la función $P_c(q)$ y a la vez calcula la sucesión recurrente $|q'_{i+1}|=2|q_n||q'_n|$. 
-
-Por tanto, el cálculo de la distancia de un punto $p$ al conjunto $\mathcal{J}_c$ se reduce a identificar $p\in\R^3$ con un cuaternio $q\in\H$, iterar $q$ y $|q'|$ teniendo en cuenta que la iteración de $q'$ comienza en $1$ y aplicar la función (\ref{eq:SDF-Julia}).
+Claro que los tres primeros campos solo tendrán sentido si el campo \verb|hit| es verdadero, si es falso no tiene sentido calcular ni consultar los demás. A continuación presentamos el código GLSL para visualizar una esfera utilizando estas estructuras.
 
 \begin{lstlisting}
-float get_dist_julia(vec3 p, vec4 c) { 
-    vec4 q = vec4(p.y, p.z, 0.0, p.x);
-    float dq = 1.0;     // q'_0 = 1
-    iterate_julia(q, dq, c);
-    float length_q = length(q);
-    return 0.5*length_q * log(length_q) / dq;
-}
-\end{lstlisting}
-
-Y ya tenemos implementada la SDF de Julia. Únicamente resta un método para calcular normales. Como hemos presentado dos, implementaremos los dos, utilizando ahora compilación condicional mediante macros para decidir cuál emplear. Tan solo tenemos que implementar los algoritmos \ref{alg:normal-gradiente-sdf} y \ref{alg:normal-tetraedro}. % TODO Seguimos con esto?
-
-\begin{lstlisting}
-#define NORMAL 0 // O 1
-// Calcula la normal al conjunto J_c en el punto p
-vec3 calculate_normal_julia(vec3 p, vec4 c) {
-    vec3 N;
-    float h = u_epsilon;
-
-    #if NORMAL == 0
-    // Gradiente de la SDF
-    vec4 qp = vec4(p.y, p.z, 0.0, p.x);
-    float gradX, gradY, gradZ;
-    vec3 gx1 = (qp - vec4( 0.0, 0.0, 0.0, h )).wxy;
-    vec3 gx2 = (qp + vec4( 0.0, 0.0, 0.0, h )).wxy;
-    vec3 gy1 = (qp - vec4( h, 0.0, 0.0, 0.0 )).wxy;
-    vec3 gy2 = (qp + vec4( h, 0.0, 0.0, 0.0 )).wxy;
-    vec3 gz1 = (qp - vec4( 0.0, h, 0.0, 0.0 )).wxy;
-    vec3 gz2 = (qp + vec4( 0.0, h, 0.0, 0.0 )).wxy;
-    
-    gradX = (get_dist_julia(gx2,c) - get_dist_julia(gx1,c))/(2.0*h);
-    gradY = (get_dist_julia(gy2,c) - get_dist_julia(gy1,c))/(2.0*h);
-    gradZ = (get_dist_julia(gz2,c) - get_dist_julia(gz1,c))/(2.0*h);
-    N = normalize(vec3( gradX, gradY, gradZ ));
-
-    #else
-    // Metodo del tetraedro
-    const vec2 k = vec2(1,-1);
-    N = normalize( k.xyy*get_dist_julia( p + k.xyy*h, c ) + 
-                   k.yyx*get_dist_julia( p + k.yyx*h, c ) + 
-                   k.yxy*get_dist_julia( p + k.yxy*h, c ) + 
-                   k.xxx*get_dist_julia( p + k.xxx*h, c ) );
-
-    #endif
-    return N;
-}
-\end{lstlisting}
-
-Y ya únicamente resta sustituir en el sphere-tracing las SDFs y el método para calcular normales de las esferas por el código que corresponde a los conjuntos de Julia, tanto en \verb|ray_color| como en \verb|light_is_visible|. Para poder dinamizar el cuaternio $c\in\H$ que se considera fijo en los cálculos declaramos una variable \verb|uniform| al igual que se hizo a la hora de los conjuntos de Julia 2D. También creamos una variable global que es \verb|Material fractal_material;| que como su propio nombre indica es el material que se le asignará al objeto fractal.
-
-\begin{lstlisting}
-// Cuaternio c fijo. Visualizaremos el conjunto J_c
-uniform vec4 u_juliaSetConstant;
-// Material que se asigna al fractal
-Material fractal_material
-// ...
-
-vec4 ray_color(Ray r, Plane ground, 
-    Directional_light lights[ARRAY_TAM], int num_lights) {
-
-    // ... 
-    int object_index; // 0: Ground, 1: Julia
-
-    // Ray Marching
-    for(int i = 0; i < MAX_STEPS; i++) {
-        closest_dist = MAX_DIST;
-        // Distancia al plano
-        dist = get_dist_plane(p, ground);
-        if(dist < closest_dist) {
-            closest_dist = dist;
-            object_index = 0;
-        }
-        // Distancia a Julia
-        dist = get_dist_julia(p , u_juliaSetConstant);
-        if(dist < closest_dist){
-            closest_dist = dist;
-            object_index = 1;
-        }
-
-        if(closest_dist < u_epsilon){   // Hay interseccion
-            hr.hit = true;
-            hr.t = current_t;
-            hr.p = ray_at(r, hr.t);
-            if(object_index == 0){      // r interseca el suelo
-                // ... 
-            else {      // r hits Julia
-                hr.mat = fractal_material;
-                hr.normal = calculate_normal_julia(
-                    hr.p, u_juliaSetConstant);
-            return evaluate_lighting_model(lights, num_lights, hr);
-        }
-        current_t += closest_dist;
-        p = ray_at(r, current_t);
-        if(current_t >= MAX_DIST) break;
-    }
-    // r no interseca ninguna superficie
-    // ... 
-}
-\end{lstlisting}
-
-Y con esta modificación de \verb|ray_color| y la análoga en \verb|light_is_visible| podemos ya visualizar conjuntos de Julia tridimensionales. Podemos también cambiar los parámetros del material para observar distintas apariencias. 
-
-En las imágenes \ref{fig:julia-3D} podemos ver algunos de los resultados que, después de este largo camino, hemos podido obtener modificando los parámetros.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-      \includegraphics[width=6.5cm]{img/C8/julia-1.png} &     \includegraphics[width=6.5cm]{img/C8/julia-2.png} \\
-    (a) $c=-0.12+0.75 i$ & (b) $c=0.3+1.09j+0.3k$ \\[6pt]
-    \includegraphics[width=6.5cm]{img/C8/julia-3.png} &     \includegraphics[width=6.5cm]{img/C8/julia-4.png} \\
-    (c) $c=0.1+0.74i+0.62j+0.14k$ & (d) $c=-0.81-0.48j-0.1k$ \\[6pt]
-    \end{tabular}
-    \caption{Conjuntos de Julia 3D para distintos $c\in\H$}
-    \label{fig:julia-3D}
-\end{figure}
-
-\section{Visualización tridimensional del conjunto de Mandelbrot}
-\label{section:Mandelbrot-3D}
-
-La pregunta más natural tras visualizar conjuntos de Julia es si podemos aprovechar todo el código que tenemos para, bajo ligeras modificaciones, visualizar lo que sería el conjunto de Mandelbrot en 3D. Afortunadamente, la respuesta es sí. Recordemos ahora la sección \ref{section:Mandelbrot}, en la cual definimos, en $\C$, al conjunto de Mandelbrot $\mathcal{M}$ de varias formas equivalentes, entre las que destacamos
-$$
-\mathcal{M}=\{c\in\C : \{P_c^n(0)\}\not\rightarrow\infty\}
-$$
-
-Por tanto, la manera de iterar $q$ y $q'$ cambia levemente. En lugar de utilizar un cuaternio $q_0$ como semilla e iterar $q^2+c$ con un $c\in\H$ fijo, utilizaremos a $0$ como semilla e iteraremos $q^2+c$ con $c=q_0$. La iteración de $|q'|$ también cambia, ya que intuitivamente la derivada de la función que iteramos es $2qq'+1$, por lo que ahora la sucesión sería $|q'_{i+1}|=2|q_i||q'_i|+1$, con $q'_0=0$. Puede consultarse una explicación más detallada de esta diferencia en \cite{distance-fractals}.Finalmente, tras suficientes iteraciones, se obtienen los valores $q_n$ y $q'_n$ necesarios en la SDF.
-
-\begin{lstlisting}
-// Itera la funcion P_c y obtiene tanto q_n como |q'_n|
-// q: Cuaternio que se itera
-// dq: Sucesion |q'_n|
-void iterate_mandelbrot(inout vec4 q, inout float dq) {
-    vec4 c = q;     // Constante inicialmente igual a q
-    q = vec4(0.0);  // Semilla inicial
-    for(int i = 0; i < 50; i++) {
-        dq = 2.0 * length(q) * dq + 1.0;
-        q = quat_square(q) + c;
-        if(dot(q, q) > 64.0) break;
-    }
-}
-\end{lstlisting}
-
-Salvo esta diferencia, la función que calcula la distancia de un punto al conjunto de Mandelbrot generalizado es idéntica a la utilizada en conjuntos de Julia: 
-$$
-d(p)=\dfrac{|q_n|\log|q_n|}{2|q'_n|},
-$$
-teniendo en cuenta las diferencias existentes entre estos $q_n$ y $q'_n$ con respecto a los utilizados en Julia.
-
-\begin{lstlisting}
-float get_dist_mandelbrot(vec3 p) {
-    float dist;
-    vec4 q = vec4(p.y, p.z, 0.0, p.x);
-    float dq = 0.0;
-    iterate_mandelbrot(q, dq);
-    float length_q = length(q);
-    return 0.5*length_q * log(length_q) / dq;
-}
-\end{lstlisting}
-
-Por su parte, los métodos para aproximar la normal descritos en la sección \ref{subsection:normal-sdf} son igualmente válidos no sólo para este caso sino realmente para cualquier superficie, ya que son considerados métodos estándar de cálculo de normales. Por tanto podemos reutilizarlos sin más que cambiar las llamadas a \verb|get_dist_julia| por llamadas a \verb|get_dist_mandelbrot|. 
-
-Y una vez tenemos estas funciones, podemos modificar \verb|ray_color| para que en lugar de utilizar las funciones de Julia utilice las de Mandelbrot. Sin embargo, en lugar de cambiar la actual, añadiremos funcionalidad. De igual manera que en la sección \ref{section:alternando} explicamos que añadiendo una variable \verb|uniform| la cual en función de su valor se graficará un conjunto u otro, en este caso haremos exactamente lo mismo, añadir una variable \verb|uniform| llamada \verb|u_fractal| y en función de su valor invocaremos la SDF y el método para calcular normales de Julia o de Mandelbrot.
-
-\begin{lstlisting}
-uniform int u_fractal; // 1: Julia, 2: Mandelbrot 
-\end{lstlisting}
-
-Tras esta pequeña modificación y darle a \verb|u_fractal| el valor $2$ mediante JavaScript, mostramos el resultado de estas operaciones en las imágenes \ref{fig:mandelbrot-3D}.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[width=6.5cm]{img/C8/mandelbrot-2.png} &
-      \includegraphics[width=6.5cm]{img/C8/mandelbrot-1.png} \\    
-    \includegraphics[width=6.5cm]{img/C8/mandelbrot-3.png} &     \includegraphics[width=6.5cm]{img/C8/mandelbrot-4.png} \\
-    \end{tabular}
-    \caption{Detalles del conjunto de Mandelbrot generalizado}
-    \label{fig:mandelbrot-3D}
-\end{figure}
-
-Hay que reconocer que el resultado es un poco decepcionante, parecería un cuerpo generado por la revolución de la frontera del conjunto de Mandelbrot 2-dimensional en torno al eje $X$.
-
-\section{El conjunto de Mandelbub}
-
-Gracias a los cuaternios hemos podido generalizar la definición de los números complejos a 4D y visualizar en 3D proyecciones de los conjuntos de Julia y el conjunto de Mandelbrot. Sin embargo, la apariencia del conjunto de Mandelbrot nos ha dejado un mal sabor de boca, y es que dista bastante de la belleza que nos ofrecía $\mathcal{M}$ en dos dimensiones. En realidad, a día de hoy no se ha conseguido ninguna generalización matemáticamente correcta que posea la complejidad y la belleza del conjunto de Mandelbrot en 2D, aunque ha habido varios intentos. El conjunto de Mandelbub es uno de estos intentos. Es una generalización tridimensional del conjunto de Mandelbrot alejada del álbegra que ofrecen cuaternios, hipercomplejos y otros tipos de álgebras, a veces inconsistentes. 
-
-Pensemos en $P_c(z)=z^2+c$, esta vez con $z,c\in\C$ como la operación que, dado un complejo $z$ multiplica su módulo por sí mismo, duplica su argumento y suma una cierta constante $c$. Si recurrimos en 3D a las coordenadas esféricas, las cuales identifican un punto $p\in\R^3$ mediante su módulo $r$, el ángulo que forma con el eje $Y$ ($\varphi$) y el ángulo que formaría la proyección a $\R^2$ con el eje Z ($\theta$), podemos extender esta operación. El procedimiento sería pasar el punto $p=(x,y,z)$ de coordenadas cartesianas a esféricas $(r,\varphi,\theta)$, elevar al cuadrado $r$, duplicar $\varphi$ y $\theta$ y devolver a coordenadas cartesianas. Es decir, tendríamos la composición 
-
-$$
-(x,y,z)\longmapsto(r,\varphi,\theta)\longmapsto(r^2,2\varphi,2\theta)\longmapsto(x',y',z')
-$$
-
-Realmente, el álgebra, las operaciones, las `derivadas' utilizadas en este procedimiento y en el cálculo de la distancia al objeto no tiene ningún rigor ni fundamento matemático, pero el resultado que produce es mucho más satisfactorio.
-
-De igual manera que utilizamos el $2$ como exponente, podemos usar cualquier otro. En este contexto lo más usual es usar el 8, ya que para exponentes más altos se tiende a la simetría y a detalles menos marcados. De manera que la transformación que usaremos entonces es la función $f$ que actúa sobre $p=(x,y,z)$ de la siguiente forma
-
-\begin{equation}
-    \label{eq:f-Mandelbub}
-    f(p)=f(x,y,z) = \Phi(|p|^8,8\varphi, 8\theta),
-\end{equation}
-donde $\Phi$ es la función que pasa de coordenadas esféricas a cartesianas, es decir
-$$
-\Phi(r,\varphi,\theta) = (r\sin(\varphi)\sin(\theta),r\cos(\varphi),r\sin(\varphi)\cos(\theta))
-$$
-y donde $\varphi = \arccos(\frac{y}{|p|})$ y $\theta=\arctan(\frac{x}{z})$.
-
-El procedimiento, en lo que se refiere a iterar un punto para posteriormente estimar la distancia al objeto es bien parecido al ya conocido, solo que en este caso en lugar de utilizar la potencia y suma de cuaternios utilizamos la transformación (\ref{eq:f-Mandelbub}). Y claro está a la hora de calcular lo que entonces conocíamos como $q'$ la iteración cambia al haber cambiado el exponente. En este caso sería $|w'_{i+1}|=8|w|^7|w'|+1$, de forma que, dado un punto $w\in\R^3$, debemos calcular las iteraciones 
-\begin{align*}
-    w_{i+1} &= f(w_i), & w_0&=w \\
-    |w'_{i+1}| &= 8|w_i|^7|w'_i|+1, & w'_0&=1
-\end{align*}
-Tomando para $f$ como $c$ el valor de $w$ inicial.
-
-Una vez $w$ y $|w'|$ han sido suficientemente iteradas, tenemos el punto $w_n$ y el módulo $|w'_n|$, dispuestos a aplicarle la SDF que de nuevo es la transformación \ref{eq:SDF-Julia}. Consúltese \cite{mandelbub} para más información sobre la SDF.
-
-Como dijimos anteriormente, el método del gradiente de la SDF y el método del tetraedro descritos en la sección \ref{subsection:normal-sdf} son igualmente válidos para cualquier superficie supuesta conocida su SDF. Por lo que podemos también calcular las normales al conjunto de Mandelbub a partir de estos métodos.
-
-La implementación necesaria para la visualización del conjunto de Mandelbub se basa en programar la función $f$ (la transformación \ref{eq:f-Mandelbub}), una función que itere un punto concreto y la sucesión de `derivadas', una que invoque a la iteración y calcule la estimación de la distancia y otra que calcule las normales.
-
-Respecto de la primera, podemos aprovechar que la GPU es muy rápida calculando funciones trigonométricas. Existen alternativas polinómicas que evitan el uso de trigonometría, la cual suele ser lenta en CPU, pero como en GPU suelen ser más rápidas, haremos uso de estas. 
-\begin{lstlisting}
-vec3 f_Mandelbub(vec3 w, vec3 c) {
-    // Coordenadas esfericas
-    float r = sqrt(dot(w,w));
-    float phi = acos(w.y/r);
-    float theta = atan(w.x,w.z);
-    // Escalado y rotacion
-    r = pow( r, 8.0 );
-    phi = phi * 8.0;
-    theta = theta * 8.0;
-    // Vuelta a coordenadas cartesianas
-    w.x = r * sin(phi)*sin(theta);
-    w.y = r * cos(phi);
-    w.z = r * sin(phi)*cos(theta);
-    return c + w;
-}
-\end{lstlisting}
-
-Seguidamente, una función que invoque a \verb|f_Mandelbub| para iterar \verb|w| y \verb|dw|. Puede llamar la atención que en este caso se rompa el bucle cuando la longitud supera el valor 2 en contraste con los 8 que se utilizan en los conjuntos de Julia y Mandelbrot, pero se ha comprobado empíricamente que de esta forma los resultados son óptimos. Además 10 iteraciones a lo sumo son también suficientes, ya que elevar el módulo a $8$ es una transformación que en general cambia muchísimo los valores por lo que la convergencia o divergencia es rápida.
-
-\begin{lstlisting}
-// Itera un punto de R^3 segun la funcion f_Mandelbub y
-// calcula tambien la sucesion de derivadas
-void iterate_mandelbub(inout vec3 w, inout float dw){
-    float m;
-    vec3 c = w;
-    for(int i = 0; i < 10; i++) {
-        m = length(w);      // |z|
-        dw = 8.0*m*m*m*m*m*m*m*dw + 1.0; // 8*|z|^7*z' + 1.0
-        w = f_Mandelbub(w,c);   // w_n^8 + w_0
-        if(m > 2.0) break;     // |z| > 2
-    }
-}
-\end{lstlisting}
-
-Por último, la función que definitivamente dado un punto $p\in\R^3$ devuelve la aproximación de la distancia al conjunto de Mandelbub. 
-
-\begin{lstlisting}
-float get_dist_mandelbub(vec3 p) {
-    vec3 w = p;
-    float dw = 1.0;
-    iterate_mandelbub(w,dw);    // Iteramos w y dw
-    float length_w = length(w);        // |w|
-    return 0.5*length_w * log(length_w) / dw;
-}
-\end{lstlisting}
-
-Con este nuevo código junto con el necesario para calcular las normales y las modificaciones necesarias para que se represente el conjunto de Mandelbub según el valor de \verb|u_fractal|, ya podemos visualizar el mismo, véase la imagen \ref{fig:mandelbub}. 
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[width=6.5cm]{img/C8/mandelbub-1.png} &
-      \includegraphics[width=6.5cm]{img/C8/mandelbub-2.png} \\    
-    \includegraphics[width=6.5cm]{img/C8/mandelbub-3.png} &     \includegraphics[width=6.5cm]{img/C8/mandelbub-4.png} \\
-    \end{tabular}
-    \caption{Conjunto de Mandelbub}
-    \label{fig:mandelbub}
-\end{figure}
-
-Nótese como efectivamente mejora por mucho el resultado que nos ofrecía el conjunto de Mandelbrot generalizado a cuaternios de las imágenes \ref{fig:mandelbrot-3D}. Sin embargo, recordamos que el álgebra y el rigor utilizado para visualizarlo está lejos de ser correcto, siendo aún así el resultado más llamativo hasta ahora. Este es el colofón a toda la teoría y todas las implementaciones que se han hecho desde que se inició con un cuadrado de colores en el capítulo \ref{chap:visualizacion}, pudiendo al fin observar fractales tridimensionales desde distintas perspectivas, con distintos materiales y por tanto diferentes apariencias.
-
-
-\section{Comparación con los fractales 2D}
-
-En las secciones anteriores y a lo largo de todo el recorrido que hemos hecho desde el capítulo \ref{chap:visualizacion}, el objetivo era conseguir generalizar a tres dimensiones los fractales del capítulo \ref{chap:Julia-Mandelbrot} y que con ayuda de WebGL pudimos revisualizar en el \ref{chap:fractales-2D}: conjuntos de Julia y Mandelbrot. Es por tanto momento de comparar los resultados obtenidos en 2D con los resultados obtenidos en 3D.
-
-\subsection{Comparación entre conjuntos de Julia 2D y 3D}
-
-Los conjuntos de Julia generalizados a tres dimensiones no son sino proyecciones a partir de un punto $p=(x,y,z)\in\R^3$ identificándolo con un cuaternio al cual se le anula su última componente imaginaria $q=x + yi +zj + 0k\in\H$. En particular, podemos tomar la tercera componente también como nula e identificar un punto $p'=(x,y)\in\R^2$ con un cuaternio $q'=x + yi + 0j + 0k\in\H$, y como además $i^2=-1$, podemos restringir la aritmética de los cuaternios a la de los complejos. Esto, a nivel teórico, nos lleva a decir que si tomamos los puntos del plano $z=0$, los identificamos con un cuaternio y los iteramos bajo $P_c(q)=q^2+c$ el resultado es precisamente el conjunto de Julia 2-dimensional.
-
-Es decir, la sección provocada por el plano $z=0$ en los conjuntos de Julia 3D debe coincidir con los conjuntos de Julia 2D (no olvidemos que el conjunto en sí es la frontera entre conjuntos prisioneros y de escape). Esto se puede apreciar bastante bien si observamos el conjunto $\mathcal{J}_{-1}$ en 3D, que a la vista queda su parecido con su análodo 2-dimensional, fíjese en la figura \ref{fig:julia-3D-2D}.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.37]{img/C8/julia-3D-frontal-1.png} &
-      \includegraphics[scale=0.31]{img/C8/julia-2D-1.png} \\    
-    (a) En 3D & (b) En 2D  \\
-    \end{tabular}
-    \caption{Conjunto $\mathcal{J}_{-1}$}
-    \label{fig:julia-3D-2D}
-\end{figure}
-
-De hecho, la generalización tridimensional es la superficie generada por la revolución del conjunto en 2D en torno al eje $X$, fíjese en la vista ofrecida por la figura \ref{fig:julia-3D-abajo-1}. Esto ocurre con todos los conjuntos de Julia de números puramente reales (se puede comprobar interactuando con la web \url{https://jantoniovr.github.io/Geometria-Fractal/3D-fractals.html}).
-
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.5]{img/C8/julia-3D-abajo-1.png}
-    \caption{$\mathcal{J}_{-1}$ visto desde abajo}
-    \label{fig:julia-3D-abajo-1}
-\end{figure}
-
-De igual manera que anulando la componente en $z$ se obtiene en la sección del plano $z=0$ el conjunto 2D, si se anula la componente en $y$ y se libera la $z$ pasa lo propio en el plano $y=0$. Fíjese como la sección de $\mathcal{J}_{-0.71-0.31i}$ en el plano $z=0$ (imagen \ref{fig:julia-3D-varias} (a)) es la misma que la de $\mathcal{J}_{-0.71-0.31j}$ en el plano $y=0$ (imagen \ref{fig:julia-3D-varias} (b)).
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.4]{img/C8/julia-3D-frontal-2.png} &
-      \includegraphics[scale=0.44]{img/C8/julia-3D-abajo-2.png} \\    
-    (a) $\mathcal{J}_{-0.71-0.31i}\subseteq\H$ & (b) $\mathcal{J}_{-0.71-0.31j}\subseteq\H$  \\
-    \end{tabular}
-    \caption{Generalizaciones de $\mathcal{J}_{-0.71-0.31i}\subseteq\C$}
-    \label{fig:julia-3D-varias}
-\end{figure}
-
-Además, aunque los detalles 3D no nos dejan apreciar claramente las similitudes entre el conjunto $\mathcal{J}_{-0.71-0.31i}$ en $\C$ y en $\H$, en la figura \ref{fig:julia-2D-3D-2} podemos observar ciertos parecidos entre los bulbos que tiene el fractal en 3D a su derecha y los que tiene el fractal en 2D.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.42]{img/C8/julia-3D-oblicuo-2.png} &
-        \includegraphics[scale=0.28]{img/C8/julia-2D-2.png} \\
-          
-    (a) Detalle en 3D & (b) En 2D  \\
-    \end{tabular}
-    \caption{Conjunto $\mathcal{J}_{-0.71-0.31i}$}
-    \label{fig:julia-2D-3D-2}
-\end{figure}
-
-\subsection{Comparación entre el conjunto de Mandelbrot 2D y 3D}
-
-De manera análoga a lo explicado para conjuntos de Julia basados en la iteración de cuaternios, un cuaternio $q=x+yi+0j+0k$ puede ser identificado con un número complejo $x+yi$. Entonces, si un complejo $c=c_x+c_yi\in\C$ pertenece a $\mathcal{M}$, necesariamente un cuaternio $q=c_x+c_yi+0j+0k$, el cual en 3D se identifica con un punto $(c_x,c_y,0)$ perteneciente al plano $z=0$, debe también pertenecer al conjunto de Mandelbrot en 3D. Entonces, el conjunto de Mandelbrot tridimensional debe dibujar al conjunto de Mandelbrot 2D en el plano $z=0$. Análogamente, esto también ocurre en el plano $y=0$ si anulamos la coordenada en $y$ en lugar de la $z$. Nos remitimos a la sección \ref{section:Mandelbrot-3D} y a las imágenes \ref{fig:mandelbrot-3D} para recordar que la generalización 3D no era más que la superficie generada por la revolución de $\mathcal{M}$ en torno al eje $X$, por lo que queda comprobada la propiedad que acabamos de describir.
-
-No obstante, en las imágenes \ref{fig:mandelbrot-2D-3D} presentamos algunas imágenes comparativas para que se pueda apreciar directamente la similitud entre $\mathcal{M}$ en 2D y en 3D. Precisamente por la revolución dejan de observarse a simple vista detalles como los bulbos o la cardioide que constituye el cuerpo principal de $\mathcal{M}$.
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.53]{img/C8/mandelbrot-3d.png} &
-        \includegraphics[scale=0.23]{img/C8/mandelbrot-2d.png} \\
-          
-    (a) En 3D & (b) En 2D  \\
-    \end{tabular}
-    \caption{Conjunto de Mandelbrot}
-    \label{fig:mandelbrot-2D-3D}
-\end{figure}
-
-\subsection{Comparación entre el conjunto de Mandelbub y $\mathcal{M}_8$}
-
-En realidad el conjunto de Mandelbub no es sino una forma de generalizar, de forma matemáticamente poco precisa, el conjunto de Mandelbrot de orden 8, el cual nos remitimos a la sección \ref{subsection:julia-mandelbrot-generalizados} para recordar su génesis. En la imagen \ref{fig:mandelbubbrot} (b) podemos recordar el aspecto que tenía $\mathcal{M}_8$. Aparentemente, está dividido en lo que parecen 7 regiones, cada una con infinitos bulbos donde destaca uno que es más grande que los demás. 
-
-La parte de Mandelbub que más recuerda a $\mathcal{M}_8$ es la parte inferior (imagen \ref{fig:mandelbubbrot} (a)), que aunque no es igual, también se aprecia que está dividida en 7 regiones iguales. A su vez, el propio cuerpo de Mandelbub tiene 7 salientes en cada uno de sus dos niveles (imagen \ref{fig:mandelbub}), haciendo cierta analogía con $\mathcal{M}_8$. 
-
-\newpage
-
-\begin{figure}[ht]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[scale=0.46]{img/C8/mandelbub-abajo.png} &
-        \includegraphics[scale=0.25]{img/C8/M-8.png} \\
-          
-    (a) Vista desde abajo de Mandelbub & (b) $\mathcal{M}_8$  \\
-    \end{tabular}
-    \caption{Conjunto de Mandelbub y de Mandelbrot de orden 8}
-    \label{fig:mandelbubbrot}
-\end{figure}
-
-\section{Posibles optimizaciones}
-
-El software, en lo que a funcionalidad se refiere está completo, sin embargo puede ser lento en algunos dispositivos dependiendo de la GPU que posean. En gran medida, lo que más ralentiza la ejecución es el hecho de evaluar la SDF correspondiente en cada iteración del sphere-tracing, ya que esto supone iterar el punto y aplicar transformaciones como el logaritmo que son más costosas. Por lo que trataremos de introducir algunas medidas que nos permitan ahorrarnos algunas ejecuciones de las SDFs, todas ellas basadas en una misma idea: las esferas englobantes.
-
-\subsection{Esferas englobantes}
- 
-Si se lanza un rayo que está muy lejano al conjunto que se esté visualizando o que apunta directamente al cielo o al suelo, antes de converger al suelo o diverger al cielo hay que evaluar, sobre todo en este último caso, hasta mil veces la SDF cuando realmente casi desde el principio podría saberse que no va a intersecar al conjunto. Para ahorrarnos todas estas evaluaciones podemos utilizar lo que se denominan esferas englobantes (\textit{bounding spheres}).
-
-La técnica consiste en crear una esfera que `englobe' el conjunto, en el sentido de que éste quepa completamente en el interior de la misma. Antes de aplicar sphere-tracing, reutilizaríamos el código que ya programamos en la sección \ref{subsection:esfera} para calcular analíticamente la intersección de un rayo con una esfera, aunque esta vez sólo nos interesa saber si el rayo interseca la esfera englobante, no el punto ni el valor de $t$. Si se calcula que el rayo no golpea la esfera englobante, entonces no se calcula la distancia al conjunto en ninguna iteración, pues sabemos que no habrá intersección con el mismo, aunque aún puede haber intersección con el plano, pero al no tener que calcular la SDF del conjunto que se esté visualizando la ejecución es mucho más rápida.
-
-Para implementar este método, hemos probado empíricamente qué radio de esfera se ajusta mejor a los conjuntos de Julia, al conjunto de Mandelbrot y al conjunto de Mandelbub, obteniendo respectivamente $2.5$, $2$ y $1.5$ respectivamente. Por tanto, ajustamos el radio de esta esfera y sólo calculamos las SDFs en caso de impacto.
-
-\begin{lstlisting}
-// Devuelve true si R interseca a S, false en otro caso
-bool hit_sphere_limits( Sphere S, Ray R ){
+// Calcula la interseccion entre un rayo y una esfera
+// y almacena la informacion del impacto en una
+// estructura Hit_record
+Hit_record hit_sphere(Sphere S, Ray R, 
+    float t_min, float t_max) {
+
+    Hit_record result;
     vec3 oc = R.orig - S.center;
-    float a = dot(R.dir,R.dir);
+    float a = dot(R.dir, R.dir);
     float b = 2.0 * dot(oc, R.dir);
-	float c = dot(oc,oc) - S.radius*S.radius;
+    float c = dot(oc, oc) - S.radius*S.radius;
     float discriminant = b*b - 4.0*a*c;
-    return discriminant >= 0.0;
+    if (discriminant < 0.0){
+        result.hit = false;
+        return result;
+    }
+    float sqrtd = sqrt(discriminant);
+    float root = (-b - sqrt(discriminant))/(2.0*a); // Primera raiz
+    if (root < t_min || t_max < root){ 
+        // La primera raiz esta fuera del rango que nos interesa
+        root = (-b + sqrt(discriminant))/(2.0*a); // La otra raiz
+        if(root < t_min || t_max < root){ 
+            // Las dos raices estan fuera del rango,
+            // consideramos que no existe impacto
+            result.hit = false;
+            return result;
+        }
+    } 
+    result.hit = true;
+    result.t = root;
+    result.p = ray_at(R, result.t);
+    result.normal = normalize((result.p - S.center) / S.radius);
+    return result;
+}
+\end{lstlisting}
+
+Fijémonos en que hemos introducido unas variables \verb|t_min| y \verb|t_max| de forma que sólo nos interesamos por los puntos del rayo $R(t)=p_0+\vec vt$ para valores de $t$ situados entre un valor mínimo y un máximo. Esto sirve para fijar una distancia mínima y máxima en la que buscar intersecciones, evitando así valores de $t$ negativos o demasiado grandes. El código implementa la ecuación (\ref{eq:rayo-recta}) de forma que en caso de no haber impacto asigna \verb|false| al campo \verb|hit| de la estructura \verb|Hit_record| y \verb|true| en caso contrario. Además, solo calcula el punto de intersección más cercano.
+
+A partir de la estructura \verb|Hit_record| y la información que contiene podemos asignar el color que deseemos. Lo ideal es evaluar un modelo de iluminación, como haremos en la sección \ref{section:Phong}, pero de momento aprovecharemos la normal en cada punto para mapear una componente de $\R^3$ normalizada en una terna RGB. Esto es una forma de simular un material conocido popularmente como `\textit{normal material}'\footnote{Consultar por ejemplo la implementación en Three.js para más información \url{https://threejs.org/docs/\#api/en/materials/MeshNormalMaterial}}, llamado así por utilizar la normal en un punto para calcular un color.
+
+Realizamos por tanto la primera modificación del código de \verb|ray_color|, que ahora acepta como argumento una esfera.
+
+\begin{lstlisting}
+// Fijamos una distancia maxima
+#define MAX_DIST 100.0
+
+// ... 
+
+vec4 ray_color(Ray R, Sphere S) {
+
+    // R interseca la esfera?
+    Hit_record hr = hit_sphere(S, R, 0.0, MAX_DIST);
+    if(hr.hit){
+        // Nos llevamos las componentes a [0,1]
+        vec3 color = (hr.normal + vec3(1.0))/float(2.0);
+        return vec4(normalize(hr.normal), 1.0);
+    }
+
+    // R no interseca ninguna superficie
+    vec3 unit_direction = normalize(R.dir);
+    float t = 0.5*(unit_direction.y + 1.0);
+    return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
 
-vec4 ray_color(Ray r, ...) {
-    // ... 
-    Sphere bounding_sphere;
-    bounding_sphere.center = vec3(0.0, 0.0, 0.0);
-    bounding_sphere.radius = u_fractal == 1 ? 1.5 : 
-        (u_fractal == 2 ? 2.5 : 2.0);
-    bool hits_bounding_sphere = hit_sphere_limits(bounding_sphere, r);
-    
-    // Sphere Tracing
-    for(int i = 0; i < MAX_STEPS; i++) {
-        // Distancia al plano ... 
-        // ... 
-        // Distancia a Julia/Mandelbrot/Mandelbub
-        if(hits_bounding_sphere) {
-            dist = get_dist(p)
-            // ... 
+// ... 
+// R es el rayo (Ray)
+
+Sphere S; 
+S.center = vec3(0.0, 0.0, -1.0); S.radius = 0.5;
+gl_FragColor = ray_color(R, S);
+\end{lstlisting}
+
+El resultado que obtenemos es el que podemos observar en la imagen \ref{fig:una-esfera}. Obsérvese la variedad de colores que ofrece la esfera, concordante con la variedad de normales que posee.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/esfera_renderizada.png}
+    \caption{Escena con una esfera}
+    \label{fig:una-esfera}
+\end{figure}
+
+\subsection{Visualizando varias esferas}
+
+Veamos ahora cómo poder visualizar varias esferas, aunque el procedimiento una vez se ha conseguido visualizar una es bastante natural. Podemos declarar en lugar de una un array de esferas, cada una con sus parámetros y crear una función que itere llamando a la función \verb|hit_sphere| con cada esfera. Sin embargo, un rayo puede intersecar varias esferas, pero consideramos que únicamente hemos golpeado la más cercana a efectos prácticos. Este problema se extiende en general a escenas con varios objetos, no sólo esferas, pero la solución es la misma, evaluar únicamente la más cercana de las intersecciones. Aquí es también donde ponemos en valor el parámetro \verb|t_max| de la función \verb|hit_sphere|, pues una vez hemos encontrado una intersección con una de las esferas no debemos considerar impactos más lejanos.
+
+Por tanto, buscamos implementar una función que dado un array de esferas devuelva en una estructura \verb|Hit_record| la información sobre la intersección rayo-esfera con el valor de $t$ más pequeño. El método consiste en llamar a \verb|hit_sphere| almacenando la información de la intersección pero sólo mantenemos la información de la más próxima, buscando en cada iteración únicamente intersecciones más cercanas que las anteriores (en caso de haberlas).
+\begin{lstlisting}
+// Tamano de los arrays
+#define ARRAY_TAM 100
+
+// ... 
+
+Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], 
+    int size, Ray R, float t_min, float t_max) {
+
+    Hit_record result, tmp;
+    float closest_t = t_max;
+    for(int i = 0; i < ARRAY_TAM; i++){
+        if(i == size) break;
+        // Buscamos tan lejos como la ultima interseccion
+        tmp = hit_sphere(spheres[i], R, t_min, closest_t);
+        if(tmp.hit){    // Hay una interseccion mas cercana
+            closest_t = tmp.t;
+            result = tmp;
         }
+    }
+    return result;
+}
+\end{lstlisting} 
+
+Y en la función \verb|main| inicializamos algunas esferas, editamos \verb|ray_color| para que acepte como argumento un array de esferas y desde ahí hacemos llamada a \verb|hit_spheres_list|.
+
+\begin{lstlisting}
+vec4 ray_color(Ray R, Sphere world[ARRAY_TAM], int size) {
+
+    // R interseca alguna superficie?
+    Hit_record hr = hit_spheres_list(world, size, R, 0.0, MAX_DIST);
+    if(hr.hit)
+        return vec4(normalize(hr.normal), 1.0);
+
+    // R no interseca ninguna superficie
+    // Codigo del background ... 
+}
+
+// ... 
+// R es el rayo (Ray)
+
+// Esferas
+int num_spheres = 4;
+Sphere world[ARRAY_TAM];
+Sphere S1, S2, S3, S4;
+S1.center = vec3(0.0, 0.0, -1.0); S1.radius = 0.5; 
+S2.center = vec3(-5, 0.5, -3.0); S2.radius = 4.0;
+S3.center = vec3(2.0, -3, -4.0); S3.radius = 1.5;
+S4.center = vec3(20.0, 10, -20.0); S4.radius = 3.0;
+world[0] = S1; world[1] = S2; world[2] = S3; world[3] = S4;
+
+gl_FragColor = ray_color(R, world, num_spheres);
+
+\end{lstlisting}
+
+Y así obtenemos la imagen \ref{fig:varias-esferas}, en la que podemos ver varias esferas de distintos tamaños y con distintas posiciones.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/varias-esferas.png}
+    \caption{Escena con varias esferas}
+    \label{fig:varias-esferas}
+\end{figure}
+
+\subsection{Visualizando un plano con textura de ajedrez}
+\label{subsection:plano}
+
+Para orientarnos en la escena cuando podamos modificar la posición de la cámara dinámicamente y hacernos también a la idea del movimiento que estamos haciendo y a qué velocidad es útil utilizar un plano con textura similar a la de un tablero de ajedrez a modo de suelo. Necesitamos por tanto ahora implementar la intersección rayo-plano y una vez encontrada la intersección discernir entre colorear el punto negro o blanco.
+
+En geometría euclídea una forma de caracterizar los puntos de un plano $P$ es mediante una ecuación lineal
+$$
+P = \{(x,y,z)\in\R^3:Ax+By+Cz=D\}
+$$
+donde el vector $\vec N=(A,B,C)\in\R^3$ es un vector normal al plano ($-(A,B,C)$ también lo sería) y $D\in\R$ es una constante que define la posición del plano. Podemos entonces ver un plano de la siguiente forma equivalente
+$$
+P = \{p=(x,y,z)\in\R^3:\vec N\cdot p = D\}
+$$
+donde de nuevo el punto $\cdot$ denota el producto escalar. Si ahora queremos calcular la intersección del plano $P$ con un rayo $R(t)=p_0+\vec vt$ tenemos que resolver una ecuación que además es lineal:
+\begin{equation}
+    \label{eq:plano-recta}
+    \begin{split}
+        R(t)\cdot \vec N &= D \\
+        (p_0+\vec vt)\cdot \vec N & = D\\
+        t &=\dfrac{D-p_0\cdot \vec N}{\vec v\cdot \vec N}
+    \end{split}
+\end{equation}
+Lo cual nos dice en qué $t$ se produce la intersección. Obsérvese que en el caso de que la dirección del rayo $\vec v$ y la normal al plano $\vec N$ sean perpendiculares (\textit{i.e.} $\vec v\cdot N=0$), lo cual se traduce en que el rayo es paralelo al plano o está incluido en el mismo, no existe intersección.
+
+Como ya hemos dicho, podemos identificar unívocamente un plano a partir de su normal en cualquier punto y una constante $D\in\R$, por lo que mediante una estructura podemos representar en GLSL un plano.
+
+\begin{lstlisting}
+struct Plane{
+    vec3 normal;    // Vector normal al plano
+    float D;        // Termino independiente
+};
+\end{lstlisting}
+
+Y a partir de la ecuación (\ref{eq:plano-recta}) podemos implementar la función \verb|hit_plane|, que hace lo correspondiente a \verb|hit_sphere| pero acepta como argumento un plano y devuelve la intersección con el mismo.
+
+\begin{lstlisting}
+Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max){
+    Hit_record result;
+    float oc = dot(P.normal, R.dir);
+    if(oc == 0.0){  // No hay interseccion
+        result.hit = false;
+        return result;
+    }
+    float t = (P.D - dot(P.normal, R.orig))/oc;
+    if (t < t_min || t > t_max)
+        result.hit = false;
+    else{
+        result.hit = true;
+        result.t = t;
+        result.p = ray_at(R, result.t);
+        result.normal = normalize(P.normal);
+    }
+    return result;
+}
+\end{lstlisting}
+
+Y ahora desde \verb|ray_color| debemos considerar la posibilidad de intersecar con el plano o con las esferas, pero solo debemos darle color a la intersección más próxima. Por eso debemos mantener una variable \verb|t_closest| que represente el valor de $t$ más pequeño en el que hemos detectado una intersección. Puede ocurrir que el rayo impacte primero con una esfera y después con el plano o al revés, primero el plano y después una esfera; en estos casos se daría color atendiendo la intersección con la esfera y con el plano respectivamente. 
+
+Como es natural, utilizaremos como suelo un plano horizontal, como puede ser el plano $P=\{(x,y,z)\in\R^3:y=-2\}$, en cuyo caso $\vec N=(0,1,0)$, $D=-2$. Véamos entonces cómo aplicarle una textura a este plano. Normalmente las texturas se suelen almacenar en imágenes, pero por sencillez en este caso la generaremos proceduralmente desde el fragment shader. Es decir, se evalúa el color de la textura en función del punto en la superficie del objeto, de forma que a cada punto del plano le asignamos un color (blanco o negro). 
+
+Por tanto, se trata de un algoritmo que a partir de una coordenada 2D de un punto en el suelo $(u,v)$ se calcula una terna RGB de color, que es el que se asigna finalmente al píxel. Los puntos de $P$ son de la forma $(x,-2,z)$, con $ x,z\in\R$, y utilizaremos como coordenadas $(u,v)$ a los pares $(x,z)$ extraídos de las coordenadas de mundo $(x,y,z)$ de los puntos que forman el plano. Muchas veces, sobre todo en superficies que no son planas o que son irregulares, el mapeo $(x,y,z)\longrightarrow(u,v)$ es mucho más complejo, pero en este caso es bastante sencillo.
+
+Lo primero es quedarnos con la parte entera de ambos valores, de forma que dividimos el plano en cuadrados. Si la suma de las partes enteras es un número par, colorearemos el píxel de blanco, y si es impar de negro. En la imagen \ref{fig:ajedrez} podemos ver cómo identificando cada punto con las partes enteras de cada componente y coloreando de negro las partes enteras cuya suma sea impar se obtiene una textura de ajedrez.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/ajedrez.png}
+    \caption{Textura de ajedrez a partir de las partes enteras}
+    \label{fig:ajedrez}
+\end{figure}
+
+Debemos, por tanto, en \verb|ray_color| añadir esta funcionalidad.
+
+\begin{lstlisting}
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], 
+    int size, Plane P) {
+    
+    float t_closest = MAX_DIST;   
+    // r interseca alguna esfera?
+    vec4 tmp_color;
+    Hit_record hr = hit_spheres_list(world, size, r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        tmp_color = vec4((hr.normal + vec3(1.0))/float(2.0), 1.0);
+    }
+
+    // r interseca el plano?
+    // Solo intersecciones mas cercanas
+    hr = hit_plane(P, r, 0.0, t_closest);
+    if(hr.hit){
+        t_closest = hr.t;
+        vec3 p = hr.p;
+        int x_int = int(floor(p.x)), // Parte entera de x
+            z_int = int(floor(p.z)), // Parte entera de z
+            sum = x_int + z_int;     // Suma de partes enteras
+        // Modulo 2
+        int modulus = sum - (2*int(sum/2));
+        if(modulus == 0)    // Suma par
+            tmp_color = vec4(1.0, 1.0, 1.0, 1.0);
+        else                // Suma impar
+            tmp_color = vec4(0.0,0.0,0.0, 1.0);
+    }
+    // Si r interseca alguna superficie
+    if(t_closest < MAX_DIST) return tmp_color;
+    // r no interseca ninguna superficie
+    // Codigo del background ... 
+}
+\end{lstlisting}
+
+Y tras declarar el plano $y=-2$, las esferas y realizar la llamada a \verb|ray_color|, al fin podemos visualizar una escena completa compuesta de varias esferas y un plano, tal y como nos propusimos al inicio de esta sección \ref{section:escena}
+
+\begin{lstlisting}
+// ... 
+// R es el rayo (Ray)
+// world es el array de objetos 'Sphere'
+
+// Plano
+Plane P;
+P.normal = vec3(0.0, 1.0, 0.0);
+P.D = -2.0;     // y = -2.0
+
+gl_FragColor = ray_color(r, world, num_spheres, P);
+\end{lstlisting}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/escena-completa.png}
+    \caption{Escena compuesta por esferas y un plano}
+    \label{fig:escena-completa}
+\end{figure}
+
+\section{Configurando la cámara}
+\label{section:camara}
+
+Hasta ahora hemos visto cómo componer una escena sencilla y visualizarla, pero desde el principio nos hemos visto limitados por la decisión que tomamos de situar al observador en el punto $(0,0,0)$, mirar hacia el $(0,0,-1)$ y proyectar la escena en un plano de altura $2$ y ratio $16:9$. Evidentemente una aplicación gráfica en la que tanto el observador como la escena se mantienen fijos carece de interés alguno. Debemos añadir la posibilidad de modificar la posición del observador y la dirección en la que se mira, para así poder disfrutar de distintos puntos de vista en una misma escena.
+
+Lo primero es fijar una serie de conceptos. Recordamos que denominábamos \textit{lookfrom} al punto desde el cual se observa ($o_c$), es decir, el punto de vista; y \textit{lookat} al punto sobre el cual se fija la mirada ($a_t$). Nótese que realmente el punto $a_t$ puede ser cualquiera situado en la semirrecta que une al observador y el centro del plano de proyección, no tiene por qué estar incluido como tal en el propio plano de proyección; pensemos en alguna vez que hemos pensado que alguien nos saludaba y realmente saludaba a alguien que está detrás nuestra.
+
+Se denomina \textit{field of view (FOV)} al ángulo total observable, que corresponde al ángulo $\theta$ en la imagen \ref{fig:fov}. Como nuestro plano de proyección no es cuadrado, este ángulo es distinto en vertical y en horizontal, pero del ratio $16:9$ ($r=16/9$) se deduce el uno del otro. En nuestro caso fijaremos $\theta=90^\circ=\pi/2 \rad$, sea $h=\tan\left(\frac \theta 2\right)=1$ el ratio constante que van a mantener la semialtura del plano de proyección y la distancia focal, tal y como se puede observar en la imagen \ref{fig:fov}. Esto implica, asumiendo una distancia focal de $1$, que la altura del plano de proyección (\verb|viewport_height|) es $P_h=2h$, por lo que la anchura es $P_w=r\cdot P_h$. 
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/fov.png}
+    \caption{Field Of View}
+    \label{fig:fov}
+\end{figure}
+
+Por otro lado, aunque definamos un punto desde el que mirar y un punto al que mirar, no está todo dicho sobre la orientación de la cámara. Piense que mientras usted lee este documento puede girar la cabeza hacia un lado y seguir mirando desde y hacia la misma posición. Por tanto necesitamos alguna forma de expresarle a la cámara que se mantenga vertical. Esto se hace mediante un vector que se denomina \textit{view up} ($\overrightarrow{\mathrm{vup}}$), el cual define ese `arriba' para la cámara. Normalmente, por convención se hace la elección $\overrightarrow{\mathrm{vup}}=(0,1,0)$. Mediante el vector $\vec{v}_d=o_c-a_t$ (\textit{view direction}) y el vector $\overrightarrow{\mathrm{vup}}$ podemos crear un sistema de referencia ortonormal del plano ortogonal a $\vec{v}_d$ que pasa por el punto $o_c$ y que define la orientación de la cámara. No confundamos este plano con el plano de proyección, pues aunque vectorialmente son iguales, y son por tanto paralelos desde el punto de vista afín, son planos distintos. Precisamente de este hecho nos aprovecharemos más tarde. Presentamos entones los siguientes vectores
+\begin{eqnarray*}
+    \vec w = \dfrac{o_c-a_t}{\|o_c-a_t\|}, \\
+    \vec u = \dfrac{\overrightarrow{\mathrm{vup}}\times \vec w}{\|\overrightarrow{\mathrm{vup}} \times \vec w\|}, \\
+    \vec v = \vec w\times \vec u,
+\end{eqnarray*}
+de forma que los vectores $\vec u,\vec v$ son, por su propia definición ortogonales a $\vec{v}_d$ y ortogonales entre sí. Además están normalizados, constituyendo así una base ortonormal del plano vectorial que define el plano de proyección, por lo que hacen las veces de los vectores $(1,0,0)$ y $(0,1,0)$ en el código de \verb|get_ray| en la sección \ref{section:rayo}, mientras que $\vec w$ por su parte toma el relevo del vector $(0,0,1)$. Fíjese para mejor comprensión en la imagen \ref{fig:vectores}. El conjunto $\{o_c; \vec u, \vec v,\vec w\}$ es por tanto un sistema de referencia del plano afín paralelo al plano de proyección que pasa por el punto $o_c$, al cual se le suele denominar \textit{marco de coordenadas de vista}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/plano.png}
+    \caption{Vectores que forman una base del plano de proyección}
+    \label{fig:vectores}
+\end{figure}
+
+Ahora recordamos que para crear el rayo en la seccion \ref{section:rayo} calculamos la esquina inferior izquierda, transformamos las coordenadas de dispositivo en coordenadas de mundo del plano de proyección en $[0,P_w]\times[0,P_h]\times\{-1\}$ y con ello calculamos el punto destino. En el caso generalizado la metodología es la misma, pero necesitamos aclarar, a partir de los datos de entrada como son el punto $o_c$, el punto $a_t$, el vector $\overrightarrow{\mathrm{vup}}$ (usualmente (0,1,0)), el ángulo $\widehat{\mathrm{fov}}$ y el el ratio $r$ ancho/alto (16/9 en nuestro caso), cuáles son las dimensiones del plano de proyección y la esquina inferior izquierda. Para ello introducimos una estructura que representará una cámara, que almacena los siguientes campos:
+
+\begin{lstlisting}
+struct Camera{
+    vec3 origin;        // Punto desde el que se observa
+    vec3 horizontal;    // Vector horizontal de modulo P_w
+    vec3 vertical;      // Vector vertical de modulo P_h
+    vec3 lower_left_corner; // Punto situado en la esquina
+};
+\end{lstlisting}
+donde \verb|origin| son las coordenadas de mundo del punto en el que se sitúa la cámara, \verb|horizontal| es un vector cuyo módulo es el ancho del plano de proyección y su dirección el vector $u$ recién presentado, análogamente \verb|vertical| es un vector cuyo módulo es la altura del plano de proyección y su vector director es $v$, por último \verb|lower_left_corner| son las coordenadas de mundo del punto situado en la esquina inferior izquierda del plano de proyección. Fíjese en la imagen \ref{fig:camera-fields}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/camera-fields.png}
+    \caption{Representación gráfica de los campos de `Camera'}
+    \label{fig:camera-fields}
+\end{figure}
+
+
+Es claro que el origen es el punto \textit{lookfrom} ($o_c$), el vector horizontal es $P_w\cdot \vec u$ y el vector vertical es $P_h\cdot \vec v$. Por tanto, asumiendo una distancia focal de $1$, la esquina inferior izquierda sería
+$$
+\mathrm{LLC} = o_c - \frac{P_w}{2}\cdot \vec u - \frac{P_h}{2}\cdot \vec v - \vec w.
+$$
+
+En base a estos elementos, volvemos a redefinir la transformación $\phi$, de forma que ahora el plano de proyección $P$ puede tener cualquier posición y orientación. A partir de los puntos $o_c$ y $a_c$ y el vector $\overrightarrow{\mathrm{vup}}$ podríamos calcular los vectores $\vec u, \vec v, \vec w$, y como $P$ es paralelo al plano de la imagen \ref{fig:vectores}, tenemos que $\mathcal{R}=\{LLC; \vec u, \vec v, \vec w \}$ es un marco de referencia del plano de proyección, de forma que podemos obtener un punto del plano de proyección $P$ a partir de las coordenadas de dispositivo aplicando la siguiente transformación.
+
+\begin{equation}
+    \label{eq:transformacion-lineal-6}
+    \begin{split}
+        \phi : [0,n_x]\times [0,n_y] & \longrightarrow P \\
+        (x,y) & \longmapsto LLC + \frac{P_w}{n_x}x\cdot \vec u + \frac{P_h}{n_y}y\cdot\vec v.
+    \end{split}
+\end{equation}
+
+También podemos expresar esta transformación matricialmente. En este caso, la inversa de la matriz $M$ de vista y proyección se obtiene mediante el producto de la matriz de cambio de marco de referencia entre el marco usual y el marco $\mathcal{R}$ y la matriz de la transformación (\ref{eq:transformacion-lineal-matrix-3D-base}). Realmente esto es intuitivo, pues no es más que un cambio de posición y orientación respecto al caso base.
+
+\begin{equation}
+    \label{eq:transformacion-lineal-matrix-3D-camara}
+    \phi(x,y) = \left(\begin{array}{ccc|c}
+        &  &  &  \\
+        \vec u & \vec v & \vec w & \mathrm{LLC} \\
+        &  &  &  \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(\begin{array}{ccc|c}
+        \frac{P_w}{n_x} & 0 & 0 & 0 \\
+        0 & \frac{P_h}{n_y} & 0 & 0 \\
+        0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 0 & 1
+    \end{array}\right)\left(
+        \begin{array}{c}
+            x \\ y \\ 0 \\ \hline 1
+        \end{array}\right)
+\end{equation}
+
+Reflejamos estos cálculos y asignaciones en el siguiente código, que corresponde a una función que dados los parámetros de una escena, crea, inicializa y devuelve un objeto \verb|Camera|.
+\begin{lstlisting}
+Camera init_camera (vec3 lookfrom, vec3 lookat, 
+    vec3 vup, float vfov, 
+    float aspect_ratio){
+    
+    Camera cam;
+    float focal_length = 1.0;
+    float theta = degrees_to_radians(vfov); // FOV vertical
+    float h = tan(theta/2.0);
+    // Dimensiones del plano de proyeccion
+    float viewport_height = 2.0*h*focal_length;
+    float viewport_width = aspect_ratio * viewport_height;
+
+    vec3 w = normalize(lookfrom - lookat);
+    vec3 u = normalize(cross(vup,w));
+    vec3 v = cross(w,u);
+
+    cam.origin = lookfrom;
+    cam.horizontal = viewport_width * u;
+    cam.vertical = viewport_height * v;
+    cam.lower_left_corner = cam.origin 
+        - cam.horizontal/float(2.0) 
+        - cam.vertical/float(2.0)
+        - w;
+
+    return cam;
+}
+\end{lstlisting}
+
+Y una vez tenemos estos parámetros almacenados en un objeto \verb|Camera| la función \verb|get_ray|, a la cual ahora en lugar de todos los parámetros con la cual la programamos primitivamente en la sección \ref{section:rayo} la reprogramaremos para que acepte únicamente como argumentos la cámara y las coordenadas de dispositivo normalizadas $[0,1]$. Tomará estas coordenadas $u,v\in[0,1]$ y multiplicará por los vectores horizontal y vertical respectivamente, definiendo así el destino del rayo.
+
+\begin{lstlisting}
+Ray get_ray(Camera cam, float u, float v){
+    Ray R;
+    R.orig = cam.origin;
+    R.dir = cam.lower_left_corner 
+        + u*cam.horizontal + v*cam.vertical 
+        - cam.origin;
+    return R;
+}
+\end{lstlisting}
+
+Vemos que ahora son los vectores \verb|cam.horizontal| y \verb|cam.vertical| los que hacen la función que en la primera implementación hacian los vectores \verb|vec3(viewport_width, 0.0, 0.0)| y \verb|vec3(0.0, viewport_height, 0.0)|.
+
+Con todo este código, tan solo tenemos que fijar los argumentos de \verb|init_camera| y observar cómo cambia el punto de vista aunque la escena sea la misma. En principio vamos a mantener constantes el $\widehat{\mathrm{fov}}=90^\circ$, el vector $\overrightarrow{\mathrm{vup}}=(0,1,0)$ y el ratio 16:9, pero como nos gustaría poder movernos con libertad por la escena, declararemos dos variables \verb|uniform| que representen el punto $o_c$ y el punto $a_t$, a las cuales podremos asignarle variables dinámicamente desde JavaScript y dar la sensación de movimiento.
+
+\begin{lstlisting}
+
+uniform vec3 u_lookfrom;    // Punto lookfrom
+uniform vec3 u_lookat;      // Punto lookat
+
+// ... 
+// aspect_ratio = 16/9
+// nx = 1280 pixels
+// ny = 720 pixels
+
+// CAMARA
+vec3 vup = vec3(0.0, 1.0, 0.0);
+float vfov = 90.0; // Vertical field of view in degrees
+Camera cam = init_camera(u_lookfrom, u_lookat, 
+    vup, vfov, aspect_ratio);
+
+// Coordenadas de dispositivo normalizadas [0,1]
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(nx, ny);
+float u = uv.x;
+float v = uv.y;
+
+Ray r = get_ray(cam, u, v);
+\end{lstlisting}
+
+Por ejemplo, si fijamos $o_c = (1,1,1)$ y $a_t = (0,0,0)$ obtenemos la imagen \ref{fig:escena-camara} (a), y con $o_c=(5, 5, -5)$, $a_t=(1,2,-5)$ la imagen \ref{fig:escena-camara} (b). En este último caso podemos de hecho ver la escena desde el lado negativo del eje $Z$, lo que antes de parametrizar la cámara llamábamos `el interior de la pantalla'.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{cc}
+          \includegraphics[scale=0.25]{img/C7/camera-1.png} &   \includegraphics[scale=0.25]{img/C7/camera-2.png} \\
+    (a) & (b)\\[6pt]
+    \end{tabular}
+    \caption{Escena \ref{fig:escena-completa} desde otros puntos de vista}
+    \label{fig:escena-camara}
+\end{figure}
+
+\section{Modelo de iluminación de Phong}
+\label{section:Phong}
+En este punto hemos creado una escena sencilla y podemos movernos libremente por ella, pero vendría bien una dosis de realismo a la escena. Para ello, dotaremos a la escena de fuentes de luz y añadiremos a los objetos que componen la escena un material que nos permita observar su aspecto más allá del material normal que definimos en la sección \ref{subsection:esfera} a la hora de darle color a la esfera.
+
+La iluminación real es imposible de simular porque cada punto de cada objeto irradia una cantidad de luz en todas las direcciones que es inviable de computar, por ello necesitamos de aproximaciones que simulen en mayor o menor medida dicha iluminación. Existen muchos y muy distintos modelos de iluminación, tan complejos y realistas como queramos. El conocido \textit{modelo de Phong} no es ni el más realista, ni el más complejo, pero es suficiente para nuestro cometido, pues nos permite darle colores a los materiales y apariencias mate además de posibles brillos que consiguen efectos metalizados.
+
+Primero de todo, haremos una clasificación de los distintos modelos de iluminación que se suelen utilizar en informática gráfica en base a la luz que recibe un punto de una superficie, la cual puede deberse a:
+\begin{itemize}
+    \item \textbf{Iluminación directa}: Provocada por una fuente de luz que incide directamente sobre dicho punto.
+    \item \textbf{Iluminación indirecta}: Luz que llega a la superficie tras haber rebotado en otras superficies.
+\end{itemize}
+Como consecuencia de esta clasificación, los modelos de iluminación pueden clasificarse en:
+\begin{itemize}
+    \item \textbf{Modelos locales}: Únicamente consideran la iluminación directa
+    \item \textbf{Modelos globales}: Consideran tanto iluminación directa como indirecta.
+\end{itemize}
+El modelo de Phong es un modelo de iluminación local, es decir, tan solo consideraremos la posible acción directa de una fuente de luz sobre los objetos, lo cual es además computacionalmente más sencillo. Este modelo se basa en descomponer la luz que incide sobre un punto de un objeto en tres componentes RGB: ambiental, difusa y especular.
+
+Consideraremos también únicamente el efecto de luces direccionales, las cuales se componen, tal y como su propio nombre indica, de un vector director $\vec L_p\in\R^3$ y de una tripleta RGB que es la intensidad de la luz $I_p$. El rasgo principal de este tipo de fuentes de luz es que inciden sobre todos los puntos del objeto con el mismo vector, a diferencia de las fuentes de luz puntuales. Por conveniencia, consideraremos que el vector $\vec L_p$ y todos los vectores que utilizaremos están normalizados. Sean entonces $k$ fuentes de luz, cada una con su vector director $\vec L_p$ y su intensidad $I_p$, $p=1,\dots,k$.
+
+En adelante fijaremos un punto cualquiera de una superficie el cual queremos calcular el color que asignarle al píxel correspondiente, calculando el mismo mediante las ecuaciones del modelo de Phong. A continuación describiremos cada una de las componentes y explicaremos su efecto.
+
+\subsection{Componente ambiental}
+
+La componente ambiental representa la luz del entorno y afecta uniformemente a todos los puntos del objeto independientemente de la forma de éste. Por ejemplo, en un día de calima todos los objetos en todos sus puntos tenían una componente ambiental naranja. Este valor $I_a$, que denominamos iluminación ambiental, se deduce del producto (componente a componente) de las siguientes tripletas:
+\begin{itemize}
+    \item Intensidad de la luz ambiente ($I_{la}\in\R^3$): Es la media de las intensidades de las luces de la escena: $I_{la}=\frac{1}{k}\sum_{p=1}^k I_p$.
+    \item Reflectividad ambiental del material $(k_a\in\R^3)$: Depende únicamente del material de la superficie y expresa la respuesta del material a este tipo de iluminación. 
+\end{itemize}
+\begin{equation}
+    I_a = I_{la} k_a,
+\end{equation}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.2]{img/C7/calima.jpg}
+    \caption{La calima: un ejemplo del efecto de la componente ambiental}
+    \label{fig:calima}
+\end{figure}
+
+\subsection{Componente difusa}
+
+Cuando la luz impacta sobre un objeto, si este es opaco la luz es reflejada a muchas direcciones, si es translúcido entra en el objeto. Esta componente representa la cantidad de luz que es reflejada. Nosotros consideraremos que la misma cantidad de luz que incide es la que se refleja en todas las direcciones (los objetos son totalmente opacos), y esta depende tanto del ángulo de incidencia como de la normal a la superficie en dicho punto. A esta componente también se le llama reflexión de Lambert por su relación con el modelo de Lambert.
+
+Fijada una fuente de luz, la iluminación difusa $I_d$ se obtiene mediante el producto de la reflectividad difusa del material $k_d\in\R^3$, la intensidad de la luz $I_p$ y el coseno del ángulo que forman la normal al punto ($\vec N$) y la dirección de la fuente de luz ($\vec L_p$), el cual, si $\vec N$ y $\vec L_p$ están normalizados se calcula simplemente como el producto escalar $\vec N\cdot \vec L_p$ (véase imagen \ref{fig:difusa}). Por tanto,
+\begin{equation}
+    I_{d_p} = I_p k_d (\vec N\cdot \vec L_p)
+\end{equation}
+La componente difusa final es la suma de las componentes difusas calculadas para cada una de las fuentes de luz.
+\begin{equation}
+    I_d = \sum_{p=1}^k I_p k_d (\vec N\cdot \vec L_p)
+\end{equation}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/difusa.png}
+    \caption{Esquema de los vectores utilizados en la componente difusa}
+    \label{fig:difusa}
+\end{figure}
+
+Fijémonos que este cálculo es independiente de la posición de la cámara, solo depende de la superficie y la fuente de luz.
+
+\subsection{Componente especular}
+
+Esta componente representa a las reflexiones directas de la fuente de luz sobre un objeto con brillo. Es con esta componente mediante la que conseguimos efectos brillantes y metalizados. La percepción de la iluminación especular depende ahora sí de la posición de la cámara respecto a la superficie. Concretamente, fijada una fuente de luz, la componente especular se ve afectada por el ángulo $\alpha$ que forman el vector que une el punto de la superficie que estamos evaluando con el punto de vista, llamémoslo  $\vec V$, y la dirección que tomaría un vector reflejado por la superficie proveniente de la fuente de luz, $\vec R_p$. Véase la imagen \ref{fig:especular} para mayor claridad. El tamaño del resplandor que causan estos brillos se regula con una constante real $n\in\R$ que es parte de las propiedades del material.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.35]{img/C7/especular.png}
+    \caption{Esquema de los vectores utilizados en la componente especular}
+    \label{fig:especular}
+\end{figure}
+
+A partir de toda esta información, la iluminación especular $I_s$ se calcula con el producto de la reflectividad especular del material $k_s$, la intensidad de la luz $I_p$ y el coseno del ángulo $\alpha$ elevado a $n$. Asumiendo que $\vec R_p$ y $\vec V$ son unitarios, $\cos\alpha=\vec R_p\cdot \vec V$, por lo que tenemos que
+\begin{equation}
+    I_{s_p} = I_p k_s (\vec R_p\cdot \vec V)^n
+\end{equation}   
+Al igual que en el caso de la componente difusa, el resultado final es la suma de las componentes especulares generadas por todas las fuentes de luz.
+\begin{equation}
+    I_s = \sum_{p=1}^k I_p k_s (\vec R_p \cdot \vec V)^n
+\end{equation}
+
+\subsection{Sombras arrojadas}
+\label{subsection:sombras}
+
+Hay algunas situaciones en las que las que no se aplica iluminación difusa ni especular, y es en el caso de que la luz no incida directamente sobre el punto. En este caso, al no incidir la luz se considera que el punto está en la sombra provocada por dicha luz. Hay varias formas de saber si un punto concreto está o no en la sombra. Pensemos primero en puntos que están `en la cara oculta' de un objeto. Es decir, pertenecen a una zona de un objeto sobre la cual una fuente de luz concreta no incide. Para determinar esto se puede utilizar la normal a la superficie en dicho punto, $\vec N$, y el vector dirección de la fuente de luz, $\vec L_p$. Si el coseno del ángulo $\theta$, que recordemos que es el vector formado por $\vec N$ y $\vec L_p$, es negativo, entonces consideramos que la luz no incide sobre el punto, véase la imagen \ref{fig:excepcion}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/excepcion.png}
+    \caption{Punto sobre el que no incide la luz}
+    \label{fig:excepcion}
+\end{figure}
+
+El problema que esta condición es suficiente únicamente en casos de objetos convexos, como las esferas, ya que si la superficie tiene puntos tapados por el propio objeto el cálculo afirmaría que la luz incide sobre el mismo cuando realmente no es así. Fíjese en el caso del tubo de la figura \ref{fig:no-convexo}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.25]{img/C7/no-convexo.png}
+    \caption{Ejemplo de objeto no convexo y punto a la sombra}
+    \label{fig:no-convexo}
+\end{figure}
+
+En estos casos, la forma de saber si el punto está o no a la sombra es lanzar un rayo en la misma dirección que la luz y averiguar si existe alguna intersección con algún objeto de la escena. En caso de que la haya multiplicamos por $0$ el valor de la componente difusa y la especular (el punto está a la sombra). Si no existe impacto se establece que la luz incide directamente sobre el punto y se multiplicarían por $1$ las componentes difusa y especular. Este proceso debe repetirse con cada una de las fuentes de luz que se utilicen.
+
+Por ejemplo, fíjese en la imagen \ref{fig:sombras}. Si se lanza un rayo desde el punto $p_0$, este no encontrará intersección con ningún objeto, por lo que se considera que la luz incide sobre él. Por su parte, $p_1$ está en la parte del objeto sobre la cual no impacta la luz, y si además lanzamos un rayo en dirección a la fuente de luz intersecaría con la propia esfera. Y finalmente, al lanzar un rayo desde $p_2$ éste interseca con la esfera, por lo que se considera que está a la sombra.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.3]{img/C7/sombras.png}
+    \caption{Ejemplos de puntos sobre los que incide y no una fuente de luz}
+    \label{fig:sombras}
+\end{figure}
+
+Por cualquiera de las dos razones, un punto puede ocurrir que esté a la sombra, en cuyo caso no se calcularían o se anularían las componentes difusa y especular del modelo. Por tanto, las intensidades difusa y especular se redefinen multiplicando cada una de las dos por una constante binaria para cada luz, $c_p$, la cual vale $0$ si el punto evaluado está a la sombra o $1$ si la luz incide sobre el mismo.
+
+\begin{align*}
+    I_{d_p} &= c_p I_p k_d (\vec N\cdot \vec L_p)  & I_d &= \sum_{p=1}^k c_p I_p k_d (\vec N\cdot \vec L_p)\\
+    I_{s_p} &= c_p I_p k_s (\vec R_p\cdot \vec V)^n & I_s &= \sum_{p=1}^k c_p I_p k_s (\vec R_p \cdot \vec V)^n
+\end{align*}
+
+\subsection{Evaluación del modelo de iluminación}
+
+Una vez se han explicado las tres componentes y cómo se calculan podemos evaluar el modelo de iluminación completo sumando las tres componentes.
+\begin{equation}
+    \label{eq:phong}
+    \begin{split}
+        I &= I_a + I_d + I_p \\
+        &=\frac{1}{k}\sum_{p=1}^k I_p k_a + \sum_{p=1}^{k}c_p I_p k_d (\vec N\cdot \vec L_p) + \sum_{p=1}^{k} c_p  I_p k_s (\vec R_p\cdot \vec V)^n \\
+        &=\sum_{p=1}^{k}\left(\frac{1}{k}I_p k_a + c_p I_p k_d (\vec N\cdot \vec L_p) + c_p I_p k_s (\vec R_p\cdot \vec V)^n\right)
+    \end{split}
+\end{equation}
+
+A modo de adelanto, pero también con el objetivo de aclarar conceptos, obsérvese cómo afecta cada componente del modelo. En las imágenes \ref{fig:componentes-aisladas} vemos el efecto de cada tipo de iluminación por separado. En la imagen (a) observamos en rojo que el efecto de la parte ambiental afecta por igual a todos los puntos, de forma que realmente no da ninguna sensación de volumen. En (b) se puede ver cómo la componente difusa colorea de forma mate en color verde el objeto. Por último, en (c) se observan únicamente brillos especulares azules.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.12]{img/C7/solo-ambiental.png} &   \includegraphics[scale=0.12]{img/C7/solo-difusa.png} &   \includegraphics[scale=0.12]{img/C7/solo-especular.png} \\
+    (a) Ambiental & (b) Difusa & (c) Especular \\[6pt]
+    \end{tabular}
+    \caption{Componentes aisladas del modelo de Phong}
+    \label{fig:componentes-aisladas}
+\end{figure}
+
+Y ahora observemos una imagen en la que se aprecian las tres componentes a la vez: la imagen \ref{fig:todas-componentes}. En las esferas predomina el verde, pero se aprecian brillos azules y sombras rojas, pudiendo apreciar perfectamente qué papel desarrolla cada componente del modelo. Fijémonos como efectivamente en los puntos que no incide la luz se ven rojos por el efecto de la componente ambiental.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.23]{img/C7/todas-componentes.png}
+    \caption{Acción de todas las componentes}
+    \label{fig:todas-componentes}
+\end{figure}
+
+\subsection{Implementación del modelo de Phong}
+
+Veamos ahora cómo a partir de la teoría introducida podemos obtener resultados como los de las imágenes \ref{fig:componentes-aisladas} y \ref{fig:todas-componentes}. El elemento básico de un modelo de iluminación es, como no podría ser de otro modo, la fuente de luz. Una fuente de luz ya dijimos que se compone de un vector director y una tripleta RGB que define su intensidad, pero en GLSL los colores vienen representados por 4 componentes, siendo la última la que corresponde a transparencia. Por simplicidad nosotros la consideraremos siempre igual a $1.0$. Por tanto, representamos en GLSL una fuente de luz direccional mediante el siguiente struct.
+\begin{lstlisting}
+struct Directional_light{
+    vec3 dir;   // Direccion de la luz
+    vec4 color; // Intensidad RBGA de la luz
+};    
+\end{lstlisting}
+
+Lo siguiente es fijarnos en que el material del objeto desempeña una labor fundamental, de hecho es el que define finalmente la apariencia del mismo. Este material tiene como elementos las reflectividades ambiental ($k_a$), difusa ($k_d$) y especular ($k_s$), las cuales son también tuplas RGBA. Además de las reflectividades, el exponente de brillo $n$ también es una propiedad del material. De esta forma, podemos representar un material con un struct tal que así:
+
+\begin{lstlisting}
+struct Material {
+    vec4 ka;    // Reflectividad ambiental
+    vec4 kd;    // Reflectividad difusa
+    vec4 ks;    // Reflectividad especular
+    float sh;   // Exponente de brillo
+};
+\end{lstlisting}
+
+Como ya hemos comentado, cada objeto tiene un único material, por lo que añadimos a las estructuras \verb|Sphere| y \verb|Plane| un nuevo campo \verb|Material mat;| de forma que a cada esfera y al plano se le puede asignar un material. Además, en caso de intersección almacenábamos información en una estructura \verb|Hit_record|, y esa información es la que nos servía para calcular el color. De igual manera que necesitábamos por ejemplo la normal ahora necesitamos saber el material del objeto con el que impacta el rayo, por lo que añadimos a \verb|Hit_record| también un campo \verb|Material mat;| al cual se le asignaría el material del objeto con el que se produce el choque.
+
+Para calcular la constante $c_p$ con la que conseguir el sombreado necesitamos ahora una función que, dado un punto, trace un rayo en dirección de una fuente de luz dada y devuelva 0 si hay intersección con algún objeto y 1 si no la hay. Fijémonos que debemos calcular intersecciones que estén a una pequeña distancia del punto, ya que en otro caso las funciones que calculan la intersección siempre calcularían que existe impacto (pues el punto que se evalúa está en una superficie), de forma que todos los puntos estarían a la sombra, cosa que no tiene sentido. Además, consideramos que solo las esferas arrojan sombras.
+
+\begin{lstlisting}
+float light_is_visible(Directional_light light, vec3 p, 
+    Sphere world[ARRAY_TAM], int size) {
+    Ray R;
+    R.dir = normalize(light.dir);
+    R.orig = p;
+    float t = 0.01;
+    float h;
+
+    return hit_spheres_list(world, size, R, t, MAX_DIST).hit ? 
+           0.0 : 1.0; 
+}
+\end{lstlisting}
+
+Además, con el objetivo de añadir eficiencia e interactividad se ha añadido una variable \verb|uniform| de tipo \verb|bvec3|, es decir, una tripleta de booleanos, que sirve para especificar desde JavaScript qué luces queremos que proyecten sombras. Así podemos proyectar las sombras de la luz que queramos cuando busquemos realismo o desactivarlas cuando queramos mayor rapidez en la ejecución, bajo la limitación de que solo podremos utilizar hasta 3 fuentes de luz.
+
+\begin{lstlisting}
+uniform bvec3 u_shadows;
+\end{lstlisting}
+
+Con estas variaciones ya podríamos implementar una función que evalúe el modelo de iluminación completo a partir de la ecuación (\ref{eq:phong}). Esta función necesita como argumentos las fuentes de luz, el material, el punto en el que se evalúa el modelo, la normal a la superficie en dicho punto, los objetos que arrojan sombras y el punto de vista. Toda esta información puede ser recogida en un array de objetos \verb|Directional_light|, en la estructura \verb|Hit_record| que almacena la información del choque, en la variable global \verb|u_lookfrom| y el vector de esferas. Presentamos por tanto el código de dicha función.
+
+\begin{lstlisting}
+vec4 evaluate_lighting_model( 
+  Directional_light lights[ARRAY_TAM], int num_lights, 
+  Hit_record hr,
+  Sphere world[ARRAY_TAM], int size ) {
+  
+  Material mat = hr.mat;
+  Directional_light light;
+  vec3 light_dir;
+  vec3 view_dir = normalize(u_lookfrom - hr.p);
+  vec3 normal = normalize(hr.normal);
+  vec4 ambient, diffuse, specular;
+  float visibility;
+  vec4 L_in = vec4(0.0, 0.0, 0.0, 1.0);
+  if(num_lights > 0){
+    for(int i = 0; i < ARRAY_TAM; i++){
+      if(i == num_lights) break;
+      ambient = vec4(0.0, 0.0, 0.0, 1.0);
+      diffuse = vec4(0.0, 0.0, 0.0, 1.0);
+      specular = vec4(0.0, 0.0, 0.0, 1.0);
+      light = lights[i];
+      ambient += mat.ka*light.color;
+      if(num_lights <= 3 && !u_shadows[i]) visibility = 1.0;
+      else 
+        visibility = light_is_visible(light,hr.p,world,size);
+      light_dir = normalize(light.dir);
+      float cos_theta = max(0.0,dot(normal,light_dir));
+      // Solo si la fuente de luz es visible desde el punto
+      if(cos_theta > 0.0 && visibility > 0.0) {
+        // Reflection direction
+        vec3 reflection_dir = reflect(-light_dir, normal);
+        diffuse = mat.kd * cos_theta;
+        specular = mat.ks * pow( max(0.0, 
+          dot(reflection_dir, view_dir)), 
+          mat.sh);
+      }
+      L_in += visibility * light.color * (diffuse + specular);
+    }
+  }
+  L_in += ambient/float(num_lights);
+  return vec4(L_in.xyz, 1.0);
+}
+\end{lstlisting}
+
+Lo siguiente es editar, aunque muy levemente, las funciones \verb|hit_sphere| y \verb|hit_plane| para que en caso de existir intersección asignen a \verb|result.mat| el material de la esfera \verb|S.mat| y el del plano \verb|P.mat| respectivamente. Por último debemos, una vez más, editar \verb|ray_color| para que acepte como argumento el array de luces y hacer las llamadas correspondientes a la función \verb|evaluate_lighting_model|.
+
+Sin embargo, recordemos que el suelo tenía textura de tablero de ajedrez, por lo que no podemos asignar de manera uniforme un material al plano. Lo que sí podemos es editar los parámetros del material utilizado para el suelo asignando a sus componentes blanco o negro según corresponda, aunque a partir de este momento y por pura estética se utilizará un color gris claro \verb|rgb(178,178,178)| en lugar del blanco.
+
+\begin{lstlisting}
+vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, 
+    Plane P, Directional_light lights[ARRAY_TAM], 
+    int num_lights) {
+
+    // r interseca alguna esfera?
+    // ...
+    if(hr.hit){
         // ... 
+        tmp_color = evaluate_lighting_model(lights, 
+            num_lights, hr, world, size);
+    }
+
+    // r interseca el plano? 
+    // ...
+    if(hr.hit){
+        // ... 
+        if(modulus == 0){
+            hr.mat.kd = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.ks = vec4(0.5, 0.5, 0.5, 1.0);
+            hr.mat.sh = 10.0;
+        }
+        else
+            hr.mat.kd = vec4(0.0,0.0,0.0, 1.0);
+        tmp_color = evaluate_lighting_model(lights, 
+            num_lights, hr, world, size);
     }
     // ...
 }
 \end{lstlisting}
 
-Y con esta simple técnica podemos optimizar bastante las escenas en las que el fractal aparece más lejano. Sin embargo, si queremos ampliar detalles del conjunto no influiría, pues la gran mayoría de los rayos impactan con la esfera englobante. Aún así, en caso de estar cerca las iteraciones que se dan representan un número pequeño, así que mejoramos el rendimiento de una u otra forma.
-
-\subsection{Optimización de sombras con esferas englobantes}
-
-En ciertos píxeles hay que aplicar varias veces sphere-tracing, es el caso de los píxeles que corresponden a puntos del fractal o del plano que consideramos como suelo, ya que como se ha explicado en la sección \ref{subsection:sombras}, la forma de añadir sombras a la escena es, a partir del punto donde se produce la intersección, lanzar un rayo en la dirección de cada una de las fuentes de luz y buscar posibles intersecciones con el conjunto que se visualice en la escena, asignando así a cada fuente un coeficiente de visibilidad. Esto supone aplicar varias veces sphere-tracing, lo que a su vez implica muchas ejecuciones de las SDFs, lo cual también ralentiza la ejecución. 
-
-Sin embargo, al igual que con el sphere-tracing principal de \verb|ray_color|, podemos desde el principio descartar todos los rayos que no intersequen la esfera englobante. Esta mejora se puede hacer con una ligera modificación del método \verb|light_is_visible|.
+Y ya por último tan solo tenemos que inicializar las luces y los materiales. En el caso de las luces, hemos utilizado dos fuentes de luz y hemo añadido dos variables \verb|uniform| para elegir los colores de ambas, aunque inicialmente serán blancas. Las direcciones de estas luces son $(1,1,0)$ y $(0,1,0)$. Respecto a los materiales, el del plano únicamente tiene la componente difusa y especular que se le asigna en \verb|ray_color| y el de las esferas es editable por el usuario, de forma que tenemos 4 variables \verb|uniform| que son editables dinámicamente y a partir de las cuales se inicializa el material de las esferas.
 
 \begin{lstlisting}
-float light_is_visible(Directional_light light, vec3 p) {
-    Ray R;
-    R.dir = normalize(light.dir);
-    R.orig = p;
-    // ... 
-    if(!hit_sphere_limits(bounding_sphere, R))
-        return 1.0;
-    // Sphere Tracing
-    for(int i = 0; i < 50; i++ ) {
-        // ... 
-    }
-    return res;
-}
+// Material parametrizable
+uniform vec4 u_ka;
+uniform vec4 u_kd;
+uniform vec4 u_ks;
+uniform float u_sh;
+
+// Colores de las luces
+uniform vec4 u_lightColor0;
+uniform vec4 u_lightColor1;
+
+// ... 
+
+// Materiales
+Material mat, ground_material;
+mat.ka = u_ka;
+mat.kd = u_kd;
+mat.ks = u_ks;
+mat.sh = u_sh;
+
+ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
+ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
+ground_material.sh = 1.0;
+
+// Esferas
+// ... 
+S1.mat = mat; S2.mat = mat;
+S3.mat = mat; S4.mat = mat;
+// ...
+
+// Plano
+// ...
+P.mat = ground_material;
+// ... 
+
+// Luces
+Directional_light lights[ARRAY_TAM];
+int num_lights = 2;
+Directional_light l0, l1;
+l0.color = u_lightColor0; 
+l1.color = u_lightColor1;
+l0.dir = vec3(1.0, 1.0, 0.0);
+l1.dir = vec3(0.0, 1.0, 0.0);
+lights[0] = l1; lights[1] = l2;
+// ... 
+
+gl_FragColor = ray_color(r, world, num_spheres, 
+    P, lights, num_lights);
 \end{lstlisting}
 
-El inconveniente es que esta mejora sólo puede aplicarse a ocasiones en las que el canvas visualice puntos lejanos al conjunto, por lo que cuando se esté graficando un detalle de un fractal puede ser poco útil. No obstante, en estos casos al haber menos puntos del plano directamente no tiene por qué ejecutarse en gran medida el código correspondiente a las sombras, por lo que hemos mejorado la eficiencia en los casos donde se ejecutaba dicho código más veces, es decir, en planos más abiertos y lejanos al conjunto.
+Evidentemente todos estos parámetros se pueden modificar y poner los que queramos, para finalmente obtener las imágenes y la coloración que deseemos.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.28]{img/C7/phong-final.png}
+    \caption{Escena aplicando el modelo de Phong completo}
+    \label{fig:phong-final}
+\end{figure}
+
+\section{SSAA en Ray-Tracing}
+
+En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{section:SSAA-2D} mostramos la posibilidad de utilizar más de un punto del plano por píxel, calcular el color asociado a cada uno y asignar un valor promedio a \verb|gl_FragColor|. Esta modificación producía imágenes y bordes más suavizados, con un nivel más alto de realismo. En 3D, esta técnica es igualmente aplicable y necesaria de hecho, fíjese por ejemplo en la imagen \ref{fig:no-antialiasing-3D}, en la cual se aprecian las irregularidades en los bordes de las fichas negras y blancas y a distancias mayores la textura se distorsiona bastante.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=130mm]{img/C7/no-antialiasing.png}
+    \caption{Suelo antes de aplicar antialiasing}
+    \label{fig:no-antialiasing-3D}
+\end{figure}
+
+Por suerte, podemos aplicar SSAA también en 3D. De igual forma que calculamos $n^2$ puntos por píxel en la región del plano que representábamos en 2D, podemos calcular, por cada píxel, $n^2$ puntos del plano de proyección, lanzar un rayo en dirección de cada uno y promediar el color que calculado para cada rayo. La metodología es prácticamente análoga a la utilizada en la sección \ref{section:SSAA-2D}, teniendo en cuenta que en este caso calculamos puntos del plano de proyección para posteriormente crear rayos. De hecho, invitamos al lector que visite dicha sección si no entiende algunos de los razonamientos, los cuales hemos abreviado por su parecido a los ya explicados en la sección \ref{section:SSAA-2D}. Procedemos entonces a explicar la metodología.
+
+
+En \verb|main|, cuando obtenemos \verb|u,v| y creamos el rayo, ahora debemos calcular $n^2$ coordenadas. Recordemos, de la sección \ref{section:camara}, \verb|u,v| son las coordenadas de dispositivo normalizadas en $[0,1]$, es decir:
+\begin{lstlisting}
+vec2 uv = (gl_FragCoord.xy + vec2(0.5)) / vec2(nx, ny);
+float u = uv.x;
+float v = uv.y;
+\end{lstlisting}
+
+Si ahora en lugar de utilizar un rayo por píxel que se dirige al centro del mismo deseamos lanzar $n^2$ rayos uniformemente distribuidos por el la superficie del píxel, tenemos que dividir su ancho en $n$ intervalos, análogamente el alto. Por tanto, dividimos cada píxel en una cuadrícula $n\times n$ donde cada fragmento mide $h_w:=\frac{1}{n_x\cdot n}$ en anchura y de $h_h:=\frac{1}{n_y \cdot n}$ en altura. Tras esto, centramos la cuadrícula sumando $\frac{1}{2}h_w$ en ancho y $\frac{1}{2}h_h$ en alto (revisitar imagen \ref{fig:SSAA}).
+
+Seguidamente, calculamos los $n^2$ colores, uno por cada rayo que lancemos. Por cada rayo calculamos la coordenada de dispositivo normalizada del punto hacia el cual queremos lanzar el rayo, llamamos a \verb|get_ray|, a \verb|ray_color| y sumamos el valor de retorno de esta última. Finalmente dividimos esta suma entre $n^2$ para calcular el color promedio y este es el que finalmente asignaríamos a \verb|gl_FragColor|.
+
+Para calcular la coordenada de dispositivo normalizada del punto $i$-ésimo iteramos un índice $i=0,\dots,n^2$, de forma que $i/n$ sería la fila e $i\%n$ la columna, de forma que a la coordenada de dispositivo normalizada inicial habría que sumarle $(i/n)h_w + \frac{1}{2}h_w$ en anchura e $(i\%n)h_h+ \frac{1}{2}h_h$ en altura para obtener la coordenada normalizada a la que lanzar el rayo. El código GLSL por tanto sería el siguiente
+
+\begin{lstlisting}
+// Antialiasing
+vec2 uv = (gl_FragCoord.xy) / vec2(nx, ny);
+float u = uv.x;
+float v = uv.y;
+
+int nSamples = 3; // O cualquier otro numero natural
+float hw = 1.0 / (float(nx * nSamples)),
+      hh = 1.0 / (float(ny * nSamples));
+Ray r;
+vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
+
+for(int i = 0; i < 1000; i++) {
+    if(i == nSamples*nSamples) break;
+    int x =  i/nSamples;
+    int y =  i - nSamples*x;
+    u = uv.x + float(x) * hw + 0.5 * hw;
+    v = uv.y + float(y) * hh + 0.5 * hh;
+    r = get_ray(cam, u, v);
+    sum_colors += ray_color(r, world, num_spheres, ground, 
+        lights, num_lights);
+}
+
+gl_FragColor = sum_colors / float(nSamples*nSamples);
+\end{lstlisting}
+
+Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSamples|) se consiguen resultados como el de la figura \ref{fig:antialiasing-3D}. Como se puede ver, los bordes son más suaves y de mejor calidad y las regiones más lejanas tienen mejor resolución.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=130mm]{img/C7/antialiasing.png}
+    \caption{Suelo tras de aplicar antialiasing}
+    \label{fig:antialiasing-3D}
+\end{figure}
+
+De nuevo, por cuestiones de eficiencia e interactividad, se incluye en el software la posibilidad de decidir si se desea o no aplicar SSAA en 3D, y en caso afirmativo, cuántos rayos por píxel se desean trazar. Esto se consigue mediante las variables \verb|uniform| \verb|u_antialiasing| y \verb|u_nSamples|, cuyas funciones son las mismas que las ya explicadas en la sección \ref{section:SSAA-2D}, aunque se puede deducir del código presentado a continuación.
+
+\begin{lstlisting}
+uniform bool u_antialiasing;
+uniform int u_nSamples;
+// ...
+void main() {
+    // ... 
+    if(u_antialiasing) {
+        // Aplicar SSAA
+        int nSamples = u_nSamples;
+        // ... 
+    }
+    else {
+        // No aplicar SSAA
+        // ...
+    }
+}   
+\end{lstlisting}
+
+Para terminar esta exposición y este capítulo mostraremos una última imagen que resume todo lo desarrollado: Ray-Tracing, intersecciones con distintos cuerpos, posicionamiento de cámara, iluminación, sombras y SSAA.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.45]{img/C7/imagen-final.png}
+    \caption{Imagen final del capítulo \ref{chap:ray-tracing}}
+    \label{fig:imagen-final}
+\end{figure}
+
