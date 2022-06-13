@@ -6,15 +6,15 @@ Presentamos también en la sección \ref{section:UML} un diagrama UML con las re
 
 Comenzaremos documentando las clases y métodos comunes a la visualización de fractales 2D y 3D. Por ejemplo, la estructura de los shaders es la misma, aunque cambia drásticamente el código fuente de un caso a otro. También se utiliza un mismo buffer de vértices inicial para el vertex shader y ciertas inicializaciones de la escena son exactamente las mismas.
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{shader.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{shader.js}}}
 
 Fichero con el código relativo a una abstracción de un shader. Hay dos posibles tipos de Shader (\verb|ShaderType|): Vertex y Fragment (clase \verb|Shader|), que juntos forman lo que llamamos `Programa Shader' (clase \verb|ShaderProgram|).
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{ShaderType}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{ShaderType}}}
 
 Enumerado inmutable, de forma que un elemento de la clase Shader sólo puede tener un tipo: \verb|ShaderType.vertexShader| o \verb|ShaderType.fragmentShader|.
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{Shader}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{Shader}}}
 Clase que abstrae un shader de WebGL, entendiendo shader como el programa relativo a un vertex shader o a un fragment shader. 
 
 \paragraph*{Atributos}
@@ -39,7 +39,7 @@ Clase que abstrae un shader de WebGL, entendiendo shader como el programa relati
     \item \verb|getProgram|: Getter del atributo program, de tipo WebGLShader.
 \end{itemize}
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{ShaderProgram}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{ShaderProgram}}}
 Clase que representa una abstracción de un programa shader, formado por el enlazado de un vertex shader y un fragment shader.
 
 \paragraph*{Atributos}
@@ -63,11 +63,11 @@ Clase que representa una abstracción de un programa shader, formado por el enla
     \item \verb|getShaderProgram|:Getter del atributo program, de la clase WebGLProgram.
 \end{itemize}
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{buffer.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{buffer.js}}}
 
 Fichero que contiene una abstraccion de un buffer de datos de WebGL.
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{Buffer}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{Buffer}}}
 
 Clase que contiene un atributo del tipo WebGLBuffer, información sobre el mismo y encapsula el comportamiento relativo a la inicialización de un buffer de WebGL. 
 
@@ -96,11 +96,11 @@ Clase que contiene un atributo del tipo WebGLBuffer, información sobre el mismo
     \item \verb|getNumberOfValuesPerElements|: Getter del atributo \verb|nValuesPE|, de tipo number.
 \end{itemize}
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{scene.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{scene.js}}}
 
 Este fichero contiene los atributos y métodos de la clase `Scene', una clase abstracta que representa una escena 2D o 3D.
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{Scene}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{Scene}}}
 Es una clase abstracta que contiene el código común de una escena 2D y una 3D. No podremos por tanto declarar una variable que sea de tipo \verb|Scene|, tan sólo podremos utilizar clases que hereden de esta.
 
 \paragraph*{Atributos}
@@ -171,11 +171,11 @@ uniform int u_nSamples;
 
 Recordando y teniendo estos detalles en mente, procedemos a documentar la clase \verb|Scene2D|.
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{scene2D.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{scene2D.js}}}
 
 Código respectivo a la clase Scene2D, que representa una escena en la que podemos visualizar fractales en 2D.
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{Scene2D}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{Scene2D}}}
 
 Es una clase que hereda de Scene y que contiene el código relativo a la creacion, parámetros, visualizado y gestion de una escena 2D en la cual representaremos fractales 2D en un canvas de WebGL.
 
@@ -293,7 +293,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 
 \end{itemize}
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{fractals-2D.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{fractals-2D.js}}}
 
 Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|2D-fractals.html|, entendiendo estos últimos como los pequeños elementos del documento en los cuales escribimos el valor actual de un parámetro (véase el documento \verb|2D-fractals.html| y cualquier etiqueta \verb|input| para una mejor comprensión). En este archivo se declara y utiliza continuamente una variable global de la clase \verb|Scene2D|, ya que es ésta la que lleva toda la interacción entre WebGL y los parámetros modificables. Este fichero, por su parte, sirve como intermediario entre el `front-end' HTML y la escena.
 
@@ -347,11 +347,11 @@ uniform int u_nSamples;
 
 Como en la sección anterior, explicaremos el significado de cada una de ellas y su relación con los parámetros de la escena. Algunas de ellas, como \verb|u_fractal| o \verb|u_juliaSetConstant| tienen significados muy similares a los que tenían sus análogas en dos dimensiones, veámoslo.
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{scene3D.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{scene3D.js}}}
 
 Contiene el código respectivo a la clase \verb|Scene3D|, que representa una escena en la que podemos visualizar fractales en 3D.
 
-\subsubsection{Clase \Large\texttt{\textcolor{Bittersweet}{Scene3D}}}
+\subsubsection{Clase \texttt{\textcolor{Bittersweet}{Scene3D}}}
 
 Es una clase que hereda de \verb|Scene| y que contiene el código relativo a la creación, parámetros, visualizado y gestión de una escena 3D en la cual representaremos fractales 3D en un canvas de WebGL. 
 
@@ -476,7 +476,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|setSh|: Setter del parámetro \verb|sh| (exponente de brillo).
 \end{itemize}
 
-\subsection{Fichero \Large\texttt{\textcolor{brown}{fractals-3D.js}}}
+\subsection{Fichero \texttt{\textcolor{brown}{fractals-3D.js}}}
 
 Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|3D-fractals.html|. La metodología utilizada en este fichero es la misma que la empleada en el caso 2-dimensional, solo que al haber más parámetros modificables, también hay más elementos HTML, y por tanto más eventos que gestionar y más indicadores que editar. Esta vez utilizamos una variable global de la clase \verb|Scene3D| para gestionar toda la interacción entre WebGL y los parámetros modificables.
 
