@@ -1,1 +1,43 @@
-Hello
+Como se ha dicho en otras secciones de esta memoria, la web interactiva, que es el producto software desarrollado en este proyecto, puede consultarse y utilizarse desde cualquier navegador desde la dirección \url{https://jantoniovr.github.io/Geometria-Fractal/}.
+
+No obstante, por cuestiones de eficiencia recomendamos ejecutar el
+proyecto en local. Explicamos el procedimiento en los siguientes
+párrafos.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Primero de todo necesitamos descargar el código del repositorio del proyecto en github, el cual se puede encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal}. Para ello, mediante una terminal nos situamos en el directorio que deseemos y clonamos el repositorio:
+
+  \begin{lstlisting}[language=bash]
+git clone git@github.com:JAntonioVR/Geometria-Fractal.git
+cd Geometria-Fractal
+  \end{lstlisting}
+
+  Si no se dispone de \texttt{git}, en la pestaña \texttt{Code} se puede encontrar la posibilidad de descargar un \texttt{ZIP} con el código.
+
+\item
+  Es necesario lanzar un servidor web local. Para esto, se ofrecen algunas de las alternativas más sencillas. Si se dispone de
+  \texttt{Python}, bastaría con ejecutar el comando:
+
+  \begin{lstlisting}[language=bash]
+python SimpleHTTPServer 8000 # Si se dispone de Python2
+  \end{lstlisting}
+
+  o
+
+  \begin{lstlisting}[language=bash]
+python http.server 8000 # Si se dispone de Python3 (recomendado)
+  \end{lstlisting}
+  
+  Tras esto, abra su navegador en la URL \url{http://localhost:8000/} y encontrará la portada de la web.
+
+  Otra alternativa para los usuarios del editor \texttt{Visual\ Studio\ Code} (VSCode) es la extensión \href{https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer}{\textcolor{blue}{\texttt{Live\ Server}}}, la cual con tan solo instalarla y pulsar el botón `Go Live' que aparecerá en la esquina inferior derecha lanza un servidor web en el directorio que se tenga abierto en el momento y abre una ventana en el navegador.
+
+  Por último, en \href{https://nodejs.org/en/knowledge/HTTP/servers/how-to-create-a-HTTP-server/}{\textcolor{blue}{este enlace}} se explica la posibilidad de crear un servidor web utilizando \texttt{node.js}.
+
+  \textbf{Nota:} Con Python se utiliza el puerto 8000, con `Live Server' el 5500 y con node.js el 8080. Sin embargo, es posible que por alguna razón esos puertos estén ocupados por otros procesos y aparezca algún error. Si esto ocurre simplemente utilice algún puerto distinto que esté disponible.
+
+\item
+  Independientemente de la opción que hayamos elegido para lanzar el servidor web, tan solo resta abrir el navegador que queramos e introducir la dirección \href{http://localhost:8000/}{\texttt{http://localhost:PPPP/}}, siendo \texttt{PPPP} el puerto que hayamos elegido finalmente.
+\end{enumerate}
