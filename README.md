@@ -20,10 +20,13 @@
   
 <img align="left" src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge">
 
-<img align="center" src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge">
-  
-<img align="right" src="https://img.shields.io/github/license/JAntonioVR/Geometria-Fractal?style=for-the-badge">  
+<img align="rigth" src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge">
+    
 </div>
+
+<p align="center">
+<img src="https://img.shields.io/github/license/JAntonioVR/Geometria-Fractal?style=for-the-badge">
+</p>
 
 <p align="center">
 <img src="./static/img/logo.png" style="width:30%;">
