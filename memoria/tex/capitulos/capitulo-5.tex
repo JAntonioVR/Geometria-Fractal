@@ -165,22 +165,24 @@ varying lowp vec4 vColor;
 
 Crearemos un buffer para almacenar las posiciones de los cuatro vértices y otro para sus colores. Éste último es el que se ha mostrado en el código de ejemplo de la sección \ref{subsection:buffer}. Servimos al shader de valores a partir de los buffer y el resultado es el mostrado en la imagen \ref{fig:ejemplo-wgl}.
 
+\begin{figure} [ht]
+    \centering
+    \includegraphics[scale = 0.4]{img/C5/ejemplo-shaders.png}
+    \caption{Cuadrado de colores graficado con WebGL}
+    \label{fig:ejemplo-wgl}
+\end{figure}
+
 Fíjese cómo hay un vértice blanco, uno rojo, uno verde y uno azul, de forma que en los píxeles intermedios hay colores intermedios entre estos, fruto de la interpolación que se realiza entre \textit{vertex} y \textit{fragment shader}.
 
 Este ejemplo se corresponde al expuesto en \cite{MDN-1}, cuya adaptación podemos encontrar en el repositorio de este trabajo, concretamente en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/js/canvas.js}. Podemos observar en la imagen \ref{fig:componentes-wgl} un esquema de los componentes de WebGL y cómo se relacionan entre ellos hasta finalmente visualizar la imagen deseada.  %TODO Cambiar URL si es necesario
 
 \newpage
 
-\begin{figure} [ht]
-    \centering
-    \includegraphics[scale = 0.25]{img/C5/ejemplo-shaders.png}
-    \caption{Cuadrado de colores graficado con WebGL}
-    \label{fig:ejemplo-wgl}
-\end{figure}
+
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C5/WEBGL-workflow.drawio.png}
+    \includegraphics[width=15cm]{img/C5/WEBGL-workflow.drawio.png}
     \caption{Componentes de WebGL e interacciones entre ellos}
     \label{fig:componentes-wgl}
 \end{figure}
