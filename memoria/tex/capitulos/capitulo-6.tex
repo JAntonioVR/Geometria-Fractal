@@ -77,24 +77,9 @@ A continuación haremos una estimación del presupuesto de este producto. Para e
 
 \subsection{Recursos hardware}
 
-Todo el software ha sido desarrollado en un ordenador portátil personal. Las especificaciones hardware de dicho ordenador se pueden comprobar en la tabla \ref{tabla:especificaciones-PC}.
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{ll}
-    \hline
-    Modelo                           & HP Pavilion 15 Notebook PC                       \\ \hline
-    Procesador                       & Intel Core i7-4500U                              \\ \hline
-    \multirow{2}{*}{GPU} & nVidia GeForce 840M                              \\
-                                     & Intel Haswell-ULT Integrated Graphics Controller \\ \hline
-    RAM                              & 7.7 GiB                                          \\ \hline
-    Sistema Operativo                & Ubuntu 20.04.2 LTS                               \\ \hline
-    \end{tabular}
-    \caption{Especificaciones del PC en el que se ha desarrollado el proyecto}
-    \label{tabla:especificaciones-PC}
-    \end{table}
+Todo el software ha sido desarrollado en un ordenador portátil personal. Cualquier ordenador moderno con una GPU estándar a fecha de junio de 2022 sería capaz de ejecutar y programar el software con suficiente fluidez. Estimamos que unos \textbf{500\euro} son suficientes para cubrir las necesidades, aunque cuanto mejor sea el ordenador y su GPU (y por tanto más caros) mejor rendimiento nos proporcionará.
 
-
-El ordenador fue estrenado el 6 de enero de 2016, fue adquirido por un precio de 620€. Este enero ha cumplido seis años de uso, por lo que su valor es mucho menor. Estimando el rendimiento que suele ofrecer y el estado de sus componentes hardware en general, se estima que a día de hoy costaría unos \textbf{70€}.
+Buenas opciones serían este \href{https://www.pccomponentes.com/lenovo-v15-g2-alc-amd-ryzen-3-5300u-8gb-256gb-ssd-156}{\textcolor{blue}{Lenovo V15 G2 ALC AMD Ryzen 3 5300U/8GB/256GB SSD/15.6"}} o este \href{https://www.pccomponentes.com/hp-15s-fq2158ns-intel-core-i3-1115g4-8gb-256gb-ssd-156}{\textcolor{blue}{HP 15S-fq2158ns Intel Core i3-1115G4/8GB/256GB SSD/15.6"}}.
 
 \subsection{Recursos Software}
 
@@ -105,18 +90,18 @@ A continuación enumeraremos los recursos software utilizados en la codificació
     \item \textbf{Google Chrome}: Navegador web, ampliamente utilizado para visualizar la web que se ha desarrollado en cada una de sus fases. también se ha empleado para consultar bibliografía, buscar información o realizar muchas de las imágenes utilizadas. En este último aspecto, los sitios más visitados han sido \href{https://www.vectary.com/}{\textcolor{blue}{Vectary}} y  \href{https://www.figma.com/}{\textcolor{blue}{Figma}}.
     \item \textbf{Git y Github}: Sistema de control de versiones, gracias a git se ha permitido llevar un histórico de los avances que se han hecho en el trabajo. Además, con `github' pages se ha podido desplegar la web en internet gratuitamente.
     \item \textbf{Bootstrap}: Framework de CSS y JavaScript útil para la programación del estilo de la página web.
-    \item \textbf{jQuery}: Biblioteca de JavaScript que simplifica la sintaxis y la programación del lenguaje.
+    \item \textbf{jQuery}: Biblioteca de JavaScript que simplifica la sintaxis, la gestión de eventos y la manipulación del DOM.
 \end{itemize}
 
 Todo esto junto con las típicas aplicaciones como el navegador de archivos, la terminal, etc.
 
-Afortunadamente, todos los recursos software son gratuitos, por lo que el presupuesto de los recursos software se reduce a \textbf{0€}.
+Afortunadamente, todos los recursos software son gratuitos, por lo que el presupuesto de los recursos software se reduce a \textbf{0\euro}.
 
 \subsection{Recursos humanos}
 
 Sobre recursos humanos, el producto ha sido en su totalidad desarrollado por el alumno y autor de este texto: Juan Antonio Villegas Recio. Siempre bajo la supervisión y ayuda del tutor de informática: D. Carlos Ureña Almagro.
 
-Si hacemos una estimación de unas 20 horas semanales de media, teniendo en cuenta que el desarrollo ha durado 20 semanas, lo cual supone un total de 400 horas, a régimen de 15€ por cada hora de trabajo, en total el gasto en recursos humanos supone \textbf{6.000€}.
+Si hacemos una estimación de unas 20 horas semanales de media, teniendo en cuenta que el desarrollo ha durado 20 semanas, lo cual supone un total de 400 horas, a régimen de 15\euro por cada hora de trabajo, en total el gasto en recursos humanos supone \textbf{6.000\euro}.
 
 \subsection{Presupuesto final}
 
@@ -127,16 +112,16 @@ Presentamos entonces el desglose final del presupuesto de este proyecto en la ta
     \begin{tabular}{ll}
     \hline
     \textbf{Recurso}     & \textbf{Precio} \\ \hline
-    Recursos hardware    & 70€             \\ \hline
-    Recursos Software    & 0€              \\ \hline
-    Recursos humanos     & 6000€           \\ \hline
-    \textbf{Coste total} & \textbf{6070€}  \\ \hline
+    Recursos hardware    & 500\euro             \\ \hline
+    Recursos Software    & 0\euro              \\ \hline
+    Recursos humanos     & 6000\euro           \\ \hline
+    \textbf{Coste total} & \textbf{6500\euro}  \\ \hline
     \end{tabular}
     \caption{Desglose por recursos del presupuesto final}
     \label{tab:presupuestos}
 \end{table}
 
-Por tanto, el presupuesto de este producto software es de \textbf{6070€}.
+Por tanto, el presupuesto de este producto software es de \textbf{6500\euro}.
 
 \section{Análisis de requisitos}
 
@@ -158,11 +143,12 @@ En caso de la visualización de fractales 2D:
 En caso de fractales 3D:
 \begin{itemize}
     \item \textbf{RF2.1}: Visualización de generalizaciones tridimensionales de los conjuntos de Julia y Mandelbrot.
-    \item \textbf{RF2.2}: Posibilidad de alternar qué fractal 3D ver en el canvas en cada momento.
-    \item \textbf{RF2.3}: Posibilidad de modificar parámetros del modelo de iluminación para así observar distintos materiales y coloraciones en los fractales.
-    \item \textbf{RF2.4}: Modificar parámetros de los algoritmos de visualización que empleemos.
-    \item \textbf{RF2.5}: Posibilidad de moverse libremente por la escena utilizando una cámara orbital.
-    \item \textbf{RF2.6}: Hacer zoom en la escena para poder observar de cerca las superficies de los fractales.
+    \item \textbf{RF2.2}: Posibilidad de distinguir dos modos de uso debidos a la complejidad de la generación de imágenes 3D: redibujado continuo (a tiempo real) y redibujado a demanda con un botón.
+    \item \textbf{RF2.3}: Posibilidad de alternar qué fractal 3D ver en el canvas en cada momento.
+    \item \textbf{RF2.4}: Posibilidad de modificar parámetros del modelo de iluminación para así observar distintos materiales y coloraciones en los fractales.
+    \item \textbf{RF2.5}: Modificar parámetros de los algoritmos de visualización que empleemos.
+    \item \textbf{RF2.6}: Posibilidad de moverse libremente por la escena utilizando una cámara orbital.
+    \item \textbf{RF2.7}: Hacer zoom en la escena para poder observar de cerca las superficies de los fractales.
 \end{itemize}
 De forma genérica:
 \begin{itemize}
