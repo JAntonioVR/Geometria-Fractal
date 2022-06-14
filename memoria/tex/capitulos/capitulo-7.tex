@@ -1,5 +1,5 @@
 %
-% ─── CAPITULO 6: VISUALIZACION DE FRACTALES 2D ──────────────────────────────────
+% ─── CAPITULO 7: VISUALIZACION DE FRACTALES 2D ──────────────────────────────────
 %
 
 En el capítulo \ref{chap:visualizacion} introdujimos el uso de WebGL como herramienta de generación de imágenes y estudiamos sus componentes, sin embargo, no olvidemos que nuestro objetivo es la visualización de fractales, donde la característica principal de los mismos es que no se pueden expresar a partir de un conjunto de vértices o líneas, sino que son curvas o superficies totalmente irregulares. Entonces, ¿cómo podemos usar WebGL para graficar imágenes fractales?
@@ -8,7 +8,7 @@ A nivel conceptual, una imagen realmente es un conjunto de píxeles con un color
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.4]{img/C6/sintesis-imagenes-f.png}
+    \includegraphics[scale = 0.4]{img/C7/sintesis-imagenes-f.png}
     \caption{Síntesis de una imagen vía una función}
     \label{fig:sintesis-imagenes-f}
 \end{figure}
@@ -211,7 +211,7 @@ Seguidamente diseñaremos una paleta de colores y mediante interpolación lineal
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.4]{img/C6/paleta.png}
+    \includegraphics[scale = 0.4]{img/C7/paleta.png}
     \caption{Paleta de colores elegida para la visualización de fractales 2D}
     \label{fig:paleta}
 \end{figure}
@@ -220,7 +220,7 @@ La paleta de colores \ref{fig:paleta} nos proporciona el gradiente de la imagen 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.51]{img/C6/gradiente.png}
+    \includegraphics[scale = 0.51]{img/C7/gradiente.png}
     \caption{Gradiente generado por la paleta de colores \ref{fig:paleta}}
     \label{fig:gradiente}
 \end{figure}
@@ -304,7 +304,7 @@ gl_FragColor = Julia(u_juliaSetConstant, u_order);
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.2]{img/C6/julia-1.png} &   \includegraphics[scale=0.2]{img/C6/julia-2.png} &   \includegraphics[scale=0.2]{img/C6/julia-3.png} \\
+      \includegraphics[scale=0.2]{img/C7/julia-1.png} &   \includegraphics[scale=0.2]{img/C7/julia-2.png} &   \includegraphics[scale=0.2]{img/C7/julia-3.png} \\
     (a) $z^2-0.38+0.62i$ & (b) $z^3+0.62+0.5i$ & (c) $z^4-0.24+0.5i$ \\[6pt]
     \end{tabular}
     \caption{Generación de algunos conjuntos de Julia con WebGL}
@@ -358,7 +358,7 @@ gl_FragColor = Mandelbrot(u_order);
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.23]{img/C6/mandelbrot-1.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-2.png} &   \includegraphics[scale=0.23]{img/C6/mandelbrot-3.png} \\
+      \includegraphics[scale=0.23]{img/C7/mandelbrot-1.png} &   \includegraphics[scale=0.23]{img/C7/mandelbrot-2.png} &   \includegraphics[scale=0.23]{img/C7/mandelbrot-3.png} \\
     (a) Detalle de $\mathcal{M}_2$ & (b) Detalle de $\mathcal{M}_8$ & (c) $\mathcal{M}_3$ \\[6pt]
     \end{tabular}
     \caption{Representación de algunos conjuntos de Mandelbrot con WebGL}
@@ -395,7 +395,7 @@ Para terminar este capítulo, introduciremos una técnica que aportará realismo
 
 \begin{figure} [ht]
   \centering
-  \includegraphics[width=130mm]{img/C6/no-antialiasing.png}
+  \includegraphics[width=130mm]{img/C7/no-antialiasing.png}
   \caption{Detalle de $\mathcal{J}_{-0.53 + 0.53i}$ antes de aplicar antialiasing}
   \label{fig:no-antialiasing-2D}
 \end{figure}
@@ -407,8 +407,8 @@ Fijémonos en la figura \ref{fig:pantalla-antialiasing} (a), en la cual represen
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.20]{img/C6/pixeles-sin-antialiasing.png} &
-      \includegraphics[scale=0.20]{img/C6/pixeles-con-antialiasing.png} \\    
+        \includegraphics[scale=0.20]{img/C7/pixeles-sin-antialiasing.png} &
+      \includegraphics[scale=0.20]{img/C7/pixeles-con-antialiasing.png} \\    
     (a) Sin antialiasing & (b) Con antialiasing  \\
     \end{tabular}
     \caption{Representación de los rayos que se lanzan a una pantalla}
@@ -433,7 +433,7 @@ Si ahora en lugar de utilizar un punto por píxel situado en centro del mismo de
 
 \begin{figure} [ht]
   \centering
-  \includegraphics[scale = 0.45]{img/C6/SSAA.png}
+  \includegraphics[scale = 0.45]{img/C7/SSAA.png}
   \caption{Construcción de los puntos por píxel en SSAA}
   \label{fig:SSAA}
 \end{figure}
@@ -495,7 +495,7 @@ El resultado tras aplicar esta modificación en $\mathcal{J}_{-0.53 + 0.53i}$, q
 
 \begin{figure} [ht]
   \centering
-  \includegraphics[width=130mm]{img/C6/antialiasing.png}
+  \includegraphics[width=130mm]{img/C7/antialiasing.png}
   \caption{Detalle de $\mathcal{J}_{-0.53 + 0.53i}$ tras aplicar SSAA}
   \label{fig:antialiasing-2D}
 \end{figure}

@@ -1,5 +1,5 @@
 %
-% ─── CAPITULO 7: INTRODUCCION AL RAY TRACING ────────────────────────────────────
+% ─── CAPITULO 8: INTRODUCCION AL RAY TRACING ────────────────────────────────────
 %
 
 En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente generar fractales en tridimensionales.
@@ -16,7 +16,7 @@ Más en profundidad, la idea es situar al observador en una cierta posición de 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/RT.png}
+    \includegraphics[width=9cm]{img/C8/RT.png}
     \caption{Esquema básico del funcionamiento del Ray-Tracing}
     \label{fig:RT}
 \end{figure}
@@ -46,7 +46,7 @@ Hasta ahora hemos visto y explicado en qué consiste el algoritmo RT desde un pu
 
 Con estos tres elementos, una primera descripción en pseudocódigo del algoritmo fundamental de Ray-Tracing sería el del algoritmo \ref{alg:Ray-Tracing}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[!]
     \caption{Ray Tracing} \label{alg:Ray-Tracing}
     \begin{algorithmic}
         \State $o\gets$ posición del observador en WC.
@@ -139,8 +139,8 @@ Una vez tenemos determinada una forma de representar un rayo, es momento de crea
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/elementos-PP.png}
-    \caption{Elementos que participan el RT}
+    \includegraphics[width=9cm]{img/C8/elementos-PP.png}
+    \caption{Elementos que participan en RT}
     \label{fig:elementos}
 \end{figure}
 
@@ -252,7 +252,7 @@ De esta forma, si el rayo apunta hacia arriba el color del píxel será más azu
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/background-gradient.png}
+    \includegraphics[scale = 0.35]{img/C8/background-gradient.png}
     \caption{Gradiente utilizado para el fondo de la escena}
     \label{fig:background}
 \end{figure}
@@ -265,7 +265,7 @@ gl_FragColor = ray_color(R);
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/first-render.png}
+    \includegraphics[scale = 0.35]{img/C8/first-render.png}
     \caption{Primera escena vacía visualizada}
     \label{fig:first-render}
 \end{figure}
@@ -402,7 +402,7 @@ El resultado que obtenemos es el que podemos observar en la imagen \ref{fig:una-
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/esfera_renderizada.png}
+    \includegraphics[scale = 0.3]{img/C8/esfera_renderizada.png}
     \caption{Escena con una esfera}
     \label{fig:una-esfera}
 \end{figure}
@@ -471,7 +471,7 @@ Y así obtenemos la imagen \ref{fig:varias-esferas}, en la que podemos ver varia
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/varias-esferas.png}
+    \includegraphics[scale = 0.25]{img/C8/varias-esferas.png}
     \caption{Escena con varias esferas}
     \label{fig:varias-esferas}
 \end{figure}
@@ -542,7 +542,7 @@ Lo primero es quedarnos con la parte entera de ambos valores, de forma que divid
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/ajedrez.png}
+    \includegraphics[scale = 0.25]{img/C8/ajedrez.png}
     \caption{Textura de ajedrez a partir de las partes enteras}
     \label{fig:ajedrez}
 \end{figure}
@@ -602,7 +602,7 @@ gl_FragColor = ray_color(r, world, num_spheres, P);
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/escena-completa.png}
+    \includegraphics[scale = 0.25]{img/C8/escena-completa.png}
     \caption{Escena compuesta por esferas y un plano}
     \label{fig:escena-completa}
 \end{figure}
@@ -618,7 +618,7 @@ Se denomina \textit{field of view (FOV)} al ángulo total observable, que corres
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/fov.png}
+    \includegraphics[scale = 0.25]{img/C8/fov.png}
     \caption{Field Of View}
     \label{fig:fov}
 \end{figure}
@@ -633,7 +633,7 @@ de forma que los vectores $\vec u,\vec v$ son, por su propia definición ortogon
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/plano.png}
+    \includegraphics[scale = 0.25]{img/C8/plano.png}
     \caption{Vectores que forman una base del plano de proyección}
     \label{fig:vectores}
 \end{figure}
@@ -652,7 +652,7 @@ donde \verb|origin| son las coordenadas de mundo del punto en el que se sitúa l
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/camera-fields.png}
+    \includegraphics[scale = 0.3]{img/C8/camera-fields.png}
     \caption{Representación gráfica de los campos de `Camera'}
     \label{fig:camera-fields}
 \end{figure}
@@ -769,7 +769,7 @@ Por ejemplo, si fijamos $o_c = (1,1,1)$ y $a_t = (0,0,0)$ obtenemos la imagen \r
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-          \includegraphics[scale=0.25]{img/C7/camera-1.png} &   \includegraphics[scale=0.25]{img/C7/camera-2.png} \\
+          \includegraphics[scale=0.25]{img/C8/camera-1.png} &   \includegraphics[scale=0.25]{img/C8/camera-2.png} \\
     (a) & (b)\\[6pt]
     \end{tabular}
     \caption{Escena \ref{fig:escena-completa} desde otros puntos de vista}
@@ -811,7 +811,7 @@ La componente ambiental representa la luz del entorno y afecta uniformemente a t
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.2]{img/C7/calima.jpg}
+    \includegraphics[scale = 0.2]{img/C8/calima.jpg}
     \caption{La calima: un ejemplo del efecto de la componente ambiental}
     \label{fig:calima}
 \end{figure}
@@ -831,7 +831,7 @@ La componente difusa final es la suma de las componentes difusas calculadas para
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/difusa.png}
+    \includegraphics[scale = 0.25]{img/C8/difusa.png}
     \caption{Esquema de los vectores utilizados en la componente difusa}
     \label{fig:difusa}
 \end{figure}
@@ -844,7 +844,7 @@ Esta componente representa a las reflexiones directas de la fuente de luz sobre 
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C7/especular.png}
+    \includegraphics[scale = 0.35]{img/C8/especular.png}
     \caption{Esquema de los vectores utilizados en la componente especular}
     \label{fig:especular}
 \end{figure}
@@ -865,7 +865,7 @@ Hay algunas situaciones en las que las que no se aplica iluminación difusa ni e
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/excepcion.png}
+    \includegraphics[scale = 0.25]{img/C8/excepcion.png}
     \caption{Punto sobre el que no incide la luz}
     \label{fig:excepcion}
 \end{figure}
@@ -874,7 +874,7 @@ El problema que esta condición es suficiente únicamente en casos de objetos co
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.25]{img/C7/no-convexo.png}
+    \includegraphics[scale = 0.25]{img/C8/no-convexo.png}
     \caption{Ejemplo de objeto no convexo y punto a la sombra}
     \label{fig:no-convexo}
 \end{figure}
@@ -885,7 +885,7 @@ Por ejemplo, fíjese en la imagen \ref{fig:sombras}. Si se lanza un rayo desde e
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C7/sombras.png}
+    \includegraphics[scale = 0.3]{img/C8/sombras.png}
     \caption{Ejemplos de puntos sobre los que incide y no una fuente de luz}
     \label{fig:sombras}
 \end{figure}
@@ -914,7 +914,7 @@ A modo de adelanto, pero también con el objetivo de aclarar conceptos, obsérve
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.12]{img/C7/solo-ambiental.png} &   \includegraphics[scale=0.12]{img/C7/solo-difusa.png} &   \includegraphics[scale=0.12]{img/C7/solo-especular.png} \\
+      \includegraphics[width=5cm]{img/C8/solo-ambiental.png} &   \includegraphics[width=5cm]{img/C8/solo-difusa.png} &   \includegraphics[width=5cm]{img/C8/solo-especular.png} \\
     (a) Ambiental & (b) Difusa & (c) Especular \\[6pt]
     \end{tabular}
     \caption{Componentes aisladas del modelo de Phong}
@@ -925,7 +925,7 @@ Y ahora observemos una imagen en la que se aprecian las tres componentes a la ve
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.23]{img/C7/todas-componentes.png}
+    \includegraphics[width=9cm]{img/C8/todas-componentes.png}
     \caption{Acción de todas las componentes}
     \label{fig:todas-componentes}
 \end{figure}
@@ -1112,7 +1112,7 @@ Evidentemente todos estos parámetros se pueden modificar y poner los que queram
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.28]{img/C7/phong-final.png}
+    \includegraphics[width=12cm]{img/C8/phong-final.png}
     \caption{Escena aplicando el modelo de Phong completo}
     \label{fig:phong-final}
 \end{figure}
@@ -1123,7 +1123,7 @@ En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{sec
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=130mm]{img/C7/no-antialiasing.png}
+    \includegraphics[width=12cm]{img/C8/no-antialiasing.png}
     \caption{Suelo antes de aplicar antialiasing}
     \label{fig:no-antialiasing-3D}
 \end{figure}
@@ -1174,8 +1174,8 @@ Con esta modificación y fijando el valor que consideremos en $n$ (\verb|nSample
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=130mm]{img/C7/antialiasing.png}
-    \caption{Suelo tras de aplicar antialiasing}
+    \includegraphics[width=12cm]{img/C8/antialiasing.png}
+    \caption{Suelo tras aplicar antialiasing}
     \label{fig:antialiasing-3D}
 \end{figure}
 
@@ -1203,7 +1203,7 @@ Para terminar esta exposición y este capítulo mostraremos una última imagen q
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.45]{img/C7/imagen-final.png}
+    \includegraphics[width=12cm]{img/C8/imagen-final.png}
     \caption{Imagen final del capítulo \ref{chap:ray-tracing}}
     \label{fig:imagen-final}
 \end{figure}

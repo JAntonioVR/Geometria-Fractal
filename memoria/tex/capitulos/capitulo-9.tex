@@ -1,5 +1,5 @@
 %
-% ─── CAPITULO 8: VISUALIZACION DE FRACTALES 3D ──────────────────────────────────
+% ─── CAPITULO 9: VISUALIZACION DE FRACTALES 3D ──────────────────────────────────
 %
 
 En el capítulo \ref{chap:fractales-2D} introdujimos técnicas y código necesario para poder visualizar conjuntos de Julia y conjuntos de Mandelbrot 2-dimensionales en un canvas utilizando WebGL, todo ello apoyado en la teoría explicada en el capítulo \ref{chap:Julia-Mandelbrot}. Sin embargo, el objetivo de éste y de los tres capítulos anteriores es aplicar técnicas avanzadas de cálculo de imágenes para poder visualizar fractales en tres dimensiones. Recordamos que explicamos en la introducción del capítulo \ref{chap:ray-tracing} que la mejor forma de generar imágenes de fractales 3D es utilizando la técnica de `Ray Tracing', que en dicho capítulo explicamos con detalle. A pesar de ello y de conseguir escenas con varios objetos, materiales y movimientos de cámara no visualizamos nada lejanamente parecido a un fractal. Será en este capítulo en el que aprovecharemos toda la infraestructura y todo el código implementado hasta el momento en el `ray-tracer' del capítulo \ref{chap:ray-tracing} para graficar fractales tridimensionales.
@@ -21,7 +21,7 @@ Pongamos un ejemplo. Supongamos que tenemos una escena con una esfera tangente a
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.2]{img/C8/situacion-inicial.png}
+    \includegraphics[width=9cm]{img/C9/situacion-inicial.png}
     \caption{Situación a la que aplicar Sphere-Tracing}
     \label{fig:ST-inicial}
 \end{figure}
@@ -36,7 +36,7 @@ y la distancia de un punto al plano $y=0$ es simplemente su componente $y$. Por 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.16]{img/C8/sphere-tracing-1.png} &     \includegraphics[scale=0.196]{img/C8/sphere-tracing-2.png} \\
+      \includegraphics[scale=0.175]{img/C9/sphere-tracing-1.png} &     \includegraphics[scale=0.215]{img/C9/sphere-tracing-2.png} \\
     (a) Primera iteración & (b) Segunda iteración \\[6pt]
     \end{tabular}
     \caption{Dos primeras iteraciones de Sphere-Tracing}
@@ -48,7 +48,7 @@ Si repetimos este proceso indefinidamente, llegará el momento en el que la dist
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.2]{img/C8/sphere-tracing-final.png} &     \includegraphics[scale=0.197]{img/C8/sphere-tracing-miss.png} \\
+      \includegraphics[scale=0.2]{img/C9/sphere-tracing-final.png} &     \includegraphics[scale=0.197]{img/C9/sphere-tracing-miss.png} \\
     (a) Encuentra intersección & (b) El rayo se pierde \\[6pt]
     \end{tabular}
     \caption{Posibles estados finales del algoritmo Sphere-Tracing}
@@ -84,7 +84,7 @@ Como ya hemos visto en la sección anterior, algunas primitivas, como las esfera
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C8/SDF-esfera.png}
+    \includegraphics[scale = 0.5]{img/C9/SDF-esfera.png}
     \caption{Ejemplos de puntos con distintos valores de la SDF de una esfera}
     \label{fig:SDF-esfera}
 \end{figure}
@@ -102,7 +102,7 @@ Por tanto la distancia entre punto y plano es la longitud del vector que une a $
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.4]{img/C8/SDF-plano.png}
+    \includegraphics[scale = 0.4]{img/C9/SDF-plano.png}
     \caption{Cálculo de la distancia de un punto a un plano}
     \label{fig:SDF-plano}
 \end{figure}
@@ -117,9 +117,10 @@ Una vez conocemos el funcionamiento intuitivo del algoritmo y la necesidad de SD
     \item \texttt{MAX\_DIST}: Distancia máxima considerada. A distancia del origen del rayo mayor que ésta suponemos que no existe ningún objeto en la escena.
     \item $\varepsilon$: Mínima distancia tal que si en una iteración la distancia mínima calculada es menor que $\varepsilon$ se considera que el punto evaluado pertenece a la superficie del objeto. Claramente un valor pequeño de $\varepsilon$ supone una resolución mayor a cambio de un mayor tiempo de cálculo.
 \end{itemize}
+
 Por tanto, el algoritmo, si consideramos un conjunto de $objetos$ (cada uno identificado por un entero $i$, empezando en $0$) y un rayo $R(t)=p_0 + \vec v t$, se describiría como indica el algoritmo \ref{alg:Sphere-Tracing}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[t]
 \caption{Sphere-Tracing} \label{alg:Sphere-Tracing}
 \begin{algorithmic}
 \Procedure{Sphere-Tracing}{$objects[num\_objects], R(t)= p_0 + \vec v t$}
@@ -293,7 +294,7 @@ Hecha esta modificación, el resultado fijando ciertos parámetros dinámicament
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C8/esferas-sphere-tracing.png}
+    \includegraphics[width=9cm]{img/C9/esferas-sphere-tracing.png}
     \caption{Escena tras implementar Sphere Tracing}
     \label{fig:esferas-ST}
 \end{figure}
@@ -302,7 +303,7 @@ Recordamos e insistimos en que el vector director del rayo \verb|r.dir| debe ser
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.35]{img/C8/vectores-no-normalizados.png}
+    \includegraphics[width=9cm]{img/C9/vectores-no-normalizados.png}
     \caption{Escena utilizando vectores no unitarios en los rayos}
     \label{fig:vectores-no-normalizados}
 \end{figure}
@@ -343,7 +344,7 @@ La constante \verb|k| es un factor que indica si el suavizado es más o menos no
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.4]{img/C8/sombras-final.png}
+    \includegraphics[width=9cm]{img/C9/sombras-final.png}
     \caption{Resultado final de la modificación}
     \label{fig:sombras-final}
 \end{figure}
@@ -352,8 +353,8 @@ La constante \verb|k| es un factor que indica si el suavizado es más o menos no
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.25]{img/C8/sombras-k-2.png} &
-      \includegraphics[scale=0.25]{img/C8/sombras-k-32.png} \\    
+        \includegraphics[width=7cm]{img/C9/sombras-k-2.png} &
+      \includegraphics[width=7cm]{img/C9/sombras-k-32.png} \\    
     (a) $k=2$ & (b) $k=32$  \\
     \end{tabular}
     \caption{Sombras con el parámetro $k=2,32$}
@@ -395,7 +396,7 @@ Un aspecto a destacar de sphere-tracing es la dependencia de sus parámetros. Es
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C8/epsilon-grande.png}
+    \includegraphics[scale = 0.3]{img/C9/epsilon-grande.png}
     \caption{Escena generada utilizando $\varepsilon=0.1$}
     \label{fig:epsilon-grande}
 \end{figure}
@@ -404,7 +405,7 @@ Una reflexión similar se puede aplicar al parámetro que define el número máx
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C8/pocas-iteraciones.png}
+    \includegraphics[scale = 0.3]{img/C9/pocas-iteraciones.png}
     \caption{Escena generada utilizando $\mathtt{MAX\_STEPS}$=100}
     \label{fig:pocas-iteraciones}
 \end{figure}
@@ -478,7 +479,7 @@ Sin embargo, es claro que no podemos visualizar conjuntos en 4D de forma tan dir
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.3]{img/C8/curvas-de-nivel2.png}
+    \includegraphics[scale = 0.3]{img/C9/curvas-de-nivel2.png}
     \caption{Representación de una montaña con curvas de nivel}
     \label{fig:curva-de-nivel}
 \end{figure}
@@ -524,9 +525,9 @@ Teniendo esta estimación de la distancia podemos calcular el posible punto de i
 
 \subsubsection{Método 1: Gradiente de la SDF}
 
-La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer sphere-tracing. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado.
+La manera más sencilla de obtener un vector normal a la superficie es tomando el gradiente de la SDF, el cual evidentemente no calculamos analítica sino numéricamente utilizando diferencias centradas. Para ello, fijado un punto $p\in\R^3$, calculamos 6 puntos muy próximos a él, sumando y restando en cada una de sus tres componentes un pequeño incremento, que por simplicidad consideraremos que será el propio $\varepsilon$ que fijamos al hacer sphere-tracing. En cada uno de los 6 puntos evaluamos la SDF y calculamos para cada componente la diferencia, tomando como normal el vector formado por cada una de estas diferencias divididas normalizado. Puede consultarse un pseudocódigo de este método en el algoritmo \ref{alg:normal-gradiente-sdf}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[!]
     \caption{Cálculo de la normal mediante el gradiente de la SDF} \label{alg:normal-gradiente-sdf}
     \begin{algorithmic}
     \Procedure{CalcularNormalGradiente}{$p$: punto de $\R^3$, $d_c$: SDF del objecto}
@@ -550,9 +551,9 @@ En realidad debería tomarse en cada componente del gradiente la diferencia divi
 
 \subsubsection{Método 2: Técnica del tetraedro}
 
-Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces una aproximación de la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
+Consideramos un tetraedro cuyos vértices son $k_0=(1,-1,-1)$, $k_1=(-1,-1,1)$, $k_2=(-1,1,-1)$ y $k_3=(1,1,1)$. Sean ahora los puntos $p_i := p+\varepsilon k_i\ \ i=0,\dots,3$. Entonces una aproximación de la normal a la superficie en el punto $p$ es la normalización del vector $\sum_{i=0}^3 k_i d_c(p_i)$. Puede verse un pseudocódigo de este método en el algoritmo \ref{alg:normal-tetraedro}. Consúltese \cite{normals-sdf} si se desea tener una justificación del funcionamiento de este método.
 
-\begin{algorithm}[H]
+\begin{algorithm}[!]
     \caption{Técnica del tetraedro para el cálculo de normales} \label{alg:normal-tetraedro}
     \begin{algorithmic}
     \Procedure{CalcularNormalTetraedro}{$p$: punto de $\R^3$, $d_c$: SDF del objecto}
@@ -717,9 +718,9 @@ En las imágenes \ref{fig:julia-3D} podemos ver algunos de los resultados que, d
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-      \includegraphics[width=6.5cm]{img/C8/julia-1.png} &     \includegraphics[width=6.5cm]{img/C8/julia-2.png} \\
+      \includegraphics[width=6.5cm]{img/C9/julia-1.png} &     \includegraphics[width=6.5cm]{img/C9/julia-2.png} \\
     (a) $c=-0.12+0.75 i$ & (b) $c=0.3+1.09j+0.3k$ \\[6pt]
-    \includegraphics[width=6.5cm]{img/C8/julia-3.png} &     \includegraphics[width=6.5cm]{img/C8/julia-4.png} \\
+    \includegraphics[width=6.5cm]{img/C9/julia-3.png} &     \includegraphics[width=6.5cm]{img/C9/julia-4.png} \\
     (c) $c=0.1+0.74i+0.62j+0.14k$ & (d) $c=-0.81-0.48j-0.1k$ \\[6pt]
     \end{tabular}
     \caption{Conjuntos de Julia 3D para distintos $c\in\H$}
@@ -781,9 +782,9 @@ Tras esta pequeña modificación y darle a \verb|u_fractal| el valor $2$ mediant
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=6.5cm]{img/C8/mandelbrot-2.png} &
-      \includegraphics[width=6.5cm]{img/C8/mandelbrot-1.png} \\    
-    \includegraphics[width=6.5cm]{img/C8/mandelbrot-3.png} &     \includegraphics[width=6.5cm]{img/C8/mandelbrot-4.png} \\
+        \includegraphics[width=6.5cm]{img/C9/mandelbrot-2.png} &
+      \includegraphics[width=6.5cm]{img/C9/mandelbrot-1.png} \\    
+    \includegraphics[width=6.5cm]{img/C9/mandelbrot-3.png} &     \includegraphics[width=6.5cm]{img/C9/mandelbrot-4.png} \\
     \end{tabular}
     \caption{Detalles del conjunto de Mandelbrot generalizado}
     \label{fig:mandelbrot-3D}
@@ -881,9 +882,9 @@ Con este nuevo código junto con el necesario para calcular las normales y las m
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[width=6.5cm]{img/C8/mandelbub-1.png} &
-      \includegraphics[width=6.5cm]{img/C8/mandelbub-2.png} \\    
-    \includegraphics[width=6.5cm]{img/C8/mandelbub-3.png} &     \includegraphics[width=6.5cm]{img/C8/mandelbub-4.png} \\
+        \includegraphics[width=6.5cm]{img/C9/mandelbub-1.png} &
+      \includegraphics[width=6.5cm]{img/C9/mandelbub-2.png} \\    
+    \includegraphics[width=6.5cm]{img/C9/mandelbub-3.png} &     \includegraphics[width=6.5cm]{img/C9/mandelbub-4.png} \\
     \end{tabular}
     \caption{Conjunto de Mandelbub}
     \label{fig:mandelbub}
@@ -905,8 +906,8 @@ Es decir, la sección provocada por el plano $z=0$ en los conjuntos de Julia 3D 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.37]{img/C8/julia-3D-frontal-1.png} &
-      \includegraphics[scale=0.31]{img/C8/julia-2D-1.png} \\    
+        \includegraphics[scale=0.37]{img/C9/julia-3D-frontal-1.png} &
+      \includegraphics[scale=0.31]{img/C9/julia-2D-1.png} \\    
     (a) En 3D & (b) En 2D  \\
     \end{tabular}
     \caption{Conjunto $\mathcal{J}_{-1}$}
@@ -917,7 +918,7 @@ De hecho, la generalización tridimensional es la superficie generada por la rev
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.5]{img/C8/julia-3D-abajo-1.png}
+    \includegraphics[scale = 0.5]{img/C9/julia-3D-abajo-1.png}
     \caption{$\mathcal{J}_{-1}$ visto desde abajo}
     \label{fig:julia-3D-abajo-1}
 \end{figure}
@@ -927,8 +928,8 @@ De igual manera que anulando la componente en $z$ se obtiene en la sección del 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.4]{img/C8/julia-3D-frontal-2.png} &
-      \includegraphics[scale=0.44]{img/C8/julia-3D-abajo-2.png} \\    
+        \includegraphics[scale=0.4]{img/C9/julia-3D-frontal-2.png} &
+      \includegraphics[scale=0.44]{img/C9/julia-3D-abajo-2.png} \\    
     (a) $\mathcal{J}_{-0.71-0.31i}\subseteq\H$ & (b) $\mathcal{J}_{-0.71-0.31j}\subseteq\H$  \\
     \end{tabular}
     \caption{Generalizaciones de $\mathcal{J}_{-0.71-0.31i}\subseteq\C$}
@@ -940,8 +941,8 @@ Además, aunque los detalles 3D no nos dejan apreciar claramente las similitudes
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.42]{img/C8/julia-3D-oblicuo-2.png} &
-        \includegraphics[scale=0.28]{img/C8/julia-2D-2.png} \\
+        \includegraphics[scale=0.42]{img/C9/julia-3D-oblicuo-2.png} &
+        \includegraphics[scale=0.28]{img/C9/julia-2D-2.png} \\
           
     (a) Detalle en 3D & (b) En 2D  \\
     \end{tabular}
@@ -958,8 +959,8 @@ No obstante, en las imágenes \ref{fig:mandelbrot-2D-3D} presentamos algunas im�
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.53]{img/C8/mandelbrot-3d.png} &
-        \includegraphics[scale=0.23]{img/C8/mandelbrot-2d.png} \\
+        \includegraphics[scale=0.53]{img/C9/mandelbrot-3d.png} &
+        \includegraphics[scale=0.23]{img/C9/mandelbrot-2d.png} \\
           
     (a) En 3D & (b) En 2D  \\
     \end{tabular}
@@ -973,13 +974,11 @@ En realidad el conjunto de Mandelbub no es sino una forma de generalizar, de for
 
 La parte de Mandelbub que más recuerda a $\mathcal{M}_8$ es la parte inferior (imagen \ref{fig:mandelbubbrot} (a)), que aunque no es igual, también se aprecia que está dividida en 7 regiones iguales. A su vez, el propio cuerpo de Mandelbub tiene 7 salientes en cada uno de sus dos niveles (imagen \ref{fig:mandelbub}), haciendo cierta analogía con $\mathcal{M}_8$. 
 
-\newpage
-
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-        \includegraphics[scale=0.46]{img/C8/mandelbub-abajo.png} &
-        \includegraphics[scale=0.25]{img/C8/M-8.png} \\
+        \includegraphics[scale=0.46]{img/C9/mandelbub-abajo.png} &
+        \includegraphics[scale=0.25]{img/C9/M-8.png} \\
           
     (a) Vista desde abajo de Mandelbub & (b) $\mathcal{M}_8$  \\
     \end{tabular}
