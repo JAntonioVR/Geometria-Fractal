@@ -1,9 +1,9 @@
 
 Probably you had ever seen on the Internet, magazines or even journals any picture with some patterns that repeat over and over again. And pretty surely you had seen or touched such natural structures as trees, ferns or some kind of vegetables, for example a cauliflower, where the whole object seems to be composed of small copies of itself, look at images \ref{fig:objetos}. Fractals, from a mathematical point of view, are objects, shapes or pictures that have repeating and similar patterns. The fractals are, in fact, the focus of this text.
 
-There are lots of types of fractals and ways to generate them. However, many of them are based on the concept of `iteration'. In this project we explain carefully the theory while we show some \textit{Mathematica} codes we had used and the results we got. In case you did not know, \textit{Mathematica} is a widely used mathematical software all over the world. 
+There are lots of types of fractals and ways to generate them. However, many of them are based on the concept of `iteration'. In this document we explain carefully the theory while we show some \textit{Mathematica} codes we had used and the results we got. In case you did not know, \textit{Mathematica} is a widely used mathematical software all over the world. 
 
-We also created an interactive website where you can visualize 2D and 3D fractals. All the methods and tools we had used is explained and documented along the project.
+We also created an interactive website where you can visualize 2D and 3D fractals. All the methods and tools we had used is explained and documented along this text.
 
 Now, we will explain in detail the chapters of this document and their contents.
 
@@ -13,7 +13,7 @@ In this first chapter we give a first insight about what is a fractal. There is 
 
 Firstly, we compare fractals with known objects like trees, romanescu or rays. With this real life examples, we introduce the concept of `self similarity' and present some of the most popular and classic fractals: the Cantor set, the Sierpinski triangle, the Sierpinski Carpet, the Menger Sponge, the Koch curve and the Koch snowflake (respectively, images \ref{fig:Cantor}, \ref{fig:triangulo-Sierpinski}, \ref{fig:alfombra-Sierpinski}, \ref{fig:esponja-menger}, \ref{fig:curva-Koch} and \ref{fig:copo-Koch}). We explain how each one is generated and some of their properties, including of course pictures.
 
-All these classic examples help us to understand what the self similarity is, so it is time to learn about dimension. There are several types, but the most common fractals dimensions are the `box-counting dimension' and the `Hausdorff dimension'. We talk about both and about the `topological dimension', and after it we expose some relations between the different definitions given.
+All these classic examples help us to understand what self similarity is, so it is time to learn about dimension. There are several types, but the most common fractals dimensions are the `box-counting dimension' and the `Hausdorff dimension'. We talk about both and about the `topological dimension', and after it we expose some relations between the different definitions given.
 
 \section*{Chapter 2: Iteration}
 
@@ -25,13 +25,13 @@ Using the Newton method to find roots of complex functions and evaluating the co
 
 \section*{Chapter 3: Julia and Mandelbrot Sets}
 
-This would not be a fractals projects if we do not talk about Julia and Mandelbrot sets. We present the complex function $P_c(z)=z^2 +c$ for a fixed $c\in\C$ and its importance in this chapter. From this function we explain the algorithms used to visualize the Julia set of a complex number $c$ ($\mathcal{J}_c$) and the Mandelbrot set ($\mathcal{M}$). Look at images \ref{fig:julia-intro} and \ref{fig:mandelbrot-intro}. 
+This would not be a fractals project if we do not talk about Julia and Mandelbrot sets. We present the complex function $P_c(z)=z^2 +c$ for a fixed $c\in\C$ and its importance in this chapter. From this function we explain the algorithms used to visualize the Julia set of a complex number $c$ ($\mathcal{J}_c$) and the Mandelbrot set ($\mathcal{M}$). Look at images \ref{fig:julia-intro} and \ref{fig:mandelbrot-intro}. 
 
 We also show some self-similar regions they present, and finally we explain and visualize some generalizations of these sets. Everything is accompanied by lots of clarifying images.
 
 \section*{Chapter 4: Iterated Function Systems}
 
-A function can be iterated over sets, not only over one complex number or point. In this chapter, we move to the $\R^2$ euclidean space and present the affine maps. Thanks to sets of contractive affine maps we can iterate a subset of the plane and get beautiful results. In a more general context, we deffine what a iterated function system (IFS) is and why its repeating application to any subset always converges to a set we call `the atractor of the IFS'.
+A function can be iterated over sets, not only over one complex number or point. In this chapter, we move to the $\R^2$ euclidean space and present the affine maps. Thanks to sets of contractive affine maps we can iterate a subset of the plane and get beautiful results. In a more general context, we deffine what a Iterated Function System (IFS) is and why its repeating application to any subset always converges to a set we call `the atractor of the IFS'.
 
 Thanks to IFS we can also calculate so easily the box counting dimension of self-similar sets. We explain the relation between these two concepts and give some examples of this calculation.
 
@@ -43,27 +43,35 @@ At this point, we could render many fractals images using Mathematica. The probl
 
 Specifically, we will use WebGL, an API which was designed to be used in JavaScript programs, so we can develop a web application and execute it using a web browser. WebGL needs the shader to be written using the `GL Shading Language' (GLSL). In this chapter we expose the main components of a WebGL based application and code step by step a very simple example.
 
-\section*{Chapter 6: Rendering 2D fractals}
+\section*{Chapter 6: Software planning and analysis}
 
-After initiate us in WebGL, it is time to use it to render 2D fractals. In this chapter, we frequently reference the methods and theorems we defined in the third chapter, because the goal is develop an interactive web page where it is possible to render Julia and Mandelbrot sets modifying some parameters.
+Once we know the mathematical basis of fractals and we have introduced render tools, it is time to describe the software product that will be developed in the following chapters. 
+
+First, we specify the temporal planning by identifying the main development phases and assigning them some particular weeks. After it, we approximate the project's budget, which is divided in hardware, software and human resources.
+
+Next, we do a requirements analysis in order to know what and how we want this software to do. Once the requirements are specified, we do a use case analysis, showing some clarifier diagrams. Finally, we present the future web wireframes.
+
+\section*{Chapter 7: Rendering 2D fractals}
+
+After initiate us in WebGL and present the project specification, it is time to render 2D fractals. In this chapter, we frequently reference the methods and theorems we defined in the third chapter, because the goal is develop an interactive web page where it is possible to render Julia and Mandelbrot sets modifying some parameters.
 
 In order to write readable and reusable code, and to easy the debug process, we use the Object Oriented paradigm and structure the code into JavaScript classes. After it, we use GLSL to translate the Mathematica code we wrote in chapter 3 with the aim of render the Julia and Mandelbrot set using WebGL. Last, but not least, we introduce a edge smoothing technic called `Supersampling Antialiasing', which we'll use in order to care about the realism and images' quality.
 
-\section*{Chapter 7: Introduction to Ray-Tracing}
+\section*{Chapter 8: Introduction to Ray-Tracing}
 
 It is easy to identify the central point of a pixel in the screen with a point in the complex plane $\C$. This makes the 2D process so easy. However, render a 3D scene with fractals is not that simple. There are different ways of representing a 3D scene in a 2D screen. We will use the `Ray-Tracing' technique, which consists of computing, for each pixel in the image, which object, if any, is projected onto that pixel, and then computing the pixel color accordingly.
 
 In this chapter, we give a detailed definition of this method and its components. The goal now is develop a simple, but complete, ray-tracer. It means, render a scene with simple objects, like spheres and a plane. Now we are going to introduce the roadmap we followed.
 
-First, we describe the creation of the rays, after all there is not ray-tracing without rays. After that, we assign a color to each pixel asuming the scene is empty. It means, we define which colors will we assign to the pixels whose rays miss. Next, we add some spheres and a plane to the scene, programming the intersection sphere-ray and plane-ray, which fortunately are so easy. Once we have filled the scene with objects, it's time to move the camera. We modify the ray creation code in order to let us change freely the point of view, allowing us to see different perspectives of the same scene. Later, we introduce in detail and implement a lighting model in order to give volume, shine, shadows and realism to the scene, assigning a material to each object, creating light sources and evaluating this lighting model at each intersection point. Specifically, we will use the `Phong lighting model', which is not very complex, but enough for our purpose. We also generalize SSAA in order to apply this technic on 3D scenes, achieving much more realism and quality.
+First, we describe the creation of the rays, after all there is not ray-tracing without rays. After that, we assign a color to each pixel asuming the scene is empty. It means, we define which colors will we assign to the pixels whose rays miss. Next, we add some spheres and a plane to the scene, programming the intersection sphere-ray and plane-ray, which fortunately are so easy. Once we have filled the scene with objects, it's time to move the camera. We modify the ray creation code so as to let us change freely the point of view, allowing us to see different perspectives of the same scene. Later, we introduce in detail and implement a lighting model in order to give volume, shine, shadows and realism to the scene, assigning a material to each object, creating light sources and evaluating this lighting model at each intersection point. Specifically, we will use the `Phong lighting model', which is not very complex, but enough for our purpose. We also generalize SSAA with the aim of apply this technic on 3D scenes, achieving much more realism and quality.
 
-\section*{Chapter 8: Rendering 3D fractals}
+\section*{Chapter 9: Rendering 3D fractals}
 
-This is the last chapter, the icing on the cake. Starting from the code we wrote in the previous chapter, we have to modify it and include some new code in order to visualize 3D fractals. The first fact: calculate the intersection is not that simple as it is when you render Spheres and Planes. There is not an easy way to solve equation like before. Nevertheless, for each object, we can try to find a signed distance function (SDF). This is a scalar field which yields, for each point of the space, a lower bound of the distance to the object's surface. So, you can identify a surface with the set of points where the SDF is equal to 0.
+This is the last chapter, the icing on the cake. Starting from the code we wrote in the previous chapter, we have to modify it and include some new code in order to visualize 3D fractals. The first fact: calculate the intersection is not that simple as it is when you render Spheres and Planes. There is not an easy way to solve an equation like before. Nevertheless, for each object, we can try to find a signed distance function (SDF). This is a scalar field which yields, for each point of the space, a lower bound of the distance to the object's surface. So, you can identify a surface with the set of points where the SDF is equal to 0.
 
 We can render scenes with objects defined by their SDFs, by using the so called `sphere-tracing' variant of ray-tracing. It consist of marching iteratively along the ray until a intersection is found. Starting from the observer's position, at every step we calculate the minimum distance to any object of the scene. Unless this distance is so small (in that case we consider we reached an intersection), we advance that minimun distance along the ray, repeating the calculation until the ray misses or an intersection is found.
 
-With these two new ingredients, we can modify the ray-tracer in order to calculate the intersections using sphere-tracing instead of resolving equations. In the following sections, we describe adequate SDFs in order to render Julia and Mandelbrot 3D generalizations (images \ref{fig:julia-3D} and \ref{fig:mandelbrot-3D}), which are based on quaternions. We also render the Mandelbulb set, a non rigorous but beautiful generalization of the Mandelbrot set (\ref{fig:mandelbub}).
+With these two new ingredients, we can modify the ray-tracer in order to calculate the intersections using sphere-tracing instead of resolving equations. In the following sections, we describe adequate SDFs for the purpose of render Julia and Mandelbrot 3D generalizations (images \ref{fig:julia-3D} and \ref{fig:mandelbrot-3D}), which are based on quaternions. We also render the Mandelbulb set, a non rigorous but beautiful generalization of the Mandelbrot set (image \ref{fig:mandelbub}).
 
 \section*{Keywords}
 
