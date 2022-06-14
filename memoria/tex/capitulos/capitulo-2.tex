@@ -32,8 +32,8 @@ Como se puede observar, en cada iteración se acerca cada vez más a $0$, lo que
 \begin{figure}[ht]
     \centering
     \begin{tabular}{cc}
-      \includegraphics[scale=0.45]{./img/orbita-1.png} &   \includegraphics[scale=0.4]{./img/orbita-2.png} \\
-    (a)$f(z)=z^2$ en $z=0.9+0.3i$ & (b) $f(z)=z^2+0.33+0.35$ en $z=0.2+0.2i$ \\[6pt]
+      \includegraphics[scale=0.45]{./img/C2/orbita-1.png} &   \includegraphics[scale=0.4]{./img/C2/orbita-2.png} \\
+    (a)$f(z)=z^2$ en $z_0=0.9+0.3i$ & (b) $f(z)=z^2+0.33+0.35$ en $z_0=0.2+0.2i$ \\[6pt]
     \end{tabular}
     \caption{Representación de dos órbitas en $\C$}
     \label{fig:orbitas-C}
@@ -99,7 +99,7 @@ por lo que en realidad la constante $K$ define de forma genérica la velocidad d
 En los casos que tengamos asegurada la convergencia, es interesante saber cuántas iteraciones son necesarias en cada punto para saber si hemos alcanzado el valor al que converge la sucesión. Este número de iteraciones se toma como aproximado, pues generalmente nunca se llega a alcanzar el punto fijo, tan solo podemos reducir la diferencia tanto como queramos. En este sentido, \textit{Mathematica} tiene dos comandos útiles:
 
 \begin{itemize}
-    \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/FixedPointList.html}}.
+    \item \verb|FixedPointList[f,expr]| genera una lista de valores resultantes de aplicar \verb|f| a \verb|expr| repetidamente hasta que los dos últimos valores no cambian. Para parametrizar la precisión en la proximidad de los valores podemos utilizar el argumento opcional \verb|SameTest|\footnote{Más información en la \href{https://reference.wolfram.com/language/ref/FixedPointList.html}{\textcolor{blue}{documentación oficial}} .}.
     \item \verb|FixedPoint[f,expr]| hace lo mismo pero produce como salida únicamente el valor último producido.
 \end{itemize}
 
@@ -150,7 +150,7 @@ Consideramos la función compleja $f:\C\longrightarrow\C$ dada por $f(z)=z^2-1$,
 
 \begin{figure} [ht]
 \centering
-\includegraphics[scale = 0.4]{img/cuencas-1.png}
+\includegraphics[scale = 0.4]{img/C2/cuencas-1.png}
 \caption{Cuencas de atracción de $f(z)=z^2-1$.}
     \label{fig:cuencas-1}
 \end{figure}
@@ -168,14 +168,16 @@ En muchas de las funciones que trataremos ocurre que existen distintas cuencas d
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.33]{img/cuencas-color-1.png} &   \includegraphics[scale=0.31]{img/cuencas-color-2.png} &   \includegraphics[scale=0.33]{img/cuencas-color-3.png} \\
+      \includegraphics[scale=0.33]{img/C2/cuencas-color-1.png} &   \includegraphics[scale=0.31]{img/C2/cuencas-color-2.png} &   \includegraphics[scale=0.33]{img/C2/cuencas-color-3.png} \\
     (a) $f(z)=z^6-1$ & (b) $f(z)=z^3-3^z$ & (c) $f(z)=z^5-z^3+z^2-4$ \\[6pt]
     \end{tabular}
     \caption{Cuencas de atracción de distintas funciones coloreadas.}
     \label{fig:cuencas-raiz}
 \end{figure}
 
-En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fractales producidos por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de inestabilidad o \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes. Además, en lugar de colorear el plano según la raíz a la que converja la sucesión también podemos fijarnos en la velocidad de convergencia. Esto es, asociar a cada punto del plano un color dependiendo del número de iteraciones necesarias para situarse a menos de cierta distancia de la raíz. En este sentido, podemos revisitar las imágenes \ref{fig:cuencas-raiz} y en función de la velocidad de convergencia de las sucesiones utilizar un color distinto. El código necesario es el siguiente y los resultados se pueden observar en las imágenes \ref{fig:cuencas-velocidad}:
+En estas imágenes podemos ahora sí ver los primeros ejemplos de estructuras fractales producidos por la iteración. Observemos que las sucesiones de dos puntos muy próximos pueden converger a raíces distintas, por lo que este es un ejemplo de inestabilidad o \textit{caos matemático}: pequeñas variaciones en las condiciones iniciales conducen a comportamientos muy diferentes. 
+
+Por otro lado, en lugar de colorear el plano según la raíz a la que converja la sucesión también podemos fijarnos en la velocidad de convergencia. Esto es, asociar a cada punto del plano un color dependiendo del número de iteraciones necesarias para situarse a menos de cierta distancia de la raíz. En este sentido, podemos revisitar las imágenes \ref{fig:cuencas-raiz} y en función de la velocidad de convergencia de las sucesiones utilizar un color distinto. El código necesario es el siguiente y los resultados se pueden observar en las imágenes \ref{fig:cuencas-velocidad}:
 
 \begin{mmaCell}{Code}
   newtonVelocidad = Compile[{{z, _Complex}}, 
@@ -189,7 +191,7 @@ donde se puede cambiar el valor de \verb|f|, la región del plano \verb|{x, -2, 
 \begin{figure}[ht]
     \centering
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.33]{img/cuencas-velocidad-1.png} &   \includegraphics[scale=0.31]{img/cuencas-velocidad-2.png} &   \includegraphics[scale=0.33]{img/cuencas-velocidad-3.png} \\
+      \includegraphics[scale=0.33]{img/C2/cuencas-velocidad-1.png} &   \includegraphics[scale=0.31]{img/C2/cuencas-velocidad-2.png} &   \includegraphics[scale=0.33]{img/C2/cuencas-velocidad-3.png} \\
       (a) $f(z)=z^6-1$ & (b) $f(z)=z^3-3^z$ & (c) $f(z)=z^5-z^3+z^2-4$ \\[6pt]
     \end{tabular}
     \caption{Evaluación de la velocidad de convergencia en cada punto}
@@ -203,7 +205,7 @@ Consideramos ahora la representación de las cuencas de atracción de la funció
 
 \begin{figure} [ht]
 \centering
-\includegraphics[scale = 0.5]{img/cuencas-autosimilaridad.png}
+\includegraphics[scale = 0.5]{img/C2/cuencas-autosimilaridad.png}
 \caption{Cuencas de atracción de $f(z)=z^3-1$}
     \label{fig:cuencas-autosimilaridad}
 \end{figure}
@@ -215,7 +217,7 @@ Fijémonos además que si hacemos \textit{zoom} en ciertas partes de la imagen, 
 
 \begin{figure}[ht]
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.33]{./img/detalle-1.png} &   \includegraphics[scale=0.33]{./img/detalle-2.png} &   \includegraphics[scale=0.33]{./img/detalle-3.png} \\
+      \includegraphics[scale=0.33]{./img/C2/detalle-1.png} &   \includegraphics[scale=0.33]{./img/C2/detalle-2.png} &   \includegraphics[scale=0.33]{./img/C2/detalle-3.png} \\
     (a) $[-1,0]\times[-0.5,0.5]$ & (b) $[-0.6,-0.4]\times[0.1,0.3]$ & (c) $[-0.5,-0.47]\times[0.215,0.245]$ \\[6pt]
     \end{tabular}
     \caption{Diferentes regiones ampliadas de la figura \ref{fig:cuencas-autosimilaridad}}

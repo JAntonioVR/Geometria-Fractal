@@ -2,7 +2,7 @@
 % ─── CAPITULO 3: CONJUNTOS DE JULIA Y MANDELBROT ────────────────────────────────
 %
 
-Terminamos el capítulo \ref{chap:iteracion} fijándonos en la autosimilaridad de las imágenes que nos proporcionaba la aplicación del método de Newton en ciertas funciones complejas para deducir las cuencas de atracción de las distintas funciones. Pudimos comprobar que a pesar de ser imágenes que no son totalmente autosimilares, por lo que no son fractales en el sentido estricto, contienen fragmentos que sí lo son. Este mismo hecho se produce en los conjuntos de Julia y en el conjunto de Mandelbrot. Podemos observar este hecho en las imágenes \ref{fig:julia-intro}, que son nuestros primeros dos ejemplos de conjuntos de Julia.
+Terminamos el capítulo \ref{chap:iteracion} fijándonos en la autosimilaridad de las imágenes que nos proporcionaba la aplicación del método de Newton en ciertas funciones complejas para deducir las cuencas de atracción de las distintas funciones. Pudimos comprobar que a pesar de ser imágenes que no son totalmente autosimilares, por lo que no son fractales en el sentido estricto, contienen fragmentos que sí lo son. Este mismo hecho se produce en los conjuntos de Julia y en el conjunto de Mandelbrot. Podemos comprobarlo en las imágenes \ref{fig:julia-intro}, que son nuestros primeros dos ejemplos de conjuntos de Julia.
 
 \begin{figure}[ht]
     \centering
@@ -19,7 +19,7 @@ Una notable diferencia entre las imágenes \ref{fig:julia-intro} se encuentra en
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.28]{./img/C3/mandelbrot-intro.png} &   \includegraphics[scale=0.255]{./img/C3/detalle-Mandelbrot.png} \\
+    \includegraphics[width=6cm]{./img/C3/mandelbrot-intro.png} &   \includegraphics[width=6cm]{./img/C3/detalle-Mandelbrot.png} \\
   (a) Conjunto completo & (b) Detalle ampliado  \\[6pt]
   \end{tabular}
     \caption{Primeras imágenes del conjunto de Mandelbrot}
@@ -121,7 +121,7 @@ Podemos aplicar este teorema para programar un algoritmo que grafique conjuntos 
 
 Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos prisioneros y a los puntos de escape asignarle otro en función de las iteraciones necesarias antes de alcanzar el número de escape. El psudocódigo del algoritmo descrito para graficar conjuntos de Julia sería el que podemos ver en el algoritmo \ref{alg:Julia}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[!]
   \caption{Conjuntos de Julia} \label{alg:Julia}
   \begin{algorithmic}
   \State Para cada $z_0\in\C$:
@@ -162,14 +162,14 @@ Fijémonos en que hemos utilizado el argumento \verb|SameTest| para especificar 
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.5]{./img/C3/julia-explicado-1.png} &   \includegraphics[scale=0.5]{./img/C3/julia-explicado-2.png} \\
+    \includegraphics[scale=0.45]{./img/C3/julia-explicado-1.png} &   \includegraphics[scale=0.45]{./img/C3/julia-explicado-2.png} \\
   (a) $J_{-0.12+0.75i}$ & (b) $J_{-0.23+0.65i}$  \\[6pt]
   \end{tabular}
   \caption{Conjuntos de Julia graficados con Mathematica}
   \label{fig:julia-explicados}
 \end{figure}
 
-Por sí solo, Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathcal{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta\footnote{Más información en la documentación oficial: \url{https://reference.wolfram.com/language/ref/JuliaSetPlot.html?q=JuliaSetPlot}}, véanse las imágenes \ref{fig:julia-set-plot}.
+Por sí solo, Mathematica incluye una función \verb|JuliaSetPlot[c]| que muestra una imagen del conjunto $\mathcal{J}_c$. Esta función permite modificar los mismos parámetros que el método que acabamos de programar por nuestra cuenta\footnote{Consúltese la documentación oficial de esta función en \url{https://reference.wolfram.com/language/ref/JuliaSetPlot.html?q=JuliaSetPlot} si se desea informar detalladamente de los parámetros modificables.}, véanse las imágenes \ref{fig:julia-set-plot}.
 
 \begin{figure}[ht]
   \centering
@@ -210,9 +210,9 @@ Sobre la dicotomía entre qué conjuntos de Julia son conexos y cuales son polva
 
 Como ya veníamos anunciando al final de la sección \ref{section:conexos-polvaredas}, el conjunto de Mandelbrot está formado por los $c\in\C$ tales que $\mathcal{J}_c$ es conexo. La idea inicial de \textit{Benoit Mandelbrot} para graficar el conjunto que denotaremos a partir de ahora como $\mathcal{M}$ fue pintar de negro los puntos del plano cuyo conjunto de Julia fuese conexo y de blanco el resto. De entrada parece una tarea titánica graficar, para cada punto del plano (aunque realmente sería solo un subconjunto suficientemente representativo), su conjunto de Julia y decidir si éste es o no conexo, pues en algunos casos la decisión se torna muy complicada.
 
-Afortunadamente, gracias al teorema \ref{th:fatou-julia} y al corolario \ref{th:conexo-polvareda} esta tarea se vuelve mucho más sencilla, tan solo habría que tomar las iteradas en el origen, es decir $\{P_c^n(0)\}=\{c, c^2+c, (c^2+c)^2+c, \dots\}$ y decidir si la sucesión diverge o no mediante algún método similar al utilizado para graficar conjuntos de Julia.
+Afortunadamente, gracias al teorema \ref{th:fatou-julia} y al corolario \ref{th:conexo-polvareda} esta tarea se vuelve mucho más sencilla, tan solo habría que tomar las iteradas en el origen, es decir $$\{P_c^n(0)\}=\{c, c^2+c, (c^2+c)^2+c, \dots\}$$ y decidir si la sucesión diverge o no mediante algún método similar al utilizado para graficar conjuntos de Julia.
 
-Por resumir, de momento sabemos que:
+Resumiendo, de momento sabemos que:
 \begin{eqnarray*}
   \mathcal{M} & = & \{c\in\C : \mathcal{J}_c \text{ es conexo }\} \\
               & = & \{c\in\C : 0\in\mathsf{P}_c \} \\
@@ -292,7 +292,7 @@ El código en \textit{Mathematica} utilizado es por tanto el siguiente, muy simi
     ColorFunction -> (If[# >= 1, Hue[0, 0, 0], Hue[#]] &)]
 \end{mmaCell}
 
-Al igual que en el caso de los conjuntos de Julia, \textit{Mathematica} tiene una función preprogramada que grafica el conjunto de Mandelbrot, llamada \verb|MandelbrotSetPlot|, la cual admite varios argumentos opcionales, como la región a graficar, el máximo de iteraciones, resolución, etc.\footnote{Más información en la documentación oficial \url{https://reference.wolfram.com/language/ref/MandelbrotSetPlot.html}}. 
+Al igual que en el caso de los conjuntos de Julia, \textit{Mathematica} tiene una función preprogramada que grafica el conjunto de Mandelbrot, llamada \verb|MandelbrotSetPlot|, la cual admite varios argumentos opcionales, como la región a graficar, el máximo de iteraciones, resolución, etc.\footnote{Consúltese la documentación oficial de esta función en \url{https://reference.wolfram.com/language/ref/MandelbrotSetPlot.html} si se desea informar detalladamente de los parámetros modificables.}. 
 
 \begin{figure}[ht]
   \centering
@@ -319,9 +319,11 @@ Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente igu
 
 \newpage
 
+\vspace{\fill}
+
 \begin{figure}[ht]
   \begin{tabular}{ccc}
-    \includegraphics[scale=0.33]{./img/C3/julia-autosimilar-1.png} &   \includegraphics[scale=0.33]{./img/C3/julia-autosimilar-2.png} &   \includegraphics[scale=0.35]{./img/C3/julia-autosimilar-3.png} \\
+    \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-1.png} &   \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-2.png} &   \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-3.png} \\
   (a) $[-0.2,1.5]\times[-1.2,0.5]$ & (b) $[0.6,1.4]\times[-0.9,-0.1]$ & (c) $[1.05,1.35]\times[-0.65,-0.35]$ \\[6pt]
   \end{tabular}
   \caption{Diferentes regiones ampliadas de la figura \ref{fig:julia-explicados} (b)}
@@ -331,15 +333,15 @@ Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente igu
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.36]{./img/C3/julia-autosimilar-4.png} &   \includegraphics[scale=0.36]{./img/C3/julia-autosimilar-5.png} \\
+    \includegraphics[width=5cm]{./img/C3/julia-autosimilar-4.png} &   \includegraphics[width=5cm]{./img/C3/julia-autosimilar-5.png} \\
   (a) $\mathcal{J}_{0.33-0.41 i}$ en $[-1,-0.3]\times[-1.1,-0.4]$ & (b) $\mathcal{J}_{0.48-0.13 i}$ en $[-0.6,-0.1]\times[0.25,0.75]$ \\[6pt]
-  \includegraphics[scale=0.36]{./img/C3/julia-autosimilar-6.png} &   \includegraphics[scale=0.36]{./img/C3/julia-autosimilar-7.png} \\
+  \includegraphics[width=5cm]{./img/C3/julia-autosimilar-6.png} &   \includegraphics[width=5cm]{./img/C3/julia-autosimilar-7.png} \\
   (c) $\mathcal{J}_{0.23+0.51i}$ en $[-1.1,-0.4]\times[0.4,1.1]$ & (d) $\mathcal{J}_{-0.52+0.51 i}$ en $[0,1.5]\times[-1,0.5]$ \\[6pt]
   \end{tabular}
   \caption{Detalles autosimilares de algunos conjuntos de Julia}
   \label{fig:mas-detalles-julia}
 \end{figure}
-
+\vspace{\fill}
 \newpage
 
 \subsection{Autosimilaridad en el conjunto de Mandelbrot}
@@ -349,9 +351,9 @@ El conjunto de Mandelbrot, el cual ya conocemos, está compuesto fundamentalment
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-1.png} &   \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-2.png} \\
+    \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-1.png} &   \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-2.png} \\
   (a) $[-1,-0.5]\times[0,0.5]$ & (b) $[-1.5,-1.2]\times[-0.15,0.15]$ \\[6pt]
-  \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-3.png} &   \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-4.png} \\
+  \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-3.png} &   \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-4.png} \\
   (c) $[-0.2,0]\times[-1.1,-0.9]$ & (d) $[-0.9,0.3]\times[-1,0.2]$ \\[6pt]
   \end{tabular}
   \caption{Detalles autosimilares de $\mathcal{M}$}
@@ -363,7 +365,7 @@ En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación d
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-5.png} &   \includegraphics[scale=0.4]{./img/C3/mandelbrot-autosimilar-6.png} \\
+    \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-5.png} &   \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-6.png} \\
   (a) $[-1.42,-1.36]\times[-0.03,0.03]$  & (b) $[-1.405,-1.39]\times[-0.0075,0.0075]$ \\[6pt]
   \end{tabular}
   \caption{Ampliaciones del bulbo principal de $\mathcal{M}$}
@@ -382,9 +384,9 @@ La extensión más natural y la que nos proporcionará resultados más llamativo
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[scale=0.55]{./img/C3/julia-generalizado-2.png} &   \includegraphics[scale=0.4]{./img/C3/julia-generalizado-3.png} \\
+    \includegraphics[height=6cm]{./img/C3/julia-generalizado-2.png} &   \includegraphics[height=6cm]{./img/C3/julia-generalizado-3.png} \\
   (a) $z^2-0.55+0.48i$ & (b) $z^3-0.55+0.48i$ \\[6pt]
-  \includegraphics[scale=0.4]{./img/C3/julia-generalizado-4.png} &   \includegraphics[scale=0.4]{./img/C3/julia-generalizado-5.png} \\
+  \includegraphics[height=6cm]{./img/C3/julia-generalizado-4.png} &   \includegraphics[height=6cm]{./img/C3/julia-generalizado-5.png} \\
   (c) $z^4-0.55+0.48i$ & (d) $z^5-0.55+0.48i$ \\[6pt]
   \end{tabular}
   \caption{Conjuntos de Julia con $P_{-0.55+0.48i, m}$ para distintos valores de $m$.}
@@ -407,7 +409,7 @@ De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados
 
 Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos determinar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
 
-Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del TFG, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}(WIP).%TODO Modificar si es necesario esta URL
+Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del TFG, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}.
 
 \newpage
 \subsection{Conjuntos de Julia con funciones no polinómicas}
