@@ -124,10 +124,10 @@ $(window).on('resize', resizeCanvas);
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
 //
 function onKeyDown(event) {
-  if( $("#nIteraciones").is(':focus') ||
-      $("#juliaX").is(':focus') ||
-      $("#juliaY").is(':focus') ||
-      $("#exponente").is(':focus') ||
+  if( $("#valorNIteraciones").is(':focus') ||
+      $("#valorJuliaX").is(':focus') ||
+      $("#valorJuliaY").is(':focus') ||
+      $("#valorExponente").is(':focus') ||
       $("#LLCX").is(':focus') ||
       $("#LLCY").is(':focus') ||
       $("#URCX").is(':focus') ||

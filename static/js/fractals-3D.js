@@ -465,6 +465,15 @@ function changeMode() {
 // ─── GESTORA DEL EVENTO PULSAR UNA TECLA ────────────────────────────────────────
 //
 function onKeyDown(event) {
+  if( $("#valor_sh").is(':focus') ||
+      $("#valorJuliaX").is(':focus') ||
+      $("#valorJuliaY").is(':focus') ||
+      $("#valorJuliaZ").is(':focus') ||
+      $("#valorJuliaW").is(':focus') ||
+      $("#posX").is(':focus') ||
+      $("#posY").is(':focus') ||
+      $("#posZ").is(':focus') ) return;
+      
   let key = event.wich || event.keyCode;
   switch (key) {
     case 37:  // Left key
