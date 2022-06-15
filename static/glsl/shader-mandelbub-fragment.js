@@ -177,7 +177,7 @@ void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
     for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq; 
         q = quat_square(q) + c;
-        if(dot(q, q) > 64.0) break;
+        if(dot(q, q) > 4.0) break;
     }
 
 }
@@ -236,7 +236,7 @@ void iterate_mandelbrot(inout vec4 q, inout float dq) {
     for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq + 1.0; 
         q = quat_square(q) + c;
-        if(dot(q, q) > 64.0) break;
+        if(dot(q, q) > 4.0) break;
     }
 
 }

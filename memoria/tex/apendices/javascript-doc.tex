@@ -10,7 +10,7 @@ Comenzaremos documentando las clases y métodos comunes a la visualización de f
 
 Fichero con el código relativo a una abstracción de un shader. Hay dos posibles tipos de Shader (\verb|ShaderType|): Vertex y Fragment (clase \verb|Shader|), que juntos forman lo que llamamos `Programa Shader' (clase \verb|ShaderProgram|).
 
-\subsubsection{Clase \texttt{\textcolor{Bittersweet}{ShaderType}}}
+\subsubsection{Enumerado \texttt{\textcolor{Bittersweet}{ShaderType}}}
 
 Enumerado inmutable, de forma que un elemento de la clase Shader sólo puede tener un tipo: \verb|ShaderType.vertexShader| o \verb|ShaderType.fragmentShader|.
 
@@ -135,12 +135,7 @@ Es una clase abstracta que contiene el código común de una escena 2D y una 3D.
     
     \textbf{Argumentos}: No acepta.
     
-    \textbf{Devuelve}: Un Objeto de JavaScript cuyos campos son:
-    \begin{itemize}
-        \item \verb|positionBuffer: WebGLBuffer|. Buffer de posiciones.
-        \item \verb|numFloatsPV: number|. Número de valores en coma flotante por cada vértice.
-        \item \verb|numVertexes: number|. Némero de vértices que se almacenan en el buffer.
-    \end{itemize}
+    \textbf{Devuelve}: Un objeto de la clase Buffer con informacion sobre el buffer de posiciones.
 
     \item \verb|drawScene|: Método abstracto que en las clases que hereden de Scene tomará el shader, los buffer y los parámetros de la escena para visualizarla en el canvas.
     
@@ -225,12 +220,12 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \textbf{Argumentos}: No acepta, toda la información que necesita está en los atributos de la clase.
     
     \textbf{Devuelve}: No devuelve nada, visualiza la escena en el canvas.
-    \item \verb|zoomIn|: Se reduce el parámetro zoomSize para ampliar la escena. También se reduce \verb|delta| para que los desplazamientos sean menos bruscos.
-    \item \verb|zoomOut|: Se aumenta el parámetro zoomSize para alejar la escena. También se aumenta \verb|delta| para que los desplazamientos sean más notables.
-    \item \verb|moveLeft|: Se reduce la primera coordenada de \verb|zoomCenter| para desplazar la escena a la izquierda.
-    \item \verb|moveRight|: Se aumenta la primera coordenada de \verb|zoomCenter| para desplazar la escena a la derecha.
-    \item \verb|moveUp|: Se aumenta la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia arriba.
-    \item \verb|moveDown|: Se reduce la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia abajo.
+    \item \verb|zoomIn|: Se reduce el parámetro \verb|zoomSize| para ampliar la escena. También se reduce \verb|delta| para que los desplazamientos sean menos bruscos.
+    \item \verb|zoomOut|: Se aumenta el parámetro \verb|zoomSize| para alejar la escena. También se aumenta \verb|delta| para que los desplazamientos sean más notables.
+    \item \verb|moveLeft|: Se reduce la primera coordenada de \verb|zoomCenter| para desplazar la escena a la izquierda y se modifican adecuadamente los valores de \verb|LLC| y \verb|URC|.
+    \item \verb|moveRight|: Se aumenta la primera coordenada de \verb|zoomCenter| para desplazar la escena a la derecha y se modifican adecuadamente los valores de \verb|LLC| y \verb|URC|.
+    \item \verb|moveUp|: Se aumenta la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia arriba y se modifican adecuadamente los valores de \verb|LLC| y \verb|URC|.
+    \item \verb|moveDown|: Se reduce la segunda coordenada de \verb|zoomCenter| para desplazar la escena hacia abajo y se modifican adecuadamente los valores de \verb|LLC| y \verb|URC|.
     \item \verb|changeAntialiasing|: Se cambia el valor del parámetro booleano \verb|antialiasing|.
     \item \verb|calculateZoom|: Recalcula los parámetros \verb|zoomCenter| y \verb|zoomSize| ante posibles cambios en LLC y URC.
 \end{itemize}
@@ -297,7 +292,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 
 Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|2D-fractals.html|, entendiendo estos últimos como los pequeños elementos del documento en los cuales escribimos el valor actual de un parámetro (véase el documento \verb|2D-fractals.html| y cualquier etiqueta \verb|input| para una mejor comprensión). En este archivo se declara y utiliza continuamente una variable global de la clase \verb|Scene2D|, ya que es ésta la que lleva toda la interacción entre WebGL y los parámetros modificables. Este fichero, por su parte, sirve como intermediario entre el `front-end' HTML y la escena.
 
-No existen como tal clases, tan sólo métodos que se utilizan como gestores de eventos y una función \verb|main|, la cual se ejecuta al cargar la página y contiene la inicialización de los indicadores HTML, la asignación de los 'event listeners' y la primera visualización.
+No existen como tal clases, tan sólo métodos que se utilizan como gestores de eventos y una función \verb|main|, la cual se ejecuta al cargar la página y contiene la inicialización de los indicadores HTML, la asignación de los manejadores de eventos y la primera visualización.
 
 Por su parte, las funciones gestoras de eventos verifican y modifican los valores de los elementos y cierto HTML si es necesario, llaman al setter indicado para cambiar el parámetro con el nuevo valor y llaman a \verb|drawScene| para redibujar la escena con los nuevos parámetros. Incluimos debajo un ejemplo en el caso del deslizador que permite cambiar el parámetro \verb|maxIterations|:
 
@@ -366,7 +361,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 \begin{itemize}
     \item \verb|parameters: Object|. Objeto (diccionario) de JavaScript con varios campos, estos campos guardan una estrecha relación con las variables \verb|uniform| descritas anteriormente, ya que albergan los valores que posteriormente se enviarán a la variable homónima. Estos campos son:
     \begin{itemize}
-        \item \verb|lookfrom: Array|. Punto en el cual se sitúa el espectador en coordenadas de mundo.
+        \item \verb|lookfrom: Array|. Punto en el cual se sitúa el espectador en coordenadas cartesianas de mundo.
         \item \verb|lookfromSpheric: Array|. Coordenadas esféricas del punto \verb|lookfrom|.
         \item \verb|lookat: Array|. Punto hacia el que mira el espectador en coordenadas de mundo.
         \item \verb|ka: Array|. Tupla RGBA que representa la reflectividad ambiental del material parametrizable con el que se graficará el objeto central de la escena.
@@ -376,11 +371,11 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
         \item \verb|lightColor0: Array|. Tupla RGBA que será la intensidad de la luz derecha.
         \item \verb|lightColor1: Array|. Tupla RGBA que será la intensidad de la luz izquierda.
         \item \verb|shadows: Array|. Tripleta booleana tal que si \verb|shadows[i]| es true la fuente de luz i-esima arrojará sombras.
-        \item \verb|fractal: number|. Si este parámetro vale 1 se visualizará el conjunto de Mandelbub. Si vale 2 se visualizará el conjunto de Julia asociado al campo \verb|juliaSetConstant|. Si vale 3 se visualizara el conjunto de Mandelbrot 3D.
+        \item \verb|fractal: number|. Si este parámetro vale 1 se visualizará el conjunto de Mandelbub. Si vale 2 se visualizará el conjunto de Julia asociado al campo \verb|juliaSetConstant|. Si vale 3 se visualizará el conjunto de Mandelbrot 3D.
         \item \verb|juliaSetConstant: Array|. Cuaternio $c$ en la ecuacion $P_c(q) = q^2 + c$.
-        \item \verb|epsilon: number|. Distancia mínima $\varepsilon$ utilizada en ray-marching para decidir cuándo un punto esta en la frontera del fractal.
+        \item \verb|epsilon: number|. Distancia mínima $\varepsilon$ utilizada en sphere-tracing para decidir cuándo un punto esta en la frontera del fractal.
         \item \verb|antialiasing: boolean|. Si es true se aplicará antialiasing a la escena. En caso contrario se trazará un único rayo por píxel.
-        \item \verb|nSamples: number|. Valor entero que en caso de que \verb|antialiasing| sea true se lanzarán $nSamples^2$ rayos por píxel.
+        \item \verb|nSamples: number|. Valor entero que en caso de que \verb|antialiasing| sea true se lanzarán $\mathtt{nSamples}^2$ rayos por píxel.
         \item \verb|delta: number|. Incremento que se suma o se resta a la hora de desplazarse por la escena.
     \end{itemize}
     \item \verb|programInfo: Object|. Objeto que almacena información genérica relativa al programa:
@@ -395,7 +390,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 \end{itemize}
 \paragraph{Métodos}
 \begin{itemize}
-    \item \verb|constructor|: A partir del código fuente del vertex y el fragment shader, llama al constructor de la clase 'Scene', el cual crea el programa shader y el buffer de posiciones de los vértices que maneja el vertex shader. Además inicializa el atributo \verb|parameters|, con los parámetros iniciales que maneja la escena. Se crea y se le dan valores al atributo \verb|programInfo| y se almacenan en el atributo \verb|initialParameters| los parámetros iniciales de la escena.
+    \item \verb|constructor|: A partir del código fuente del vertex y el fragment shader, llama al constructor de la clase \texttt{Scene}, el cual crea el programa shader y el buffer de posiciones de los vértices que maneja el vertex shader. Además inicializa el atributo \verb|parameters|, con los parámetros iniciales que maneja la escena. Se crea y se le dan valores al atributo \verb|programInfo| y se almacenan en el atributo \verb|initialParameters| los parámetros iniciales de la escena.
     
     \textbf{Argumentos}
     \begin{itemize}
@@ -413,7 +408,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|zoomIn|: Se reduce el modulo del vector que une el origen con el punto \verb|lookfrom| para acercar la escena.
     \item \verb|zoomOut|: Se aumenta el modulo del vector que une el origen con el punto \verb|lookfrom| para alejar la escena.
     \item \verb|moveLeft|: Se modifica el angulo $\phi$ de las coordenadas esféricas del punto \verb|lookfrom| para desplazar la escena a la izquierda.
-    \item \verb|moveRight|: Se modifica el angulo $\phi$ de las coordenadas esfericas del punto lookfrom para desplazar la escena a la derecha.
+    \item \verb|moveRight|: Se modifica el angulo $\phi$ de las coordenadas esfericas del punto \verb|lookfrom| para desplazar la escena a la derecha.
     \item \verb|moveX|: Dada una cantidad `\verb|desp|', desplaza la cámara a la derecha o a la izquierda \verb|desp| unidades.
 
     \textbf{Argumentos}:
@@ -446,7 +441,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|getKa|: Getter del parámetro \verb|ka|, de tipo array (terna RGBA).
     \item \verb|getKd|: Getter del parámetro \verb|kd|, de tipo array (terna RGBA).
     \item \verb|getKs|: Getter del parámetro \verb|ks|, de tipo array (terna RGBA).
-    \item \verb|getLightColor|: Getter del parámetro 'lightColorX' donde X puede ser 0 o 1 según el valor del argumento.
+    \item \verb|getLightColor|: Getter del parámetro \verb|lightColorX| donde \verb|X| puede ser 0 o 1 según el valor del argumento.
     
     \textbf{Argumentos}:
     \begin{itemize}
@@ -465,7 +460,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
     \item \verb|setKa|: Setter del parámetro \verb|ka| (reflectividad ambiental).
     \item \verb|setKd|: Setter del parámetro \verb|kd| (reflectividad difusa).
     \item \verb|setKs|: Setter del parámetro \verb|ks| (reflectividad especular).
-    \item \verb|setLightColor|: Setter del parámetro \verb|lightColorX|, donde X depende del valor del argumento \verb|i|.
+    \item \verb|setLightColor|: Setter del parámetro \verb|lightColorX|, donde \verb|X| depende del valor del argumento \verb|i|.
     
     \textbf{Argumentos}:
     \begin{itemize}
@@ -480,7 +475,7 @@ Además de los heredados de \verb|Scene|, contamos con los siguientes atributos.
 
 Fichero javascript que gestiona los eventos y los indicadores HTML del documento \verb|3D-fractals.html|. La metodología utilizada en este fichero es la misma que la empleada en el caso 2-dimensional, solo que al haber más parámetros modificables, también hay más elementos HTML, y por tanto más eventos que gestionar y más indicadores que editar. Esta vez utilizamos una variable global de la clase \verb|Scene3D| para gestionar toda la interacción entre WebGL y los parámetros modificables.
 
-Tampoco existen clases, únicamente funciones manejadoras de eventos y la función \verb|main| que se ejecuta al cargar la página y contiene la inicialización de los elementos e indicadores HTML, la asignación de los 'event listeners' y la primera visualización.
+Tampoco existen clases, únicamente funciones manejadoras de eventos y la función \verb|main| que se ejecuta al cargar la página y contiene la inicialización de los elementos e indicadores HTML, la asignación de los manejadores de eventos y la primera visualización.
 
 Para no alargar innecesariamente este apéndice y para que el propio lector observe la metodología por sí mismo, lo invitamos a visitar el fichero completo en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/js/fractals-3D.js}.
 

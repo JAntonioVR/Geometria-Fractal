@@ -21,7 +21,7 @@ Si nos restringimos al plano euclídeo $\R^2$ visto como espacio afín, previo a
 Una forma equivalente de denotar $w$ matricialmente es tomando la matriz $A=\begin{pmatrix}
     a & b \\
     c & d
-\end{pmatrix}\in\mathcal{M}_2(\R)$ y el vector $b=\begin{pmatrix}
+\end{pmatrix}\in\mathcal{M}_2(\R)$ y el vector $\mathbf b=\begin{pmatrix}
     e \\
     f
 \end{pmatrix}$ y expresar $w$ como:
@@ -31,7 +31,7 @@ Una forma equivalente de denotar $w$ matricialmente es tomando la matriz $A=\beg
     w\begin{pmatrix}
         x_1 \\
         x_2
-    \end{pmatrix} = Ax + b = \begin{pmatrix}
+    \end{pmatrix} = Ax + \mathbf b = \begin{pmatrix}
         a & b \\
         c & d
     \end{pmatrix}\begin{pmatrix}
@@ -46,7 +46,7 @@ Una forma equivalente de denotar $w$ matricialmente es tomando la matriz $A=\beg
     \end{pmatrix}\in\R^2.
 \end{equation}
 
-Hasta aquí, se trata de un concepto geométrico que además es bien conocido. Sin embargo, podemos visualizarlo de una forma equivalente, dando un sentido geométrico a la matriz $A$, pudiendo expresarla de la siguiente forma:
+Hasta aquí, se trata de un concepto afín que además es bien conocido. Sin embargo, podemos visualizarlo de una forma equivalente, dando un sentido geométrico a la matriz $A$, pudiendo expresarla de la siguiente forma:
 \begin{equation}
     A = \begin{pmatrix}
         a & b \\
@@ -60,13 +60,13 @@ donde el par $(r,\alpha)$ son las coordenadas polares de $(a,c)$ y $(s,\beta+\fr
 \begin{itemize}
     \item $r,s$ representan una homotecia o escalado de razón $r$ en el eje $X$ y razón $s$ en el eje $Y$.
     \item $\alpha,\beta$ denotan una rotación de $\alpha$ radianes en la componente $X$ y $\beta$ en la componente $Y$.
-    \item $e,f$ simbolizan una traslación de vector $b=\begin{pmatrix} e \\ f\end{pmatrix}$.
+    \item $e,f$ simbolizan una traslación de vector $\mathbf b=\begin{pmatrix} e \\ f\end{pmatrix}$.
 \end{itemize}
 
-Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{homotecia} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $b=(e,f)^t$. A continuación definimos un caso concreto de transformación afín más familiar.
+Nótese que la transformación lineal $x\mapsto Ax$ en $\R^2$ lleva un paralelogramo con un extremo en el origen en otro paralelogramo con un extremo en el origen, como consecuencia de la linealidad de las aplicaciones \textit{homotecia} y \textit{rotación}. Por lo que la transformación afín $w(x)=Ax+\mathbf b$ es una composición de la aplicación lineal representada por $A$, la cual transforma el espacio relativo al origen, y de la \textit{traslación} de vector $\mathbf b=(e,f)^t$. A continuación definimos un caso concreto de transformación afín más familiar.
 
 \begin{definicion}
-    Una transformación afín de $\R^2$ $w(x)=Ax+b$, con $b\in\R^2$, se denomina \textbf{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
+    Una transformación afín de $\R^2$ $w(x)=Ax+\mathbf b$, con $\mathbf b\in\R^2$, se denomina \textbf{similitud} si la matriz $A$ tiene alguna de las siguientes formas:
     \begin{eqnarray}
         A = \begin{pmatrix}
             r\cos\alpha & -r\sin\alpha \\
@@ -89,15 +89,15 @@ Para aclarar todos estos conceptos en la figura \ref{fig:ejemplos-ta} podemos ve
     \centering
     \begin{tabular}{cc}
       \includegraphics[scale=0.65]{./img/C4/ejemplo-ta-1.png} &   \includegraphics[scale=0.6]{./img/C4/ejemplo-ta-2.png} \\
-    (a) $w=(0.5, 0.5, \frac{\pi}{6}, \frac{\pi}{6}, 0,0)$ & (b) $(0.5, 0.5, \frac{\pi}{6}, 0,0,0)$ \\[6pt]
+    (a) $w_1=(0.5, 0.5, \frac{\pi}{6}, \frac{\pi}{6}, 0,0)$ & (b) $w_2=(0.5, 0.5, \frac{\pi}{6}, 0,0,0)$ \\[6pt]
     \includegraphics[scale=0.6]{./img/C4/ejemplo-ta-3.png} &   \includegraphics[scale=0.75]{./img/C4/ejemplo-ta-4.png} \\
-    (c) $(1,1,0,0,0.1,0.1)$ & (d) $(1,1,\pi,0,0,0)$ \\[6pt]
+    (c) $w_3=(1,1,0,0,0.1,0.1)$ & (d) $w_4=(1,1,\pi,0,0,0)$ \\[6pt]
     \end{tabular}
     \caption{Ejemplos de aplicaciones de transformaciones lineales}
     \label{fig:ejemplos-ta}
   \end{figure}
 
-En el caso de (a) observamos una similitud con $r=0.5$ y $\alpha=\frac{\pi}{6}$. En (b) además de un escalado uniforme de razón $r=s=0.5$ podemos ver el efecto que tiene una rotación (no uniforme) en $X$ de razón $\alpha=\frac{\pi}{6}$. Por su parte, (c) simplemente aplica una traslación mediante el vector $b=(0.1,0.1)^t$. Por último, en (d) vemos un caso de reflexión respecto al eje $Y$.
+En el caso de (a) observamos una similitud con $r=0.5$ y $\alpha=\frac{\pi}{6}$. En (b) además de un escalado uniforme de razón $r=s=0.5$ podemos ver el efecto que tiene una rotación (no uniforme) en $X$ de razón $\alpha=\frac{\pi}{6}$. Por su parte, (c) simplemente aplica una traslación mediante el vector $\mathbf b=(0.1,0.1)^t$. Por último, en (d) vemos un caso de reflexión respecto al eje $Y$.
 
 Un último detalle para la creación de SFI es la necesidad de que las transformaciones afines utilizadas sean \textit{aplicaciones contractivas}. Procedemos por tanto a definir un SFI:
 
@@ -123,7 +123,7 @@ Podemos utilizar como espacio métrico completo el plano euclídeo $\R^2$ y un c
         w_2 = \left(0.5,0.5,0,0,\frac 1 2,0\right) \\
         w_3 = \left(0.5,0.5,0,0,\frac 1 4,\frac{\sqrt{3}}{4}\right)
     \end{eqnarray*}
-    Entonces en la imagen \ref{fig:ejemplo-sfi} podemos ver tanto $T$ como el resultado de aplicar el SFI $w=\{w_1,w_2,w_3\}$ a $T$.
+    Entonces en la imagen \ref{fig:ejemplo-sfi} podemos ver tanto $T$ como el resultado de aplicar el SFI \linebreak $w=\{w_1,w_2,w_3\}$ a $T$.
     \begin{figure} [ht]
     \centering
     \includegraphics[scale = 0.6]{img/C4/ejemplo-sfi.png}
@@ -172,7 +172,7 @@ $$
 El problema es que esta definición no nos basta para definir una distancia entre conjuntos, pues si $A\subset B$ tenemos que $d(A,B)=0$, pero si $b\in B\backslash A$, entonces $d(b,A)>0$, por lo que necesariamente $d(B,A)>0$. Y como sabemos, una auténtica distancia es simétrica. Véase el contraejemplo de la figura \ref{fig:contraejemplo-distancia}. 
 \begin{figure} [ht]
     \centering
-    \includegraphics[scale = 0.4]{img/C4/no-distancia-hausdorff.png}
+    \includegraphics[width=6.5cm]{img/C4/no-distancia-hausdorff.png}
     \caption{Contraejemplo a la distancia entre conjuntos}
         \label{fig:contraejemplo-distancia}
 \end{figure}
@@ -277,7 +277,7 @@ Hasta ahora hemos probado varios resultados que nos han servido para construir a
     $$
     W(A) := \bigcup_{i=1}^N w_i(A) \ \ \forall A\in\mathcal{H}(X).
     $$
-    Entonces $W$ es una aplicación contractiva de constante $s$ y admite un único punto fijo $A^*\in\mathcal{H}(X)$, el cual está dado por 
+    Entonces $W$ es una aplicación contractiva de constante $s$ y admite un único punto fijo \linebreak $A^*\in\mathcal{H}(X)$, el cual está dado por 
     $$
     A^*=\lim_{n\rightarrow\infty} W^n(B) \ \ \forall B\in\mathcal{H}(X).
     $$
@@ -298,21 +298,20 @@ Recordamos ahora el SFI del ejemplo \ref{ejemplo:sfi} y las imágenes \ref{fig:s
 Ahora podemos aplicar esta teoría al espacio métrico completo $\R^2$ y a las transformaciones afines, que para asegurar la convergencia necesitamos que sean contracciones. Afortunadamente, es sencillo probar esta condición.
 
 \begin{proposicion}
-    Sea $w =(r,s,\alpha,\beta,e,f)$ una transformación afín de $\R^2$. Si $\alpha=\beta$ y $\max\{|r|,|s|\}\leq 1$, entonces $w$ es una aplicación contractiva. 
+    Sea $w =(r,s,\alpha,\beta,e,f)$ una transformación afín de $\R^2$. Si $\alpha=\beta$ y $\max\{|r|,|s|\}< 1$, entonces $w$ es una aplicación contractiva. 
 \end{proposicion}
 \begin{proof}
-    Por un lado, las rotaciones uniformes y las traslaciones son movimientos rígidos, en particular aplicaciones lipschitzianas de constante de Lipschitz igual a 1. Por tanto, por composición, para comprobar que $w$ es contractiva, debemos probar que un escalado (uniforme o no) es una aplicación contractiva si $\max\{|r|,|s|\}<1$. Supongamos que la aplicación $s(x_1,x_2)=(r\cdot x_1,s\cdot x_2)$ verifica $K=\max\{|r|,|s|\}\leq 1$. Entonces, para cualesquiera $x=(x_1,x_2), y=(y_1,y_2)\in\R^2$:
+    Por un lado, las rotaciones uniformes y las traslaciones son movimientos rígidos, en particular aplicaciones lipschitzianas de constante de Lipschitz igual a 1. Por tanto, por composición, para comprobar que $w$ es contractiva, debemos probar que un escalado (uniforme o no) es una aplicación contractiva si $\max\{|r|,|s|\}<1$. Supongamos que la aplicación $h(x_1,x_2)=(r\cdot x_1,s\cdot x_2)$ verifica $K=\max\{|r|,|s|\}< 1$. Entonces, para cualesquiera $x=(x_1,x_2), y=(y_1,y_2)\in\R^2$:
     \begin{eqnarray*}
-        \|s(x) - s(y)\| & = & \|(s_1 x_1-s_1 y_1, s_2 x_2 - s_2 y_2)\| \\
-                        & = & \|(s_1(x_1-y_1), s_2(x_2-y_2))\| \\
-                        & \leq & K \|x-y\|
+        \|h(x) - h(y)\| & = & \|(r x_1-r y_1, s x_2 - s y_2)\| \\
+                        & = & \|(r(x_1-y_1), s(x_2-y_2))\| \\
+                        & < & K \|x-y\|
     \end{eqnarray*}
-    Por tanto $s$ es contractiva.
+    Por tanto $h$ es contractiva.
 \end{proof}
 
-Y una vez que sabemos cómo hacer que una transformación afín sea contractiva, podemos , sin importar el conjunto de partida, obtener imágenes fractales a partir únicamente de una colección finita de sextuplas, cada una representando una transformación afín contractiva. Como posibles ejemplos, y para que se observe la diversidad que ofrece este método, en las tablas \ref{tabla:arbol-pitagoras} y \ref{tabla:helecho-Barnsley} se pueden observar los SFI cuyos atractores son el árbol pitagórico y el helecho de Barnsley (imágenes \ref{fig:atractores-sfi} (a) y (b) respectivamente), siendo este último una imagen cuya representación es ya bastante realista.
+Y una vez que sabemos cómo hacer que una transformación afín sea contractiva, podemos, sin importar el conjunto de partida, obtener imágenes fractales a partir únicamente de una colección finita de sextuplas, cada una representando una transformación afín contractiva. Como posibles ejemplos, y para que se observe la diversidad que ofrece este método, en las tablas \ref{tabla:arbol-pitagoras} y \ref{tabla:helecho-Barnsley} se pueden observar los SFI cuyos atractores son el árbol pitagórico y el helecho de Barnsley (imágenes \ref{fig:atractores-sfi} (a) y (b) respectivamente), siendo este último una imagen cuya representación es ya bastante realista.
 
-\newpage
 \begin{table}
     \centering
     \begin{tabular}{c|cccccc} \hline
@@ -355,14 +354,14 @@ En el capítulo \ref{chap:concepto} y concretamente en la sección \ref{subsecti
 
 \begin{definicion}
     \label{def:condicion-conjunto-abierto}
-    Sean $(X,d)$ un espacio métrico completo y un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$. $w$ satisface la \textbf{condición de conjunto abierto} si existe un conjunto abierto $\emptyset\not= U\subseteq X$ tal que las imágenes $w_1(U),\dots,w_n(U)\subseteq U$ y son disjuntas.
+    Sean $(X,d)$ un espacio métrico completo y un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$. $w$ satisface la \textbf{condición de conjunto abierto} si existe un conjunto abierto no vacío $U\subseteq X$ tal que las imágenes $w_1(U),\dots,w_n(U)\subseteq U$ y son disjuntas.
 \end{definicion}
 
 Intuitivamente, esta condición nos afirma que podemos controlar el `tamaño' del resultado de aplicar el SFI y que además las imágenes de cada aplicación que compone el SFI no se solapan unas con otras. Gracias a esta condición podemos enunciar el siguiente teorema, que es el que nos proporcionará las herramientas esenciales para el cálculo de la dimensión en estos casos.
 
 \begin{teorema}[Moran]
     \label{th:Moran}
-    Sean $(X,d)$ un espacio métrico completo, un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$ que satisface la condición de conjunto abierto y $\{c_i:i=1,\dots,n\}$ las constantes de contractividad de las aplicaciones $w_i$. Entonces la dimensión por cajas del atractor de $w$ es el único valor real positivo $d$ que satisface la ecuación $1 = c_1^d + \cdots c_n^d$ y esta coincide con la dimensión de Hausdorff.
+    Sean $(X,d)$ un espacio métrico completo. En $X$ se define un SFI $w=\{w_i:i=1,\dots,n\}$ en $X$ que satisface la condición de conjunto abierto y $\{c_i:i=1,\dots,n\}$ las constantes de contractividad de las aplicaciones $w_i$. Entonces la dimensión por cajas del atractor de $w$ es el único valor real positivo $d$ que satisface la ecuación $1 = c_1^d + \cdots c_n^d$ y esta coincide con la dimensión de Hausdorff.
 \end{teorema}
 
 Podemos encontrar la prueba de este teorema en \cite{Moran}.

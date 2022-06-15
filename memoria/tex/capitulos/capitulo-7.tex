@@ -44,7 +44,7 @@ Además, conviene añadir la posibilidad de desplazarse y hacer zoom en distinta
 \section{Estructurando el código}
 \label{section:codigo}
 
-Con el objetivo de utilizar WebGL para generar imágenes fractales, podemos usar como base el código utilizado para visualizar el cuadrado de colores, ya que nos puede venir bien su estructura para adaptar la misma a la visualización de fractales. Sin embargo, esta estructura es muy procedural. Es posible mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL.
+Con el objetivo de utilizar WebGL para generar imágenes fractales, podemos usar como base el código utilizado para visualizar el cuadrado de colores del capítulo \ref{chap:visualizacion}, ya que nos puede venir bien su estructura para adaptar la misma a la visualización de fractales. Sin embargo, esta estructura es muy procedural. Es posible mantener la misma arquitectura de forma que cambiando los elementos que sean necesarios y el código de los shaders podamos ver los fractales que deseemos, pero en ese caso la depuración se complicaría, el código es más difícil de leer y cuesta mucho añadir interactividad. Por este motivo, adaptaremos el código a un paradigma orientado a objetos, modularizando los distintos componentes, creando abstracciones de las herramientas que proporciona WebGL.
 
 En concreto, para el código de JavaScript hemos creado las siguientes clases:
 \begin{itemize}
@@ -81,7 +81,7 @@ De esta forma, a partir de las coordenadas de dispositivo obtenemos un punto del
 \begin{equation}
     \label{eq:transformacion-lineal-2}
     \begin{split}
-        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right] \\
+        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[-\lambda\frac{w}{2},\lambda\frac{w}{2}\right]\times\left[-\lambda\frac{h}{2},\lambda\frac{h}{2}\right] \\
         (x,y) & \longmapsto \lambda\left(\frac{w}{n_x}x-\frac{w}{2},\frac{h}{n_y}y-\frac{h}{2}\right)
     \end{split}
 \end{equation}
@@ -91,7 +91,7 @@ Y por último, procedemos a buscar la forma de representar cualquier parte del p
 \begin{equation}
     \label{eq:transformacion-lineal-3}
     \begin{split}
-        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[x_0-\frac{w}{2},x_0+\frac{w}{2}\right]\times\left[y_0-\frac{h}{2},y_0+\frac{h}{2}\right] \\
+        \phi:[0,n_x]\times[0,n_y] & \longrightarrow \left[x_0-\lambda\frac{w}{2},x_0+\lambda\frac{w}{2}\right]\times\left[y_0-\lambda\frac{h}{2},y_0+\lambda\frac{h}{2}\right] \\
         (x,y) & \longmapsto (x_0,y_0) + \lambda\left(\frac{w}{n_x}x-\frac{w}{2},\frac{h}{n_y}y-\frac{h}{2}\right)
     \end{split}
 \end{equation}
@@ -114,7 +114,7 @@ En muchos contextos, la transformación lineal (\ref{eq:transformacion-lineal-3}
     \end{array}\right)
 \end{equation}
 
-Eb rasterización, se denomina matriz de vista a aquella que transforma las coordenadas de mundo (WC) de los objetos que componen la escena a coordenadas de cámara, mientras que la matriz de proyección es la que calcula las coordenadas de dispositivo (DC) finales a partir de las coordenadas de cámara. La composición de estas dos matrices es la matriz de vista y proyección $M$, que convierte las coordenadas de mundo en coordenadas de dispositivo. La transformación $\phi$ convierte las coordenadas de dispositivo en coordenadas de mundo en el plano complejo, por lo que la matriz de la transformación (\ref{eq:transformacion-lineal-matrix}) es la inversa de la matriz de vista y proyección.
+En rasterización, se denomina matriz de vista a aquella que transforma las coordenadas de mundo (WC) de los objetos que componen la escena a coordenadas de cámara, mientras que la matriz de proyección es la que calcula las coordenadas de dispositivo (DC) finales a partir de las coordenadas de cámara. La composición de estas dos matrices es la matriz de vista y proyección $M$, que convierte las coordenadas de mundo en coordenadas de dispositivo. La transformación $\phi$ convierte las coordenadas de dispositivo en coordenadas de mundo en el plano complejo, por lo que la matriz de la transformación (\ref{eq:transformacion-lineal-matrix}) es la inversa de la matriz de vista y proyección.
 
 
 Las constantes de zoom $\lambda$ y el centro $(x_0,y_0)$ pueden ser parametrizables para así poder visualizar cualquier región del plano en el canvas. La forma de darle distintos valores a estas constantes es mediante una variable \verb|uniform| para cada caso. Otro detalle a tener en cuenta es que, aunque en todo momento hemos hablado de coordenadas de dispositivo como valores enteros, lo estándar es tomar reales con parte fraccionaria igual a $\frac{1}{2}$, de forma que identificamos el píxel con el punto de $\R^2$ que se encuentra en el centro del píxel. En caso de mantener la coordenada entera estaríamos identificándolo con la esquina inferior izquierda. Queda por tanto el siguiente fragmento de código:
@@ -180,8 +180,8 @@ Para el que no esté acostumbrado al código GLSL, este lenguaje no permite iter
 Una vez tenemos esta función, es muy sencillo programar la función $P_{c,m}$ aprovechando la aritmética preprogramada para los objetos vector en GLSL.
 
 \begin{lstlisting}
-vec2 P(vec2 z, vec2 c, int n) {
-  return complex_pow(z,n) + c;
+vec2 P(vec2 z, vec2 c, int m) {
+  return complex_pow(z,m) + c;
 }
 \end{lstlisting}
 
@@ -247,10 +247,10 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
 vec4 computePixelColor(bool escaped, int iterations) {
     return escaped ? vec4(palette(
       float(iterations)/ float(u_maxIterations),
-      vec3(0.109,0.109,0.647), 
-      vec3(0.823, 0.411, 0.0), 
-      vec3(0.769, 0.659, 0.0), 
-      vec3(0.627,0.878,0.043)
+      vec3(0.109,0.109,0.647), // #1C1CA5
+      vec3(0.823, 0.411, 0.0), // #D26900
+      vec3(0.769, 0.659, 0.0), // #C4A800
+      vec3(0.627,0.878,0.043)  // #A0E00B
       ), 
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
@@ -261,19 +261,19 @@ Como se puede observar, es una simple interpolación lineal entre los 4 colores 
 \section{Visualizando conjuntos de Julia}
 \label{section:grafica-julia}
 
-Tenemos entonces todos los ingredientes para programar la visualización, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,m}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito al inicio de esta sección, debemos iterar la función $P_{c,m}$. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero (recordemos el psudocódigo del algoritmo \ref{alg:Julia}). Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{section:colores}. El código GLSL sería el siguiente:
+Tenemos entonces todos los ingredientes para programar la visualización, tan solo falta decidir si el punto que representa el píxel es prisionero o escapa mediante la iteración de $P_{c,m}$. Tras obtener las coordenadas de mundo que se le asignan al píxel mediante el método descrito en la sección \ref{section:pantalla-plano}, debemos iterar la función $P_{c,m}$. Atendiendo al teorema \ref{th:escape}, en caso de que el módulo supere el valor 2 se decide que el punto es de escape. Si esto nunca ocurre y se alcanza el número máximo de iteraciones sin que el módulo sea mayor que 2, entonces se decide que el punto es prisionero (recordemos el pseudocódigo del algoritmo \ref{alg:Julia}). Atendiendo a esta decisión y al número de iteraciones dadas se asigna el color correspondiente como comentamos en la sección \ref{section:colores}. El código GLSL sería el siguiente:
 
 \begin{lstlisting}
 // A partir del valor de la semilla z0, la constante c 
-// y el exponente n iteramos la funcion P_{c,m}.
-void iterateJulia(vec2 z0, vec2 c, int n, 
+// y el exponente m iteramos la funcion P_{c,m}.
+void iterateJulia(vec2 z0, vec2 c, int m, 
   out bool escaped, out int iterations) {  
   vec2 z = z0;
   escaped = false;
   for(int i = 0; i < 10000; i++) {
     if(i == u_maxIterations) break;
     iterations = i;
-    z = P(z, c, n);
+    z = P(z, c, m);
     if (length(z) > 2.0){
       escaped = true;
       break;
@@ -281,14 +281,15 @@ void iterateJulia(vec2 z0, vec2 c, int n,
   }
 }
 
-// A partir del valor de la constante c y el exponente n
+
+// A partir del valor de la constante c y el exponente m
 // se calcula el punto asociado al pixel, se itera P_{c,m}
 // y se devuelve el color en funcion de dicha iteracion.
-vec4 Julia(vec2 c, int n) {
+vec4 Julia(vec2 c, int m) {
   vec2 z0 = get_world_coordinates();
   bool escaped;
   int iterations;
-  iterateJulia(z0, c, n, escaped, iterations);
+  iterateJulia(z0, c, m, escaped, iterations);
   return computePixelColor(escaped, iterations);
 }
 \end{lstlisting}
@@ -318,9 +319,9 @@ Ya hemos visto la metodología a utilizar si queremos visualizar conjuntos de Ju
 La idea consiste por tanto en obtener las coordenadas de mundo del píxel, iterar la función $P_{c,m}$ tomando $z_0=0$ como semilla y observar qué sucede, recordemos el algoritmo \ref{alg:Mandelbrot}. Por la proposición \ref{prop:mandelbrot-escape} afirmamos que en el momento que una iterada supere en módulo a 2, entonces la sucesión de iteradas es divergente. Por tanto, almacenamos en una variable el número de iteradas que se han calculado antes de que el módulo de la sucesión supere a 2 en caso de que lo haga. Si esto no ocurre, se etiqueta al punto como prisionero y por tanto el punto pertenece a $\mathcal{M}_m$. De nuevo, la forma de asignar un color al píxel depende de si la sucesión diverge o no y del número de iteraciones hasta decidir que diverge en dicho caso. El código GLSL por tanto es el siguiente:
 
 \begin{lstlisting}
-// A partir de la constante c, el exponente n y 
+// A partir de la constante c, el exponente m y 
 // tomando como semilla z=0 se itera P_{c,m} 
-void iterateMandelbrot(vec2 c, int n, 
+void iterateMandelbrot(vec2 c, int m, 
   out bool escaped, out int iterations) {
     
   vec2 z = vec2(0.0);
@@ -328,7 +329,7 @@ void iterateMandelbrot(vec2 c, int n,
   for (int i = 0; i < 10000; i++) {
     if (i == u_maxIterations) break;
     iterations = i;
-    z = P(z, c, n);
+    z = P(z, c, m);
     if (length(z) > 2.0) {
       escaped = true;
       break;
@@ -336,13 +337,13 @@ void iterateMandelbrot(vec2 c, int n,
   }
 }
 
-// A partir del exponente n se calcula el punto asociado al
+// A partir del exponente m se calcula el punto asociado al
 // pixel, se itera y se devuelve el color asociado.
-vec4 Mandelbrot(int n) {
+vec4 Mandelbrot(int m) {
   vec2 c = get_world_coordinates();
   bool escaped;
   int iterations;
-  iterateMandelbrot(c, n, escaped, iterations);
+  iterateMandelbrot(c, m, escaped, iterations);
   return computePixelColor(escaped, iterations);
 }
 \end{lstlisting}
@@ -364,6 +365,8 @@ gl_FragColor = Mandelbrot(u_order);
     \caption{Representación de algunos conjuntos de Mandelbrot con WebGL}
     \label{fig:mandelbrot-webgl}
 \end{figure}
+
+\newpage
 
 \section{Alternando conjuntos de Julia y Mandelbrot}
 \label{section:alternando}
@@ -391,7 +394,7 @@ void main() {
 \section{Supersampling Antialiasing}
 \label{section:SSAA-2D}
 
-Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El aliasing es un efecto que ocurre en muchas aplicaciones gráficas debido a la discretización que se realiza de una imagen real en un subconjunto finito de píxeles. Por ejemplo, a no ser que una línea recta sea totalmente vertical u horizontal, se presentará con sobresaltos impropios de una línea recta (véase imagen \ref{fig:no-antialiasing-2D}).Por su parte, el \textit{antialiasing} es un conjunto de técnicas que nos permite evitar este efecto mediante el suavizado de bordes. Por ejemplo, fíjese en la imagen \ref{fig:no-antialiasing-2D}, de $\mathcal{J}_{-0.53 + 0.53i}$. En ella se pueden observar irregularidades, como por ejemplo pequeños puntos negros o píxeles consecutivos de colores muy distintos.
+Para terminar este capítulo, introduciremos una técnica que aportará realismo y calidad a nuestras imágenes. El aliasing es un efecto que ocurre en muchas aplicaciones gráficas debido a la discretización que se realiza de una imagen real en un subconjunto finito de píxeles. Por ejemplo, a no ser que una línea recta sea totalmente vertical u horizontal, se presentará con sobresaltos impropios de una línea recta (véase imagen \ref{fig:no-antialiasing-3D}).Por su parte, el \textit{antialiasing} es un conjunto de técnicas que nos permite evitar este efecto mediante el suavizado de bordes. Por ejemplo, fíjese en la imagen \ref{fig:no-antialiasing-2D}, de $\mathcal{J}_{-0.53 + 0.53i}$. En ella se pueden observar irregularidades, como por ejemplo pequeños puntos negros o píxeles consecutivos de colores muy distintos.
 
 \begin{figure} [ht]
   \centering
@@ -478,8 +481,8 @@ Finalmente, en las funciones \verb|Julia| y \verb|Mandelbrot|, en lugar de hacer
 \begin{lstlisting}
 vec4 Julia(vec2 c, int n) {
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
-  int nSamples = 3;
-  for(int i = 0; i < 10000; i++) {
+  int nSamples = 3; // Se calcularian 3^2 = 9 colores
+  for(int i = 0; i < 1000; i++) {
     if(i == nSamples*nSamples) break;
     vec2 z0 = get_world_coordinates(i, nSamples);
     bool escaped;

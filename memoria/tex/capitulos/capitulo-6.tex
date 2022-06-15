@@ -2,19 +2,17 @@
 % ─── PLANIFICACION Y PRESUPUESTO ────────────────────────────────────────────────
 %
 
-Hasta el momento hemos introducido la materia matemática básica de esta disciplina y las herramientas gráficas utilizadas en informática gráfica. Con el objetivo de familiarizar al usuario de internet con los conjuntos de Julia y Mandelbrot en dos dimensiones, estudiados en el capítulo \ref{chap:Julia-Mandelbrot}, y con el de conseguir nuestras primeras visualizaciones de fractales tridimensionales es momento de comenzar el desarrollo del producto software. Como se ha dicho en la introducción y en otras partes de esta memoria, este producto consiste en una web interactiva en la que poder graficar distintos fractales, tanto 2D como 3D, permitiendo modificar algunos de sus parámetros de manera dinámica.  
+Hasta el momento hemos introducido la materia matemática básica de esta disciplina y las herramientas gráficas utilizadas en informática gráfica, con énfasis en WebGL. Con el objetivo de familiarizar al usuario de internet con los conjuntos de Julia y Mandelbrot en dos dimensiones, estudiados en el capítulo \ref{chap:Julia-Mandelbrot}, y con el de conseguir nuestras primeras visualizaciones de fractales tridimensionales es momento de comenzar el desarrollo del producto software. Como se ha dicho en la introducción y en otras partes de esta memoria, este producto consiste en una web interactiva en la que poder graficar distintos fractales, tanto 2D como 3D, permitiendo modificar algunos de sus parámetros de manera dinámica.  
 
 \section{Planificación}
 
-A continuación describiremos la planificación temporal por fases de este producto software. Debe tenerse en cuenta que con cada avance hay asociado un tiempo de codificación de la funcionalidad, pero también un tiempo buscando información, consultando bibliografía y redactando la documentación del software. El desarrollo del software comienza a la par que el periodo lectivo correspondiente al segundo cuatrimestre del curso universitario 2021-2022, por lo que dividiremos el tiempo que transcurre desde el 7 de febrero de 2022 hasta la fecha de entrega, que es el 20 de junio de 2022, en 20 semanas, cada una identificada por la fecha del lunes de dicha semana. Utilizaremos estas unidades y fechas para describir los tiempos empleados en cada fase de desarrollo, las cuales procedemos a describir en las siguientes subsecciones.
+A continuación describiremos la planificación temporal por fases de este producto software. Debe tenerse en cuenta que con cada avance hay asociado un tiempo de codificación de la funcionalidad, pero también un tiempo buscando información, consultando bibliografía y redactando la documentación del software. El desarrollo comienza a la par que el periodo lectivo correspondiente al segundo cuatrimestre del curso universitario 2021--2022, por lo que dividiremos el tiempo que transcurre desde el 7 de febrero de 2022 hasta la fecha de entrega, que es el 20 de junio de 2022, en 20 semanas, cada una identificada por la fecha del lunes de dicha semana. Utilizaremos estas unidades y fechas para describir los tiempos empleados en cada fase de desarrollo, las cuales procedemos a describir en las siguientes subsecciones.
 
 \subsection{Infraestructura básica}
 
-La fase de desarrollo comienza en la segunda semana de febrero de 2022, que da comienzo el día 7 de este mismo mes. El primer paso es conseguir una web vacía con un elemento tipo `canvas' en el cual visualicemos algo sencillo, como por ejemplo un cuadrado de colores.
+La primera fase de desarrollo comienza en la segunda semana de febrero de 2022, que da comienzo el día 7 de este mismo mes. El primer paso es conseguir una web vacía con un elemento tipo `canvas' en el cual visualicemos algo sencillo, como por ejemplo un cuadrado de colores, que es el que encontramos en la figura \ref{fig:ejemplo-wgl}.
 
-Esta tarea es sencilla, ya que hay muchos tutoriales, es el `hello world' de las aplicaciones gráficas. Debe estar lista en esta misma semana, es decir, antes de acabar la \textbf{semana 1}, la cual transcurre desde el 7 hasta el 13 de febrero.
-
-Con esto, ya tenemos la infraestructura básica del producto software.
+Esta tarea es sencilla, ya que hay muchos tutoriales, es el `hello world' de las aplicaciones gráficas. Debe estar lista en esta misma semana, es decir, antes de acabar la \textbf{semana 1}, la cual transcurre desde el 7 hasta el 13 de febrero. Con esto, ya tenemos la infraestructura básica del producto software.
 
 \subsection{Visualización de fractales 2D}
 
@@ -22,7 +20,7 @@ Con el código hasta ahora, debemos modificar la estructura para que el software
 
 Seguidamente, debemos preparar el documento web para el soporte de interactividad y gestión de eventos. Es decir, añadir formularios, botones, deslizadores... en principio sin funcionalidad alguna. Hecho esto, añadimos definitivamente la interactividad, permitiendo que a partir del documento web se pueda interactuar con el canvas y la escena que se está visualizando. Con cada avance en el desarrollo debe cuidarse la apariencia y el estilo de la web.
 
-En este punto, el producto consiste en una web interactiva para visualizar fractales en 2D. Esta tarea no es tampoco demasiado compleja al ser sencillo identificar un canvas 2D con una región del plano sencilla, pero requiere mucha funcionalidad muy distinta, la cual es la primera vez que se programa, y teniendo en cuenta que es una parte importante del proyecto que servirá de base para el resto de fases, estipulamos que debemos dar como margen hasta la \textbf{semana 8}, es decir, entre el lunes 7 de febrero y el domingo 3 de abril de 2022.
+En este punto, el producto consiste en una web interactiva para visualizar fractales en 2D. Esta tarea no es tampoco demasiado compleja al ser sencillo identificar un canvas 2D con una región del plano, pero requiere mucha funcionalidad muy distinta, la cual es la primera vez que se programa, y teniendo en cuenta que es una parte importante del proyecto que servirá de base para el resto de fases, estipulamos que debemos dar como margen hasta la \textbf{semana 8}, es decir, entre el lunes 7 de febrero y el domingo 3 de abril de 2022.
 
 \subsection{Construcción de un programa ray-tracer}
 
@@ -45,21 +43,23 @@ Una vez realizado esto, contaríamos con una web en la que interactuar con fract
 
 \subsection{Realismo y optimización en la escena 3D}
 
-Aunque la funcionalidad está completa y el objetivo cumplido, es bueno pulir algunos detalles relacionados con el realismo. Por ejemplo, añadir la visualización de sombras arrojadas al modelo de iluminación o técnicas como el antialiasing para suavizar los bordes.
+Aunque la funcionalidad está completa y el objetivo cumplido, es bueno pulir algunos detalles relacionados con el realismo. Por ejemplo, tanto en las imágenes 2D como 3D podemos aplicar la técnica conocida como `Super Sampling Antialiasing' para suavizar los bordes y conseguir una mayor calidad de imagen.
 
-El problema es que estas dos adiciones son muy costosas en tiempo, lo cual compromete la velocidad de ejecución, por lo que añadiremos a la web la posibilidad de elegir si se desean aplicar o no.
+También podemos añadir al modelo de iluminación de la escena 3D la visualización de sombras arrojadas, consiguiendo efectos más realistas.
 
-Seguidamente podemos añadir esferas englobantes al programa como técnica de optimización, al menos en escenas donde el fractal esté relativamente lejano.
+El problema es que estas dos adiciones son muy costosas en tiempo, lo cual compromete la velocidad de ejecución, por lo que añadiremos a la web la posibilidad de elegir si se desean aplicar o no. 
+
+Seguidamente, podemos añadir a la escena 3D esferas englobantes como técnica de optimización, al menos en escenas donde el fractal esté relativamente lejano.
 
 Estas modificaciones completarían el desarrollo software de la visualización e interacción de la escena y en lo que a `backend' se refiere completa el software. Debe estar lista durante la \textbf{semana 18}, que finaliza el domingo 12 de junio.
 
 \subsection{Añadir estilo y UX a la web}
 
-Desde el inicio, al estar en fases de desarrollo, hemos descuidado bastante la apariencia de la página en lo que a secciones, fuentes y colores se refiere. Por tanto, añadiremos estilo y código CSS al documento para darle una apariencia más visual y amigable.
+Desde el inicio, al estar en fases de desarrollo, se suele descuidar bastante la apariencia de la página en lo que a secciones, fuentes y colores se refiere. Por tanto, añadiremos estilo y código CSS al documento para darle una apariencia más visual y amigable. Para ello nos ayudaremos del framework de CSS y JavaScript `Bootstrap'.
 
 La última, pero no por ello menos importante fase del desarrollo debe estar finalizada la misma semana que se produce la entrega, es decir, la \textbf{semana 20} y por supuesto antes del día \textbf{20 de Junio de 2022}.
 
-\vspace{0.5cm}
+\vspace{1cm}
 
 En conclusión, y a modo de resumen, presentamos en la imagen \ref{fig:Gantt} el conocido como \textit{diagrama de Gantt}, que sintetiza en una tabla el tiempo dedicado a cada actividad. Cada columna representa una semana, identificada por el día y el mes del lunes de dicha semana.
 
@@ -70,6 +70,7 @@ En conclusión, y a modo de resumen, presentamos en la imagen \ref{fig:Gantt} el
     \label{fig:Gantt}
 \end{figure}
 
+\newpage
 
 \section{Presupuesto del producto software}
 
@@ -87,13 +88,13 @@ A continuación enumeraremos los recursos software utilizados en la codificació
 
 \begin{itemize}
     \item \textbf{Visual Studio Code}: Editor de código utilizado tanto para redactar todo el código fuente necesario como la memoria, gracias a sus múltiples extensiones que lo convierten en un entorno de desarrollo muy versátil.
-    \item \textbf{Google Chrome}: Navegador web, ampliamente utilizado para visualizar la web que se ha desarrollado en cada una de sus fases. también se ha empleado para consultar bibliografía, buscar información o realizar muchas de las imágenes utilizadas. En este último aspecto, los sitios más visitados han sido \href{https://www.vectary.com/}{\textcolor{blue}{Vectary}} y  \href{https://www.figma.com/}{\textcolor{blue}{Figma}}.
-    \item \textbf{Git y Github}: Sistema de control de versiones, gracias a git se ha permitido llevar un histórico de los avances que se han hecho en el trabajo. Además, con `github' pages se ha podido desplegar la web en internet gratuitamente.
+    \item \textbf{Google Chrome}: Navegador web, ampliamente utilizado para visualizar la web que se ha desarrollado en cada una de sus fases. También se ha empleado para consultar bibliografía, buscar información o realizar muchas de las imágenes utilizadas. En este último aspecto, los sitios más visitados han sido \href{https://www.vectary.com/}{\textcolor{blue}{Vectary}} y  \href{https://www.figma.com/}{\textcolor{blue}{Figma}} para las imágenes explicativas sobre ray-tracing junto con \href{https://app.diagrams.net/}{\textcolor{blue}{app.diagrams.net}} y \href{https://online.visual-paradigm.com/es/}{\textcolor{blue}{Visual Paradigm Online}} para hacer los diagramas y algunas imágenes.
+    \item \textbf{Git y Github}: Sistema de control de versiones, gracias a git se ha permitido llevar un histórico de los avances que se han hecho en el trabajo. Además, con `Github pages' se ha podido desplegar la web en internet gratuitamente.
     \item \textbf{Bootstrap}: Framework de CSS y JavaScript útil para la programación del estilo de la página web.
     \item \textbf{jQuery}: Biblioteca de JavaScript que simplifica la sintaxis, la gestión de eventos y la manipulación del DOM.
 \end{itemize}
 
-Todo esto junto con las típicas aplicaciones como el navegador de archivos, la terminal, etc.
+Todo esto junto con las aplicaciones tradicionales como el navegador de archivos, la terminal, etc.
 
 Afortunadamente, todos los recursos software son gratuitos, por lo que el presupuesto de los recursos software se reduce a \textbf{0\euro}.
 
@@ -111,10 +112,10 @@ Presentamos entonces el desglose final del presupuesto de este proyecto en la ta
     \centering
     \begin{tabular}{ll}
     \hline
-    \textbf{Recurso}     & \textbf{Precio} \\ \hline
-    Recursos hardware    & 500\euro             \\ \hline
+    \textbf{Recurso}     & \textbf{Precio} \\ \hline\hline
+    Recursos Hardware    & 500\euro             \\ \hline
     Recursos Software    & 0\euro              \\ \hline
-    Recursos humanos     & 6000\euro           \\ \hline
+    Recursos Humanos     & 6000\euro           \\ \hline\hline
     \textbf{Coste total} & \textbf{6500\euro}  \\ \hline
     \end{tabular}
     \caption{Desglose por recursos del presupuesto final}
@@ -195,15 +196,17 @@ Ante estos casos de uso, en la figura \ref{fig:casos-uso} vemos el diagrama de c
 
 Por último, con el objetivo de clarificar las distintas actividades que puede realizar tanto el software como el usuario, presentamos en la imagen \ref{fig:diagrama-actividad} un diagrama de actividad, en el cual podemos observar cómo tras la generación de una imagen el usuario puede continuar indefinidamente variando parámetros hasta que finalmente decida cerrar la página.
 
+\newpage
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=12cm]{img/diagrama-actividad.png}
+    \includegraphics[width=11cm]{img/diagrama-actividad.png}
     \caption{Diagrama de Actividad}
         \label{fig:diagrama-actividad}
     \end{figure}
 
-\newpage
+
 \section{Bocetos de la web}
+
 
 A continuación presentaremos los bocetos básicos, a veces llamados `wireframes', de la apariencia que tendrá la web. Son únicamente tres pantallas, y dos de ellas son prácticamente iguales en lo que a nivel de boceto se refiere. La pantalla en la que se visualizan fractales 2D y 3D en un canvas (imagen \ref{fig:wireframe-fractals}) es prácticamente igual en ambos casos, por lo que sólo hemos incluido una de ellas entendiendo que los enlaces y los títulos son intercambiables en cada versión. 
 
@@ -212,18 +215,16 @@ Como vemos en la imagen \ref{fig:wireframe-home}, al acceder a la web nos aparec
 
 Sobre la pantalla de la imagen \ref{fig:wireframe-fractals}, aparecería a la izquierda el canvas donde se visualizarían los fractales y los distintos controles y parámetros modificables estarían en el lado derecho. Debajo de esta sección de la pantalla también se incluiría un texto documentando el sentido de cada parámetro para que el usuario que no conozca demasiado el trasfondo matemático ni informático pueda interactuar sin problemas.
 
-\newpage
-
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=11cm]{img/wireframe-home.png}
+    \includegraphics[width=10cm]{img/wireframe-home.png}
     \caption{Wireframe de la portada de la página}
     \label{fig:wireframe-home}
     \end{figure}
 
 \begin{figure} [ht]
     \centering
-    \includegraphics[width=11cm]{img/wireframe-1.png}
+    \includegraphics[width=10cm]{img/wireframe-1.png}
     \caption{Wireframe de la pantalla en la que se visualizan fractales}
         \label{fig:wireframe-fractals}
     \end{figure}
