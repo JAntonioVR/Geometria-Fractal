@@ -47,48 +47,136 @@
       <section class="row">
         <div class="col-lg-8" id="canvas-wapper">
           <canvas class="container-fluid"  id="glCanvas"  width="1280" height="720"></canvas>
+          <div class="row justify-content-center">
+            <span class="col-4 fs-5 text">Modo de uso</span>
+            <div class="col-3 form-check">
+              <input class="form-check-input" type="radio" name="modo" id="interactivo" value="0">
+              <label class="form-check-label" for="interactivo">
+                Modo interactivo
+              </label>
+            </div>
+            <div class="col-3 form-check">
+              <input class="form-check-input" type="radio" name="modo" id="a-demanda" value="1" checked>
+              <label class="form-check-label" for="a-demanda">
+                Modo a demanda
+              </label>
+            </div>
+          </div>
+          
+          <div class="row justify-content-around">
+            <button type="button" class="col-4 btn-change" id="botonReset">Reset</button>
+            <button class="col-4 btn-change" id="redraw">Redibujar</button>
+          </div>
         </div>
           
         <aside class="col-lg-4">
-          <h3>Controles:</h3>
-          <ul>
-            <li>Teclas +/-: Ampliar o reducir el zoom</li>
-            <li>Flechas: Desplazarse por el espacio</li>
-          </ul>
-            
+
           <div class="accordion accordion-flush" id="accordionFlushExample">
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="flush-headingFour">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseZero" aria-expanded="false" aria-controls="flush-collapseZero">
-                  <span class="fs-5 text">Modo de uso</span>
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <span class="fs-5 text">Parámetros del fractal</span>
                 </button>
               </h2>
-              <div id="flush-collapseZero" class="accordion-collapse collapse" aria-labelledby="flush-headingZero" >
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="modo" id="interactivo" value="0">
-                    <label class="form-check-label" for="interactivo">
-                      Modo interactivo
-                    </label>
+                  
+                  <div class="row">
+                    <b class="col-7">¿Qué fractal quieres ver?</b>
+                    <div class="col-5">
+                      <select class="form-select form-select-sm mb-3" aria-label=".form-select-lg example" id="fractales">
+                        <option value="1" selected>Mandelbub</option>
+                        <option value="2">Julia</option>
+                        <option value="3">Mandelbrot</option>
+                      </select>
+                    </div>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="modo" id="a-demanda" value="1" checked>
-                    <label class="form-check-label" for="a-demanda">
-                      Modo a demanda
-                    </label>
-                  </div>
+                  <section id="constanteJulia">
+                    <b>Constante del Conjunto de Julia</b><br> \(c = i\cdot x + j\cdot y + k\cdot z + w \)
+                    <div class="container" id="deslizadorJuliaX">
+                      <div class="row align-items-center justify-content-between">
+                        <b class="col-2">x:</b>
+                        <input class="col-5" id="juliaX" type="range" min="-2" max="2" step="0.01">
+                        <input type="number" class="col-3" id="valorJuliaX" min="-2" max="2" step="0.01"></input>
+                      </div>
+                    </div>
+                    <div class="container" id="deslizadorJuliaY">
+                      <div class="row align-items-center justify-content-between">
+                        <b class="col-2">y:</b>
+                        <input class="col-5" id="juliaY" type="range" min="-2" max="2" step="0.01">
+                        <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
+                      </div>
+                    </div>
+                    <div class="container" id="deslizadorJuliaZ">
+                      <div class="row align-items-center justify-content-between">
+                        <b class="col-2">z:</b>
+                        <input class="col-5" id="juliaZ" type="range" min="-2" max="2" step="0.01">
+                        <input type="number" class="col-3" id="valorJuliaZ" min="-2" max="2" step="0.01"></input>
+                      </div>
+                    </div>
+                    <div class="container" id="deslizadorJuliaW">
+                      <div class="row align-items-center justify-content-between">
+                        <b class="col-2">w:</b>
+                        <input class="col-5" id="juliaW" type="range" min="-2" max="2" step="0.01">
+                        <input type="number" class="col-3" id="valorJuliaW" min="-2" max="2" step="0.01"></input>
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
             </div>
 
             <div class="accordion-item">
-              <h4 class="accordion-header" id="flush-headingOne">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+              <h2 class="accordion-header" id="flush-headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                  <span class="fs-5 text">Ray-Tracing</span>
+                </button>
+              </h2>
+              <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" >
+                <div class="accordion-body">
+                  <h5>Posición actual (coordenadas cartesianas)</h5>
+                  <div class="row justify-content-around align-items-center">
+                    <div class="col-4 text-center"><b>x</b></div>
+                    <div class="col-4 text-center"><b>y</b></div>
+                    <div class="col-4 text-center"><b>z</b></div>
+                  </div>
+                  <div class="row justify-content-around align-items-center">
+                    <input class="col-3" id="posX" type="number" min="-100" max="100" step="0.1">
+                    <input class="col-3" id="posY" type="number" min="-100" max="100" step="0.1">
+                    <input class="col-3" id="posZ" type="number" min="-100" max="100" step="0.1">
+                  </div><br>
+                  <h5>Epsilon</h5>
+                  <div class="container" id="epsilon">
+                    <div class="row align-items-center justify-content-between">
+                      <b class="col-2">\(\varepsilon\):</b>
+                      <input class="col-5" id="current_epsilon" type="range" min="1" max="4" step="1">
+                      <div class="col-3" id="valor_epsilon"></div>
+                    </div>
+                  </div><br>
+                  <h5>Supersampling Antialiasing</h5>
+                  <div class="form-check form-switch" style="padding-left: 5.5em;">
+                    <input class="form-check-input" type="checkbox" id="antialiasing">
+                    <label class="form-check-label" for="antialiasing">Activar/desactivar SSAA</label>
+                  </div>
+                  <div class="container" id="deslizadorNSamples">
+                    <div class="row align-items-center justify-content-between">
+                      <b class="col-5">Rayos por píxel:</b>
+                      <input class="col-5" id="nSamples" type="range" min="1" max="4" step="1">
+                      <div class="col-2" id="valorNSamples"></div>
+                    </div>
+                  </div>   
+                </div> 
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h4 class="accordion-header" id="flush-headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
                   <span class="fs-5 text">Modelo de iluminación</span>
                 </button>
               </h4>
-              <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" >
+              <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" >
                 <div class="accordion-body">
                   <h5>Propiedades del material</h5>
                   <div class="row justify-content-center">
@@ -136,134 +224,20 @@
                 </div>
               </div>
             </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="flush-headingTwo">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
-                  <span class="fs-5 text">Supersampling Antialiasing</span>
-                </button>
-              </h2>
-              <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" >
-                <div class="form-check form-switch" style="padding-left: 5.5em;">
-                  <input class="form-check-input" type="checkbox" id="antialiasing">
-                  <label class="form-check-label" for="antialiasing">Activar/desactivar</label>
-                </div>
-                <div class="container" id="deslizadorNSamples">
-                  <div class="row align-items-center justify-content-between">
-                    <b class="col-5">Rayos por píxel:</b>
-                    <input class="col-5" id="nSamples" type="range" min="1" max="4" step="1">
-                    <div class="col-2" id="valorNSamples"></div>
-                  </div>
-                </div>    
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="flush-headingThree">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
-                  <span class="fs-5 text">Fractal que se visualiza</span>
-                </button>
-              </h2>
-              <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" >
-                <div class="accordion-body">
-                  <div class="row">
-                    <b class="col-7">¿Qué fractal quieres ver?</b>
-                    <div class="col-5">
-                      <select class="form-select form-select-sm mb-3" aria-label=".form-select-lg example" id="fractales">
-                        <option value="1" selected>Mandelbub</option>
-                        <option value="2">Julia</option>
-                        <option value="3">Mandelbrot</option>
-                      </select>
-                    </div>
-                  </div>
-                  <section id="constanteJulia">
-                    <b>Constante del Conjunto de Julia</b><br> \(c = i\cdot x + j\cdot y + k\cdot z + w \)
-                    <div class="container" id="deslizadorJuliaX">
-                      <div class="row align-items-center justify-content-between">
-                        <b class="col-2">x:</b>
-                        <input class="col-5" id="juliaX" type="range" min="-2" max="2" step="0.01">
-                        <input type="number" class="col-3" id="valorJuliaX" min="-2" max="2" step="0.01"></input>
-                      </div>
-                    </div>
-                    <div class="container" id="deslizadorJuliaY">
-                      <div class="row align-items-center justify-content-between">
-                        <b class="col-2">y:</b>
-                        <input class="col-5" id="juliaY" type="range" min="-2" max="2" step="0.01">
-                        <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
-                      </div>
-                    </div>
-                    <div class="container" id="deslizadorJuliaZ">
-                      <div class="row align-items-center justify-content-between">
-                        <b class="col-2">z:</b>
-                        <input class="col-5" id="juliaZ" type="range" min="-2" max="2" step="0.01">
-                        <input type="number" class="col-3" id="valorJuliaZ" min="-2" max="2" step="0.01"></input>
-                      </div>
-                    </div>
-                    <div class="container" id="deslizadorJuliaW">
-                      <div class="row align-items-center justify-content-between">
-                        <b class="col-2">w:</b>
-                        <input class="col-5" id="juliaW" type="range" min="-2" max="2" step="0.01">
-                        <input type="number" class="col-3" id="valorJuliaW" min="-2" max="2" step="0.01"></input>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="flush-headingFour">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour">
-                  <span class="fs-5 text">Epsilon</span>
-                </button>
-              </h2>
-              <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour" >
-                <div class="accordion-body">
-                  <div class="container" id="epsilon">
-                    <div class="row align-items-center justify-content-between">
-                      <b class="col-2">\(\varepsilon\):</b>
-                      <input class="col-5" id="current_epsilon" type="range" min="1" max="4" step="1">
-                      <div class="col-3" id="valor_epsilon"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-        
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="flush-headingFive">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFive" aria-expanded="false" aria-controls="flush-collapseFive">
-                  <span class="fs-5 text">Posición actual (coordenadas cartesianas)</span>
-                </button>
-              </h2>
-              <div id="flush-collapseFive" class="accordion-collapse collapse" aria-labelledby="flush-headingFive" >
-                <div class="accordion-body">
-                  <div class="row justify-content-around align-items-center">
-                    <div class="col-4 text-center"><b>x</b></div>
-                    <div class="col-4 text-center"><b>y</b></div>
-                    <div class="col-4 text-center"><b>z</b></div>
-                  </div>
-                  <div class="row justify-content-around align-items-center">
-                    <input class="col-3" id="posX" type="number" min="-100" max="100" step="0.1">
-                    <input class="col-3" id="posY" type="number" min="-100" max="100" step="0.1">
-                    <input class="col-3" id="posZ" type="number" min="-100" max="100" step="0.1">
-                  </div><br>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row justify-content-between">
-            <button type="button" class="col-4 btn-change" id="botonReset">Reset</button>
-            <button class="col-4 btn-change" id="redraw">Redibujar</button>
-          </div>
+            <br>
           <span id="contador-valor" class="fs-5 text"></span>
         </aside>
       </section>
 
       <section class="container">
+        <h2>Controles:</h2>
+          <ul>
+            <li>Teclas +/-: Ampliar o reducir el zoom</li>
+            <li>Flechas: Desplazarse por el espacio</li>
+          </ul>
         <h2>Ayuda</h2>
         <p>
-          En los siguientes párrafos se explica de forma intuitiva el significado y el efecto provocado por cada uno de los parámetros modificables del panel de la parte derecha. Previamente, explicamos algunas nociones sobre los algoritmos utilizados para visualizar estas escenas.
+          En los siguientes párrafos se explica de forma intuitiva el significado y el efecto provocado por cada uno de los parámetros modificables. Previamente, explicamos algunas nociones sobre los algoritmos utilizados para visualizar estas escenas.
         </p>
         <p>
           El algoritmo utilizado para graficar una escena 3D es 'Ray-Tracing', el cual consiste en imaginar la escena que queremos visualizar, que en este caso está compuesta por un plano con textura de tablero de ajedrez y un fractal 3D, y desde una posición que tomamos como punto de vista posicionar un plano el cual identificamos con la pantalla y dividimos en píxeles (este plano se denomina 'plano de proyección'). Posteriormente, se 'trazan rayos' hacia la escena, uno por cada píxel. En caso de intersección con algún objeto, se colorea el píxel del color asociado a la intersección.
@@ -283,8 +257,62 @@
           <li><strong>Modo interactivo</strong> : La escena cambia conforme cambia cada parámetro. Es la opción más ilustrativa y en la que más se aprecian los cambios en los distintos parámetros, pero también la más costosa. No recomendamos usar este modo, o al menos no abusar de él con parámetros exigentes si el computador es antiguo o tiene una mala GPU.</li>
           <li><strong>Modo a demanda</strong>: En este caso la escena no cambia al modificar los parámetros, aunque si cambian internamente. Una vez se han ajustado a nuestro gusto, se pulsa el botón <a class="text-primary" href="#redraw">Redibujar</a> para que se grafique la escena con los nuevos parámetros.</li>
         </ul>
+
+        <h3>Botón 'Reset'</h3>
+        <p>
+          Al pulsarlo se restablecen los parámetros a los iniciales, es decir, los que había al cargar la página por primera vez.  
+        </p>
+
+        <h3>Botón 'Redibujar'</h3>
+        <p>
+          Al pulsarlo se dibuja la escena con los valores que tengan los parámetros en el momento que se pulsa. Cada vez que se redibuja la escena, sea por este botón o porque esté activo el modo interactivo, se actualiza el 'tiempo de procesado', que especifica el tiempo en milisegundos que tarda en procesarse el frame.
+        </p>
+
         <p>
           En general, se recomienda usar los parámetros estándar y el modo interactivo para moverse por la escena, y en el momento que se desee primar el realismo y la calidad de la imagen activar el modo a demanda, especificar parámetros concretos más exigentes y redibujar.
+        </p>
+
+        <h3>Parámetros del fractal</h3>
+        <p>
+          En la página de <a href="2D-fractals.html#ayuda2D" class="text-primary">fractales 2D</a> se explica la metodología para graficar conjuntos de Julia y Mandelbrot mediante iteración de números complejos. Para dar el salto a 3 dimensiones se utiliza una generalización de los complejos: los cuaternios, los cuales pueden identificarse con \(\mathbb R^4\), de forma que aquí representamos una proyección de los conjuntos de Julia y Mandelbrot 4-dimensionales en 3 dimensiones.
+        </p>
+        <p>
+          Se ofrece la posibilidad de elegir entre la visualización de los conjuntos de Julia y Mandelbrot fijando esta vez para los conjuntos de Julia una constante \(c=ix + jy + kz + w\), es decir, un cuaternio, 4 parámetros de libertad. También es posible visualizar el conjunto de Mandelbub, que es una generalización 3D del conjunto de Mandelbrot de orden 8, bastante más visual que el conjunto de Mandelbrot generalizado.
+        </p>
+        <p>
+          Recomendamos seleccionar la opción de visualizar conjuntos de Julia y modificar los parámetros de la constante \(c\), o abrir la página de <a href="2D-fractals.html" class="text-primary">fractales 2D</a> y comparar el conjunto de Mandelbrot 2D con el 3D y el conjunto de Mandelbrot con exponente \(m=8\) con el conjunto de Mandelbub.
+        </p>
+
+        <h3>Ray-Tracing</h3>
+        <p>
+          En este apartado se eligen parámetros que se relacionan directamente con el algoritmo utilizado para la visualización de la escena, no tanto con el fractal. Dividimos la sección en tres subapartados:
+        </p>
+        <h4>Posición actual (coordenadas cartesianas)</h4>
+        <p>
+          La escena está dotada de una cámara orbital que se mueve mirando siempre de forma fija al punto \((0,0,0)\), que es donde están fijados todos los fractales. Así, cada vez que se pulsan las flechas o las teclas '+/-' el movimiento se hace en la cámara orbital y en torno al punto origen. En este conjunto de parámetros se especifican las coordenadas cartesianas del punto en el cual se sitúa el observador en cada momento, pudiendo modificar la posición a nuestro gusto, pero siempre mirando al punto \((0,0,0)\).
+        </p>
+        <p>
+          Recomendamos modificar libremente estos valores para poder observar los fractales desde distintos puntos de vista.
+        </p>
+        <h4>Epsilon</h4>
+        <p>
+          Anteriormente, cuando hemos explicado Sphere-Tracing, hemos mencionado que si se detecta que un punto está a una distancia muy pequeña de la superficie de algún objeto, entonces se considera que pertenece a esa superficie. Denominamos \(\varepsilon\) a esa distancia, la cual damos en este apartado la posibilidad de parametrizar. En general, tomando \(\varepsilon=10^{-3}\) se obtienen resultados bastante buenos.
+        </p>
+        <p>
+          Obsérvese cómo cambian el suelo, los fractales y su nivel de detalle al variar el valor de \(\varepsilon\).
+        </p>
+        <p>
+          <strong>CUIDADO</strong>: Cuanto menor sea esta cantidad mayor será la precisión y mejor la aproximación, pero también implica más carga de trabajo, por lo que no recomendamos utilizar el valor más pequeño ofrecido (que es \(10^{-4}\)) en modo interactivo en comunión con SSAA con un alto número de rayos por píxel o con las sombras activadas.
+        </p>
+        <h4>Supersampling Antialiasing</h4>
+        <p>
+          Anteriormente hemos mencionado que se identifica cada píxel con un único punto del plano de proyección, pero esto suele provocar calidades bajas y bordes bruscos. Con este parámetro se permite identificar cada píxel con \(n^2\) puntos, lanzar un rayo hacia cada punto, calcular el color asociado a cada rayo y finalmente asignar al píxel el color promedio. De esta forma se visualizan los bordes más suavizados y se obtienen imágenes de mayor calidad. Esta técnica se conoce como Supersampling Antialiasing (SSAA).
+        </p>
+        <p>
+          Recomendamos activar simultáneamente las sombras arrojadas, activar el antialiasing con un número alto de rayos por píxel y redibujar, el cambio es fácilmente notable (este procesado es lento y costoso, no recomendable usar el modo interactivo).
+        </p>
+        <p>
+          <strong>CUIDADO</strong>: Esta operación es considerablemente más costosa que el visualizado estándar, por lo que recomendamos no abusar de la interactividad con un número alto de rayos por píxel si no se dispone de una gráfica suficientemente buena.
         </p>
 
         <h3>Modelo de iluminación</h3>
@@ -308,57 +336,6 @@
         </p>
         <p>
           <strong>CUIDADO</strong>: Arrojar sombras provoca un efecto muy realista pero también muy costoso, por lo que se recomienda no abusar del modo interactivo con las sombras activadas.
-        </p>
-
-        <h3>Supersampling Antialiasing</h3>
-        <p>
-          Anteriormente hemos mencionado que se identifica cada píxel con un único punto del plano de proyección, pero esto suele provocar calidades bajas y bordes bruscos. Con este parámetro se permite identificar cada píxel con \(n^2\) puntos, lanzar un rayo hacia cada punto, calcular el color asociado a cada rayo y finalmente asignar al píxel el color promedio. De esta forma se visualizan los bordes más suavizados y se obtienen imágenes de mayor calidad. Esta técnica se conoce como Supersampling Antialiasing (SSAA).
-        </p>
-        <p>
-          Recomendamos activar simultáneamente las sombras arrojadas, activar el antialiasing con un número alto de rayos por píxel y redibujar, el cambio es fácilmente notable (este procesado es lento y costoso, no recomendable usar el modo interactivo).
-        </p>
-        <p>
-          <strong>CUIDADO</strong>: Esta operación es considerablemente más costosa que el visualizado estándar, por lo que recomendamos no abusar de la interactividad con un número alto de rayos por píxel si no se dispone de una gráfica suficientemente buena.
-        </p>
-
-        <h3>Fractal que se visualiza</h3>
-        <p>
-          En la página de <a href="2D-fractals.html#ayuda2D" class="text-primary">fractales 2D</a> se explica la metodología para graficar conjuntos de Julia y Mandelbrot mediante iteración de números complejos. Para dar el salto a 3 dimensiones se utiliza una generalización de los complejos: los cuaternios, los cuales pueden identificarse con \(\mathbb R^4\), de forma que aquí representamos una proyección de los conjuntos de Julia y Mandelbrot 4-dimensionales en 3 dimensiones.
-        </p>
-        <p>
-          Se ofrece la posibilidad de elegir entre la visualización de los conjuntos de Julia y Mandelbrot fijando esta vez para los conjuntos de Julia una constante \(c=ix + jy + kz + w\), es decir, un cuaternio, 4 parámetros de libertad. También es posible visualizar el conjunto de Mandelbub, que es una generalización 3D del conjunto de Mandelbrot de orden 8, bastante más visual que el conjunto de Mandelbrot generalizado.
-        </p>
-        <p>
-          Recomendamos seleccionar la opción de visualizar conjuntos de Julia y modificar los parámetros de la constante \(c\), o abrir la página de <a href="2D-fractals.html" class="text-primary">fractales 2D</a> y comparar el conjunto de Mandelbrot 2D con el 3D y el conjunto de Mandelbrot con exponente \(m=8\) con el conjunto de Mandelbub.
-        </p>
-
-        <h3>Epsilon</h3>
-        <p>
-          Anteriormente, cuando hemos explicado Sphere-Tracing, hemos mencionado que si se detecta que un punto está a una distancia muy pequeña de la superficie de algún objeto, entonces se considera que pertenece a esa superficie. Denominamos \(\varepsilon\) a esa distancia, la cual damos en este apartado la posibilidad de parametrizar. En general, tomando \(\varepsilon=10^{-3}\) se obtienen resultados bastante buenos.
-        </p>
-        <p>
-          Obsérvese cómo cambian el suelo, los fractales y su nivel de detalle al variar el valor de \(\varepsilon\).
-        </p>
-        <p>
-          <strong>CUIDADO</strong>: Cuanto menor sea esta cantidad mayor será la precisión y mejor la aproximación, pero también implica más carga de trabajo, por lo que no recomendamos utilizar el valor más pequeño ofrecido (que es \(10^{-4}\)) en modo interactivo en comunión con SSAA con un alto número de rayos por píxel o con las sombras activadas.
-        </p>
-        
-        <h3>Posición actual (coordenadas cartesianas)</h3>
-        <p>
-          La escena está dotada de una cámara orbital que se mueve mirando siempre de forma fija al punto \((0,0,0)\), que es donde están fijados todos los fractales. Así, cada vez que se pulsan las flechas o las teclas '+/-' el movimiento se hace en la cámara orbital y en torno al punto origen. En este conjunto de parámetros se especifican las coordenadas cartesianas del punto en el cual se sitúa el observador en cada momento, pudiendo modificar la posición a nuestro gusto, pero siempre mirando al punto \((0,0,0)\).
-        </p>
-        <p>
-          Recomendamos modificar libremente estos valores para poder observar los fractales desde distintos puntos de vista.
-        </p>
-
-        <h3>Botón 'Reset'</h3>
-        <p>
-          Al pulsarlo se restablecen los parámetros a los iniciales, es decir, los que había al cargar la página por primera vez.  
-        </p>
-
-        <h3>Botón 'Redibujar'</h3>
-        <p>
-          Al pulsarlo se dibuja la escena con los valores que tengan los parámetros en el momento que se pulsa. Cada vez que se redibuja la escena, sea por este botón o porque esté activo el modo interactivo, se actualiza el 'tiempo de procesado', que especifica el tiempo en milisegundos que tarda en procesarse el frame.
         </p>
 
         <div class="row align-items-center">

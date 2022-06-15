@@ -47,23 +47,22 @@
       <section class="row">
         <div class="col-lg-8" id="canvas-wapper">
           <canvas class="container-fluid" id="glCanvas" width="1280" height="720"></canvas>
+          <div class="row justify-content-center">
+            <button type="button" class="btn-change col-4" id="botonReset">Reset</button>
+          </div>
         </div>
         
         <aside class="col-lg-4">
-          <h3>Controles:</h3>
-          <ul>
-            <li>Teclas +/-: Ampliar o reducir el zoom</li>
-            <li>Flechas: Desplazarse por el plano</li>
-          </ul>
+          
           
           <div class="accordion" id="accordionPanelsStayOpenExample">
             <div class="accordion-item">
-              <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                  <span class="fs-5 text">Fractal que se visualiza</span>
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <span class="fs-5 text">Parámetros del fractal</span>
                 </button>
               </h2>
-              <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
                   <div class="row">
                     <b class="col-6">¿Qué fractal quieres ver?</b>
@@ -90,7 +89,6 @@
                             <input type="number" class="col-3" id="valorJuliaY" min="-2" max="2" step="0.01"></input>
                         </div>
                     </div>
-                    
                   </div>
                   <br>
                   <b>Exponente \(m\) de la función</b> \(P_{c,m}(z) = z^m + c\)
@@ -108,53 +106,13 @@
             <div class="accordion-item">
               <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                  <span class="fs-5 text">Máximo de iteraciones \( M \)</span>
+                  <span class="fs-5 text">Algoritmo de visualización</span>
                 </button>
               </h2>
               <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
                 <div class="accordion-body">
-                  <div class="container" id="numIteraciones">
-                    <div class="row align-items-center justify-content-between">
-                      <b class="col-5">Número de iteraciones:</b>
-                      <input class="col-4" id="nIteraciones" type="range" min="10" max="1000" step="5">
-                      <input type="number" class="col-3" id="valorNIteraciones" min="10" max="1000" step="5"></input>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
-                  <span class="fs-5 text">Supersampling Antialiasing</span>
-                </button>
-              </h2>
-              <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
-                <div class="accordion-body">
-                  <div class="form-check form-switch" style="padding-left: 5.5em;">
-                    <input class="form-check-input" type="checkbox" id="antialiasing">
-                    <label class="form-check-label" for="antialiasing">Activar/desactivar</label>
-                  </div>
-                  <div class="container" id="deslizadorNSamples">
-                      <div class="row align-items-center justify-content-between">
-                          <b class="col-6">Rayos por píxel:</b>
-                          <input class="col-4" id="nSamples" type="range" min="1" max="4" step="1">
-                          <div class="col-2" id="valorNSamples"></div>
-                      </div>
-                  </div>  
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="panelsStayOpen-headingFour">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
-                  <span class="fs-5 text">Región del plano visualizada</span>
-                </button>
-              </h2>
-              <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingFour">
-                <div class="accordion-body">
+                  <h5>Región del plano visualizada</h5>
                   <b>Esquina inferior izquierda:</b>
                   <div class="row justify-content-around align-items-center">
                     <input class="col-3" id="LLCX" type="number" min="-10" max="10" step="0.1">
@@ -178,41 +136,79 @@
                       </div>
                     </div>
                   </div><br>
-                  
+
+                  <h5>Máximo de iteraciones \(M\)</h5>
+                  <div class="container" id="numIteraciones">
+                    <div class="row align-items-center justify-content-between">
+                      <b class="col-5">Número de iteraciones:</b>
+                      <input class="col-4" id="nIteraciones" type="range" min="10" max="1000" step="5">
+                      <input type="number" class="col-3" id="valorNIteraciones" min="10" max="1000" step="5"></input>
+                    </div>
+                  </div>
+                  <h5>Supersampling Antialiasing</h5>
+                  <div class="form-check form-switch" style="padding-left: 5.5em;">
+                    <input class="form-check-input" type="checkbox" id="antialiasing">
+                    <label class="form-check-label" for="antialiasing">Activar/desactivar</label>
+                  </div>
+                  <div class="container" id="deslizadorNSamples">
+                      <div class="row align-items-center justify-content-between">
+                          <b class="col-6">Rayos por píxel:</b>
+                          <input class="col-4" id="nSamples" type="range" min="1" max="4" step="1">
+                          <div class="col-2" id="valorNSamples"></div>
+                      </div>
+                  </div>  
                 </div>
               </div>
             </div>
+
           </div>
-          <button type="button" class="btn-change" id="botonReset">Reset</button>
+          
         </aside>
       </section>
       <section class="container">
+          <h2>Controles:</h2>
+          <ul>
+            <li>Teclas +/-: Ampliar o reducir el zoom</li>
+            <li>Flechas: Desplazarse por el plano</li>
+          </ul>
           <h2 id="ayuda2D">Ayuda</h2>
           <p>
-            En los siguientes párrafos se explica de forma intuitiva el significado y el efecto provocado por cada uno de los parámetros modificables del panel de la parte derecha. Previamente, introducimos unas pequeñas nociones sobre cómo se grafican los conjuntos de Julia y Mandelbrot.
+            En los siguientes párrafos se explica de forma intuitiva el significado y el efecto provocado por cada uno de los parámetros modificables. Previamente, introducimos unas pequeñas nociones sobre cómo se grafican los conjuntos de Julia y Mandelbrot.
           </p>
           <p>
             Partimos de la familia de funciones complejas \(P_{c,m}(z)=z^m + c\), siendo \(c\in\mathbb C\) un número complejo. A su vez, identificamos la pantalla con una región del plano complejo, asociando cada píxel de la pantalla a un número complejo. Para visualizar un conjunto de Julia, fijamos un número complejo \(c\in\mathbb C\), de forma que hay tantos conjuntos de Julia como números complejos, aunque los más interesantes son aquellos asociados a constantes \(c\) con módulo pequeño. Denotamos \(\mathcal J_{c,m}\) al conjunto de Julia asociado al complejo \(c\). 
           </p>
           <p>
-            Así, para cada punto \(z_0\in\mathbb C\) (es decir, para cada píxel) calculamos la sucesión de iteradas \(z_0, P_{c,m}(z_0), P_{c,m}(P_{c,m}(z_0)),\dots\). Es decir, la sucesión \(z_0, z_0^m + c, (z_0^m + c)^m +c, \dots\). Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(z_0\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color.
+            Así, para cada punto \(z_0\in\mathbb C\) (es decir, para cada píxel) calculamos la sucesión de iteradas \(z_0, P_{c,m}(z_0), P_{c,m}(P_{c,m}(z_0)),\dots\) Es decir, la sucesión \(z_0, z_0^m + c, (z_0^m + c)^m +c, \dots\) Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(z_0\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color.
           </p>
           <p>
-            De forma similar, para graficar el conjunto de Mandelbrot, \(\mathcal M_m\), tomamos \(z_0=0\) como primer término y para cada complejo \(c\in\mathbb C\) (es decir, para cada píxel) se calculan las iteradas \(0, P_{c,m}(0), P_{c,m}(P_{c,m}(0)),\dots\), es decir, \(0, c, c^m +c,\dots\). Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(c\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color. 
+            De forma similar, para graficar el conjunto de Mandelbrot, \(\mathcal M_m\), tomamos \(z_0=0\) como primer término y para cada complejo \(c\in\mathbb C\) (es decir, para cada píxel) se calculan las iteradas \(0, P_{c,m}(0), P_{c,m}(P_{c,m}(0)),\dots\), es decir, \(0, c, c^m +c,\dots\) Si esta sucesión no diverge después de un número máximo de iteraciones que llamamos \(M\), se colorea el píxel asociado a \(c\) de negro. Si después de \(M\) iteraciones la sucesión diverge (un término de la sucesión es grande), se colorea de algún color. 
           </p>
           <p>
             Tras esta introducción, presentamos el significado de cada parámetro:
           </p>
 
-          <h3 id="ayuda-fractal">Fractal que se visualiza</h3>
+          <h3>Botón 'Reset'</h3>
+          <p>
+          Al pulsarlo se restablecen los parámetros a los iniciales, es decir, los que había al cargar la página por primera vez.  
+          </p>
+
+          <h3 id="ayuda-fractal">Parámetros del fractal</h3>
           <p>
             Estos parámetros definen qué conjunto de Julia o Mandelbrot se visualiza. Podemos elegir entre qué conjuntos ver, si Julia o Mandelbrot, y en el caso de elegir que deseamos ver conjuntos de Julia, elegir qué constante \(c=x+i\cdot y\) fijar, pudiendo elegir la coordenada \(x\) y la coordenada \(y\). Ambos valores se permite que estén en el intervalo \([-2,2]\) por que fuera de esta región los conjuntos de Julia carecen de interés. También se puede elegir qué exponente \(m\) se fija en la función \(P_{c_m}(z)=z^{\mathbf m}+c\)
           </p>
           <p>
             Se recomienda variar los exponentes y visualizar el conjunto de Mandelbrot estándar \(\mathcal M\) correspondiente a \(m=2\) y sus generalizaciones a órdenes superiores \(\mathcal M_m\), o seleccionar conjuntos de Julia y variar los deslizadores de \(x\) e \(y\) e ir viendo cómo cambian los conjuntos de Julia al variar la constante \(c\)
           </p>
-
-          <h3>Máximo número de iteraciones \(M\)</h3>
+          <h3>Algoritmo de visualización</h3>
+          <p>
+              En esta sección se pueden variar los parámetros relacionados no tanto con el fractal que estemos visualizando sino con el algoritmo utilizado para graficarlo y la calidad de la imagen. Está subdividida a su vez en varios subapartados.
+          </p>
+          <h4 id="ayuda-region-plano">Región del plano visualizada</h4>
+          <p>
+            Definimos dos números complejos a los cuales llamaremos \(\mathrm{LLC}\) (Lower Left Corner) y \(\mathrm{URC}\) (Upper Right Corner) como los números complejos que se identifican con los puntos situados en la esquina inferior izquierda y la esquina superior derecha de la región del plano que se visualiza en la pantalla. Estos valores son modificables, de forma que nos permiten movernos libremente por el plano complejo y fijar una de las dos y cambiar la otra, pudiendo así mostrar la región del plano que deseemos (siempre que se mantengan la proporción 16:9). Estos parámetros representan una alternativa al uso de las flechas y las teclas '+/-' para movernos por la región del plano.
+          </p>
+          <h4>Máximo número de iteraciones \(M\)</h4>
           <p>
             Valor de \(M\), es decir, el número máximo de iteraciones que se dan antes de decidir si las sucesiones convergen o divergen. A mayor número, mayor coste computacional pero mayor precisión en la representación.
           </p>
@@ -222,8 +218,7 @@
           <p>
             <strong>CUIDADO:</strong> Un número alto de iteraciones por píxel aumenta considerablemente el coste computacional, por lo que no recomendamos abusar de la interactividad si no se dispone de una gráfica suficientemente buena.
           </p>
-
-          <h3>Supersampling Antialiasing</h3>
+          <h4>Supersampling Antialiasing</h4>
           <p>
             Anteriormente hemos mencionado que se identifica cada píxel con un único punto del plano, pero esto suele provocar calidades bajas y bordes bruscos. Con este parámetro se permite identificar cada píxel con \(n^2\) puntos, calcular el color asociado a cada punto y finalmente asignar al píxel el color promedio. De esta forma se visualizan los bordes más suavizados y se obtienen imágenes de mayor calidad. Esta técnica se conoce como Supersampling Antialiasing (SSAA).
           </p>
@@ -232,16 +227,6 @@
           </p>
           <p>
             <strong>CUIDADO:</strong> Esta operación es considerablemente más costosa que el visualizado estándar, por lo que recomendamos no abusar de la interactividad con un número alto de puntos por píxel si no se dispone de una gráfica suficientemente buena.
-          </p>
-
-          <h3 id="ayuda-region-plano">Región del plano visualizada</h3>
-          <p>
-            Definimos dos números complejos a los cuales llamaremos \(\mathrm{LLC}\) (Lower Left Corner) y \(\mathrm{URC}\) (Upper Right Corner) como los números complejos que se identifican con los puntos situados en la esquina inferior izquierda y la esquina superior derecha de la región del plano que se visualiza en la pantalla. Estos valores son modificables, de forma que nos permiten movernos libremente por el plano complejo y fijar una de las dos y cambiar la otra, pudiendo así mostrar la región del plano que deseemos (siempre que se mantengan la proporción 16:9). Estos parámetros representan una alternativa al uso de las flechas y las teclas '+/-' para movernos por la región del plano.
-          </p>
-
-          <h3>Botón 'Reset'</h3>
-          <p>
-          Al pulsarlo se restablecen los parámetros a los iniciales, es decir, los que había al cargar la página por primera vez.  
           </p>
 
           <div class="row align-items-center">
