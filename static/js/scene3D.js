@@ -84,17 +84,15 @@ class Scene3D extends Scene{
       }
     };
 
-    var initialLookfrom = [1.3, 0.5, -1.0];
-    //var initialLookfrom = [0.0,0.0,4.0];
+    var initialLookfrom = [-1.3, 0.5, 1.0];
 
     this.parameters = {
       lookfrom: initialLookfrom,
       lookat: [0.0, 0.0, 0.0],
       lookfromSpheric: cartesianToSpheric(initialLookfrom),
-      ke: [0.0, 0.0, 0.0, 1.0],
       ka: [0.0, 0.0, 0.0, 1.0],
-      kd: [0.84, 0.25, 0.25, 1.0],
-      ks: [0.37, 0.25, 0.57, 1.0],
+      kd: [0.43, 0.5, 0.32, 1.0],
+      ks: [0.65, 0.97, 0.17, 1.0],
       sh: 30.0,
       lightColor0: [1.0, 1.0, 1.0, 1.0],
       lightColor1: [1.0, 1.0, 1.0, 1.0],
@@ -171,10 +169,6 @@ class Scene3D extends Scene{
     gl.uniform3f(
         this.programInfo.uniformLocations.lookat,
         lookat[0], lookat[1], lookat[2]);
-
-    gl.uniform4f(
-      this.programInfo.uniformLocations.ke,
-      ke[0], ke[1], ke[2], ke[3]);
     gl.uniform4f(
       this.programInfo.uniformLocations.ka,
       ka[0], ka[1], ka[2], ka[3]);
