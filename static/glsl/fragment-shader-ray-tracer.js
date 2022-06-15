@@ -2,50 +2,68 @@ import { glsl } from './glsl.js';
 
 const fsSource = glsl`
 //
-// ────────────────────────────────────────────────────────────────────────────────
-//   :::::: F R A G M E N T   S H A D E R : :  :   :    :     :        :          :
-// ────────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────
+//   :::::: F R A G M E N T   S H A D E R   R A Y   T R A C E R : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────
 //
-
-#define MAX_DIST 100.0
 
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
-// ─── UNIFORM VARIABLES ──────────────────────────────────────────────────────────
+
+//
+// ─── VARIABLES UNIFORM ──────────────────────────────────────────────────────────
+//
+
+// Posicion del observador
 uniform vec3 u_lookfrom;
+// Punto hacia el que mira el observador
 uniform vec3 u_lookat;
-uniform vec4 u_ke;
+
+// Componente ambiental del material parametrizable
 uniform vec4 u_ka;
+// Componente difusa del material parametrizable
 uniform vec4 u_kd;
+// Componente especular del material parametrizable
 uniform vec4 u_ks;
+// Exponente de brillo del material parametrizable
 uniform float u_sh;
+
+// Intensidad (color) de la luz izquierda
 uniform vec4 u_lightColor0;
+// Intensidad (color) de la luz derecha
 uniform vec4 u_lightColor1;
+// Sombras arrojadas activadas/desactivadas
 uniform bvec3 u_shadows;
+// SSAA activado/desactivado
 uniform bool u_antialiasing;
+// Numero de rayos por pixel si u_antialiasing == true
 uniform int u_nSamples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 #define ARRAY_TAM 100
 #define PI 3.14159265359
+#define MAX_DIST 100.0
+
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
+
 // ─── DEGREES TO RADIANS ─────────────────────────────────────────────────────────
-// Transform an angle measure from degrees to radians
+// Transforma una medida de un angulo de grados a radianes
+
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
 }
 
 //
 // ─── RAY ────────────────────────────────────────────────────────────────────────
-// Struct that represents a Ray, defined by a point 'origin' and a vector 
-// 'direction'
+// Estructura que representa un rayo dado por su 'origen' y su 'direccion'
 struct Ray {
     vec3 orig;      // Ray's origin
     vec3 dir;       // Ray's direction
 };
+
 // ─── AT ─────────────────────────────────────────────────────────────────────────
-// Given a Ray, it returns the point given by origin + t * direction.    
+// Dado un rayo, devuelve el punto situado en r.orig + t*r.dir   
 vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
@@ -53,7 +71,8 @@ vec3 ray_at(Ray r, float t){
 
 //
 // ─── MATERIAL ───────────────────────────────────────────────────────────────────
-// Struct that defines a material RGB components.
+// Estructura definida por las componentes RGBA de un material y su exponente de 
+// brillo.
 struct Material {
     vec4 ka;    // Ambient component
     vec4 kd;    // Diffuse component
@@ -61,21 +80,13 @@ struct Material {
     float sh;   // Shiness
 };
 
-// Ground material
+// Material del suelo
 Material ground_material;
-
-
-//
-// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
-// Struct that defines a directional light source.
-struct Directional_light{
-    vec3 dir;   // Light direction
-    vec4 color; // Light RGB color
-};
 
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
-// Stores information about an intersection between a ray and a surface.
+// Almacena informacion sobre el impacto rayo-superficie
+
 struct Hit_record {
     vec3 p;         // Intersection point
     vec3 normal;    // Surface's normal at p point
@@ -84,19 +95,42 @@ struct Hit_record {
     Material mat;   // Material of the hit surface
 };
 
+//
+// ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
+// Estructura que define una fuente de luz direccional
+
+struct Directional_light{
+    vec3 dir;   // Light direction
+    vec4 color; // Light RGB color
+};
+
 // ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ────────────────────────────────────────────────────── I ──────────
+//   :::::: O B J E T O S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────
+//
+
+//
+// ──────────────────────────────────────────────────── II ──────────
+//   :::::: E S F E R A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────
+//
+
 //
 // ─── SPHERE ─────────────────────────────────────────────────────────────────────
-// Represents a sphere, defined by the center and the radius
+// Representa una esfera, definida por su centro, su radio y su material.
 struct Sphere{
     vec3 center;
     float radius;
     Material mat;
 };
+
 //
 // ─── HIT SPHERE ─────────────────────────────────────────────────────────────────
-// Calculates the intersection between a Ray and a Sphere and stores the hit
-// information in a Hit_record struct.
+// Calcula analiticamente la posible interseccion entre un rayo y una esfera y
+// almacena la informacion del impacto en una estructura 'Hit_record'
 Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     Hit_record result;
     vec3 oc = R.orig - S.center;
@@ -124,11 +158,12 @@ Hit_record hit_sphere(Sphere S, Ray R, float t_min, float t_max){
     result.mat = S.mat;
     return result;
 }
+
 //
 // ─── HIT SPHERES LIST ───────────────────────────────────────────────────────────
-// Given a list of spheres, calculates the possible intersection between a Ray and
-// and the spheres list. If any sphere is hit, stores the hit information in a
-// hit_record struct.
+// Dada una lista de esferas, calcula la posible interseccion entre un rayo y el
+// conjunto de esferas. Si el rayo golpea alguna esfera o varias, se almacena la
+// informacion del impacto mas cercano en una estructura Hit_record
 Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_min, float t_max){
     Hit_record result, tmp;
     float closest_t = t_max;
@@ -143,20 +178,27 @@ Hit_record hit_spheres_list(Sphere spheres[ARRAY_TAM], int size, Ray R, float t_
     return result;
 }
 // ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ────────────────────────────────────────────────── II ──────────
+//   :::::: P L A N O : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────
+//
+
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
-// A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the 
-// normal vector that defines the plane.
+// Un plano se define con una ecuacion Ax + By + Cz = D, donde (A, B, C) es el 
+// vector normal que define su direccion.
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
     Material mat;   // Plane material
 };
+
 //
 // ─── HIT PLANE ──────────────────────────────────────────────────────────────────
-// Calculates the possible intersection between a ray and a plane and stores the
-// information in a Hit_record struct.
-    
+// Calcula analiticamente la posible interseccion entre un rayo y un plano y
+// almacena la informacion del impacto en una estructura 'Hit_record'
 Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     Hit_record result;
     float oc = dot(P.normal, R.dir);
@@ -177,11 +219,17 @@ Hit_record hit_plane(Plane P, Ray R, float t_min, float t_max) {
     return result;
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+
 //
-// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
-// 
+// ──────────────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: M O D E L O   D E   I L U M I N A C I O N   D E   P H O N G : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+//
 
-
+//
+// ─── CONSTANTE DE VISIBILIDAD ───────────────────────────────────────────────────
+// Dada una fuente de luz, calcula si la luz incide o no sobre el punto p.    
 float light_is_visible(Directional_light light, vec3 p, Sphere world[ARRAY_TAM], int size) {
     Ray R;
     R.dir = normalize(light.dir);
@@ -192,6 +240,9 @@ float light_is_visible(Directional_light light, vec3 p, Sphere world[ARRAY_TAM],
     return hit_spheres_list(world, size, R, t, MAX_DIST).hit ? 0.0 : 1.0; 
 }
 
+//
+// ─── EVALUACION DEL MODELO DE ILUMINACION ───────────────────────────────────────
+//   
 vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr,
     Sphere world[ARRAY_TAM], int size ) {
     Material mat = hr.mat;
@@ -233,18 +284,27 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ──────────────────────────────────────────────────── I ──────────
+//   :::::: C A M A R A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────
+//
+
 //
 // ─── CAMERA ─────────────────────────────────────────────────────────────────────
-// Stores information about the camera and the rendered frame. 
+// Almacena informacion en coordenadas de mundo sobre la camara y el frame que
+// se visualiza.
 struct Camera{
     vec3 origin;                // Where the observer is located
     vec3 horizontal;            // Viewport width in WC
     vec3 vertical;              // Viewport height in WC
     vec3 lower_left_corner;     // Point in WC that is in the corner of the screen
 };
+
 //
 // ─── INIT CAMERA ────────────────────────────────────────────────────────────────
-// Initializes and returns a Camera given its parameters
+// Inicializa y devuelve una camara a partir de ciertos parametros
 Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
     Camera cam;
     float focal_length = 1.0;
@@ -263,21 +323,39 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     cam.lower_left_corner = cam.origin - cam.horizontal/float(2.0) - cam.vertical/float(2.0) - w;
     return cam;
 }
+
+//
+// ────────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C R E A C I O N   D E   R A Y O S   P R I M A R I O S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+//
+
 //
 // ─── GET RAY ────────────────────────────────────────────────────────────────────
-// Creates and returns a Ray where the origin is the observer's position and
-// the direction is a point of the rendered frame.
-    
+// Crea un rayo 'Ray' donde el origen es la posicion del observador y la el destino
+// viene dado por las coordenadas de dispositivo normalizadas [0,1] (s y t).
 Ray get_ray(Camera cam, float s, float t){
     Ray R;
     R.orig = cam.origin;
     R.dir = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical - cam.origin;
     return R;
 }
+
+
 // ────────────────────────────────────────────────────────────────────────────────
+
+//
+// ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C A L C U L O   D E   I N T E R S E C C I O N E S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────
+//
+
+
 //
 // ─── RAY COLOR ──────────────────────────────────────────────────────────────────
-// Given a ray and the full scene, calculates pixel's color.
+// Dado un rayo, los objetos que componen la escena y las fuentes de luz, calcula
+// la posible interseccion rayo-superficie y devuelve el color que se asignara a un
+// pixel.
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_light lights[ARRAY_TAM], int num_lights) {
     // r hits any sphere?
     float t_closest = MAX_DIST;
@@ -313,23 +391,29 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int size, Plane P, Directional_li
     float t = 0.5*(unit_direction.y + 1.0);
     return vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
 }
+
 // ────────────────────────────────────────────────────────────────────────────────
+
 //
-// ─── MAIN ───────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────── I ──────────
+//   :::::: M A I N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────
 //
 void main() {
     // IMAGE
     float aspect_ratio = 16.0/9.0;
     int image_width = 1280;
     int image_height = int(float(image_width) / aspect_ratio);
+
     // WORLD
-    // Material
+    // Material de las esferas
     Material mat;
     mat.ka = u_ka;
     mat.kd = u_kd;
     mat.ks = u_ks;
     mat.sh = u_sh;
 
+    // Material del suelo
     ground_material.ka = vec4(0.0, 0.0, 0.0, 1.0);
     ground_material.ks = vec4(0.0, 0.0, 0.0, 1.0);
     ground_material.sh = 1.0;
@@ -356,9 +440,8 @@ void main() {
     float vfov = 90.0; // Vertical field of view in degrees
     vec3 lookfrom = vec3(0.0, 0.0, 0.0), lookat = vec3(0.0, 0.0, -1.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
-    //Camera cam = init_camera(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, -1.0), vup, vfov, aspect_ratio);
     
-    // LIGHTING
+    // LIGHTS
     Directional_light lights[ARRAY_TAM];
     int num_lights = 2;
     Directional_light l0, l1;
@@ -370,8 +453,6 @@ void main() {
     
      
     // COLOR
-
-
     if(u_antialiasing) {
         // Antialiasing
 

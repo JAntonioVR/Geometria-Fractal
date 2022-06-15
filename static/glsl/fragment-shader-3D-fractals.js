@@ -2,34 +2,53 @@ import { glsl } from './glsl.js';
 
 const fsSource = glsl`
 //
-// ────────────────────────────────────────────────────────────────────────────────
-//   :::::: F R A G M E N T   S H A D E R : :  :   :    :     :        :          :
-// ────────────────────────────────────────────────────────────────────────────────
-//
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+//   :::::: F R A G M E N T   S H A D E R   3 D   F R A C T A L S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+// Codigo shader correspondiente a la visualizacion de fractales 3D
 
 // ─── PRECISION ──────────────────────────────────────────────────────────────────
     
 precision mediump float;
 
-// ─── UNIFORM VARIABLES ──────────────────────────────────────────────────────────
+//
+// ─── VARIABLES UNIFORM ──────────────────────────────────────────────────────────
+//
 
+// Posicion del observador
 uniform vec3 u_lookfrom;
+// Punto hacia el que mira el observador
 uniform vec3 u_lookat;
 
+// Componente ambiental del material parametrizable
 uniform vec4 u_ka;
+// Componente difusa del material parametrizable
 uniform vec4 u_kd;
+// Componente especular del material parametrizable
 uniform vec4 u_ks;
+// Exponente de brillo del material parametrizable
 uniform float u_sh;
 
+// Intensidad (color) de la luz izquierda
 uniform vec4 u_lightColor0;
+// Intensidad (color) de la luz derecha
 uniform vec4 u_lightColor1;
+// Sombras arrojadas activadas/desactivadas
 uniform bvec3 u_shadows;
 
+// Minima distancia por debajo de la cual se considera encontrada interseccion
 uniform float u_epsilon;
 
+// Fractal que se visualiza
+// 0: Mandelbub
+// 1: Julia
+// 2: Mandelbrot
 uniform int u_fractal;
+// Constante c de la ecuacion P(q) = q^2 + c
 uniform vec4 u_juliaSetConstant;
+// SSAA activado/desactivado
 uniform bool u_antialiasing;
+// Numero de rayos por pixel si u_antialiasing == true
 uniform int u_nSamples;
 
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
@@ -44,7 +63,7 @@ uniform int u_nSamples;
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 
 // ─── DEGREES TO RADIANS ─────────────────────────────────────────────────────────
-// Transform an angle measure from degrees to radians
+// Transforma una medida de un angulo de grados a radianes
 
 float degrees_to_radians(float degrees){
     return PI*degrees/float(180.0);
@@ -52,32 +71,39 @@ float degrees_to_radians(float degrees){
 
 //
 // ─── QUATERNION ─────────────────────────────────────────────────────────────────
-// Quaternion are represented by a 4-dimensional vector
+// Un cuaternio se representa mediante un elemento de tipo vec4
+// vec4 q --> q.x i + q.y j + q.z k + q.w
 
+//
+// ─── PRODUCTO DE CUATERNIOS ─────────────────────────────────────────────────────
+//    
 vec4 quat_mult(vec4 q1, vec4 q2) {
     vec3 xyz = cross(q1.xyz, q2.xyz) + q1.w*q2.xyz + q2.w*q1.xyz;
     float w = q1.w*q2.w - dot(q1.xyz,q2.xyz);
     return vec4(xyz, w);
 }
 
+//
+// ─── CUADRADO DE CUATERNIOS ─────────────────────────────────────────────────────
+//
 vec4 quat_square(vec4 q){
     vec3 xyz = 2.0*q.w*q.xyz;
     float w = q.w*q.w - dot(q.xyz, q.xyz);
     return vec4(xyz, w);
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+
 //
 // ─── RAY ────────────────────────────────────────────────────────────────────────
-// Struct that represents a Ray, defined by a point 'origin' and a vector 
-// 'direction'
-
+// Estructura que representa un rayo dado por su 'origen' y su 'direccion'
 struct Ray {
     vec3 orig;      // Ray's origin
     vec3 dir;       // Ray's direction
 };
 
 // ─── AT ─────────────────────────────────────────────────────────────────────────
-// Given a Ray, it returns the point given by origin + t * direction.    
+// Dado un rayo, devuelve el punto situado en r.orig + t*r.dir
 vec3 ray_at(Ray r, float t){
     return r.orig + t*r.dir;
 }
@@ -86,8 +112,8 @@ vec3 ray_at(Ray r, float t){
 
 //
 // ─── MATERIAL ───────────────────────────────────────────────────────────────────
-// Struct that defines a material RGB components.
-
+// Estructura definida por las componentes RGBA de un material y su exponente de 
+// brillo.
 struct Material {
     vec4 ka;    // Ambient component
     vec4 kd;    // Diffuse component
@@ -95,12 +121,14 @@ struct Material {
     float sh;   // Shiness
 };
 
-// Ground material
+// Materiales: el del suelo y el del fractal, inicializados en main
 Material ground_material, fractal_material;
+
+// ────────────────────────────────────────────────────────────────────────────────
 
 //
 // ─── HIT RECORD ─────────────────────────────────────────────────────────────────
-// Stores information about an intersection between a ray and a surface.
+// Almacena informacion sobre el impacto rayo-superficie
 
 struct Hit_record {
     vec3 p;         // Intersection point
@@ -112,34 +140,53 @@ struct Hit_record {
 
 //
 // ─── DIRECTIONAL LIGHT ──────────────────────────────────────────────────────────
-// Struct that defines a directional light source.
+// Estructura que define una fuente de luz direccional
+
 struct Directional_light{
     vec3 dir;   // Light direction
     vec4 color; // Light RGB color
 };
 
-
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
-// ─── SPHERE ─────────────────────────────────────────────────────────────────────
-// Represents a sphere, defined by the center and the radius
+// ────────────────────────────────────────────────────── I ──────────
+//   :::::: O B J E T O S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────
+//
 
+//
+// ──────────────────────────────────────────────────── II ──────────
+//   :::::: E S F E R A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────
+//
+
+//
+// ─── SPHERE ─────────────────────────────────────────────────────────────────────
+// Representa una esfera, definida por su centro, su radio y su material.
 struct Sphere{
     vec3 center;
     float radius;
     Material mat;
 };
 
-
+//
+// ─── SDF DE LA ESFERA ───────────────────────────────────────────────────────────
+//    
 float get_dist_sphere(vec3 p, Sphere S){
     return length(S.center - p) - S.radius;
 }
 
+//
+// ─── CALCULO DE LA NORMAL EN LA ESFERA ──────────────────────────────────────────
+//    
 vec3 calculate_normal_sphere(vec3 p, Sphere S) {
     return (p - S.center) / S.radius;
 }
 
+//
+// ─── RAYO GOLPEA ESFERA ─────────────────────────────────────────────────────────
+// Calcula analiticamente si un rayo interseca una esfera.
 bool hit_sphere_limits( Sphere S, Ray R ){
     vec3 oc = R.orig - S.center;
     float a = dot(R.dir,R.dir);
@@ -149,40 +196,51 @@ bool hit_sphere_limits( Sphere S, Ray R ){
     return discriminant >= 0.0;
 }
 
+//
+// ────────────────────────────────────────────────── II ──────────
+//   :::::: P L A N O : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────
+//
 
 //
 // ─── PLANE ──────────────────────────────────────────────────────────────────────
-// A plane is defined by an equation Ax + By + Cz = D, where (A, B, C) is the 
-// normal vector that defines the plane.
+// Un plano se define con una ecuacion Ax + By + Cz = D, donde (A, B, C) es el 
+// vector normal que define su direccion.
 struct Plane{
     vec3 normal;    // Normal vector to the plane
     float D;        // Independent term
     Material mat;   // Material of the plane
 };
 
+//
+// ─── SDF DEL PLANO ──────────────────────────────────────────────────────────────
+//
 float get_dist_plane (vec3 p, Plane P) {
     float t_interseccion = (P.D - dot(P.normal,p))/dot(P.normal, P.normal);
     vec3 closest_point = p + t_interseccion * P.normal;
     return length(p-closest_point);
 }
 
+//
+// ──────────────────────────────────────────────────────────────────────────── II ──────────
+//   :::::: C O N J U N T O S   D E   J U L I A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────
+//
 
 //
-// ─── JULIA ──────────────────────────────────────────────────────────────────────
-//
-
-
+// ─── ITERACION DE CUATERNIOS SEGUN JULIA ────────────────────────────────────────
+//    
 void iterate_julia(inout vec4 q, inout float dq, vec4 c) {
-
     for(int i = 0; i < 50; i++) {
         dq = 2.0 * length(q) * dq; 
         q = quat_square(q) + c;
         if(dot(q, q) > 64.0) break;
     }
-
 }
 
-// ANCHOR dist julia
+//
+// ─── SDF DE LOS CONJUNTOS DE JULIA ──────────────────────────────────────────────
+//    
 float get_dist_julia(vec3 p, vec4 c) {
     vec4 q = vec4(p.y, p.z, 0.0, p.x);
     float dq = 1.0;
@@ -191,7 +249,9 @@ float get_dist_julia(vec3 p, vec4 c) {
     return 0.5*length_q * log(length_q) / dq;
 }
 
-
+//
+// ─── CALCULO DE LA NORMAL EN CONJUNTOS DE JULIA ─────────────────────────────────
+//    
 vec3 calculate_normal_julia(vec3 p, vec4 c) {
     vec3 N;
     float h = u_epsilon;
@@ -225,9 +285,14 @@ vec3 calculate_normal_julia(vec3 p, vec4 c) {
 }
 
 //
-// ─── MANDELBROT ─────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────────── II ──────────
+//   :::::: C O N J U N T O   D E   M A N D E L B R O T : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────────────
 //
 
+//
+// ─── ITERACION DE CUATERNIOS SEGUN MANDELBROT ───────────────────────────────────
+//    
 void iterate_mandelbrot(inout vec4 q, inout float dq) {
 
     vec4 c = q;
@@ -241,6 +306,9 @@ void iterate_mandelbrot(inout vec4 q, inout float dq) {
 
 }
 
+//
+// ─── SDF DEL CONJUNTO DE MANDELBROT ─────────────────────────────────────────────
+//
 float get_dist_mandelbrot(vec3 p) {
     vec4 q = vec4(p.y, p.z, 0.0, p.x);
     float dq = 0.0;
@@ -249,6 +317,9 @@ float get_dist_mandelbrot(vec3 p) {
     return 0.5*length_q * log(length_q) / dq;
 }
 
+//
+// ─── CALCULO DE LA NORMAL EN EL CONJUNTO DE MANDELBROT ──────────────────────────
+//    
 vec3 calculate_normal_mandelbrot(vec3 p) {
     vec3 N;
     float h = u_epsilon;
@@ -283,22 +354,27 @@ vec3 calculate_normal_mandelbrot(vec3 p) {
 }
 
 //
-// ─── MANDELBUB ──────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────── II ──────────
+//   :::::: M A N D E L B U B : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────
 //
 
+//
+// ─── FUNCION ITERADA EN EL CONJUNTO DE MANDELBUB ────────────────────────────────
+//    
 vec3 f_Mandelbub(vec3 w, vec3 c) {
 
-    // extract polar coordinates
+    // Extraemos las coordenadas esfericas
     float wr = sqrt(dot(w,w));      // r
     float wo = acos(w.y/wr);        // phi
     float wi = atan(w.x,w.z);       // theta
 
-    // scale and rotate the point
+    // Se escala y rota el punto
     wr = pow( wr, 8.0 );
     wo = wo * 8.0;
     wi = wi * 8.0;
 
-    // convert back to cartesian coordinates
+    // Se devuelve a coordenadas cartesianas
     w.x = wr * sin(wo)*sin(wi);
     w.y = wr * cos(wo);
     w.z = wr * sin(wo)*cos(wi);
@@ -306,6 +382,9 @@ vec3 f_Mandelbub(vec3 w, vec3 c) {
     return c + w;
 }
 
+//
+// ─── ITERACION SEGUN MANDELBUB ──────────────────────────────────────────────────
+//    
 void iterate_mandelbub(inout vec3 w, inout float dw){
 
     float m;
@@ -319,6 +398,9 @@ void iterate_mandelbub(inout vec3 w, inout float dw){
     }
 }
 
+//
+// ─── SDF DE MANDELBUB ───────────────────────────────────────────────────────────
+//    
 float get_dist_mandelbub(vec3 p) {
     vec3 w = p;
     float dw = 1.0;
@@ -327,6 +409,9 @@ float get_dist_mandelbub(vec3 p) {
     return 0.5*length_w * log(length_w) / dw;
 }
 
+//
+// ─── CALCULO DE NORMALES EN EL CONJUNTO DE MANDELBUB ────────────────────────────
+//    
 vec3 calculate_normal_mandelbub(vec3 p) {
 
     vec3 N;
@@ -360,19 +445,23 @@ vec3 calculate_normal_mandelbub(vec3 p) {
     return N;
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+
 //
 // ─── BOUNDING SPHERE ────────────────────────────────────────────────────────────
 //    
 Sphere bounding_sphere;
 
 //
-// ─── PHONG LIGHTING MODEL ───────────────────────────────────────────────────────
-// 
+// ──────────────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: M O D E L O   D E   I L U M I N A C I O N   D E   P H O N G : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+//
 
-bool point_in_sphere(vec3 p, Sphere S) {
-    return abs(dot(p-S.center, p-S.center) - S.radius*S.radius) < u_epsilon;
-}
-
+//
+// ─── CONSTANTE DE VISIBILIDAD ───────────────────────────────────────────────────
+// Dada una fuente de luz, calcula si la luz incide en mayor o menor medida, o
+// si directamente no incide sobre el punto p.    
 float light_is_visible(Directional_light light, vec3 p) {
     Ray R;
     R.dir = normalize(light.dir);
@@ -389,21 +478,23 @@ float light_is_visible(Directional_light light, vec3 p) {
     for(int i = 0; i < MAX_STEPS; i++ ) {
         h = MAX_DIST;
         dist = MAX_DIST;
+/**/
         if(u_fractal == 1)
             h = get_dist_mandelbub(ray_at(R, t));
         if(u_fractal == 2)
             h = get_dist_julia(ray_at(R, t), u_juliaSetConstant);
         if(u_fractal == 3)
             h = get_dist_mandelbrot(ray_at(R,t));
-
-        /*
+/**/
+/*
         for(int i = 0; i < ARRAY_TAM; i++) {
             if(i == num_spheres) break;
             dist = get_dist_sphere(ray_at(R, t), world[i]);
             if(dist < h) {
                 h = dist;
             }
-        }*/
+        }
+*/
 
         if(h < u_epsilon)
             return 0.0;
@@ -415,6 +506,9 @@ float light_is_visible(Directional_light light, vec3 p) {
     return res;
 }
 
+//
+// ─── EVALUACION DEL MODELO DE ILUMINACION ───────────────────────────────────────
+//    
 vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_lights, Hit_record hr ){
     vec4 color_average = vec4(0.0, 0.0, 0.0, 1.0);
     Material mat = hr.mat;
@@ -456,9 +550,15 @@ vec4 evaluate_lighting_model( Directional_light lights[ARRAY_TAM], int num_light
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
-// ─── CAMERA ─────────────────────────────────────────────────────────────────────
-// Stores information about the camera and the rendered frame. 
+// ──────────────────────────────────────────────────── I ──────────
+//   :::::: C A M A R A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────
+//
 
+//
+// ─── CAMERA ─────────────────────────────────────────────────────────────────────
+// Almacena informacion en coordenadas de mundo sobre la camara y el frame que
+// se visualiza.
 struct Camera{
     vec3 origin;                // Where the observer is located
     vec3 horizontal;            // Viewport width in WC
@@ -468,8 +568,7 @@ struct Camera{
 
 //
 // ─── INIT CAMERA ────────────────────────────────────────────────────────────────
-// Initializes and returns a Camera given its parameters
-
+// Inicializa y devuelve una camara a partir de ciertos parametros
 Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect_ratio){
     Camera cam;
     float theta = degrees_to_radians(vfov);
@@ -489,6 +588,15 @@ Camera init_camera (vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspe
     return cam;
 }
 
+//
+// ────────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C R E A C I O N   D E   R A Y O S   P R I M A R I O S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+//
+
+//
+// ─── CREACION DE UN RAYO A PARTIR DE ORIGEN Y DESTINO ───────────────────────────
+//    
 Ray create_ray_origin_destiny(vec3 origin, vec3 destiny) {
     Ray R;
     R.orig = origin;
@@ -498,9 +606,8 @@ Ray create_ray_origin_destiny(vec3 origin, vec3 destiny) {
 
 //
 // ─── GET RAY ────────────────────────────────────────────────────────────────────
-// Creates and returns a Ray where the origin is the observer's position and
-// the direction is a point of the rendered frame.
-    
+// Crea un rayo 'Ray' donde el origen es la posicion del observador y la el destino
+// viene dado por las coordenadas de dispositivo normalizadas [0,1] (s y t).
 Ray get_ray(Camera cam, float s, float t){
     vec3 destiny = cam.lower_left_corner + s*cam.horizontal + t*cam.vertical;
     return create_ray_origin_destiny(cam.origin, destiny);
@@ -509,10 +616,24 @@ Ray get_ray(Camera cam, float s, float t){
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
-// ─── RAY COLOR ──────────────────────────────────────────────────────────────────
-// Given a ray and the full scene, calculates pixel's color.
+// ────────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C A L C U L O   D E   I N T E R S E C C I O N E S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────
+//
 
+
+//
+// ─── RAY COLOR ──────────────────────────────────────────────────────────────────
+// Dado un rayo, los objetos que componen la escena y las fuentes de luz, calcula
+// la posible interseccion rayo-superficie y devuelve el color que se asignara a un
+// pixel.
 vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Directional_light lights[ARRAY_TAM], int num_lights) {
+
+    // Aclaracion: Se mantiene el codigo de las implementaciones de Sphere-Tracing
+    // con esferas por si el lector desea modificarlo para que se visualice la 
+    // escena con esferas en lugar de fractales, tan solo tiene que descomentar
+    // el codigo que refiere a las esferas y comentar lo referente a los fractales
+    // 3D en esta funcion y en light_is_visible 
 
     Hit_record hr; hr.hit = false;
     float dist = MAX_DIST;
@@ -529,7 +650,8 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
     for(int i = 0; i < MAX_STEPS; i++) {
 
         closest_dist = MAX_DIST;
-/*
+
+/*        // Esferas
         for(int i = 0; i < ARRAY_TAM; i++) {
             if(i == num_spheres) break;
             dist = get_dist_sphere(p, world[i]);
@@ -545,6 +667,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
             closest_dist = dist;
             object_index = 0;
         }
+/**/
         if(hits_bounding_sphere) {
 
             if(u_fractal == 1)      // Render Mandelbub
@@ -559,11 +682,8 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
                 closest_dist = dist;
                 object_index = u_fractal;
             }
-            
+/**/       
         }
-
-        
-
         if(closest_dist < u_epsilon){   // Hay interseccion
 
             hr.hit = true;
@@ -594,9 +714,10 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
                 hr.normal = calculate_normal_sphere(hr.p, S_hit);
                 hr.mat = fractal_material;
                 return evaluate_lighting_model(lights, num_lights, hr, world, num_spheres);
-            }*/
-
-           hr.mat = fractal_material; // TODO Crear un material
+            }
+*/
+/**/
+           hr.mat = fractal_material;
 
             if(object_index == 1)     // r hits Mandelbub
                 hr.normal = calculate_normal_mandelbub(hr.p);
@@ -608,6 +729,7 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
                 hr.normal = calculate_normal_mandelbrot(hr.p);
 
             return evaluate_lighting_model(lights, num_lights, hr);
+/**/
         }
 
         current_t += closest_dist;
@@ -629,9 +751,10 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
-// ─── MAIN ───────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────── I ──────────
+//   :::::: M A I N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────
 //
-
 void main() {
     // IMAGE
     float aspect_ratio = float(16.0) / float(9.0);
@@ -681,7 +804,7 @@ void main() {
     vec3 lookfrom = vec3(0.0,0.0, 2.0);
     Camera cam = init_camera(u_lookfrom, u_lookat, vup, vfov, aspect_ratio);
 
-
+    // LIGHTS
     Directional_light lights[ARRAY_TAM];
     int num_lights = 3;
     Directional_light l0, l1, l2;
@@ -695,7 +818,6 @@ void main() {
     lights[0] = l0; lights[1] = l1; lights[2] = l2;
     
     // COLOR
-    
     if(u_antialiasing) {
         // Antialiasing
 

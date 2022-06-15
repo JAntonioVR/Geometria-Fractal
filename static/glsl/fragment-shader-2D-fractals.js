@@ -3,40 +3,65 @@ import { glsl } from './glsl.js';
 const fsSource = glsl`
 
 //
-// ─── CODIGO DEL FRAGMENT SHADER ─────────────────────────────────────────────────
-//
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+//   :::::: F R A G M E N T   S H A D E R   2 D   F R A C T A L S : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────
+// Codigo shader correspondiente a la visualizacion de fractales 2D
 
-/* Fragment shader that renders Mandelbrot set */
+// ─── PRECISION ──────────────────────────────────────────────────────────────────
+
 precision mediump float;
 
-/* Point on the complex plane that will be mapped to the center of the screen */
+//
+// ─── VARIABLES UNIFORM ──────────────────────────────────────────────────────────
+//
+
+// Punto del plano complejo que se situara en el centro de la pantalla (x_0, y_0)
 uniform vec2 u_zoomCenter;
 
-/* Distance between left and right edges of the screen. This essentially specifies
-   which points on the plane are mapped to left and right edges of the screen.
-  Together, u_zoomCenter and u_zoomSize determine which piece of the complex
-   plane is displayed. */
+// Constante de zoom \lambda.
 uniform float u_zoomSize;
 
-/* How many iterations to do before deciding that a point is in the set. */
+// Numero de iteraciones hasta decidir que puntos son prisioneros o de escape
 uniform int u_maxIterations;
 
-/* Fixed c value in Julia set Equation z^n + c */
+// Valor fijo c en la ecuacion P(z) = z^m + c
 uniform vec2 u_juliaSetConstant;
 
-/* Fixed n value in Julia/Mandelbrot set Equation */
+// Valor fijo m en la ecuacion P(z) = z^m + c
 uniform int u_order;
 
-/* Render Mandelbrot or Julia set */
+// Visualizar conjunto de Julia o de Mandelbrot
 uniform int u_fractal;
 
-/* Antialiasing */
+// Antialiasing
 uniform bool u_antialiasing;
 uniform int u_nSamples;
 
 float r = 16.0/9.0; // Ratio r = width/height
 int viewportWidth = 1280,   // Canvas width (pixels)
     viewportHeight = 720;   // Canvas height (pixels)
+
+//
+// ─── CALCULAR COORDENADAS DE MUNDO ──────────────────────────────────────────────
+// Calcula la (o las si se aplica SSAA) coordenada de mundo que corresponde a un
+// pixel
+vec2 get_world_coordinates(int i, int nSamples) {
+
+  float hw = 1.0 / (float(viewportWidth * nSamples)),
+        hh = 1.0 / (float(viewportHeight * nSamples));
+
+  float height = 4.0,
+        width = float(r)*height;
+
+  int x =  i/nSamples;
+  int y =  i - nSamples*x;
+
+  vec2 uv = (gl_FragCoord.xy) / vec2(float(viewportWidth), float(viewportHeight));
+  float u = uv.x + float(x) * hw + 0.5 * hw,
+        v = uv.y + float(y) * hh + 0.5 * hh;
+  return u_zoomCenter + u_zoomSize * vec2(u*width-width/2.0, v*height-height/2.0);
+}
 
 //
 // ─── COMPLEX POW ────────────────────────────────────────────────────────────────
@@ -59,15 +84,13 @@ vec2 complex_pow(vec2 z, int n) {
 //  vec2 c: Constante c de la función z^n +c
 //  int n:  Exponente al que se eleva la variable
 // Devuelve: Una variable vec2 resultado de la operación z^n+c
-
 vec2 P(vec2 z, vec2 c, int n) {
 	return complex_pow(z,n) + c;
 }
 
-/*vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
-  return a + b*cos( 6.28318*(c*t+d) );
-}*/
-
+//
+// ─── PALETA DE COLORES ──────────────────────────────────────────────────────────
+//
 vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
   float x = 1.0 / 3.0;
   if (t < x) return mix(c1, c2, t/x);
@@ -76,24 +99,11 @@ vec3 palette(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
   return c4;
 }
 
-// Decide which point on the complex plane this fragment corresponds to.
-vec2 get_world_coordinates(int i, int nSamples) {
 
-  float hw = 1.0 / (float(viewportWidth * nSamples)),
-        hh = 1.0 / (float(viewportHeight * nSamples));
 
-  float height = 4.0,
-        width = float(r)*height;
-
-  int x =  i/nSamples;
-  int y =  i - nSamples*x;
-
-  vec2 uv = (gl_FragCoord.xy) / vec2(float(viewportWidth), float(viewportHeight));
-  float u = uv.x + float(x) * hw + 0.5 * hw,
-        v = uv.y + float(y) * hh + 0.5 * hh;
-  return u_zoomCenter + u_zoomSize * vec2(u*width-width/2.0, v*height-height/2.0);
-}
-
+//
+// ─── CALCULAR EL COLOR DEL PIXEL ────────────────────────────────────────────────
+//
 vec4 computePixelColor(bool escaped, int iterations) {
     return escaped ? vec4(palette(
       float(iterations)/ float(u_maxIterations),
@@ -106,6 +116,16 @@ vec4 computePixelColor(bool escaped, int iterations) {
       1.0) : vec4(vec3(0.0,0.0,0.0), 1.0);
 }
 
+
+//
+// ──────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C O N J U N T O S   D E   J U L I A : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────────────
+//
+
+//
+// ─── ITERACION SEGUN JULIA ──────────────────────────────────────────────────────
+//
 void iterateJulia(vec2 z0, vec2 c, int n, out bool escaped, out int iterations) {
   vec2 z = z0;
   escaped = false;
@@ -120,6 +140,10 @@ void iterateJulia(vec2 z0, vec2 c, int n, out bool escaped, out int iterations) 
   }
 }
 
+//
+// ─── CALCULO DEL COLOR PARA JULIA ───────────────────────────────────────────────
+// Calcula las coordenadas de mundo de cada pixel, las itera y devuelve el color
+// calculado
 vec4 Julia(vec2 c, int n) {
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
   int nSamples = u_antialiasing ? u_nSamples : 1;
@@ -136,6 +160,15 @@ vec4 Julia(vec2 c, int n) {
   return sum_colors/float(nSamples*nSamples);
 }
 
+//
+// ────────────────────────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: C O N J U N T O S   D E   M A N D E L B R O T : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+//
+
+//
+// ─── ITERACION SEGUN MANDELBROT ─────────────────────────────────────────────────
+//
 void iterateMandelbrot(vec2 c, int n, out bool escaped, out int iterations) {
   vec2 z = vec2(0.0);
   escaped = false;
@@ -150,6 +183,10 @@ void iterateMandelbrot(vec2 c, int n, out bool escaped, out int iterations) {
   }
 }
 
+//
+// ─── CALCULO DEL COLOR PARA MANDELBROT ──────────────────────────────────────────
+// Calcula las coordenadas de mundo de cada pixel, las itera y devuelve el color
+// calculado
 vec4 Mandelbrot(int n) {
 
   vec4 sum_colors = vec4(0.0, 0.0, 0.0, 1.0);
@@ -167,6 +204,11 @@ vec4 Mandelbrot(int n) {
     return sum_colors/float(nSamples*nSamples);
 }
 
+//
+// ──────────────────────────────────────────────── I ──────────
+//   :::::: M A I N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────
+//
 void main() {
   vec4 color;
   if(u_fractal == 0){
