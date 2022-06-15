@@ -9,10 +9,10 @@
 // Escena 3D
 import { Scene3D } from "./scene3D.js";
 // Vertex shader
-import { vsSource } from "../glsl/shader-wgl-vertex.js";
+import { vsSource } from "../glsl/vertex-shader.js";
 // Fragment shader
-import { fsSource } from "../glsl/shader-mandelbub-fragment.js";
-//import { fsSource } from "../glsl/shader-ray-tracer-fragment.js";
+import { fsSource } from "../glsl/fragment-shader-3D-fractals.js";
+//import { fsSource } from "../glsl/fragment-shader-ray-tracer.js";
 // Utils
 import { hexToRgb, rgbToHex } from "./utils.js";
 

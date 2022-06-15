@@ -10,9 +10,9 @@
 // Escena 2D
 import { Scene2D } from "./scene2D.js";
 // Vertex shader
-import { vsSource } from "../glsl/shader-wgl-vertex.js";
+import { vsSource } from "../glsl/vertex-shader.js";
 // Fragment shader
-import { fsSource } from "../glsl/shader-wgl-fragment.js";
+import { fsSource } from "../glsl/fragment-shader-2D-fractals.js";
 
 //
 // ─── ESCENA 2D ──────────────────────────────────────────────────────────────────
