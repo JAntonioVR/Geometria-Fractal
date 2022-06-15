@@ -545,7 +545,6 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
             closest_dist = dist;
             object_index = 0;
         }
-
         if(hits_bounding_sphere) {
 
             if(u_fractal == 1)      // Render Mandelbub
@@ -621,7 +620,6 @@ vec4 ray_color(Ray r, Sphere world[ARRAY_TAM], int num_spheres, Plane ground, Di
     vec3 unit_direction = normalize(r.dir);
     float t = 0.5*(unit_direction.y + 1.0);
     tmp_color = vec4((1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0), 1.0);
-    
     
     return tmp_color;
 
