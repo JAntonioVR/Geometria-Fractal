@@ -2,7 +2,7 @@
 % ─── CAPITULO 8: INTRODUCCION AL RAY TRACING ────────────────────────────────────
 %
 
-En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente generar fractales tridimensionales. El código del fragment shader que se emplea en este capítulo se puede encontrar en el fichero \verb|fragment-shader-ray-tracer.js|, que se puede encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/glsl/fragment-shader-ray-tracer.js}.
+En los anteriores capítulos hemos visto cómo asignar colores a los píxeles utilizando el fragment shader y cómo dibujar hermosos fractales en la superficie que ocupan dos triángulos. Sin embargo, no hemos podido movernos de las dos dimensiones. Esto se debe a la dificultad que de por sí supone que en 2D un píxel puede representar un único punto del plano mientras que en 3D un píxel representa infinitos puntos del espacio. Nuestro objetivo ahora es poder visualizar escenas simples en 3D para posteriormente generar fractales tridimensionales. El código del fragment shader que se emplea en este capítulo se puede encontrar en el fichero \verb|static/glsl/fragment-shader-ray-tracer.js|, también disponible en \url{https://github.com/JAntonioVR/Geometria-Fractal/blob/main/static/glsl/fragment-shader-ray-tracer.js}.
 
 \section{Definición de Ray-Tracing}
 
@@ -236,7 +236,7 @@ Y de esta forma el fragment shader obtiene un rayo por cada píxel que tiene com
 
 Una vez tenemos creado el rayo asignado a un píxel debemos asignar un color. La función que dado un rayo $R$ devuelve el color del cual colorearemos el píxel la llamaremos \verb|ray_color|. Esta función se verá sometida a muchos cambios, sobre todo en sus argumentos dependiendo de los elementos que compongan la escena, pero de momento asumimos una escena vacía. Que la escena esté vacía supone que ningún rayo interseca ninguna superficie, pero independientemente de ello hay que asignar un color al píxel. Esta asignación de color a un rayo que no interseca ninguna superficie determina el fondo (\textit{background}) de la escena, y esta decisión que tomaremos ahora sobre cómo colorear el fondo nos acompañará durante el resto del desarrollo. 
 
-En concreto, hemos decidido simular algo parecido al cielo mediante un degradado vertical de un \textcolor{background-blue}{azul} \texttt{rgb(127, 178, 255)} a blanco \texttt{rgb(255, 255, 255)}, definiendo el color a partir de la componente $y$ del vector director normalizado. Mostramos el código correspondiente también para clarificar esta descripción.
+En concreto, hemos decidido simular algo parecido al cielo mediante un degradado vertical de un azul \texttt{rgb(127, 178, 255)} a blanco \texttt{rgb(255, 255, 255)}, definiendo el color a partir de la componente $y$ del vector director normalizado. Mostramos el código correspondiente también para clarificar esta descripción.
 
 \begin{lstlisting}
 vec4 ray_color(Ray R) {
@@ -1120,6 +1120,8 @@ Evidentemente todos estos parámetros se pueden modificar y poner los que queram
     \label{fig:phong-final}
 \end{figure}
 
+\newpage
+
 \section{SSAA en Ray-Tracing}
 
 En el capítulo \ref{chap:fractales-2D}, y concretamente en la sección \ref{section:SSAA-2D} mostramos la posibilidad de utilizar más de un punto del plano por píxel, calcular el color asociado a cada uno y asignar un valor promedio a \verb|gl_FragColor|. Esta modificación producía imágenes y bordes más suavizados, con un nivel más alto de realismo. En 3D, esta técnica es igualmente aplicable y necesaria de hecho, fíjese por ejemplo en la imagen \ref{fig:no-antialiasing-3D}, en la cual se aprecian las irregularidades en los bordes de las fichas negras y blancas y a distancias mayores la textura se distorsiona bastante.
@@ -1201,6 +1203,8 @@ void main() {
     }
 }   
 \end{lstlisting}
+
+\newpage
 
 Para terminar esta exposición y este capítulo mostraremos una última imagen que resume todo lo desarrollado: Ray-Tracing, intersecciones con distintos cuerpos, posicionamiento de cámara, iluminación, sombras y SSAA.
 

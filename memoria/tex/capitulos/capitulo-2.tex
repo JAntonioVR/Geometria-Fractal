@@ -4,6 +4,8 @@
 
 Como hemos podido comprobar en el capítulo anterior, muchos de los fractales clásicos son generados repitiendo indefinidamente un proceso. Iteración es el proceso de repetir una y otra vez un método, ocasionalmente sobre el resultado de la aplicación anterior. Este procedimiento es muy útil en muchas disciplinas matemáticas. Por ejemplo, existen métodos numéricos basados en la iteración como el método de \textit{Jacobi} y \textit{Gauss-Seidel} para resolución de sistemas de ecuaciones lineales, el método de \textit{Newton-Raphson} para encontrar soluciones de ecuaciones, el método de \textit{Runge-Kutta} para resolución numérica de ecuaciones diferenciales, etc. Incluso en otras disciplinas como el aprendizaje automático los algoritmos de \textit{K-Means} para ``clustering'' o los métodos de generación de árboles de decisión en problemas de clasificación hacen uso de procesos iterativos. Esta metodología aplicada sobre el plano complejo y sobre ciertas funciones complejas será la que nos proporcionará nuestros primeros ejemplos de imágenes fractales.
 
+Dichas imágenes han sido generadas mediante el uso del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1). Los códigos completos que generan las imágenes fractales que se observan en este y en los dos capítulos siguientes se pueden encontrar en el repositorio de GitHub del proyecto mediante la URL \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Mathematica} o en el directorio \texttt{Mathematica} del material entregado.
+
 \section{Iteración de funciones}
 \begin{definicion}
     Consideramos una función $f:\C\longrightarrow\C$ y un punto $z\in\C$. La aplicación sucesiva de $f$ a $z$ -- \textit{i.e.}, $z,f(z),f(f(z)), f(f(f(z))),\dots$ -- produce las \textbf{iteradas} de la función $f$ en el punto $z$. Al conjunto de dichas iteradas se le denomina \textbf{órbita} $O_f(z)$ de $f$ en $z$.
@@ -13,7 +15,7 @@ Como hemos podido comprobar en el capítulo anterior, muchos de los fractales cl
     donde $f^n$ denota a $f\circ f^{n-1}$.
 \end{definicion}
 
-Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software \textcolor{blue}{\href{https://www.wolfram.com/mathematica/}{Mathematica®}} en su versión 12 (concretamente la versión 12.1)\footnote{Los códigos completos que generan las imágenes fractales creadas con Mathematica que se observan en este documento se pueden encontrar en \url{https://github.com/JAntonioVR/Geometria-Fractal/tree/main/Mathematica}.}. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
+Lo siguiente es plantearse la posible convergencia de la sucesión $\{f^n(z)\}$. Para ello, y a partir de este momento nos ayudaremos del software Mathematica. El comando \verb|NestList[f,z,n]| itera una función \verb|f|, comenzando en el punto \verb|z| un total de \verb|n| veces y devuelve una lista con los \verb|n| valores. 
 
 Para intuir qué ocurre a largo plazo podemos iterar un número grande de veces, fijémonos lo que ocurre si utilizamos $f(z):=z^2$ comenzando por $z_0=0.9$.
 

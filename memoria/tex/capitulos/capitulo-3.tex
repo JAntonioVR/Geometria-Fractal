@@ -144,7 +144,7 @@ Para graficar un conjunto de Julia podemos asignar un color fijo a los puntos pr
   \end{algorithmic}
 \end{algorithm}
 
-Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathcal{J}_{-0.12+0.75i}$ utilizaríamos el siguiente código:
+Por ejemplo, si queremos representar en \textit{Mathematica} el conjunto de la figura \ref{fig:julia-intro} (a), que era $\mathcal{J}_{-0.12+0.75i}$ utilizaríamos el código situado debajo del algoritmo \ref{alg:Julia}.
 
 \begin{mmaCell}{Code}
   M = 50;
@@ -255,7 +255,7 @@ donde $D(z,r)$ denota el disco abierto de centro $z$ y radio $r$ mientras que $\
 
 Además, en el momento que una iterada se sitúe fuera de $\bar D(0,2)$, podemos asegurar que esa sucesión va a diverger, por lo que podemos dejar de iterar. Para concluir que la sucesión no diverge, al igual que para graficar conjuntos de Julia, fijamos un número máximo de iteraciones $M\in\N$, de forma que si al calcular la $M$-ésima iterada el módulo del elemento $P_c^{M}(0)$ no ha excedido a $2$, podemos considerar que el número $c$ pertenece a $\mathcal{M}$. En conclusión, el algoritmo consiste en, para cada píxel identificado con un punto del plano complejo $c\in\C$, calcular sus iteradas hasta un máximo de $M$ iteraciones, en caso de exceder en módulo a $2$ guardamos el mínimo valor $m\in\N$ tal que $|P_c^m(0)|>2$ y asignamos un color en función; en caso de no exceder a $2$ asignar un color fijo. Presentamos por tanto en el algoritmo \ref{alg:Mandelbrot} el procedimiento para graficar el conjunto de Mandelbrot. 
 
-\begin{algorithm}[H]
+\begin{algorithm}[!]
   \caption{Conjunto de Mandelbrot} \label{alg:Mandelbrot}
   \begin{algorithmic}
   \State Para cada $c\in\C$:
@@ -317,14 +317,17 @@ Recordemos el conjunto de Julia $\mathcal{J}_{-0.23+0.65}$, que podemos ver en l
 
 Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente iguales, pudiendo ver así una de las regiones autosimilares de $\mathcal{J}_{-0.23+0.65}$. En las imágenes \ref{fig:mas-detalles-julia} podemos ver algunas regiones ampliadas de ciertos conjuntos de Julia, pudiendo observar regiones autosimilares.
 
-\newpage
-
-\vspace{\fill}
 
 \begin{figure}[ht]
-  \begin{tabular}{ccc}
-    \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-1.png} &   \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-2.png} &   \includegraphics[width=4.5cm]{./img/C3/julia-autosimilar-3.png} \\
-  (a) $[-0.2,1.5]\times[-1.2,0.5]$ & (b) $[0.6,1.4]\times[-0.9,-0.1]$ & (c) $[1.05,1.35]\times[-0.65,-0.35]$ \\[6pt]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=6cm]{./img/C3/julia-autosimilar-1.png} &   \includegraphics[width=6cm]{./img/C3/julia-autosimilar-2.png} \\
+  (a) $[-0.2,1.5]\times[-1.2,0.5]$ & (b) $[0.6,1.4]\times[-0.9,-0.1]$ \\[6pt]
+  \end{tabular}
+  
+  \centering\begin{tabular}{c}
+    \includegraphics[width=6.5cm]{./img/C3/julia-autosimilar-3.png} \\
+    (c) $[1.05,1.35]\times[-0.65,-0.35]$ \\[6pt]
   \end{tabular}
   \caption{Diferentes regiones ampliadas de la figura \ref{fig:julia-explicados} (b)}
   \label{fig:detalles-julia}
@@ -333,9 +336,9 @@ Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente igu
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[width=5cm]{./img/C3/julia-autosimilar-4.png} &   \includegraphics[width=5cm]{./img/C3/julia-autosimilar-5.png} \\
+    \includegraphics[width=7cm]{./img/C3/julia-autosimilar-4.png} &   \includegraphics[width=7cm]{./img/C3/julia-autosimilar-5.png} \\
   (a) $\mathcal{J}_{0.33-0.41 i}$ en $[-1,-0.3]\times[-1.1,-0.4]$ & (b) $\mathcal{J}_{0.48-0.13 i}$ en $[-0.6,-0.1]\times[0.25,0.75]$ \\[6pt]
-  \includegraphics[width=5cm]{./img/C3/julia-autosimilar-6.png} &   \includegraphics[width=5cm]{./img/C3/julia-autosimilar-7.png} \\
+  \includegraphics[width=7cm]{./img/C3/julia-autosimilar-6.png} &   \includegraphics[width=7cm]{./img/C3/julia-autosimilar-7.png} \\
   (c) $\mathcal{J}_{0.23+0.51i}$ en $[-1.1,-0.4]\times[0.4,1.1]$ & (d) $\mathcal{J}_{-0.52+0.51 i}$ en $[0,1.5]\times[-1,0.5]$ \\[6pt]
   \end{tabular}
   \caption{Detalles autosimilares de algunos conjuntos de Julia}
@@ -348,19 +351,30 @@ Obsérvese cómo efectivamente las imágenes, salvo giro, son prácticamente igu
 
 El conjunto de Mandelbrot, el cual ya conocemos, está compuesto fundamentalmente de un cuerpo principal con forma de cardioide con gran cantidad de bulbos adosados al mismo (imagen \ref{fig:detalles-mandelbrot} (a), (b) y (d)), siendo cada uno de estos autosimilar y terminando en una antena que se bifurca (imagen \ref{fig:detalles-mandelbrot} (b) y (c)). Además, en el propio $\mathcal{M}$ hay minúsculas copias de sí mismo, en las cuales se vuelve a repetir su estructura (imagen \ref{fig:detalles-mandelbrot} (c)).
 
+
+
+En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación del que se conoce como `bulbo principal', pues es el más grande de todos los que están pegados al cuerpo principal. Podemos comprobar, observando los detalles que ofrecen las imágenes \ref{fig:detalles-bulbo}, que dicho bulbo muestra autosimilaridad.
+
+
+\newpage
+
+\vspace*{\fill}
 \begin{figure}[ht]
   \centering
   \begin{tabular}{cc}
-    \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-1.png} &   \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-2.png} \\
+    \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-1.png} &   \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-2.png} \\
   (a) $[-1,-0.5]\times[0,0.5]$ & (b) $[-1.5,-1.2]\times[-0.15,0.15]$ \\[6pt]
-  \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-3.png} &   \includegraphics[width=5cm]{./img/C3/mandelbrot-autosimilar-4.png} \\
+  \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-3.png} &   \includegraphics[width=7cm]{./img/C3/mandelbrot-autosimilar-4.png} \\
   (c) $[-0.2,0]\times[-1.1,-0.9]$ & (d) $[-0.9,0.3]\times[-1,0.2]$ \\[6pt]
   \end{tabular}
   \caption{Detalles autosimilares de $\mathcal{M}$}
   \label{fig:detalles-mandelbrot}
 \end{figure}
 
-En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación del que se conoce como `bulbo principal', pues es el más grande de todos los que están pegados al cuerpo principal. Podemos comprobar, observando los detalles que ofrecen las imágenes \ref{fig:detalles-bulbo}, que dicho bulbo muestra autosimilaridad.
+\vspace*{\fill}
+
+\newpage
+
 
 \begin{figure}[ht]
   \centering
@@ -371,6 +385,9 @@ En la imagen \ref{fig:detalles-mandelbrot} (b) podemos ver una representación d
   \caption{Ampliaciones del bulbo principal de $\mathcal{M}$}
   \label{fig:detalles-bulbo}
 \end{figure}
+
+
+
 
 \section{Conjuntos de Julia y Mandelbrot generalizados}
 
@@ -409,9 +426,8 @@ De esta forma, podemos hablar por tanto de conjuntos de Mandelbrot generalizados
 
 Obsérvese que a pesar de encontrar cierta similaridad en la formas de los distintos conjuntos de Mandelbrot generalizados, podemos determinar puntos que para unos exponentes se encuentran dentro y en otros casos fuera de su respectivo $\mathcal{M}_m$. Este hecho explica lo ocurrido con $c=-0.55+0.48i$, que para ciertos exponentes el conjunto de Julia es conexo y para otros es polvareda.
 
-Finalmente, invitamos al lector a visitar una web interactiva que hemos desarrollado como parte del TFG, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}.
+Finalmente, invitamos al lector a visitar la web interactiva que hemos desarrollado como parte del TFG, la cual se describe minuciosamente su diseño e implementación a partir del capítulo \ref{chap:visualizacion}. En esta web es posible visualizar tantos conjuntos de Julia y Mandelbrot estándar y generalizados como desee, además de modificar dinámicamente parámetros como la constante $c$ de los conjuntos de Julia o hacer `zoom' a las distintas regiones para poder observar los detalles y entresijos que nos ofrecen los conjuntos de Julia y de Mandelbrot. Su url es \url{https://jantoniovr.github.io/Geometria-Fractal/}.
 
-\newpage
 \subsection{Conjuntos de Julia con funciones no polinómicas}
 
 Además de todos los conjuntos de Julia ya tratados y visualizados, utilizando otras funciones no polinómicas como pueden ser las trigonométricas y las exponenciales (complejas) también se pueden graficar algunos conjuntos con formas distintas a las ya vistas y con hermosas propiedades. A continuación mostraremos tan solo algunos ejemplos:

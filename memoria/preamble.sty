@@ -10,9 +10,10 @@
 %\usepackage{titlesec}    % Remove the text 'Chapter' from each chapter.
 %\titleformat{\chapter}{\normalfont\huge\bf}{\thechapter}{20pt}{\huge\bf}
 
-\title{Master's thesis Health Informatics \the\year}
-\author{authors}
+\title{Fractales}
+\author{Juan Antonio Villegas Recio}
 \setcounter{tocdepth}{3}
+%\setlength{\parskip}{0.1cm}
 
 % PARA EVITAR LA DIVISIÓN SILÁBICA
 \pretolerance=10000
@@ -28,7 +29,7 @@
   commentstyle=\color{red},
   keywordstyle=\color{blue}
 }
-\usepackage{hyperref}
+\usepackage[hidelinks, linktocpage, colorlinks=true, linkcolor=blue, citecolor=red]{hyperref}
 \usepackage{array}
 \usepackage{verbatim}
 \usepackage{algorithm}
@@ -44,14 +45,14 @@
 
 \usepackage{amsthm, amssymb}
 \usepackage{amsmath}
-\newtheorem{teorema}{Teorema}[section]
-\newtheorem{corolario}{Corolario}[section]
+\newtheorem{teorema}{Teorema}[chapter]
+\newtheorem{corolario}[teorema]{Corolario}
 \theoremstyle{definition}
-\newtheorem{definicion}{Definición}[section]
-\newtheorem{observacion}{Observación}[section]
-\newtheorem{ejemplo}{Ejemplo}[section]
-\newtheorem{proposicion}{Proposición}[section]
-\newtheorem{lema}{Lema}[section]
+\newtheorem{definicion}{Definición}[chapter]
+\newtheorem{observacion}{Observación}[chapter]
+\newtheorem{ejemplo}{Ejemplo}
+\newtheorem{proposicion}{Proposición}[chapter]
+\newtheorem{lema}{Lema}[chapter]
 
 \newcommand{\diam}[0]{\mathrm{diam}}
 \newcommand{\rad}[0]{\mathrm{rad}}
