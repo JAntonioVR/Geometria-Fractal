@@ -67,7 +67,7 @@ Una vez estructurado el código en JavaScript, es bueno recordar que, como dijim
 
 Recordemos que el fragment shader se ejecuta una vez por cada píxel, de manera que podemos identificar la superficie completa del canvas con una región $[x_1,x_2]\times [y_1,y_2]\subseteq\R^2\cong\C$ del plano complejo y en particular cada píxel con un número complejo. Para ello, necesitamos transformar las coordenadas de dispositivo que el shader encuentra en la variable \verb|gl_FragCoord|. Supongamos que tenemos un canvas de $n_x\times n_y$ píxeles, y en el mismo queremos graficar una región del plano centrada en el origen de $w$ unidades de ancho y $h$ de alto, con $w,h$ fijos. es decir, la región $\left[-\frac{w}{2},\frac{w}{2}\right]\times\left[-\frac{h}{2},\frac{h}{2}\right]$. Es muy recomendable que se guarde la proporción $\frac{n_x}{n_y}=\frac{w}{h}$ para así evitar posibles deformaciones.
 
-Las coordenadas de dispositivo son por tanto $(x,y)\in[0,n_x]\times[0,n_y]$, las cuales están precisamente en la región $[0,n_x]\times[0,n_y]$ porque las dimensiones del canvas son $n_x\times n_y$ píxeles. Entonces la transformación lineal que necesitamos es 
+Las coordenadas de dispositivo son por tanto $(x,y)\in[0,n_x]\times[0,n_y]$, las cuales están precisamente en la región $[0,n_x]\times[0,n_y]$ porque las dimensiones del canvas son $n_x\times n_y$ píxeles. Entonces la transformación afín que necesitamos es 
 \begin{equation}
 \label{eq:transformacion-lineal-1}
 \begin{split}
@@ -98,7 +98,7 @@ Y por último, procedemos a buscar la forma de representar cualquier parte del p
 
 En nuestro ejemplo concreto, usaremos un canvas de $1280\times 720$ píxeles, manteniendo así un ratio $r=1280/720=16/9$, que es uno de los más estándar. La región del plano a representar será inicialmente la $[-3.56,3.56]\times[-2,2]$, esto es, $h=4, w=r\cdot h =7.11$. Sobre esta región inicial aplicaremos zoom y desplazamientos.
 
-En muchos contextos, la transformación lineal (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)^t$ y cada punto $p=(p_1,p_2)\in\R^2$ con el vector $(p_1, p_2, 0 ,1)^t$, de forma que:
+En muchos contextos, la transformación afín (\ref{eq:transformacion-lineal-3}) se suele expresar en términos de una matriz $4\times 4$, identificando cada coordenada de dispositivo $(x,y)$ con un vector de 4 dimensiones $(x,y,0,1)^t$ y cada punto $p=(p_1,p_2)\in\R^2$ con el vector $(p_1, p_2, 0 ,1)^t$, de forma que:
 
 \begin{equation}
     \label{eq:transformacion-lineal-matrix}
