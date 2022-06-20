@@ -54,7 +54,7 @@ uniform int u_nSamples;
 // ─── MACROS ─────────────────────────────────────────────────────────────────────
 
 #define ARRAY_TAM 100
-#define MAX_STEPS 300
+#define MAX_STEPS 500
 #define MAX_DIST 100.0
 #define PI 3.14159265359
 
