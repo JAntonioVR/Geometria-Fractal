@@ -31,6 +31,9 @@
     <link rel="icon" href="static/img/logo.png">
   </head>
   <body>
+    <!--
+    -- ─── CABECERA ────────────────────────────────────────────────────
+    -->
     <header class="row d-flex flex-wrap justify-content-around py-3 mb-4 border-bottom w-100 p-3">
       <a href="index.html" class="d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none col-xl-6">
         <img src="static/img/logo.png" id="logo">
@@ -42,9 +45,13 @@
         <li class="nav-item"><a href="./3D-fractals.html"><button class="btn-change">Fractales 3D</button></a></li>    
       </ul>
     </header>
-
+    <!--
+    -- ─── CONTENIDO ───────────────────────────────────────────────────
+    -->
     <main class="container-xl">
       <section class="row">
+
+        <!-- WEBGL CANVAS -->
         <div class="col-lg-8" id="canvas-wapper">
           <canvas class="container-fluid" id="glCanvas" width="1280" height="720"></canvas>
           <div class="row justify-content-center">
@@ -52,8 +59,8 @@
           </div>
         </div>
         
+        <!-- PANEL DE CONTROL -->
         <aside class="col-lg-4">
-          
           
           <div class="accordion" id="accordionPanelsStayOpenExample">
             <div class="accordion-item">
@@ -165,6 +172,8 @@
           
         </aside>
       </section>
+      
+      <!-- AYUDA -->
       <section class="container">
           <h2>Controles:</h2>
           <ul>
@@ -241,7 +250,9 @@
           </p>
       </section>
     </main>
-
+    <!--
+    -- ─── PIE DE PAGINA ───────────────────────────────────────────────
+    -->
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
       <div class="col-md-4 d-flex align-items-center">
         <a href="index.html" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
