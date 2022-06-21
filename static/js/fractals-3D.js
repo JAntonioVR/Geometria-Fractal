@@ -525,20 +525,20 @@ function resetParameters() {
   $("#kd").val(rgbToHex(theScene.getKd()));
   $("#ks").val(rgbToHex(theScene.getKs()));
   $("#sh").val(theScene.getSh());
-  $("#valor_sh").html(theScene.getSh());
+  $("#valor_sh").val(theScene.getSh());
   $("#lightColor0").val(rgbToHex(theScene.getLightColor(0)));
   $("#shadows_0").prop('checked', false);
   $("#lightColor1").val(rgbToHex(theScene.getLightColor(1)));
   $("#shadows_1").prop('checked', false);
 
   $("#juliaX").val(theScene.getJuliaConstant()[0]);
-  $("#valorJuliaX").html(theScene.getJuliaConstant()[0]);
+  $("#valorJuliaX").val(theScene.getJuliaConstant()[0].toFixed(2));
   $("#juliaY").val(theScene.getJuliaConstant()[1]);
-  $("#valorJuliaY").html(theScene.getJuliaConstant()[1]);
+  $("#valorJuliaY").val(theScene.getJuliaConstant()[1].toFixed(2));
   $("#juliaZ").val(theScene.getJuliaConstant()[2]);
-  $("#valorJuliaZ").html(theScene.getJuliaConstant()[2]);
+  $("#valorJuliaZ").val(theScene.getJuliaConstant()[2].toFixed(2));
   $("#juliaW").val(theScene.getJuliaConstant()[3]);
-  $("#valorJuliaW").html(theScene.getJuliaConstant()[3]);
+  $("#valorJuliaW").val(theScene.getJuliaConstant()[3].toFixed(2));
   if(theScene.getFractal() != 2)
     $("#constanteJulia").hide();
 
@@ -598,3 +598,81 @@ function resizeCanvas () {
 window.onresize = resizeCanvas;
 
 // ────────────────────────────────────────────────────────────────────────────────
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function animate() {
+  theScene.setJuliaConstant([0,0,0,0]);
+  for (let i = 0; i <= 1.1; i+=0.01) {
+    let C = theScene.getJuliaConstant();
+    C[0] = i;
+    theScene.setJuliaConstant(C);
+    $("#juliaX").val(theScene.getJuliaConstant()[0]);
+  $("#valorJuliaX").val(theScene.getJuliaConstant()[0].toFixed(2));
+  $("#juliaY").val(theScene.getJuliaConstant()[1]);
+  $("#valorJuliaY").val(theScene.getJuliaConstant()[1].toFixed(2));
+  $("#juliaZ").val(theScene.getJuliaConstant()[2]);
+  $("#valorJuliaZ").val(theScene.getJuliaConstant()[2].toFixed(2));
+  $("#juliaW").val(theScene.getJuliaConstant()[3]);
+  $("#valorJuliaW").val(theScene.getJuliaConstant()[3].toFixed(2));
+    redraw()
+    await sleep(1000);
+    console.log(C);
+    
+  }
+  for (let i = 0; i >= -0.49; i-=0.01) {
+    let C = theScene.getJuliaConstant();
+    C[1] = i;
+    theScene.setJuliaConstant(C);
+    $("#juliaX").val(theScene.getJuliaConstant()[0]);
+  $("#valorJuliaX").val(theScene.getJuliaConstant()[0].toFixed(2));
+  $("#juliaY").val(theScene.getJuliaConstant()[1]);
+  $("#valorJuliaY").val(theScene.getJuliaConstant()[1].toFixed(2));
+  $("#juliaZ").val(theScene.getJuliaConstant()[2]);
+  $("#valorJuliaZ").val(theScene.getJuliaConstant()[2].toFixed(2));
+  $("#juliaW").val(theScene.getJuliaConstant()[3]);
+  $("#valorJuliaW").val(theScene.getJuliaConstant()[3].toFixed(2));
+    redraw()
+    await sleep(1000);
+    console.log(C);
+    
+  }
+  for (let i = 1.0; i >= 0.49; i-=0.01) {
+    let C = theScene.getJuliaConstant();
+    C[0] = i;
+    theScene.setJuliaConstant(C);
+    $("#juliaX").val(theScene.getJuliaConstant()[0]);
+  $("#valorJuliaX").val(theScene.getJuliaConstant()[0].toFixed(2));
+  $("#juliaY").val(theScene.getJuliaConstant()[1]);
+  $("#valorJuliaY").val(theScene.getJuliaConstant()[1].toFixed(2));
+  $("#juliaZ").val(theScene.getJuliaConstant()[2]);
+  $("#valorJuliaZ").val(theScene.getJuliaConstant()[2].toFixed(2));
+  $("#juliaW").val(theScene.getJuliaConstant()[3]);
+  $("#valorJuliaW").val(theScene.getJuliaConstant()[3].toFixed(2));
+    redraw();
+    await sleep(1000);
+    console.log(C);
+    
+  }
+  for (let i = 0.0; i <= 0.51; i+=0.01) {
+    let C = theScene.getJuliaConstant();
+    C[3] = i;
+    theScene.setJuliaConstant(C);
+    $("#juliaX").val(theScene.getJuliaConstant()[0]);
+  $("#valorJuliaX").val(theScene.getJuliaConstant()[0].toFixed(2));
+  $("#juliaY").val(theScene.getJuliaConstant()[1]);
+  $("#valorJuliaY").val(theScene.getJuliaConstant()[1].toFixed(2));
+  $("#juliaZ").val(theScene.getJuliaConstant()[2]);
+  $("#valorJuliaZ").val(theScene.getJuliaConstant()[2].toFixed(2));
+  $("#juliaW").val(theScene.getJuliaConstant()[3]);
+  $("#valorJuliaW").val(theScene.getJuliaConstant()[3].toFixed(2));
+    redraw();
+    await sleep(1000);
+    console.log(C);
+    
+  }
+}
+
+$('#animaciones').click(animate);
