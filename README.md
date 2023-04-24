@@ -24,11 +24,6 @@
     
 </div>
 
-
-<p align="center">
-<img src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/Build%20LaTeX%20document?label=PDF&style=for-the-badge">
-</p>
-
 <p align="center">
 <img src="./static/img/logo.png" style="width:30%;">
 </p>
