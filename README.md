@@ -18,7 +18,7 @@
 
 <div style="display: flex;">
   
-<img align="left" src="https://img.shields.io/github/workflow/status/JAntonioVR/Geometria-Fractal/pages%20build%20and%20deployment?label=WEB&style=for-the-badge">
+<img align="left" src="https://img.shields.io/github/actions/workflow/status/JAntonioVR/Geometria-Fractal/.github/workflows/latex-build.yml?label=PDF&style=for-the-badge">
 
 <img align="right" src="https://img.shields.io/github/license/JAntonioVR/Geometria-Fractal?style=for-the-badge">
     
